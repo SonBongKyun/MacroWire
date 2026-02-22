@@ -1,0 +1,21 @@
+{
+  "rules": [
+    { "tag": "금리", "keywords": ["금리", "기준금리", "국채", "금통위", "채권", "수익률", "국고채", "interest rate", "bond yield", "treasury", "basis points", "rate hike", "rate cut", "yield curve"] },
+    { "tag": "물가", "keywords": ["물가", "소비자물가", "CPI", "PCE", "인플레이션", "디플레이션", "생산자물가", "inflation", "consumer price", "price index", "cost of living"] },
+    { "tag": "연준", "keywords": ["연준", "FOMC", "파월", "연방준비", "연방공개시장위원회", "federal reserve", "jerome powell", "fed chair", "monetary policy", "quantitative"] },
+    { "tag": "환율", "keywords": ["환율", "원달러", "원화", "달러", "달러인덱스", "DXY", "외환", "forex", "currency", "exchange rate", "엔화", "위안화"] },
+    { "tag": "미국", "keywords": ["미국", "트럼프", "바이든", "워싱턴", "백악관", "의회", "공화당", "민주당", "관세", "tariff", "trade war", "wall street"] },
+    { "tag": "중국", "keywords": ["중국", "베이징", "시진핑", "인민은행", "위안", "중국경제", "홍콩", "대만", "china", "beijing", "xi jinping"] },
+    { "tag": "일본", "keywords": ["일본", "도쿄", "엔화", "일본은행", "BOJ", "닛케이", "다카이치", "japan", "yen", "nikkei"] },
+    { "tag": "유럽", "keywords": ["유럽", "EU", "ECB", "유로존", "독일", "프랑스", "영국", "브렉시트", "유로", "europe", "euro", "eurozone"] },
+    { "tag": "수출입", "keywords": ["수출", "수입", "무역", "무역수지", "경상수지", "관세", "통관", "교역", "FTA", "export", "import", "trade"] },
+    { "tag": "경기", "keywords": ["경기", "GDP", "성장률", "경기침체", "경기회복", "PMI", "고용", "실업률", "소비", "경제성장", "recession", "employment"] },
+    { "tag": "부동산", "keywords": ["부동산", "주택", "아파트", "전세", "매매", "분양", "재건축", "집값", "부동산시장", "LTV", "DSR"] },
+    { "tag": "가계부채", "keywords": ["가계부채", "가계대출", "주택담보대출", "신용대출", "대출금리", "부채", "household debt", "mortgage", "credit"] },
+    { "tag": "재정", "keywords": ["재정", "국가채무", "세수", "예산", "기재부", "국채발행", "재정적자", "세금", "fiscal", "government spending", "budget"] },
+    { "tag": "에너지", "keywords": ["에너지", "유가", "원유", "WTI", "브렌트", "OPEC", "천연가스", "LNG", "석유", "crude oil", "natural gas", "oil price"] },
+    { "tag": "반도체", "keywords": ["반도체", "삼성전자", "SK하이닉스", "HBM", "메모리", "TSMC", "엔비디아", "칩", "파운드리", "semiconductor", "chip", "nvidia", "DRAM", "NAND"] },
+    { "tag": "AI", "keywords": ["AI", "인공지능", "딥러닝", "ChatGPT", "LLM", "생성형", "머신러닝", "OpenAI", "데이터센터", "artificial intelligence", "machine learning"] },
+    { "tag": "지정학", "keywords": ["지정학", "러시아", "우크라이나", "북한", "미사일", "NATO", "제재", "전쟁", "군사", "외교", "sanction", "conflict", "war", "missile", "geopolit"] }
+  ]
+}

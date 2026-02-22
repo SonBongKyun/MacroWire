@@ -1,0 +1,20 @@
+[
+  { "name": "연합뉴스 경제",    "feedUrl": "https://www.yna.co.kr/rss/economy.xml",            "category": "macro" },
+  { "name": "연합뉴스 세계",    "feedUrl": "https://www.yna.co.kr/rss/international.xml",      "category": "global" },
+  { "name": "연합뉴스 정치",    "feedUrl": "https://www.yna.co.kr/rss/politics.xml",           "category": "policy" },
+  { "name": "한국경제 경제",    "feedUrl": "https://www.hankyung.com/feed/economy",             "category": "macro" },
+  { "name": "한국경제 국제",    "feedUrl": "https://www.hankyung.com/feed/international",       "category": "global" },
+  { "name": "한국경제 정치",    "feedUrl": "https://www.hankyung.com/feed/politics",            "category": "policy" },
+  { "name": "매일경제 경제",    "feedUrl": "https://www.mk.co.kr/rss/30100041/",               "category": "macro" },
+  { "name": "매일경제 국제",    "feedUrl": "https://www.mk.co.kr/rss/30300018/",               "category": "global" },
+  { "name": "매일경제 증권",    "feedUrl": "https://www.mk.co.kr/rss/30200030/",               "category": "fx" },
+  { "name": "서울경제 경제",    "feedUrl": "https://www.sedaily.com/RSS/Economy",               "category": "macro" },
+  { "name": "서울경제 국제",    "feedUrl": "https://www.sedaily.com/RSS/International",         "category": "global" },
+  { "name": "전자신문 반도체",  "feedUrl": "https://rss.etnews.com/Section901.xml",             "category": "semicon" },
+  { "name": "전자신문 AI",      "feedUrl": "https://rss.etnews.com/Section904.xml",             "category": "semicon" },
+  { "name": "Federal Reserve",  "feedUrl": "https://www.federalreserve.gov/feeds/press_all.xml","category": "policy" },
+  { "name": "ECB Press",        "feedUrl": "https://www.ecb.europa.eu/rss/press.html",         "category": "policy" },
+  { "name": "Reuters Business", "feedUrl": "https://feeds.reuters.com/reuters/businessNews",    "category": "global" },
+  { "name": "CNBC Economy",     "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258", "category": "macro" },
+  { "name": "Investing.com",    "feedUrl": "https://www.investing.com/rss/news.rss",           "category": "fx" }
+]

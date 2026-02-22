@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Source {
+  id        String    @id @default(cuid())
+  name      String
+  feedUrl   String    @unique
+  enabled   Boolean   @default(true)
+  category  String
+  createdAt DateTime  @default(now())
+  articles  Article[]
+}
+
+model Article {
+  id          String   @id
+  sourceId    String
+  sourceName  String
+  title       String
+  url         String   @unique
+  publishedAt DateTime
+  summary     String?
+  tags        String   @default("[]") // JSON array stored as string
+  isRead      Boolean  @default(false)
+  isSaved     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  source      Source   @relation(fields: [sourceId], references: [id])
+
+  @@index([publishedAt])
+  @@index([sourceId])
+  @@index([url])
+}
