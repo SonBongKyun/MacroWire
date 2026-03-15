@@ -13,12 +13,12 @@ export function TodayPulse({ articles }: TodayPulseProps) {
 
   const stats = [
     { icon: "📰", label: "오늘 기사", value: pulse.todayCount, color: "var(--accent)" },
-    { icon: "🇺🇸", label: "미국 관련", value: pulse.usCount, color: "#3b82f6" },
-    { icon: "📈", label: "금리 관련", value: pulse.rateCount, color: "#f59e0b" },
-    { icon: "💱", label: "환율 관련", value: pulse.fxCount, color: "#10b981" },
+    { icon: "🇺🇸", label: "미국 관련", value: pulse.usCount, color: "#2563eb" },
+    { icon: "📈", label: "금리 관련", value: pulse.rateCount, color: "#d97706" },
+    { icon: "💱", label: "환율 관련", value: pulse.fxCount, color: "#059669" },
   ];
 
-  const barColors = ["var(--accent)", "#3b82f6", "#10b981"];
+  const barColors = ["var(--accent)", "#2563eb", "#059669"];
 
   return (
     <aside className="w-[440px] shrink-0 bg-[var(--surface-flat)] border-l border-[var(--border)] flex flex-col overflow-hidden select-none">
@@ -38,7 +38,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
             <h2 className="text-[13px] font-bold text-[var(--foreground-bright)]">
               Today Pulse
             </h2>
-            <p className="text-[10px] text-[var(--muted)] mt-0.5">
+            <p className="text-[12px] text-[var(--muted)] mt-0.5">
               오늘의 매크로 동향 한눈에
             </p>
           </div>
@@ -55,7 +55,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
             >
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-base leading-none">{s.icon}</span>
-                <span className="text-[10px] text-[var(--muted)] font-medium">
+                <span className="text-[12px] text-[var(--muted)] font-medium">
                   {s.label}
                 </span>
               </div>
@@ -73,7 +73,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
         <div className="flex items-center gap-3 p-3.5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--accent-surface)]">
           <span className="text-base">⏰</span>
           <div className="flex-1">
-            <span className="text-[10px] text-[var(--muted)] font-medium">
+            <span className="text-[12px] text-[var(--muted)] font-medium">
               최근 1시간
             </span>
             <div className="text-[18px] font-bold tabular-nums text-[var(--accent)] leading-tight">
@@ -81,7 +81,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
             </div>
           </div>
           <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] animate-pulse-dot" />
-          <span className="text-[9px] text-[var(--success)] font-semibold tracking-wide">
+          <span className="text-[11px] text-[var(--success)] font-semibold tracking-wide">
             LIVE
           </span>
         </div>
@@ -89,7 +89,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
         {/* Top tags */}
         {pulse.topTags.length > 0 && (
           <div>
-            <h3 className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)] font-semibold mb-3">
+            <h3 className="text-[12px] uppercase tracking-[0.08em] text-[var(--muted)] font-semibold mb-3">
               인기 태그 Top 3
             </h3>
             <div className="space-y-2.5">
@@ -100,15 +100,15 @@ export function TodayPulse({ articles }: TodayPulseProps) {
                     : 0;
                 return (
                   <div key={tag} className="flex items-center gap-3">
-                    <span className="w-5 h-5 rounded-full bg-[var(--surface-active)] flex items-center justify-center text-[10px] font-bold text-[var(--foreground-secondary)] tabular-nums">
+                    <span className="w-5 h-5 rounded-full bg-[var(--surface-active)] flex items-center justify-center text-[11px] font-bold text-[var(--foreground-secondary)] tabular-nums">
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[11px] font-semibold text-[var(--foreground)]">
+                        <span className="text-[13px] font-semibold text-[var(--foreground)]">
                           {tag}
                         </span>
-                        <span className="text-[10px] text-[var(--muted)] tabular-nums">
+                        <span className="text-[12px] text-[var(--muted)] tabular-nums">
                           {count}건
                         </span>
                       </div>
@@ -122,7 +122,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
                         />
                       </div>
                     </div>
-                    <span className="text-[10px] font-bold tabular-nums text-[var(--muted)]">
+                    <span className="text-[12px] font-bold tabular-nums text-[var(--muted)]">
                       {pct}%
                     </span>
                   </div>
@@ -134,7 +134,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
 
         {/* Quick help */}
         <div className="mt-4 p-3 rounded-[var(--radius-md)] metal-surface">
-          <h4 className="text-[10px] font-semibold text-[var(--foreground-secondary)] mb-2">
+          <h4 className="text-[12px] font-semibold text-[var(--foreground-secondary)] mb-2">
             ⌨ 빠른 탐색
           </h4>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
@@ -147,10 +147,10 @@ export function TodayPulse({ articles }: TodayPulseProps) {
               { key: "?", desc: "전체 단축키" },
             ].map(({ key, desc }) => (
               <div key={key} className="flex items-center gap-1.5 py-0.5">
-                <kbd className="text-[9px] font-semibold text-[var(--foreground-secondary)] bg-[var(--surface-active)] border border-[var(--border)] rounded-[3px] px-1.5 py-0.5 min-w-[28px] text-center">
+                <kbd className="text-[11px] font-semibold text-[var(--foreground-secondary)] bg-[var(--surface-active)] border border-[var(--border)] rounded-[3px] px-1.5 py-0.5 min-w-[28px] text-center">
                   {key}
                 </kbd>
-                <span className="text-[10px] text-[var(--muted)]">{desc}</span>
+                <span className="text-[12px] text-[var(--muted)]">{desc}</span>
               </div>
             ))}
           </div>

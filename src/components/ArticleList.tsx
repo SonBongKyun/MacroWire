@@ -22,23 +22,23 @@ interface ArticleListProps {
 }
 
 const TAG_COLORS: Record<string, string> = {
-  금리: "#92400e",
-  물가: "#991b1b",
-  연준: "#5b21b6",
-  환율: "#155e75",
-  미국: "#1e40af",
-  중국: "#b91c1c",
-  일본: "#9d174d",
-  유럽: "#3730a3",
-  수출입: "#065f46",
-  경기: "#3f6212",
-  부동산: "#9a3412",
-  가계부채: "#be123c",
-  재정: "#075985",
-  에너지: "#854d0e",
-  반도체: "#115e59",
-  AI: "#166534",
-  지정학: "#86198f",
+  금리: "#b45309",
+  물가: "#dc2626",
+  연준: "#7c3aed",
+  환율: "#0891b2",
+  미국: "#2563eb",
+  중국: "#ef4444",
+  일본: "#db2777",
+  유럽: "#4f46e5",
+  수출입: "#059669",
+  경기: "#65a30d",
+  부동산: "#ea580c",
+  가계부채: "#e11d48",
+  재정: "#0284c7",
+  에너지: "#ca8a04",
+  반도체: "#0d9488",
+  AI: "#16a34a",
+  지정학: "#a855f7",
 };
 
 function timeAgo(dateStr: string): string {
@@ -187,7 +187,7 @@ export function ArticleList({
       onKeyDown={handleKeyDown}
     >
       {/* Header */}
-      <div className="px-4 py-2 border-b border-[var(--border)] metal-header flex items-center justify-between shrink-0">
+      <div className="px-4 py-2 border-b border-[var(--border)] bg-[var(--surface-flat)] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
           <h2 className="text-[13px] font-semibold text-[var(--foreground-secondary)]">
             피드

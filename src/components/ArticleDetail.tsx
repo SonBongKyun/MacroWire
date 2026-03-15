@@ -11,23 +11,23 @@ interface ArticleDetailProps {
 }
 
 const TAG_COLORS: Record<string, string> = {
-  금리: "#92400e",
-  물가: "#991b1b",
-  연준: "#5b21b6",
-  환율: "#155e75",
-  미국: "#1e40af",
-  중국: "#b91c1c",
-  일본: "#9d174d",
-  유럽: "#3730a3",
-  수출입: "#065f46",
-  경기: "#3f6212",
-  부동산: "#9a3412",
-  가계부채: "#be123c",
-  재정: "#075985",
-  에너지: "#854d0e",
-  반도체: "#115e59",
-  AI: "#166534",
-  지정학: "#86198f",
+  금리: "#b45309",
+  물가: "#dc2626",
+  연준: "#7c3aed",
+  환율: "#0891b2",
+  미국: "#2563eb",
+  중국: "#ef4444",
+  일본: "#db2777",
+  유럽: "#4f46e5",
+  수출입: "#059669",
+  경기: "#65a30d",
+  부동산: "#ea580c",
+  가계부채: "#e11d48",
+  재정: "#0284c7",
+  에너지: "#ca8a04",
+  반도체: "#0d9488",
+  AI: "#16a34a",
+  지정학: "#a855f7",
 };
 
 function formatDate(dateStr: string): string {
@@ -100,7 +100,7 @@ export function ArticleDetail({
         </div>
         <div className="text-center">
           <p className="text-[13px] text-[var(--foreground-secondary)] font-medium">기사를 선택하세요</p>
-          <p className="text-[11px] text-[var(--muted)] mt-1">↑↓ 또는 j/k로 이동</p>
+          <p className="text-[12px] text-[var(--muted)] mt-1">↑↓ 또는 j/k로 이동</p>
         </div>
       </aside>
     );
@@ -113,16 +113,16 @@ export function ArticleDetail({
         {/* Status badges */}
         <div className="flex items-center gap-1.5 mb-3">
           {article.isRead && (
-            <span className="text-[9px] font-semibold text-[var(--muted)]">
+            <span className="text-[11px] font-semibold text-[var(--muted)]">
               읽음
             </span>
           )}
           {article.isSaved && (
-            <span className="text-[9px] font-semibold text-[var(--accent)]">
+            <span className="text-[11px] font-semibold text-[var(--accent)]">
               ★ 저장됨
             </span>
           )}
-          <span className="text-[10px] text-[var(--muted)] ml-auto tabular-nums font-medium">
+          <span className="text-[12px] text-[var(--muted)] ml-auto tabular-nums font-medium">
             {timeAgo(article.publishedAt)}
           </span>
         </div>
@@ -133,7 +133,7 @@ export function ArticleDetail({
         </h2>
 
         {/* Meta row */}
-        <div className="flex items-center gap-2 text-[11px]">
+        <div className="flex items-center gap-2 text-[13px]">
           <span className="text-[var(--accent)] font-semibold">{article.sourceName}</span>
           <span className="text-[var(--border-strong)]">·</span>
           <span className="text-[var(--muted)] tabular-nums">
@@ -150,7 +150,7 @@ export function ArticleDetail({
                 <button
                   key={tag}
                   style={{ color }}
-                  className="text-[10px] font-semibold hover:underline cursor-pointer"
+                  className="text-[12px] font-semibold hover:underline cursor-pointer"
                   onClick={() => onTagClick?.(tag)}
                   title={`"${tag}" 태그로 필터`}
                 >
@@ -166,7 +166,7 @@ export function ArticleDetail({
       <div className="flex-1 overflow-y-auto p-5">
         {article.summary ? (
           <div className="space-y-3">
-            <h3 className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)] font-semibold">
+            <h3 className="text-[12px] uppercase tracking-[0.08em] text-[var(--muted)] font-semibold">
               요약
             </h3>
             <p className="text-[13px] leading-[1.7] text-[var(--foreground)]">
@@ -180,7 +180,7 @@ export function ArticleDetail({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
               </svg>
             </div>
-            <p className="text-[11px] text-[var(--muted)]">
+            <p className="text-[13px] text-[var(--muted)]">
               요약 정보가 없습니다
             </p>
           </div>
@@ -188,12 +188,12 @@ export function ArticleDetail({
       </div>
 
       {/* Actions */}
-      <div className="p-4 border-t border-[var(--border)] metal-header flex gap-2">
+      <div className="p-4 border-t border-[var(--border)] bg-[var(--surface-flat)] flex gap-2">
         <a
           href={article.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 py-2 text-[11px] font-semibold metal-btn !border-[var(--accent)] text-[var(--accent)] rounded-[var(--radius-sm)]"
+          className="flex-1 flex items-center justify-center gap-2 py-2 text-[13px] font-semibold metal-btn !border-[var(--accent)] text-[var(--accent)] rounded-[var(--radius-sm)]"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -203,7 +203,7 @@ export function ArticleDetail({
         {/* Copy URL */}
         <button
           onClick={copyUrl}
-          className="px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
+          className="px-3 py-2 text-[13px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
           title="URL 복사"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -213,7 +213,7 @@ export function ArticleDetail({
         {/* Copy title + URL */}
         <button
           onClick={copyTitleAndUrl}
-          className="px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
+          className="px-3 py-2 text-[13px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
           title="제목 + URL 복사"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -222,7 +222,7 @@ export function ArticleDetail({
         </button>
         <button
           onClick={() => onToggleRead(article)}
-          className={`px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn transition-colors ${
+          className={`px-3 py-2 text-[13px] font-medium rounded-[var(--radius-sm)] metal-btn transition-colors ${
             article.isRead
               ? "text-[var(--muted)] hover:text-[var(--foreground)]"
               : "!border-[var(--accent)] text-[var(--accent)]"
@@ -254,7 +254,7 @@ export function ArticleDetail({
 
       {/* Toast */}
       {toast && (
-        <div className={`absolute bottom-16 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-[var(--radius-md)] bg-[var(--foreground-bright)] text-white text-[11px] font-medium shadow-lg ${toastExiting ? "toast-exit" : "toast-enter"}`}>
+        <div className={`absolute bottom-16 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-[var(--radius-md)] bg-[var(--foreground-bright)] text-white text-[13px] font-medium shadow-lg ${toastExiting ? "toast-exit" : "toast-enter"}`}>
           <div className="flex items-center gap-2">
             <svg className="w-3.5 h-3.5 text-[var(--success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />

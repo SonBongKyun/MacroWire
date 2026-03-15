@@ -32,7 +32,7 @@ export function StatsBar({ articles, sources }: StatsBarProps) {
   ];
 
   return (
-    <div className="flex items-center gap-0 px-5 h-8 border-b border-[var(--border)] metal-header shrink-0 text-[12px]">
+    <div className="flex items-center gap-0 px-5 h-8 border-b border-[var(--border)] bg-[var(--surface-flat)] shrink-0 text-[12px]">
       {/* Stat items */}
       {stats.map((stat, i) => (
         <div key={stat.label} className="flex items-center">

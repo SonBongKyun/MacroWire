@@ -78,7 +78,7 @@ export function TopBar({
     <header className="flex items-center gap-3 px-5 h-12 border-b border-[var(--border)] metal-header shrink-0 select-none">
       {/* Logo */}
       <div className="flex items-center gap-2 mr-2">
-        <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-[var(--accent)] flex items-center justify-center" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.12)' }}>
+        <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-[var(--accent)] flex items-center justify-center" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>

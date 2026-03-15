@@ -327,10 +327,10 @@ export default function Home() {
 
   const REGION_TAGS: Record<string, { tags: string[]; icon: string; color: string }> = {
     "전체": { tags: [], icon: "📋", color: "var(--accent)" },
-    "한국": { tags: ["경기", "부동산", "가계부채", "재정", "수출입"], icon: "🇰🇷", color: "#e35169" },
-    "미국": { tags: ["연준", "미국"], icon: "🇺🇸", color: "#3b82f6" },
-    "글로벌": { tags: ["중국", "일본", "유럽", "지정학"], icon: "🌍", color: "#10b981" },
-    "환율·에너지": { tags: ["환율", "에너지"], icon: "💱", color: "#f59e0b" },
+    "한국": { tags: ["경기", "부동산", "가계부채", "재정", "수출입"], icon: "🇰🇷", color: "#e11d48" },
+    "미국": { tags: ["연준", "미국"], icon: "🇺🇸", color: "#2563eb" },
+    "글로벌": { tags: ["중국", "일본", "유럽", "지정학"], icon: "🌍", color: "#059669" },
+    "환율·에너지": { tags: ["환율", "에너지"], icon: "💱", color: "#d97706" },
   };
 
   // Apply region filter client-side
@@ -458,7 +458,7 @@ export default function Home() {
       <StatsBar articles={articles} sources={sources} />
 
       {/* 오늘의 구분 보기 Region Tabs */}
-      <div className="px-5 h-11 border-b border-[var(--border)] metal-header flex items-center gap-2 shrink-0">
+      <div className="px-5 h-11 border-b border-[var(--border)] bg-[var(--background)] flex items-center gap-2 shrink-0">
         <span className="text-[12px] font-bold text-[var(--muted)] shrink-0 tracking-[0.08em] uppercase mr-1">
           구분
         </span>

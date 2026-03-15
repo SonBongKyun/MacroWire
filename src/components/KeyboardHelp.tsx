@@ -76,7 +76,7 @@ export function KeyboardHelp({ open, onClose }: KeyboardHelpProps) {
         <div className="p-5 space-y-5">
           {SHORTCUTS.map(({ section, items }) => (
             <div key={section}>
-              <h4 className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)] font-semibold mb-2.5">
+              <h4 className="text-[12px] uppercase tracking-[0.08em] text-[var(--muted)] font-semibold mb-2.5">
                 {section}
               </h4>
               <div className="space-y-1.5">
@@ -86,8 +86,8 @@ export function KeyboardHelp({ open, onClose }: KeyboardHelpProps) {
                     <div className="flex items-center gap-1">
                       {keys.map((key, i) => (
                         <span key={i}>
-                          {i > 0 && <span className="text-[var(--muted)] text-[10px] mx-0.5">/</span>}
-                          <kbd className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[10px] font-semibold text-[var(--foreground-secondary)] border border-[var(--border)] rounded-[var(--radius-sm)] metal-btn">
+                          {i > 0 && <span className="text-[var(--muted)] text-[11px] mx-0.5">/</span>}
+                          <kbd className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[11px] font-semibold text-[var(--foreground-secondary)] border border-[var(--border)] rounded-[var(--radius-sm)] metal-btn">
                             {key}
                           </kbd>
                         </span>
@@ -102,10 +102,10 @@ export function KeyboardHelp({ open, onClose }: KeyboardHelpProps) {
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-[var(--border)] text-center">
-          <span className="text-[10px] text-[var(--muted)]">
-            <kbd className="inline-flex items-center justify-center w-[18px] h-[18px] px-1 text-[9px] font-semibold border border-[var(--border)] rounded-[3px] metal-btn mr-1">?</kbd>
+          <span className="text-[12px] text-[var(--muted)]">
+            <kbd className="inline-flex items-center justify-center w-[18px] h-[18px] px-1 text-[11px] font-semibold border border-[var(--border)] rounded-[3px] metal-btn mr-1">?</kbd>
             또는
-            <kbd className="inline-flex items-center justify-center min-w-[30px] h-[18px] px-1.5 text-[9px] font-semibold border border-[var(--border)] rounded-[3px] metal-btn mx-1">Esc</kbd>
+            <kbd className="inline-flex items-center justify-center min-w-[30px] h-[18px] px-1.5 text-[11px] font-semibold border border-[var(--border)] rounded-[3px] metal-btn mx-1">Esc</kbd>
             로 닫기
           </span>
         </div>
