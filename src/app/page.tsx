@@ -698,12 +698,6 @@ export default function Home() {
 
   return (
     <div className={`flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)] ${focusMode ? "focus-mode" : ""}`}>
-      {/* Ambient background */}
-      <div className="ambient-orbs">
-        <div className="ambient-orb" />
-        <div className="ambient-orb" />
-      </div>
-
       <div className="content-layer flex flex-col h-screen">
       <TopBar
         searchQuery={searchQuery}

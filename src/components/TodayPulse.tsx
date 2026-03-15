@@ -105,7 +105,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
       {/* Header */}
       <div className="px-5 py-4 border-b border-[var(--border)]">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg accent-gradient flex items-center justify-center shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center shadow-sm">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -134,7 +134,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="p-3.5 rounded-[var(--radius-md)] glass-card glass-card-prism hover-lift relative overflow-hidden"
+              className="p-3.5 rounded-[var(--radius-md)] glass-card relative overflow-hidden"
             >
               <div className="flex items-center gap-2 mb-2">
                 <span className="leading-none" style={{ color: s.color }}>{s.icon}</span>
@@ -150,7 +150,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
                   {s.value}
                 </div>
                 {s.showSpark && sparkData.length > 1 && (
-                  <Sparkline data={sparkData} color={typeof s.color === 'string' && s.color.startsWith('#') ? s.color : '#6366f1'} />
+                  <Sparkline data={sparkData} color={typeof s.color === 'string' && s.color.startsWith('#') ? s.color : '#0d9488'} />
                 )}
               </div>
             </div>

@@ -85,17 +85,15 @@ export function TopBar({
 
   return (
     <header className="relative flex items-center gap-3 px-4 h-12 border-b border-[var(--border)] glass-header shrink-0 select-none z-20">
-      <div className="aurora-bar" />
-
       {/* Logo */}
       <div className="flex items-center gap-2 mr-0.5 shrink-0">
-        <div className="w-7 h-7 rounded-lg accent-gradient flex items-center justify-center shadow-sm logo-pulse">
+        <div className="w-7 h-7 rounded-lg bg-[var(--accent)] flex items-center justify-center shadow-sm">
           <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
         <div className="flex flex-col">
-          <span className="text-[13px] font-extrabold leading-none tracking-tight gradient-text">
+          <span className="text-[13px] font-extrabold leading-none tracking-tight text-[var(--foreground-bright)]">
             Macro Wire
           </span>
           <span className="text-[8px] font-semibold text-[var(--muted)] tracking-[0.15em] uppercase leading-none mt-[2px]">REAL-TIME FEED</span>
