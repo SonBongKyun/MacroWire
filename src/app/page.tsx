@@ -34,45 +34,37 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, se
   }, []);
 
   return (
-    <div className="status-bar px-5 h-8 flex items-center gap-3 shrink-0 select-none">
-      <div className="flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] stat-dot-live" />
-        <span className="text-[11px] font-semibold text-[var(--success)]">Connected</span>
-      </div>
-      <div className="topbar-divider" style={{ height: 12 }} />
-      <span className="text-[11px] tabular-nums font-mono font-bold text-[var(--accent)]">
+    <div className="status-bar px-5 h-7 flex items-center gap-3 shrink-0 select-none">
+      <span className="text-[10px] tabular-nums text-[var(--muted)]">
         {clock}
       </span>
-      <div className="topbar-divider" style={{ height: 12 }} />
-      <div className="flex items-center gap-1">
-        <span className="w-1 h-1 rounded-full" style={{ background: 'linear-gradient(135deg, #10b981, #06b6d4)' }} />
-        <span className="text-[11px] tabular-nums">
-          {enabledSources}/{totalSources} 소스
-        </span>
-      </div>
-      <div className="topbar-divider" style={{ height: 12 }} />
-      <span className="text-[11px] tabular-nums">
+      <span className="text-[10px] text-[var(--border-strong)]">·</span>
+      <span className="text-[10px] tabular-nums">
+        {enabledSources}/{totalSources} 소스
+      </span>
+      <span className="text-[10px] text-[var(--border-strong)]">·</span>
+      <span className="text-[10px] tabular-nums">
         {articleCount}건
       </span>
       {unreadCount > 0 && (
         <>
-          <div className="topbar-divider" style={{ height: 12 }} />
-          <span className="text-[11px] tabular-nums text-[var(--accent)] font-semibold">
-            {unreadCount}건 미독
+          <span className="text-[10px] text-[var(--border-strong)]">·</span>
+          <span className="text-[10px] tabular-nums font-medium">
+            {unreadCount} 미독
           </span>
         </>
       )}
       {selectedSourceName && (
         <>
-          <div className="topbar-divider" style={{ height: 12 }} />
-          <span className="text-[11px] truncate max-w-[300px]">
+          <span className="text-[10px] text-[var(--border-strong)]">·</span>
+          <span className="text-[10px] truncate max-w-[300px]">
             {selectedSourceName}
           </span>
         </>
       )}
       <div className="flex-1" />
-      <span className="text-[11px] opacity-60">
-        j/k 이동 · s 저장 · / 검색 · ? 도움말
+      <span className="text-[10px] opacity-50">
+        j/k · s · / · ?
       </span>
     </div>
   );
@@ -734,7 +726,7 @@ export default function Home() {
       {/* Region Tabs */}
       <div className="hide-in-focus" style={{ flexShrink: 0 }}>
       <div className="px-4 border-b border-[var(--border)] flex items-center gap-2" style={{ height: 40, flexShrink: 0, overflow: 'hidden' }}>
-        <span className="text-[12px] font-bold text-[var(--muted)] tracking-[0.05em] uppercase mr-0.5" style={{ flexShrink: 0 }}>
+        <span className="text-[11px] font-medium text-[var(--muted)] mr-0.5" style={{ flexShrink: 0 }}>
           구분
         </span>
         <div className="flex gap-0.5" style={{ flex: '1 1 0%', minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -757,12 +749,7 @@ export default function Home() {
                 <span className="text-sm leading-none" style={{ color: isActive ? color : undefined }}>{icon}</span>
                 <span>{region}</span>
                 {count > 0 && (
-                  <span
-                    className={`text-[11px] tabular-nums font-bold px-1.5 py-0.5 rounded-full leading-none ${
-                      isActive ? "text-white" : "text-[var(--muted)] bg-[var(--surface-active)]"
-                    }`}
-                    style={isActive ? { backgroundColor: color } : undefined}
-                  >
+                  <span className="text-[10px] tabular-nums text-[var(--muted)]">
                     {count}
                   </span>
                 )}
@@ -987,13 +974,8 @@ export default function Home() {
 
       {/* Focus mode indicator */}
       {focusMode && (
-        <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2 px-3.5 py-2 rounded-full focus-indicator text-[10px] text-[var(--accent)] font-semibold select-none">
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          포커스 모드
-          <kbd className="kbd-key" style={{ fontSize: '9px', padding: '1px 4px', minWidth: 'auto', height: 'auto' }}>ESC</kbd>
+        <div className="fixed bottom-3 right-3 z-40 px-2.5 py-1.5 rounded-[var(--radius-sm)] bg-[var(--surface)] border border-[var(--border)] text-[10px] text-[var(--muted)] select-none shadow-sm">
+          포커스 · ESC
         </div>
       )}
 

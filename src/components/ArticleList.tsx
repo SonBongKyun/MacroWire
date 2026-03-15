@@ -4,7 +4,6 @@ import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import type { Article } from "@/types";
 import { clusterArticles } from "@/lib/clustering/cluster";
 import type { ArticleCluster } from "@/lib/clustering/cluster";
-import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { PeekPopover } from "@/components/PeekPopover";
 
 type ReadFilter = "all" | "unread" | "read";
@@ -338,7 +337,6 @@ export function ArticleList({
             {filteredArticles.map((article) => {
               const isSelected = selectedArticleId === article.id;
               const isNew = newIds.has(article.id);
-              const sentiment = analyzeSentiment(article.title, article.summary);
               return (
                 <div
                   key={article.id}
@@ -350,16 +348,9 @@ export function ArticleList({
                     <span className="text-[11px] text-[var(--accent)] font-semibold truncate">{article.sourceName}</span>
                     <span className="text-[11px] text-[var(--border-strong)] tabular-nums ml-auto shrink-0">{timeAgo(article.publishedAt)}</span>
                   </div>
-                  <div className="flex items-start gap-1.5 mb-2">
-                    <span
-                      className="w-1.5 h-1.5 rounded-full shrink-0 mt-1"
-                      style={{ backgroundColor: sentiment.color }}
-                      title={sentiment.label}
-                    />
-                    <p className={`text-[13px] leading-[1.45] line-clamp-2 ${isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"}`}>
-                      {article.title}
-                    </p>
-                  </div>
+                  <p className={`text-[13px] leading-[1.45] line-clamp-2 mb-2 ${isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"}`}>
+                    {article.title}
+                  </p>
                   {article.summary && (
                     <p className="text-[11px] text-[var(--muted)] leading-[1.5] line-clamp-2 mb-2">
                       {article.summary}
@@ -469,20 +460,13 @@ export function ArticleList({
                             {article.isSaved ? "★" : "☆"}
                           </button>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ backgroundColor: analyzeSentiment(article.title, article.summary).color }}
-                            title={analyzeSentiment(article.title, article.summary).label}
-                          />
-                          <p
+                        <p
                             className={`text-[13px] leading-[1.4] line-clamp-1 ${
                               isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"
                             }`}
                           >
                             {article.title}
                           </p>
-                        </div>
                       </div>
                     );
                   })}
@@ -553,20 +537,13 @@ export function ArticleList({
                   {article.isSaved ? "★" : "☆"}
                 </button>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ backgroundColor: analyzeSentiment(article.title, article.summary).color }}
-                  title={analyzeSentiment(article.title, article.summary).label}
-                />
-                <p
-                  className={`text-[13px] leading-[1.4] line-clamp-1 ${
-                    isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"
-                  }`}
-                >
-                  {article.title}
-                </p>
-              </div>
+              <p
+                className={`text-[13px] leading-[1.4] line-clamp-1 ${
+                  isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"
+                }`}
+              >
+                {article.title}
+              </p>
             </div>
           );
         })}

@@ -86,22 +86,10 @@ export function TopBar({
   return (
     <header className="relative flex items-center gap-3 px-4 h-12 border-b border-[var(--border)] glass-header shrink-0 select-none z-20">
       {/* Logo */}
-      <div className="flex items-center gap-2 mr-0.5 shrink-0">
-        <div className="w-7 h-7 rounded-lg bg-[var(--accent)] flex items-center justify-center shadow-sm">
-          <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[14px] font-black leading-none tracking-[-0.03em] text-[var(--accent)]">
-            Macro Wire
-          </span>
-          <span className="text-[8px] font-semibold text-[var(--muted)] tracking-[0.15em] uppercase leading-none mt-[2px]">REAL-TIME FEED</span>
-        </div>
-        <div className="flex items-center gap-1 ml-0.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] stat-dot-live" />
-          <span className="text-[9px] text-[var(--success)] tracking-wider font-bold">LIVE</span>
-        </div>
+      <div className="flex items-center gap-1.5 mr-0.5 shrink-0">
+        <span className="text-[14px] font-bold leading-none tracking-[-0.02em] text-[var(--foreground-bright)]">
+          Macro Wire
+        </span>
       </div>
 
       <div className="topbar-divider" />
@@ -246,28 +234,9 @@ export function TopBar({
       {/* Countdown + Ingest */}
       <div className="flex items-center gap-1.5 shrink-0">
         {countdown > 0 && !ingesting && (
-          <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] tabular-nums font-medium">
-            <svg className="w-4 h-4" viewBox="0 0 20 20">
-              <circle
-                cx="10" cy="10" r="8"
-                fill="none"
-                stroke="var(--border)"
-                strokeWidth="2"
-              />
-              <circle
-                cx="10" cy="10" r="8"
-                fill="none"
-                stroke="var(--accent)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeDasharray="50.27"
-                strokeDashoffset={50.27 * (1 - countdown / 300)}
-                transform="rotate(-90 10 10)"
-                className="transition-all duration-1000 ease-linear"
-              />
-            </svg>
+          <span className="text-[10px] text-[var(--muted)] tabular-nums">
             {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, "0")}
-          </div>
+          </span>
         )}
         <button
           onClick={onIngest}

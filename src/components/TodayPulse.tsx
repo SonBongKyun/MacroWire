@@ -92,39 +92,23 @@ export function TodayPulse({ articles }: TodayPulseProps) {
   }, [pulse.hourlyDistribution]);
 
   const stats = [
-    { icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>, label: "오늘 기사", value: animToday, color: "var(--accent)", showSpark: true },
-    { icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 21V5a2 2 0 012-2h4l2 3h8a2 2 0 012 2v3M3 21l6-6m0 0l4 4m-4-4v6" /><path strokeLinecap="round" d="M14 3v4h4" /></svg>, label: "미국 관련", value: animUS, color: "#3b82f6", showSpark: false },
-    { icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>, label: "금리 관련", value: animRate, color: "#f59e0b", showSpark: false },
-    { icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>, label: "환율 관련", value: animFX, color: "#10b981", showSpark: false },
+    { label: "오늘 기사", value: animToday, showSpark: true },
+    { label: "미국 관련", value: animUS, showSpark: false },
+    { label: "금리 관련", value: animRate, showSpark: false },
+    { label: "환율 관련", value: animFX, showSpark: false },
   ];
 
-  const barColors = ["var(--accent)", "#3b82f6", "#10b981"];
+  const barColors = ["var(--foreground-secondary)", "var(--muted-bright)", "var(--muted)"];
 
   return (
     <aside className="w-[440px] shrink-0 bg-[var(--surface-flat)] border-l border-[var(--border)] flex flex-col overflow-hidden select-none">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-[var(--border)]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center shadow-sm">
-            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <h2 className="text-[13px] font-extrabold text-[var(--foreground-bright)] tracking-tight">
-              Today Pulse
-            </h2>
-            <p className="text-[10px] text-[var(--muted)] mt-0.5">
-              오늘의 매크로 동향 한눈에
-            </p>
-          </div>
-          <div className="text-right">
-            <span className="text-[11px] font-mono font-bold tabular-nums text-[var(--accent)]">{clock}</span>
-            <div className="flex items-center gap-1 justify-end mt-0.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] stat-dot-live" />
-              <span className="text-[8px] text-[var(--success)] font-bold tracking-widest">LIVE</span>
-            </div>
-          </div>
+      <div className="px-5 py-3.5 border-b border-[var(--border)]">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground-bright)]">
+            오늘의 동향
+          </h2>
+          <span className="text-[10px] tabular-nums text-[var(--muted)]">{clock}</span>
         </div>
       </div>
 
@@ -134,23 +118,17 @@ export function TodayPulse({ articles }: TodayPulseProps) {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="p-3.5 rounded-[var(--radius-md)] glass-card relative overflow-hidden"
+              className="p-3 rounded-[var(--radius-md)] glass-card"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="leading-none" style={{ color: s.color }}>{s.icon}</span>
-                <span className="text-[10px] text-[var(--muted)] font-medium">
-                  {s.label}
-                </span>
-              </div>
+              <span className="text-[10px] text-[var(--muted)] block mb-1">
+                {s.label}
+              </span>
               <div className="flex items-end justify-between">
-                <div
-                  className="text-[24px] font-extrabold tabular-nums leading-none counter-value"
-                  style={{ color: s.color }}
-                >
+                <span className="text-[22px] font-bold tabular-nums leading-none text-[var(--foreground-bright)]">
                   {s.value}
-                </div>
+                </span>
                 {s.showSpark && sparkData.length > 1 && (
-                  <Sparkline data={sparkData} color={typeof s.color === 'string' && s.color.startsWith('#') ? s.color : '#0d9488'} />
+                  <Sparkline data={sparkData} color="var(--border-strong)" />
                 )}
               </div>
             </div>
@@ -158,29 +136,21 @@ export function TodayPulse({ articles }: TodayPulseProps) {
         </div>
 
         {/* Recent 1h highlight */}
-        <div className="flex items-center gap-3 p-3.5 rounded-[var(--radius-md)] glass-card border-l-[3px] border-l-[var(--accent)]">
-          <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
+        <div className="flex items-center gap-3 p-3.5 rounded-[var(--radius-md)] glass-card">
           <div className="flex-1">
-            <span className="text-[10px] text-[var(--muted)] font-medium">
+            <span className="text-[10px] text-[var(--muted)]">
               최근 1시간
             </span>
-            <div className="text-[20px] font-extrabold tabular-nums text-[var(--accent)] leading-tight counter-value">
-              {animRecent}<span className="text-[13px] font-bold ml-0.5">건</span>
+            <div className="text-[18px] font-bold tabular-nums text-[var(--foreground-bright)] leading-tight">
+              {animRecent}<span className="text-[12px] font-medium text-[var(--muted)] ml-0.5">건</span>
             </div>
           </div>
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] stat-dot-live" />
-          <span className="text-[9px] text-[var(--success)] font-bold tracking-wide">
-            LIVE
-          </span>
         </div>
 
         {/* 24h Activity Chart */}
         {pulse.hourlyDistribution && (
           <div>
-            <h3 className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)] font-semibold mb-2">
+            <h3 className="text-[10px] text-[var(--muted)] font-medium mb-2">
               24시간 활동
             </h3>
             <div className="p-3 rounded-[var(--radius-md)] glass-card">
@@ -228,8 +198,8 @@ export function TodayPulse({ articles }: TodayPulseProps) {
         {/* Top tags */}
         {pulse.topTags.length > 0 && (
           <div>
-            <h3 className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)] font-semibold mb-3">
-              인기 태그 Top 3
+            <h3 className="text-[10px] text-[var(--muted)] font-medium mb-3">
+              인기 태그
             </h3>
             <div className="space-y-2.5">
               {pulse.topTags.map(([tag, count], i) => {
@@ -239,10 +209,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
                     : 0;
                 return (
                   <div key={tag} className="flex items-center gap-3">
-                    <span
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold tabular-nums text-white"
-                      style={{ backgroundColor: barColors[i] || "var(--accent)" }}
-                    >
+                    <span className="text-[10px] text-[var(--muted)] tabular-nums w-3 text-center">
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
