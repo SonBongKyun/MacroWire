@@ -93,7 +93,7 @@ export function TopBar({
           </svg>
         </div>
         <div className="flex flex-col">
-          <span className="text-[13px] font-extrabold leading-none tracking-tight text-[var(--foreground-bright)]">
+          <span className="text-[14px] font-black leading-none tracking-[-0.03em] text-[var(--accent)]">
             Macro Wire
           </span>
           <span className="text-[8px] font-semibold text-[var(--muted)] tracking-[0.15em] uppercase leading-none mt-[2px]">REAL-TIME FEED</span>
@@ -117,7 +117,7 @@ export function TopBar({
           placeholder="기사 검색… (Ctrl+K)"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius-md)] pl-9 pr-16 py-[7px] text-[12px] placeholder-[var(--muted)] focus:outline-none search-input transition-all"
+          className="w-full bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius-md)] pl-9 pr-16 py-[7px] text-[11px] placeholder-[var(--muted)] focus:outline-none search-input transition-all"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
           {searchQuery ? (
@@ -139,14 +139,14 @@ export function TopBar({
 
       {/* Range toggle */}
       <div className="flex items-center gap-1.5 shrink-0">
-        <div className="flex border border-[var(--border)] rounded-[var(--radius-sm)] p-0.5 bg-[var(--surface-active)]">
+        <div className="flex gap-1">
           {ranges.map((r) => (
             <button
               key={r.key}
               onClick={() => onRangeChange(r.key)}
-              className={`px-2.5 py-1 text-[10px] font-semibold rounded-[3px] transition-all duration-150 ${
+              className={`px-2 py-1.5 text-[11px] font-semibold transition-all duration-150 ${
                 range === r.key
-                  ? "bg-[var(--accent)] text-white shadow-sm"
+                  ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)]"
                   : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >

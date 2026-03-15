@@ -119,7 +119,7 @@ export function SourcePanel({
             </button>
           )}
         </div>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {tags.map((tag) => {
             const color = TAG_COLORS[tag] || "#475569";
             const isActive = selectedTag === tag;
@@ -128,7 +128,7 @@ export function SourcePanel({
                 key={tag}
                 onClick={() => onSelectTag(tag)}
                 className="tag-pill"
-                style={isActive ? { color, backgroundColor: `${color}20`, borderColor: `${color}40` } : { color: 'var(--muted)' }}
+                style={isActive ? { color, backgroundColor: `${color}20`, borderColor: `${color}50` } : { color, opacity: 0.5 }}
               >
                 {tag}
               </button>

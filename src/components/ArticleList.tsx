@@ -235,7 +235,7 @@ export function ArticleList({
             피드
           </h2>
           {/* Read filter tabs */}
-          <div className="flex border border-[var(--border)] rounded-[var(--radius-sm)] p-0.5 bg-[var(--surface-active)]">
+          <div className="flex gap-0.5">
             {([
               { key: "all" as ReadFilter, label: "전체" },
               { key: "unread" as ReadFilter, label: "안읽음" },
@@ -244,9 +244,9 @@ export function ArticleList({
               <button
                 key={f.key}
                 onClick={() => onReadFilterChange(f.key)}
-                className={`px-2 py-0.5 text-[11px] font-semibold rounded-[3px] transition-all duration-150 ${
+                className={`px-2 py-1 text-[11px] font-semibold transition-all duration-150 ${
                   readFilter === f.key
-                    ? "bg-[var(--accent)] text-white shadow-sm"
+                    ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)]"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
                 }`}
               >
@@ -259,11 +259,11 @@ export function ArticleList({
           </span>
           {/* View mode toggle */}
           {onViewModeChange && (
-            <div className="flex border border-[var(--border)] rounded-[var(--radius-sm)] p-0.5 bg-[var(--surface-active)] ml-1">
+            <div className="flex gap-0.5 ml-1">
               <button
                 onClick={() => onViewModeChange("list")}
-                className={`w-6 h-5 flex items-center justify-center rounded-[3px] transition-all duration-150 ${
-                  viewMode === "list" ? "bg-[var(--accent)] text-white shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                className={`w-6 h-6 flex items-center justify-center transition-all duration-150 ${
+                  viewMode === "list" ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"
                 }`}
                 title="리스트 뷰"
               >
@@ -273,8 +273,8 @@ export function ArticleList({
               </button>
               <button
                 onClick={() => onViewModeChange("card")}
-                className={`w-6 h-5 flex items-center justify-center rounded-[3px] transition-all duration-150 ${
-                  viewMode === "card" ? "bg-[var(--accent)] text-white shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                className={`w-6 h-6 flex items-center justify-center transition-all duration-150 ${
+                  viewMode === "card" ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)]" : "text-[var(--muted)] hover:text-[var(--foreground)]"
                 }`}
                 title="카드 뷰"
               >

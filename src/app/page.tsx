@@ -240,7 +240,7 @@ export default function Home() {
     try {
       const res = await fetch("/api/sources");
       const data = await res.json();
-      setSources(data);
+      setSources(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch sources:", err);
     }
@@ -270,13 +270,14 @@ export default function Home() {
         const qs = buildQuery(append ? nextCursor : null);
         const res = await fetch(`/api/articles?${qs}`);
         const json: ArticlesResponse = await res.json();
+        const items = Array.isArray(json?.data) ? json.data : [];
 
         if (append) {
-          setArticles((prev) => [...prev, ...json.data]);
+          setArticles((prev) => [...prev, ...items]);
         } else {
           // Track new articles for badge
           if (prevArticleIds.current.size > 0) {
-            const newOnes = json.data.filter(
+            const newOnes = items.filter(
               (a: Article) => !prevArticleIds.current.has(a.id)
             );
             if (newOnes.length > 0) {
@@ -293,14 +294,14 @@ export default function Home() {
             }
           }
           // Update known IDs
-          const allIds = new Set(json.data.map((a: Article) => a.id));
+          const allIds = new Set(items.map((a: Article) => a.id));
           prevArticleIds.current = allIds;
 
-          setArticles(json.data);
+          setArticles(items);
           setSelectedArticle(null);
         }
-        setNextCursor(json.nextCursor);
-        setHasMore(json.hasMore);
+        setNextCursor(json?.nextCursor ?? null);
+        setHasMore(json?.hasMore ?? false);
       } catch (err) {
         console.error("Failed to fetch articles:", err);
       } finally {
@@ -733,10 +734,10 @@ export default function Home() {
       {/* Region Tabs */}
       <div className="hide-in-focus" style={{ flexShrink: 0 }}>
       <div className="px-4 border-b border-[var(--border)] flex items-center gap-2" style={{ height: 40, flexShrink: 0, overflow: 'hidden' }}>
-        <span className="text-[12px] font-bold text-[var(--muted)] tracking-[0.08em] uppercase mr-0.5" style={{ flexShrink: 0 }}>
+        <span className="text-[12px] font-bold text-[var(--muted)] tracking-[0.05em] uppercase mr-0.5" style={{ flexShrink: 0 }}>
           구분
         </span>
-        <div className="flex items-center gap-2" style={{ flex: '1 1 0%', minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="flex gap-0.5" style={{ flex: '1 1 0%', minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {Object.entries(REGION_TAGS).map(([region, { icon, color }]) => {
             const isActive = regionFilter === region;
             const count = region === "전체"
@@ -746,12 +747,12 @@ export default function Home() {
               <button
                 key={region}
                 onClick={() => setRegionFilter(region)}
-                className={`relative flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-semibold rounded-[var(--radius-sm)] transition-all duration-150 ${
+                className={`relative flex items-center gap-1.5 px-3 py-1.5 text-[13px] transition-all duration-150 ${
                   isActive
-                    ? "bg-[var(--surface)] text-[var(--foreground-bright)] shadow-sm border border-[var(--border)]"
-                    : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
+                    ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)] font-bold"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
                 }`}
-                style={{ flex: '0 0 auto', whiteSpace: 'nowrap', ...(isActive ? { borderColor: `${color}50` } : {}) }}
+                style={{ flex: '0 0 auto', whiteSpace: 'nowrap' }}
               >
                 <span className="text-sm leading-none" style={{ color: isActive ? color : undefined }}>{icon}</span>
                 <span>{region}</span>
