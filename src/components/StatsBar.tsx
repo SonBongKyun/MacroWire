@@ -25,20 +25,21 @@ export function StatsBar({ articles, sources }: StatsBarProps) {
     .slice(0, 3);
 
   const stats = [
-    { label: "전체", value: total },
-    { label: "안읽음", value: unread },
-    { label: "저장됨", value: saved },
-    { label: "소스", value: `${activeSources}/${sources.length}` },
+    { label: "전체", value: total, color: "var(--foreground-bright)", dot: "linear-gradient(135deg, #6366f1, #8b5cf6)" },
+    { label: "안읽음", value: unread, color: "var(--foreground-bright)", dot: "linear-gradient(135deg, #3b82f6, #06b6d4)" },
+    { label: "저장됨", value: saved, color: "var(--foreground-bright)", dot: "linear-gradient(135deg, #f59e0b, #f97316)" },
+    { label: "소스", value: `${activeSources}/${sources.length}`, color: "var(--foreground-bright)", dot: "linear-gradient(135deg, #10b981, #06b6d4)" },
   ];
 
   return (
-    <div className="flex items-center gap-0 px-5 h-8 border-b border-[var(--border)] metal-header shrink-0 text-[10px]">
+    <div className="flex items-center gap-0 px-4 h-8 shrink-0 text-[11px]">
       {/* Stat items */}
       {stats.map((stat, i) => (
         <div key={stat.label} className="flex items-center">
-          {i > 0 && <span className="text-[var(--border-strong)] mx-2.5">·</span>}
+          {i > 0 && <span className="text-[var(--border-strong)] mx-2">·</span>}
+          <span className="w-1.5 h-1.5 rounded-full mr-1.5 shrink-0" style={{ background: stat.dot }} />
           <span className="text-[var(--muted)] mr-1">{stat.label}</span>
-          <span className="font-bold text-[var(--foreground-bright)] tabular-nums">
+          <span className="font-bold tabular-nums" style={{ color: stat.color }}>
             {stat.value}
           </span>
         </div>

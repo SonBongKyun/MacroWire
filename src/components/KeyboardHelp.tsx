@@ -16,7 +16,7 @@ const SHORTCUTS = [
   ]},
   { section: "검색·필터", items: [
     { keys: ["/"], desc: "검색창 포커스" },
-    { keys: ["⌘", "K"], desc: "검색창 포커스" },
+    { keys: ["⌘", "K"], desc: "커맨드 팔레트 열기" },
     { keys: ["1"], desc: "범위: 24H" },
     { keys: ["2"], desc: "범위: 7D" },
     { keys: ["3"], desc: "범위: 30D" },
@@ -28,6 +28,13 @@ const SHORTCUTS = [
     { keys: ["m"], desc: "전체 읽음 처리" },
     { keys: ["e"], desc: "저장된 기사 내보내기" },
     { keys: ["?"], desc: "이 도움말 표시/닫기" },
+  ]},
+  { section: "UI 전환", items: [
+    { keys: ["["], desc: "사이드바 접기/펼치기" },
+    { keys: ["f"], desc: "포커스 리딩 모드" },
+    { keys: ["v"], desc: "리스트/카드 뷰 전환" },
+    { keys: ["a"], desc: "애널리틱스 대시보드" },
+    { keys: ["w"], desc: "키워드 워치리스트" },
   ]},
 ];
 
@@ -56,17 +63,21 @@ export function KeyboardHelp({ open, onClose }: KeyboardHelpProps) {
 
       {/* Panel */}
       <div
-        className="relative w-[480px] max-h-[70vh] overflow-y-auto rounded-[var(--radius-lg)] border border-[var(--border)] metal-surface animate-fade-in"
+        className="relative w-[480px] max-h-[70vh] overflow-y-auto rounded-[var(--radius-lg)] glass-modal rotating-border animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)] metal-header">
-          <h3 className="text-[13px] font-bold text-[var(--foreground-bright)]">
-            ⌨️ 키보드 단축키
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)] glass-header">
+          <h3 className="text-[13px] font-extrabold text-[var(--foreground-bright)] flex items-center gap-2 tracking-tight">
+            <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8" />
+            </svg>
+            키보드 단축키
           </h3>
           <button
             onClick={onClose}
-            className="text-[var(--muted)] hover:text-[var(--foreground)] text-xs w-6 h-6 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn"
+            className="text-[var(--muted)] hover:text-[var(--foreground)] text-xs w-6 h-6 flex items-center justify-center rounded-[var(--radius-sm)] hover:bg-[var(--surface-hover)] transition-colors"
           >
             ✕
           </button>
@@ -79,15 +90,15 @@ export function KeyboardHelp({ open, onClose }: KeyboardHelpProps) {
               <h4 className="text-[10px] uppercase tracking-[0.1em] text-[var(--muted)] font-semibold mb-2.5">
                 {section}
               </h4>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {items.map(({ keys, desc }) => (
-                  <div key={desc} className="flex items-center justify-between py-1">
+                  <div key={desc} className="flex items-center justify-between py-1.5 px-2 rounded-[var(--radius-sm)] hover:bg-[var(--surface-hover)] transition-colors">
                     <span className="text-[12px] text-[var(--foreground)]">{desc}</span>
                     <div className="flex items-center gap-1">
                       {keys.map((key, i) => (
                         <span key={i}>
-                          {i > 0 && <span className="text-[var(--muted)] text-[10px] mx-0.5">/</span>}
-                          <kbd className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-[10px] font-semibold text-[var(--foreground-secondary)] border border-[var(--border)] rounded-[var(--radius-sm)] metal-btn">
+                          {i > 0 && <span className="text-[var(--muted)] text-[10px] mx-0.5">+</span>}
+                          <kbd className="kbd-key text-[var(--foreground-secondary)] bg-[var(--surface-active)] border border-[var(--border)]">
                             {key}
                           </kbd>
                         </span>
@@ -101,11 +112,11 @@ export function KeyboardHelp({ open, onClose }: KeyboardHelpProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t border-[var(--border)] text-center">
+        <div className="px-5 py-3 border-t border-[var(--border)] text-center glass-header">
           <span className="text-[10px] text-[var(--muted)]">
-            <kbd className="inline-flex items-center justify-center w-[18px] h-[18px] px-1 text-[9px] font-semibold border border-[var(--border)] rounded-[3px] metal-btn mr-1">?</kbd>
+            <kbd className="kbd-key text-[var(--foreground-secondary)] bg-[var(--surface-active)] border border-[var(--border)] !min-w-[18px] !h-[18px] text-[9px] mr-1">?</kbd>
             또는
-            <kbd className="inline-flex items-center justify-center min-w-[30px] h-[18px] px-1.5 text-[9px] font-semibold border border-[var(--border)] rounded-[3px] metal-btn mx-1">Esc</kbd>
+            <kbd className="kbd-key text-[var(--foreground-secondary)] bg-[var(--surface-active)] border border-[var(--border)] !min-w-[30px] !h-[18px] text-[9px] mx-1">Esc</kbd>
             로 닫기
           </span>
         </div>

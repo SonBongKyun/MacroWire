@@ -38,10 +38,25 @@ export async function GET(request: NextRequest) {
     }
 
     if (q) {
-      where.OR = [
-        { title: { contains: q } },
-        { summary: { contains: q } },
-      ];
+      // Enhanced search: split query into tokens and match all (#21)
+      const tokens = q.trim().split(/\s+/).filter((t: string) => t.length > 0);
+      if (tokens.length > 1) {
+        where.AND = tokens.map((token: string) => ({
+          OR: [
+            { title: { contains: token } },
+            { summary: { contains: token } },
+            { sourceName: { contains: token } },
+            { tags: { contains: token } },
+          ],
+        }));
+      } else {
+        where.OR = [
+          { title: { contains: q } },
+          { summary: { contains: q } },
+          { sourceName: { contains: q } },
+          { tags: { contains: q } },
+        ];
+      }
     }
 
     if (read !== null && read !== undefined && read !== "") {

@@ -1,5 +1,10 @@
 import type { Article } from "@/types";
 
+export interface HourlyBucket {
+  hour: number;
+  count: number;
+}
+
 export interface PulseData {
   todayCount: number;
   usCount: number;
@@ -7,6 +12,7 @@ export interface PulseData {
   fxCount: number;
   recentHourCount: number;
   topTags: [string, number][];
+  hourlyDistribution: HourlyBucket[];
 }
 
 export function computePulse(articles: Article[]): PulseData {
@@ -40,6 +46,16 @@ export function computePulse(articles: Article[]): PulseData {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3) as [string, number][];
 
+  // Hourly distribution for the last 24h
+  const hourlyDistribution: HourlyBucket[] = Array.from(
+    { length: 24 },
+    (_, i) => ({ hour: i, count: 0 })
+  );
+  today.forEach((a) => {
+    const h = new Date(a.publishedAt).getHours();
+    hourlyDistribution[h].count++;
+  });
+
   return {
     todayCount: today.length,
     usCount,
@@ -47,5 +63,6 @@ export function computePulse(articles: Article[]): PulseData {
     fxCount,
     recentHourCount,
     topTags,
+    hourlyDistribution,
   };
 }
