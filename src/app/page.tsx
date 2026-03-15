@@ -459,7 +459,7 @@ export default function Home() {
 
       {/* 오늘의 구분 보기 Region Tabs */}
       <div className="px-5 h-11 border-b border-[var(--border)] metal-header flex items-center gap-2 shrink-0">
-        <span className="text-[10px] font-bold text-[var(--muted)] shrink-0 tracking-[0.08em] uppercase mr-1">
+        <span className="text-[12px] font-bold text-[var(--muted)] shrink-0 tracking-[0.08em] uppercase mr-1">
           구분
         </span>
         <div className="flex items-center gap-1.5">
@@ -472,7 +472,7 @@ export default function Home() {
               <button
                 key={region}
                 onClick={() => setRegionFilter(region)}
-                className={`relative flex items-center gap-1.5 px-3.5 py-1.5 text-[11px] font-semibold rounded-[var(--radius-md)] transition-all duration-200 ${
+                className={`relative flex items-center gap-1.5 px-3.5 py-1.5 text-[13px] font-semibold rounded-[var(--radius-md)] transition-all duration-200 ${
                   isActive
                     ? "metal-btn text-[var(--foreground-bright)] shadow-sm"
                     : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
@@ -489,7 +489,7 @@ export default function Home() {
                 <span>{region}</span>
                 {count > 0 && (
                   <span
-                    className={`text-[9px] tabular-nums font-bold px-1.5 py-0.5 rounded-full leading-none ${
+                    className={`text-[11px] tabular-nums font-bold px-1.5 py-0.5 rounded-full leading-none ${
                       isActive ? "text-white" : "text-[var(--muted)] bg-[var(--surface-active)]"
                     }`}
                     style={isActive ? { backgroundColor: color } : undefined}
@@ -504,7 +504,7 @@ export default function Home() {
         {regionFilter !== "전체" && (
           <button
             onClick={() => setRegionFilter("전체")}
-            className="ml-auto text-[10px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-1"
+            className="ml-auto text-[12px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-1"
           >
             <span>✕</span> 필터 해제
           </button>

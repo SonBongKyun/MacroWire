@@ -74,13 +74,13 @@ export function SourcePanel({
       {/* Tags section */}
       <div className="p-3 border-b border-[var(--border)] metal-header">
         <div className="flex items-center justify-between mb-2.5">
-          <h3 className="text-[11px] font-semibold text-[var(--foreground-secondary)] tracking-wide">
+          <h3 className="text-[13px] font-semibold text-[var(--foreground-secondary)] tracking-wide">
             태그
           </h3>
           {selectedTag && (
             <button
               onClick={() => onSelectTag(selectedTag)}
-              className="text-[10px] text-[var(--accent)] hover:text-[var(--accent-dim)] font-medium transition-colors"
+              className="text-[12px] text-[var(--accent)] hover:text-[var(--accent-dim)] font-medium transition-colors"
             >
               초기화
             </button>
@@ -95,7 +95,7 @@ export function SourcePanel({
                 key={tag}
                 onClick={() => onSelectTag(tag)}
                 style={{ color: isActive ? color : undefined }}
-                className={`px-1.5 py-0.5 text-[10px] font-medium rounded-[var(--radius-sm)] transition-colors ${
+                className={`px-1.5 py-0.5 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors ${
                   isActive
                     ? "font-bold metal-btn !border-[var(--border-strong)]"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
@@ -111,10 +111,10 @@ export function SourcePanel({
       {/* Sources section */}
       <div className="flex-1 overflow-y-auto">
         <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--border)] sticky top-0 bg-[var(--surface-sidebar)] z-10 metal-header">
-          <h3 className="text-[11px] font-semibold text-[var(--foreground-secondary)] tracking-wide">
+          <h3 className="text-[13px] font-semibold text-[var(--foreground-secondary)] tracking-wide">
             소스
           </h3>
-          <span className="text-[10px] text-[var(--muted)] tabular-nums font-medium">
+          <span className="text-[12px] text-[var(--muted)] tabular-nums font-medium">
             <span className="text-[var(--success)]">{enabledCount}</span>
             <span className="mx-0.5">/</span>
             {sources.length}
@@ -133,7 +133,7 @@ export function SourcePanel({
                 <div key={category} className="mb-0.5">
                   <button
                     onClick={() => toggleCategory(category)}
-                    className="flex items-center gap-2 w-full px-3 py-1.5 text-[10px] font-semibold text-[var(--muted)] hover:text-[var(--foreground-secondary)] transition-colors"
+                    className="flex items-center gap-2 w-full px-3 py-1.5 text-[12px] font-semibold text-[var(--muted)] hover:text-[var(--foreground-secondary)] transition-colors"
                   >
                     <svg
                       className="w-2.5 h-2.5 transition-transform"
@@ -151,7 +151,7 @@ export function SourcePanel({
                       <div
                         key={source.id}
                         onClick={() => onSelectSource(source.id)}
-                        className={`flex items-center gap-2 py-[5px] px-3 pl-7 cursor-pointer text-[12px] article-row rounded-r-md mr-1 ${
+                        className={`flex items-center gap-2 py-[5px] px-3 pl-7 cursor-pointer text-[13px] article-row rounded-r-md mr-1 ${
                           selectedSourceId === source.id
                             ? "bg-[var(--accent-glow)] text-[var(--accent)] font-medium"
                             : "hover:bg-[var(--surface-hover)] text-[var(--foreground)]"
@@ -177,7 +177,7 @@ export function SourcePanel({
                           {source.name}
                         </span>
                         {source._count && source._count.articles > 0 && (
-                          <span className="text-[10px] text-[var(--muted)] tabular-nums">
+                          <span className="text-[12px] text-[var(--muted)] tabular-nums">
                             {source._count.articles}
                           </span>
                         )}

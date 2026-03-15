@@ -189,7 +189,7 @@ export function ArticleList({
       {/* Header */}
       <div className="px-4 py-2 border-b border-[var(--border)] metal-header flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <h2 className="text-[11px] font-semibold text-[var(--foreground-secondary)]">
+          <h2 className="text-[13px] font-semibold text-[var(--foreground-secondary)]">
             피드
           </h2>
           {/* Read filter tabs */}
@@ -202,7 +202,7 @@ export function ArticleList({
               <button
                 key={f.key}
                 onClick={() => onReadFilterChange(f.key)}
-                className={`px-2 py-0.5 text-[10px] font-semibold rounded-[3px] transition-colors ${
+                className={`px-2 py-0.5 text-[12px] font-semibold rounded-[3px] transition-colors ${
                   readFilter === f.key
                     ? "bg-[var(--foreground-bright)] text-white shadow-sm"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
@@ -212,12 +212,12 @@ export function ArticleList({
               </button>
             ))}
           </div>
-          <span className="text-[10px] tabular-nums text-[var(--muted)] font-medium">
+          <span className="text-[12px] tabular-nums text-[var(--muted)] font-medium">
             {filteredArticles.length}건
           </span>
         </div>
         {loading && (
-          <div className="flex items-center gap-1.5 text-[10px] text-[var(--accent)] font-medium">
+          <div className="flex items-center gap-1.5 text-[12px] text-[var(--accent)] font-medium">
             <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
@@ -246,7 +246,7 @@ export function ArticleList({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
               </svg>
             </div>
-            <p className="text-[12px]">
+            <p className="text-[13px]">
               {readFilter === "unread" ? "안읽은 기사가 없습니다" : readFilter === "read" ? "읽은 기사가 없습니다" : "기사가 없습니다"}
             </p>
           </div>
@@ -268,22 +268,22 @@ export function ArticleList({
                 >
                   <div className="flex items-center gap-2">
                     <span
-                      className="text-[10px] text-[var(--muted)] transition-transform duration-150 inline-block"
+                      className="text-[11px] text-[var(--muted)] transition-transform duration-150 inline-block"
                       style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
                     >
                       ▶
                     </span>
-                    <span className="text-[11px] font-bold" style={{ color: topColor }}>
+                    <span className="text-[13px] font-bold" style={{ color: topColor }}>
                       {cluster.label}
                     </span>
                     <span
-                      className="text-[9px] font-bold px-1.5 py-0.5 rounded-full tabular-nums text-white leading-none"
+                      className="text-[11px] font-bold px-1.5 py-0.5 rounded-full tabular-nums text-white leading-none"
                       style={{ backgroundColor: topColor }}
                     >
                       {cluster.articles.length}
                     </span>
                     <div className="flex-1" />
-                    <span className="text-[9px] text-[var(--muted)] font-medium">
+                    <span className="text-[11px] text-[var(--muted)] font-medium">
                       {cluster.tag}
                     </span>
                   </div>
@@ -305,10 +305,10 @@ export function ArticleList({
                       >
                         <div className="flex items-center gap-2">
                           {isNew && <span className="new-dot" />}
-                          <span className="text-[10px] text-[var(--border-strong)] shrink-0 tabular-nums">
+                          <span className="text-[12px] text-[var(--border-strong)] shrink-0 tabular-nums">
                             {timeAgo(article.publishedAt)}
                           </span>
-                          <span className="text-[10px] text-[var(--accent)] truncate font-semibold">
+                          <span className="text-[12px] text-[var(--accent)] truncate font-semibold">
                             {article.sourceName}
                           </span>
                           <div className="flex-1" />
@@ -328,7 +328,7 @@ export function ArticleList({
                           </button>
                         </div>
                         <p
-                          className={`text-[11.5px] leading-[1.4] line-clamp-1 ${
+                          className={`text-[13px] leading-[1.4] line-clamp-1 ${
                             isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"
                           }`}
                         >
@@ -357,10 +357,10 @@ export function ArticleList({
             >
               <div className="flex items-center gap-2">
                 {isNew && <span className="new-dot" />}
-                <span className="text-[10px] text-[var(--border-strong)] shrink-0 tabular-nums">
+                <span className="text-[12px] text-[var(--border-strong)] shrink-0 tabular-nums">
                   {timeAgo(article.publishedAt)}
                 </span>
-                <span className="text-[10px] text-[var(--accent)] truncate font-semibold">
+                <span className="text-[12px] text-[var(--accent)] truncate font-semibold">
                   {article.sourceName}
                 </span>
                 <div className="flex-1" />
@@ -372,7 +372,7 @@ export function ArticleList({
                         <button
                           key={tag}
                           style={{ color }}
-                          className="text-[9px] font-semibold hover:underline cursor-pointer"
+                          className="text-[11px] font-semibold hover:underline cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             onTagClick?.(tag);
@@ -401,7 +401,7 @@ export function ArticleList({
                 </button>
               </div>
               <p
-                className={`text-[11.5px] leading-[1.4] line-clamp-1 ${
+                className={`text-[13px] leading-[1.4] line-clamp-1 ${
                   isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"
                 }`}
               >

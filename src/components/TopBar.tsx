@@ -84,12 +84,12 @@ export function TopBar({
           </svg>
         </div>
         <div className="flex flex-col">
-          <span className="text-[12px] font-bold text-[var(--foreground-bright)] leading-none">
+          <span className="text-[14px] font-bold text-[var(--foreground-bright)] leading-none">
             Macro Wire
           </span>
           <div className="flex items-center gap-1 mt-0.5">
             <div className="w-1 h-1 rounded-full bg-[var(--success)]" />
-            <span className="text-[8px] text-[var(--muted)] tracking-wider">LIVE</span>
+            <span className="text-[10px] text-[var(--muted)] tracking-wider">LIVE</span>
           </div>
         </div>
       </div>
@@ -105,7 +105,7 @@ export function TopBar({
           placeholder="기사 검색…"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius-md)] pl-9 pr-16 py-2 text-[12px] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] focus:ring-2 focus:ring-[var(--accent)]/10 transition-all metal-inset"
+          className="w-full bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius-md)] pl-9 pr-16 py-2 text-[13px] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] focus:ring-2 focus:ring-[var(--accent)]/10 transition-all metal-inset"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
           {searchQuery ? (
@@ -116,7 +116,7 @@ export function TopBar({
               ✕
             </button>
           ) : (
-            <kbd className="text-[10px] text-[var(--muted)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-[4px] px-1.5 py-0.5 leading-none font-medium">
+            <kbd className="text-[11px] text-[var(--muted)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-[4px] px-1.5 py-0.5 leading-none font-medium">
               ⌘K
             </kbd>
           )}
@@ -129,7 +129,7 @@ export function TopBar({
           <button
             key={r.key}
             onClick={() => onRangeChange(r.key)}
-            className={`px-2.5 py-1 text-[10px] font-semibold rounded-[3px] transition-colors ${
+            className={`px-2.5 py-1 text-[12px] font-semibold rounded-[3px] transition-colors ${
               range === r.key
                 ? "bg-[var(--foreground-bright)] text-white shadow-sm"
                 : "text-[var(--muted)] hover:text-[var(--foreground)]"
@@ -143,7 +143,7 @@ export function TopBar({
       {/* Saved toggle */}
       <button
         onClick={onToggleSaved}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-medium rounded-[var(--radius-sm)] transition-colors metal-btn ${
+        className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium rounded-[var(--radius-sm)] transition-colors metal-btn ${
           showSaved
             ? "!border-[var(--accent)] text-[var(--accent)]"
             : "text-[var(--muted)] hover:text-[var(--foreground)]"
@@ -156,12 +156,12 @@ export function TopBar({
       {/* Counter + New badge */}
       <div className="flex items-center gap-1.5">
         {articleCount > 0 && (
-          <span className="text-[10px] text-[var(--muted)] tabular-nums font-medium">
+          <span className="text-[12px] text-[var(--muted)] tabular-nums font-medium">
             {articleCount}건
           </span>
         )}
         {newArticleCount > 0 && (
-          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[var(--accent)] text-white animate-pulse">
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[12px] font-bold rounded-full bg-[var(--accent)] text-white animate-pulse">
             +{newArticleCount}
           </span>
         )}
@@ -172,7 +172,7 @@ export function TopBar({
         {onMarkAllRead && (
           <button
             onClick={onMarkAllRead}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--success)] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--success)] transition-colors"
             title="전체 읽음 처리 (M)"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -183,7 +183,7 @@ export function TopBar({
         {onExport && (
           <button
             onClick={onExport}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
             title="저장 기사 내보내기 (E)"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -194,7 +194,7 @@ export function TopBar({
         {onShowHelp && (
           <button
             onClick={onShowHelp}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--accent)] transition-colors text-[11px] font-bold"
+            className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--accent)] transition-colors text-[13px] font-bold"
             title="단축키 도움말 (?)"
           >
             ?
@@ -205,7 +205,7 @@ export function TopBar({
       {/* Countdown + Ingest */}
       <div className="flex items-center gap-1.5">
         {countdown > 0 && !ingesting && (
-          <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] tabular-nums font-medium">
+          <div className="flex items-center gap-1.5 text-[12px] text-[var(--muted)] tabular-nums font-medium">
             <svg className="w-4 h-4" viewBox="0 0 20 20">
               <circle
                 cx="10" cy="10" r="8"
@@ -231,7 +231,7 @@ export function TopBar({
         <button
           onClick={onIngest}
           disabled={ingesting}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold rounded-[var(--radius-sm)] transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold rounded-[var(--radius-sm)] transition-colors ${
             ingesting
               ? "metal-btn !border-[var(--border)] text-[var(--muted)] cursor-wait"
               : "metal-btn !border-[var(--accent)] text-[var(--accent)]"
@@ -259,7 +259,7 @@ export function TopBar({
       {/* Dark mode toggle */}
       <button
         onClick={onToggleDark}
-        className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
+        className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
         title={darkMode ? "라이트 모드" : "다크 모드"}
       >
         {darkMode ? (
@@ -275,7 +275,7 @@ export function TopBar({
 
       {/* Last updated */}
       {lastUpdated && (
-        <span className="text-[10px] text-[var(--muted)] whitespace-nowrap tabular-nums">
+        <span className="text-[12px] text-[var(--muted)] whitespace-nowrap tabular-nums">
           {updatedAgo()}
         </span>
       )}
