@@ -5,6 +5,7 @@ import type { Article } from "@/types";
 import { clusterArticles } from "@/lib/clustering/cluster";
 import type { ArticleCluster } from "@/lib/clustering/cluster";
 import { PeekPopover } from "@/components/PeekPopover";
+import { ClusterInsight } from "@/components/ClusterInsight";
 
 type ReadFilter = "all" | "unread" | "read";
 type ViewMode = "list" | "card";
@@ -470,6 +471,11 @@ export function ArticleList({
                       </div>
                     );
                   })}
+                  <ClusterInsight
+                    clusterId={cluster.id}
+                    articles={cluster.articles}
+                    label={cluster.label}
+                  />
                   </div>
                 </div>
               </div>

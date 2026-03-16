@@ -35,3 +35,17 @@ model Article {
   @@index([sourceId])
   @@index([url])
 }
+
+model Insight {
+  id        String   @id @default(cuid())
+  type      String   // "article" | "cluster" | "connections"
+  targetId  String
+  model     String   // "haiku" | "sonnet"
+  content   String   // JSON structured insight data
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@unique([type, targetId])
+  @@index([targetId])
+  @@index([type])
+}

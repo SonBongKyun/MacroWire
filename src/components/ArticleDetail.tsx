@@ -4,6 +4,10 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import type { Article } from "@/types";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { RelatedArticles } from "@/components/RelatedArticles";
+import { InsightPanel } from "@/components/InsightPanel";
+import { ConnectionsView } from "@/components/ConnectionsView";
+
+type DetailTab = "summary" | "insight" | "connections";
 
 interface ArticleDetailProps {
   article: Article | null;
@@ -91,10 +95,12 @@ export function ArticleDetail({
   const [toastExiting, setToastExiting] = useState(false);
   const [newCollectionInput, setNewCollectionInput] = useState("");
   const [readProgress, setReadProgress] = useState(0);
+  const [activeTab, setActiveTab] = useState<DetailTab>("summary");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setReadProgress(0);
+    setActiveTab("summary");
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [article?.id]);
 
@@ -234,44 +240,77 @@ export function ArticleDetail({
         )}
       </div>
 
-      {/* Summary */}
+      {/* Tab bar */}
+      <div className="flex border-b border-[var(--border)] px-5 shrink-0">
+        {([
+          { key: "summary" as DetailTab, label: "요약" },
+          { key: "insight" as DetailTab, label: "AI 분석" },
+          { key: "connections" as DetailTab, label: "연결 고리" },
+        ]).map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-3 py-2 text-[11px] font-semibold transition-all duration-150 ${
+              activeTab === tab.key
+                ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)]"
+                : "text-[var(--muted)] hover:text-[var(--foreground)]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
       <div className="flex-1 overflow-y-auto p-5" ref={scrollRef} onScroll={handleScroll}>
-        {article.summary ? (
-          <div className="space-y-3">
-            <h3 className="section-label">
-              요약
-            </h3>
-            <p className="text-[13.5px] leading-[1.85] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
-              {article.summary}
-            </p>
-            <div className="detail-divider mt-4" />
-            <div className="flex items-center gap-2 pt-1">
-              <span className="text-[9px] text-[var(--muted)] font-medium">발행일</span>
-              <span className="text-[10px] text-[var(--foreground-secondary)] tabular-nums">
-                {formatDate(article.publishedAt)} {formatTime(article.publishedAt)}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-28 gap-3">
-            <div className="empty-state-icon" style={{ width: 40, height: 40, borderRadius: 12 }}>
-              <svg className="w-5 h-5 text-[var(--border-strong)] opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
-              </svg>
-            </div>
-            <p className="text-[11px] text-[var(--muted)]">
-              요약 정보가 없습니다
-            </p>
-          </div>
+        {activeTab === "summary" && (
+          <>
+            {article.summary ? (
+              <div className="space-y-3">
+                <h3 className="section-label">
+                  요약
+                </h3>
+                <p className="text-[13.5px] leading-[1.85] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
+                  {article.summary}
+                </p>
+                <div className="detail-divider mt-4" />
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-[9px] text-[var(--muted)] font-medium">발행일</span>
+                  <span className="text-[10px] text-[var(--foreground-secondary)] tabular-nums">
+                    {formatDate(article.publishedAt)} {formatTime(article.publishedAt)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-28 gap-3">
+                <div className="empty-state-icon" style={{ width: 40, height: 40, borderRadius: 12 }}>
+                  <svg className="w-5 h-5 text-[var(--border-strong)] opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                  </svg>
+                </div>
+                <p className="text-[11px] text-[var(--muted)]">
+                  요약 정보가 없습니다
+                </p>
+              </div>
+            )}
+
+            {/* Related Articles (#7) */}
+            {articles.length > 0 && onSelectArticle && (
+              <RelatedArticles
+                article={article}
+                articles={articles}
+                onSelectArticle={onSelectArticle}
+              />
+            )}
+          </>
         )}
 
-        {/* Related Articles (#7) */}
-        {articles.length > 0 && onSelectArticle && (
-          <RelatedArticles
-            article={article}
-            articles={articles}
-            onSelectArticle={onSelectArticle}
-          />
+        {activeTab === "insight" && (
+          <InsightPanel article={article} />
+        )}
+
+        {activeTab === "connections" && (
+          <ConnectionsView articles={articles} />
         )}
       </div>
 

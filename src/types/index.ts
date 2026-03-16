@@ -34,3 +34,29 @@ export interface IngestResult {
   failedSources: string[];
   lastUpdated: string;
 }
+
+// AI Insight types
+export interface ArticleInsight {
+  keyPoints: string[];
+  marketImpact: string;
+  context: string;
+}
+
+export interface ClusterInsight {
+  synthesis: string;
+  mediaTones: { source: string; tone: string }[];
+  consensus: string;
+  divergence: string;
+  outlook: string;
+}
+
+export interface ConnectionChain {
+  nodes: string[];
+  relations: string[];
+  narrative: string;
+}
+
+export interface ConnectionsInsight {
+  chains: ConnectionChain[];
+  summary: string;
+}
