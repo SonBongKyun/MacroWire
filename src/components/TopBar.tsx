@@ -84,12 +84,20 @@ export function TopBar({
   }, [onOpenPalette]);
 
   return (
-    <header className="relative flex items-center gap-3 px-4 h-12 border-b border-[var(--border)] glass-header shrink-0 select-none z-20">
+    <header className="relative flex items-center gap-3 px-4 h-[52px] border-b border-[var(--border)] glass-header shrink-0 select-none z-20">
       {/* Logo */}
-      <div className="flex items-center gap-1.5 mr-0.5 shrink-0">
-        <span className="text-[14px] font-bold leading-none tracking-[-0.02em] text-[var(--foreground-bright)]">
-          Macro Wire
-        </span>
+      <div className="flex items-center gap-2.5 mr-1 shrink-0">
+        <div className="logo-mark">
+          <span style={{ position: 'relative', zIndex: 1 }}>MW</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[13px] font-extrabold leading-none tracking-[-0.03em] text-[var(--foreground-bright)]">
+            Macro Wire
+          </span>
+          <span className="text-[8px] font-semibold tracking-[0.12em] text-[var(--muted)] uppercase leading-none mt-0.5">
+            Economic Intelligence
+          </span>
+        </div>
       </div>
 
       <div className="topbar-divider" />
@@ -102,10 +110,10 @@ export function TopBar({
         <input
           id="wire-search"
           type="text"
-          placeholder="기사 검색… (Ctrl+K)"
+          placeholder="기사 검색... (Ctrl+K)"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius-md)] pl-9 pr-16 py-[7px] text-[11px] placeholder-[var(--muted)] focus:outline-none search-input transition-all"
+          className="w-full bg-[var(--surface-active)] border border-[var(--border)] rounded-[var(--radius-md)] pl-9 pr-16 py-[7px] text-[11px] placeholder-[var(--muted)] focus:outline-none search-input transition-all"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
           {searchQuery ? (
@@ -127,14 +135,14 @@ export function TopBar({
 
       {/* Range toggle */}
       <div className="flex items-center gap-1.5 shrink-0">
-        <div className="flex gap-1">
+        <div className="flex bg-[var(--surface-active)] rounded-[var(--radius-sm)] p-0.5 border border-[var(--border-subtle)]">
           {ranges.map((r) => (
             <button
               key={r.key}
               onClick={() => onRangeChange(r.key)}
-              className={`px-2 py-1.5 text-[11px] font-semibold transition-all duration-150 ${
+              className={`px-2.5 py-1 text-[10px] font-bold rounded-[3px] transition-all duration-150 ${
                 range === r.key
-                  ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)]"
+                  ? "bg-[var(--accent)] text-white shadow-sm"
                   : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >
@@ -144,10 +152,10 @@ export function TopBar({
         </div>
         <button
           onClick={onToggleSaved}
-          className={`flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium rounded-[var(--radius-sm)] transition-all metal-btn ${
+          className={`flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold rounded-[var(--radius-sm)] transition-all ${
             showSaved
-              ? "!border-[var(--accent)] text-[var(--accent)] bg-[var(--accent-surface)]"
-              : "text-[var(--muted)] hover:text-[var(--foreground)]"
+              ? "bg-[var(--gold-surface)] border border-[var(--gold)] text-[var(--gold)]"
+              : "metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
           }`}
         >
           <span className="text-xs leading-none">{showSaved ? "★" : "☆"}</span>
@@ -158,12 +166,12 @@ export function TopBar({
       {/* Counter + New badge */}
       <div className="flex items-center gap-1.5 shrink-0">
         {articleCount > 0 && (
-          <span className="text-[10px] text-[var(--muted)] tabular-nums font-medium">
+          <span className="text-[10px] text-[var(--muted)] tabular-nums font-semibold">
             {articleCount}건
           </span>
         )}
         {newArticleCount > 0 && (
-          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[var(--accent)] text-white animate-pulse-dot">
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-[var(--gold)] text-white shadow-sm">
             +{newArticleCount}
           </span>
         )}
@@ -176,7 +184,7 @@ export function TopBar({
         {onOpenAnalytics && (
           <button
             onClick={onOpenAnalytics}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all"
             title="애널리틱스 (A)"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -187,7 +195,7 @@ export function TopBar({
         {onToggleWatchlist && (
           <button
             onClick={onToggleWatchlist}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all"
             title="워치리스트 (W)"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -199,7 +207,7 @@ export function TopBar({
         {onMarkAllRead && (
           <button
             onClick={onMarkAllRead}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--success)] hover:bg-[var(--surface-hover)] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--success)] hover:bg-[rgba(5,150,105,0.06)] transition-all"
             title="전체 읽음 처리 (M)"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -210,7 +218,7 @@ export function TopBar({
         {onExport && (
           <button
             onClick={onExport}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all"
             title="저장 기사 내보내기 (E)"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -221,7 +229,7 @@ export function TopBar({
         {onShowHelp && (
           <button
             onClick={onShowHelp}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)] transition-colors text-[11px] font-bold"
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all text-[11px] font-bold"
             title="단축키 도움말 (?)"
           >
             ?
@@ -232,19 +240,19 @@ export function TopBar({
       <div className="topbar-divider" />
 
       {/* Countdown + Ingest */}
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         {countdown > 0 && !ingesting && (
-          <span className="text-[10px] text-[var(--muted)] tabular-nums">
+          <span className="text-[10px] text-[var(--muted)] tabular-nums font-medium">
             {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, "0")}
           </span>
         )}
         <button
           onClick={onIngest}
           disabled={ingesting}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-semibold rounded-[var(--radius-sm)] transition-all ripple-btn ${
+          className={`flex items-center gap-1.5 px-3.5 py-[7px] text-[10px] font-bold rounded-[var(--radius-sm)] transition-all ripple-btn ${
             ingesting
               ? "metal-btn !border-[var(--border)] text-[var(--muted)] cursor-wait"
-              : "bg-[var(--accent)] text-white shadow-sm hover:opacity-90 ingest-pulse"
+              : "btn-primary ingest-pulse"
           }`}
         >
           {ingesting ? (
@@ -253,7 +261,7 @@ export function TopBar({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
-              수집 중…
+              수집 중...
             </>
           ) : (
             <>
@@ -273,7 +281,7 @@ export function TopBar({
         <button
           ref={themeToggleRef}
           onClick={onToggleDark}
-          className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
           title={darkMode ? "라이트 모드 (D)" : "다크 모드 (D)"}
         >
           {darkMode ? (
@@ -287,7 +295,7 @@ export function TopBar({
           )}
         </button>
         {lastUpdated && (
-          <span className="text-[9px] text-[var(--muted)] whitespace-nowrap tabular-nums opacity-60">
+          <span className="text-[9px] text-[var(--muted)] whitespace-nowrap tabular-nums">
             {updatedAgo()}
           </span>
         )}

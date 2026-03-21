@@ -25,21 +25,21 @@ export function StatsBar({ articles, sources }: StatsBarProps) {
     .slice(0, 3);
 
   const stats = [
-    { label: "전체", value: total, color: "var(--foreground-bright)", dot: "linear-gradient(135deg, #6366f1, #8b5cf6)" },
-    { label: "안읽음", value: unread, color: "var(--foreground-bright)", dot: "linear-gradient(135deg, #3b82f6, #06b6d4)" },
-    { label: "저장됨", value: saved, color: "var(--foreground-bright)", dot: "linear-gradient(135deg, #f59e0b, #f97316)" },
-    { label: "소스", value: `${activeSources}/${sources.length}`, color: "var(--foreground-bright)", dot: "linear-gradient(135deg, #10b981, #06b6d4)" },
+    { label: "전체", value: total, color: "var(--accent)", dot: "var(--accent)" },
+    { label: "안읽음", value: unread, color: "var(--info)", dot: "#2563eb" },
+    { label: "저장됨", value: saved, color: "var(--gold)", dot: "var(--gold)" },
+    { label: "소스", value: `${activeSources}/${sources.length}`, color: "var(--success)", dot: "var(--success)" },
   ];
 
   return (
-    <div className="flex items-center gap-0 px-4 h-8 shrink-0 text-[11px]">
+    <div className="flex items-center gap-0 px-4 h-9 shrink-0 text-[11px]">
       {/* Stat items */}
       {stats.map((stat, i) => (
         <div key={stat.label} className="flex items-center">
-          {i > 0 && <span className="text-[var(--border-strong)] mx-2">·</span>}
+          {i > 0 && <span className="text-[var(--border-strong)] mx-2.5 text-[8px]">|</span>}
           <span className="w-1.5 h-1.5 rounded-full mr-1.5 shrink-0" style={{ background: stat.dot }} />
-          <span className="text-[var(--muted)] mr-1">{stat.label}</span>
-          <span className="font-bold tabular-nums" style={{ color: stat.color }}>
+          <span className="text-[var(--muted)] mr-1 text-[10px]">{stat.label}</span>
+          <span className="font-bold tabular-nums text-[var(--foreground-bright)]">
             {stat.value}
           </span>
         </div>
@@ -49,11 +49,12 @@ export function StatsBar({ articles, sources }: StatsBarProps) {
       {topTags.length > 0 && (
         <>
           <div className="w-px h-3.5 bg-[var(--border)] mx-3" />
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--muted)]">인기</span>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[9px] font-bold text-[var(--muted)] tracking-wider uppercase">Hot</span>
             {topTags.map(([tag, count]) => (
-              <span key={tag} className="font-semibold text-[var(--accent)]">
-                {tag}<span className="text-[var(--muted)] font-normal ml-0.5">{count}</span>
+              <span key={tag} className="flex items-center gap-1">
+                <span className="text-[10px] font-semibold text-[var(--foreground-secondary)]">{tag}</span>
+                <span className="text-[9px] text-[var(--muted)] tabular-nums">{count}</span>
               </span>
             ))}
           </div>

@@ -248,10 +248,10 @@ export function CommandPalette({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-[520px] max-h-[60vh] glass-modal rotating-border rounded-xl overflow-hidden shadow-2xl palette-enter border border-[var(--border)]">
+      <div className="w-[540px] max-h-[60vh] glass-modal overflow-hidden shadow-2xl palette-enter border border-[var(--border)]">
         {/* Search */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)]">
-          <svg className="w-4 h-4 text-[var(--accent)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[var(--border)]">
+          <svg className="w-4 h-4 text-[var(--accent)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -259,10 +259,10 @@ export function CommandPalette({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="명령, 기사, 소스, 태그 검색…"
-            className="flex-1 bg-transparent text-[13px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none"
+            placeholder="명령, 기사, 소스, 태그 검색..."
+            className="flex-1 bg-transparent text-[13px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none font-medium"
           />
-          <kbd className="text-[10px] text-[var(--muted)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-[4px] px-1.5 py-0.5 leading-none font-medium">
+          <kbd className="kbd-key" style={{ fontSize: '9px', height: '20px', minWidth: '32px' }}>
             ESC
           </kbd>
         </div>

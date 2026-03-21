@@ -63,7 +63,7 @@ export function KeyboardHelp({ open, onClose }: KeyboardHelpProps) {
 
       {/* Panel */}
       <div
-        className="relative w-[480px] max-h-[70vh] overflow-y-auto rounded-[var(--radius-lg)] glass-modal rotating-border animate-fade-in"
+        className="relative w-[500px] max-h-[70vh] overflow-y-auto glass-modal animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

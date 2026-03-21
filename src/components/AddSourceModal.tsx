@@ -114,9 +114,9 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 text-[11px] font-semibold rounded-[var(--radius-sm)] metal-btn !border-[var(--accent)] text-[var(--accent)]"
+            className="px-4 py-2 text-[11px] font-bold rounded-[var(--radius-sm)] btn-primary"
           >
-            {loading ? "추가 중…" : "소스 추가"}
+            {loading ? "추가 중..." : "소스 추가"}
           </button>
         </div>
       </div>

@@ -26,23 +26,23 @@ interface ArticleListProps {
 }
 
 const TAG_COLORS: Record<string, string> = {
-  금리: "#92400e",
-  물가: "#991b1b",
-  연준: "#5b21b6",
-  환율: "#155e75",
-  미국: "#1e40af",
-  중국: "#b91c1c",
-  일본: "#9d174d",
-  유럽: "#3730a3",
-  수출입: "#065f46",
-  경기: "#3f6212",
-  부동산: "#9a3412",
-  가계부채: "#be123c",
-  재정: "#075985",
-  에너지: "#854d0e",
-  반도체: "#115e59",
-  AI: "#166534",
-  지정학: "#86198f",
+  금리: "#b45309",
+  물가: "#dc2626",
+  연준: "#7c3aed",
+  환율: "#0e7490",
+  미국: "#2563eb",
+  중국: "#e11d48",
+  일본: "#be185d",
+  유럽: "#4338ca",
+  수출입: "#047857",
+  경기: "#4d7c0f",
+  부동산: "#c2410c",
+  가계부채: "#e11d48",
+  재정: "#0369a1",
+  에너지: "#a16207",
+  반도체: "#0f766e",
+  AI: "#15803d",
+  지정학: "#9333ea",
 };
 
 function timeAgo(dateStr: string): string {
@@ -228,13 +228,13 @@ export function ArticleList({
       onKeyDown={handleKeyDown}
     >
       {/* Header */}
-      <div className="px-4 py-2 border-b border-[var(--border)] flex items-center justify-between shrink-0">
+      <div className="px-4 py-2.5 border-b border-[var(--border)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
         <div className="flex items-center gap-2.5">
           <h2 className="section-label">
             피드
           </h2>
           {/* Read filter tabs */}
-          <div className="flex gap-0.5">
+          <div className="flex bg-[var(--surface-active)] rounded-[var(--radius-sm)] p-0.5 border border-[var(--border-subtle)]">
             {([
               { key: "all" as ReadFilter, label: "전체" },
               { key: "unread" as ReadFilter, label: "안읽음" },
@@ -243,9 +243,9 @@ export function ArticleList({
               <button
                 key={f.key}
                 onClick={() => onReadFilterChange(f.key)}
-                className={`px-2 py-1 text-[11px] font-semibold transition-all duration-150 ${
+                className={`px-2 py-0.5 text-[10px] font-bold rounded-[3px] transition-all duration-150 ${
                   readFilter === f.key
-                    ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)]"
+                    ? "bg-[var(--surface)] text-[var(--foreground-bright)] shadow-sm"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
                 }`}
               >

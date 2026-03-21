@@ -14,11 +14,11 @@ interface AnalyticsDashboardProps {
 type Tab = "trends" | "heatmap" | "bubbles" | "digest" | "report" | "calendar";
 
 const TAG_COLORS: Record<string, string> = {
-  금리: "#92400e", 물가: "#991b1b", 연준: "#5b21b6", 환율: "#155e75",
-  미국: "#1e40af", 중국: "#b91c1c", 일본: "#9d174d", 유럽: "#3730a3",
-  수출입: "#065f46", 경기: "#3f6212", 부동산: "#9a3412", 가계부채: "#be123c",
-  재정: "#075985", 에너지: "#854d0e", 반도체: "#115e59", AI: "#166534",
-  지정학: "#86198f",
+  금리: "#b45309", 물가: "#dc2626", 연준: "#7c3aed", 환율: "#0e7490",
+  미국: "#2563eb", 중국: "#e11d48", 일본: "#be185d", 유럽: "#4338ca",
+  수출입: "#047857", 경기: "#4d7c0f", 부동산: "#c2410c", 가계부채: "#e11d48",
+  재정: "#0369a1", 에너지: "#a16207", 반도체: "#0f766e", AI: "#15803d",
+  지정학: "#9333ea",
 };
 
 const ECON_EVENTS = [
@@ -90,18 +90,15 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
     <div className="flex flex-col h-full">
       {/* Header tabs */}
       <div className="flex items-center gap-2 px-5 py-3 border-b border-[var(--border)] glass-header shrink-0">
-        <h3 className="text-[14px] font-extrabold text-[var(--foreground-bright)] flex items-center gap-2 mr-4">
-          <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
+        <h3 className="text-[13px] font-bold text-[var(--foreground-bright)] mr-4 tracking-[-0.01em]">
           Analytics
         </h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center bg-[var(--surface-active)] rounded-[var(--radius-sm)] p-0.5 border border-[var(--border-subtle)]">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-3 py-1.5 text-[10px] font-semibold rounded-[var(--radius-sm)] transition-colors ${tab === t.key ? "bg-[var(--foreground-bright)] text-white shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)] metal-btn"}`}
+              className={`px-3 py-1.5 text-[10px] font-bold rounded-[3px] transition-all ${tab === t.key ? "bg-[var(--accent)] text-white shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]"}`}
             >
               <span className="mr-1">{t.icon}</span>{t.label}
             </button>

@@ -18,23 +18,23 @@ interface SourcePanelProps {
 }
 
 const TAG_COLORS: Record<string, string> = {
-  금리: "#92400e",
-  물가: "#991b1b",
-  연준: "#5b21b6",
-  환율: "#155e75",
-  미국: "#1e40af",
-  중국: "#b91c1c",
-  일본: "#9d174d",
-  유럽: "#3730a3",
-  수출입: "#065f46",
-  경기: "#3f6212",
-  부동산: "#9a3412",
-  가계부채: "#be123c",
-  재정: "#075985",
-  에너지: "#854d0e",
-  반도체: "#115e59",
-  AI: "#166534",
-  지정학: "#86198f",
+  금리: "#b45309",
+  물가: "#dc2626",
+  연준: "#7c3aed",
+  환율: "#0e7490",
+  미국: "#2563eb",
+  중국: "#e11d48",
+  일본: "#be185d",
+  유럽: "#4338ca",
+  수출입: "#047857",
+  경기: "#4d7c0f",
+  부동산: "#c2410c",
+  가계부채: "#e11d48",
+  재정: "#0369a1",
+  에너지: "#a16207",
+  반도체: "#0f766e",
+  AI: "#15803d",
+  지정학: "#9333ea",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -46,12 +46,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_ICONS: Record<string, { label: string; color: string }> = {
-  policy: { label: "P", color: "#5b21b6" },
-  macro: { label: "M", color: "#b4637a" },
-  global: { label: "G", color: "#10b981" },
-  fx: { label: "F", color: "#f59e0b" },
-  semicon: { label: "S", color: "#0ea5e9" },
-  other: { label: "O", color: "#6b7280" },
+  policy: { label: "P", color: "#7c3aed" },
+  macro: { label: "M", color: "#1e3a5f" },
+  global: { label: "G", color: "#059669" },
+  fx: { label: "F", color: "#c49a2c" },
+  semicon: { label: "S", color: "#0284c7" },
+  other: { label: "O", color: "#71717a" },
 };
 
 export function SourcePanel({

@@ -35,36 +35,36 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, se
 
   return (
     <div className="status-bar px-5 h-7 flex items-center gap-3 shrink-0 select-none">
-      <span className="text-[10px] tabular-nums text-[var(--muted)]">
+      <span className="text-[10px] tabular-nums text-[var(--muted)] font-medium">
         {clock}
       </span>
-      <span className="text-[10px] text-[var(--border-strong)]">·</span>
+      <span className="text-[8px] text-[var(--border-strong)]">|</span>
       <span className="text-[10px] tabular-nums">
         {enabledSources}/{totalSources} 소스
       </span>
-      <span className="text-[10px] text-[var(--border-strong)]">·</span>
+      <span className="text-[8px] text-[var(--border-strong)]">|</span>
       <span className="text-[10px] tabular-nums">
         {articleCount}건
       </span>
       {unreadCount > 0 && (
         <>
-          <span className="text-[10px] text-[var(--border-strong)]">·</span>
-          <span className="text-[10px] tabular-nums font-medium">
+          <span className="text-[8px] text-[var(--border-strong)]">|</span>
+          <span className="text-[10px] tabular-nums font-semibold text-[var(--accent)]">
             {unreadCount} 미독
           </span>
         </>
       )}
       {selectedSourceName && (
         <>
-          <span className="text-[10px] text-[var(--border-strong)]">·</span>
+          <span className="text-[8px] text-[var(--border-strong)]">|</span>
           <span className="text-[10px] truncate max-w-[300px]">
             {selectedSourceName}
           </span>
         </>
       )}
       <div className="flex-1" />
-      <span className="text-[10px] opacity-50">
-        j/k · s · / · ?
+      <span className="text-[9px] text-[var(--muted)] opacity-60 tracking-wide">
+        j/k  s  /  ?
       </span>
     </div>
   );
@@ -725,8 +725,8 @@ export default function Home() {
 
       {/* Region Tabs */}
       <div className="hide-in-focus" style={{ flexShrink: 0 }}>
-      <div className="px-4 border-b border-[var(--border)] flex items-center gap-2" style={{ height: 40, flexShrink: 0, overflow: 'hidden' }}>
-        <span className="text-[11px] font-medium text-[var(--muted)] mr-0.5" style={{ flexShrink: 0 }}>
+      <div className="px-4 border-b border-[var(--border)] flex items-center gap-2 bg-[var(--surface)]" style={{ height: 38, flexShrink: 0, overflow: 'hidden' }}>
+        <span className="section-label mr-0.5" style={{ flexShrink: 0, fontSize: '9px', letterSpacing: '0.1em' }}>
           구분
         </span>
         <div className="flex gap-0.5" style={{ flex: '1 1 0%', minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -739,17 +739,17 @@ export default function Home() {
               <button
                 key={region}
                 onClick={() => setRegionFilter(region)}
-                className={`relative flex items-center gap-1.5 px-3 py-1.5 text-[13px] transition-all duration-150 ${
+                className={`relative flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all duration-150 rounded-[var(--radius-sm)] ${
                   isActive
-                    ? "text-[var(--foreground-bright)] border-b-2 border-b-[var(--accent)] font-bold"
-                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                    ? "text-[var(--foreground-bright)] font-bold bg-[var(--accent-surface)]"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
                 }`}
                 style={{ flex: '0 0 auto', whiteSpace: 'nowrap' }}
               >
                 <span className="text-sm leading-none" style={{ color: isActive ? color : undefined }}>{icon}</span>
                 <span>{region}</span>
                 {count > 0 && (
-                  <span className="text-[10px] tabular-nums text-[var(--muted)]">
+                  <span className={`text-[9px] tabular-nums font-medium ${isActive ? 'text-[var(--accent)]' : 'text-[var(--muted)]'}`}>
                     {count}
                   </span>
                 )}
@@ -760,9 +760,9 @@ export default function Home() {
         {regionFilter !== "전체" && (
           <button
             onClick={() => setRegionFilter("전체")}
-            className="ml-auto shrink-0 text-[11px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-1"
+            className="ml-auto shrink-0 text-[10px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-1 font-medium"
           >
-            <span>✕</span> 필터 해제
+            ✕ 해제
           </button>
         )}
       </div>
@@ -797,11 +797,11 @@ export default function Home() {
 
       {/* Collection filter tabs (when viewing saved) */}
       {showSaved && collectionStore.names.length > 0 && (
-        <div className="px-5 h-9 border-b border-[var(--border-subtle)] flex items-center gap-2 shrink-0 bg-[var(--accent-surface)]">
-          <svg className="w-3 h-3 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="px-5 h-9 border-b border-[var(--border-subtle)] flex items-center gap-2 shrink-0 bg-[var(--gold-surface)]">
+          <svg className="w-3 h-3 text-[var(--gold)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
           </svg>
-          <span className="text-[10px] font-bold text-[var(--muted)] tracking-[0.08em]">COLLECTION</span>
+          <span className="text-[9px] font-bold text-[var(--gold)] tracking-[0.1em] uppercase">Collection</span>
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setSelectedCollection(null)}
@@ -927,15 +927,17 @@ export default function Home() {
       {analyticsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setAnalyticsOpen(false)}>
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-          <div className="relative w-[90vw] max-w-[1100px] h-[80vh] rounded-[var(--radius-xl)] glass-modal overflow-hidden animate-fade-in" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)] glass-header">
-              <h3 className="text-[13px] font-extrabold text-[var(--foreground-bright)] flex items-center gap-2">
-                <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+          <div className="relative w-[90vw] max-w-[1100px] h-[80vh] glass-modal overflow-hidden animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border)] glass-header">
+              <h3 className="text-[13px] font-bold text-[var(--foreground-bright)] flex items-center gap-2 tracking-[-0.01em]">
+                <div className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--accent)] flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
                 애널리틱스 대시보드
               </h3>
-              <button onClick={() => setAnalyticsOpen(false)} className="text-[var(--muted)] hover:text-[var(--foreground)] w-6 h-6 flex items-center justify-center rounded hover:bg-[var(--surface-hover)]">✕</button>
+              <button onClick={() => setAnalyticsOpen(false)} className="text-[var(--muted)] hover:text-[var(--foreground)] w-6 h-6 flex items-center justify-center rounded-[var(--radius-sm)] hover:bg-[var(--surface-hover)] transition-colors">✕</button>
             </div>
             <div className="h-[calc(80vh-48px)] overflow-y-auto">
               <AnalyticsDashboard articles={articles} />
@@ -974,8 +976,10 @@ export default function Home() {
 
       {/* Focus mode indicator */}
       {focusMode && (
-        <div className="fixed bottom-3 right-3 z-40 px-2.5 py-1.5 rounded-[var(--radius-sm)] bg-[var(--surface)] border border-[var(--border)] text-[10px] text-[var(--muted)] select-none shadow-sm">
-          포커스 · ESC
+        <div className="fixed bottom-3 right-3 z-40 px-3 py-2 rounded-[var(--radius-md)] bg-[var(--surface)] border border-[var(--border)] text-[10px] text-[var(--muted)] select-none shadow-md flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+          <span className="font-medium">포커스 모드</span>
+          <kbd className="kbd-key" style={{ fontSize: '8px', height: '16px', minWidth: '28px' }}>ESC</kbd>
         </div>
       )}
 

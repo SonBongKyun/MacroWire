@@ -15,10 +15,10 @@ export function SpikeAlert({ articles, onTagClick }: SpikeAlertProps) {
   if (spikes.length === 0) return null;
 
   return (
-    <div className="px-5 h-9 border-b border-[var(--border-subtle)] flex items-center gap-2 shrink-0 bg-red-500/5 overflow-x-auto hide-in-focus">
+    <div className="px-5 h-9 border-b border-[var(--border-subtle)] flex items-center gap-2 shrink-0 bg-[var(--gold-surface)] overflow-x-auto hide-in-focus">
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        <span className="text-[9px] font-bold text-red-500 tracking-wider uppercase">SPIKE</span>
+        <span className="w-2 h-2 rounded-full bg-[var(--gold)] spike-alert-dot" />
+        <span className="text-[9px] font-bold text-[var(--gold)] tracking-[0.12em] uppercase">Spike</span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         {spikes.slice(0, 3).map((s) => (

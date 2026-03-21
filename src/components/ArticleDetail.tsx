@@ -19,23 +19,23 @@ interface ArticleDetailProps {
 }
 
 const TAG_COLORS: Record<string, string> = {
-  금리: "#92400e",
-  물가: "#991b1b",
-  연준: "#5b21b6",
-  환율: "#155e75",
-  미국: "#1e40af",
-  중국: "#b91c1c",
-  일본: "#9d174d",
-  유럽: "#3730a3",
-  수출입: "#065f46",
-  경기: "#3f6212",
-  부동산: "#9a3412",
-  가계부채: "#be123c",
-  재정: "#075985",
-  에너지: "#854d0e",
-  반도체: "#115e59",
-  AI: "#166534",
-  지정학: "#86198f",
+  금리: "#b45309",
+  물가: "#dc2626",
+  연준: "#7c3aed",
+  환율: "#0e7490",
+  미국: "#2563eb",
+  중국: "#e11d48",
+  일본: "#be185d",
+  유럽: "#4338ca",
+  수출입: "#047857",
+  경기: "#4d7c0f",
+  부동산: "#c2410c",
+  가계부채: "#e11d48",
+  재정: "#0369a1",
+  에너지: "#a16207",
+  반도체: "#0f766e",
+  AI: "#15803d",
+  지정학: "#9333ea",
 };
 
 function formatDate(dateStr: string): string {
@@ -131,15 +131,20 @@ export function ArticleDetail({
 
   if (!article) {
     return (
-      <aside className="w-[440px] shrink-0 bg-[var(--surface-flat)] border-l border-[var(--border)] flex flex-col items-center justify-center gap-4 select-none">
-        <div className="empty-state-icon">
-          <svg className="w-7 h-7 text-[var(--border-strong)] opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+      <aside className="w-[440px] shrink-0 bg-[var(--surface-flat)] border-l border-[var(--border)] flex flex-col items-center justify-center gap-5 select-none">
+        <div className="empty-state-icon" style={{ width: 64, height: 64 }}>
+          <svg className="w-7 h-7 text-[var(--accent)] opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
           </svg>
         </div>
-        <div className="text-center">
-          <p className="text-[13px] text-[var(--foreground-secondary)] font-medium">기사를 선택하세요</p>
-          <p className="text-[11px] text-[var(--muted)] mt-1">↑↓ 또는 j/k로 이동 · o로 원문 열기</p>
+        <div className="text-center px-8">
+          <p className="text-[14px] text-[var(--foreground-secondary)] font-semibold">기사를 선택하세요</p>
+          <p className="text-[11px] text-[var(--muted)] mt-2 leading-relaxed">
+            왼쪽 목록에서 기사를 클릭하거나<br />
+            <kbd className="kbd-key mx-0.5" style={{ fontSize: '9px', height: '16px', minWidth: '16px', padding: '0 4px' }}>j</kbd>
+            <kbd className="kbd-key mx-0.5" style={{ fontSize: '9px', height: '16px', minWidth: '16px', padding: '0 4px' }}>k</kbd>
+            키로 이동할 수 있습니다
+          </p>
         </div>
       </aside>
     );
@@ -326,12 +331,12 @@ export function ArticleDetail({
       )}
 
       {/* Actions */}
-      <div className="p-4 border-t border-[var(--border)] flex gap-2">
+      <div className="p-4 border-t border-[var(--border)] flex gap-2 bg-[var(--surface)]">
         <a
           href={article.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 py-2 text-[11px] font-semibold bg-[var(--accent)] text-white rounded-[var(--radius-sm)] shadow-sm hover:opacity-90 transition-opacity"
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] font-bold btn-primary"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
