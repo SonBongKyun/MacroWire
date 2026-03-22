@@ -5,6 +5,7 @@ import type { Article } from "@/types";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { RelatedArticles } from "@/components/RelatedArticles";
 import { ArticleSummary } from "@/components/ArticleSummary";
+import { TAG_COLORS } from "@/lib/constants/colors";
 
 interface ArticleDetailProps {
   article: Article | null;
@@ -18,26 +19,6 @@ interface ArticleDetailProps {
   articles?: Article[];
   onSelectArticle?: (article: Article) => void;
 }
-
-const TAG_COLORS: Record<string, string> = {
-  금리: "#b45309",
-  물가: "#dc2626",
-  연준: "#7c3aed",
-  환율: "#0e7490",
-  미국: "#2563eb",
-  중국: "#e11d48",
-  일본: "#be185d",
-  유럽: "#4338ca",
-  수출입: "#047857",
-  경기: "#4d7c0f",
-  부동산: "#c2410c",
-  가계부채: "#e11d48",
-  재정: "#0369a1",
-  에너지: "#a16207",
-  반도체: "#0f766e",
-  AI: "#15803d",
-  지정학: "#9333ea",
-};
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);

@@ -19,15 +19,15 @@ export interface ThemePreset {
 const PRESETS: ThemePreset[] = [
   {
     id: "ink-gold",
-    name: "Ink & Gold",
+    name: "Midnight Prism",
     colors: {
-      accent: "#1e3a5f",
-      accentLight: "#2d5a8e",
-      gold: "#c49a2c",
-      background: "#f7f7f5",
+      accent: "#2563eb",
+      accentLight: "#3b82f6",
+      gold: "#f59e0b",
+      background: "#f8fafc",
       surface: "#ffffff",
-      foreground: "#2c2c34",
-      border: "#e4e4e0",
+      foreground: "#1e293b",
+      border: "#e2e8f0",
     },
   },
   {

@@ -1,5 +1,6 @@
 import type { Article } from "@/types";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
+import { TAG_COLORS_MUTED as TAG_COLORS } from "@/lib/constants/colors";
 
 export interface TagTrendPoint {
   date: string; // YYYY-MM-DD
@@ -29,14 +30,6 @@ export interface CorrelationPoint {
   tagCount: number;
   marketValue?: number;
 }
-
-const TAG_COLORS: Record<string, string> = {
-  금리: "#92400e", 물가: "#991b1b", 연준: "#5b21b6", 환율: "#155e75",
-  미국: "#1e40af", 중국: "#b91c1c", 일본: "#9d174d", 유럽: "#3730a3",
-  수출입: "#065f46", 경기: "#3f6212", 부동산: "#9a3412", 가계부채: "#be123c",
-  재정: "#075985", 에너지: "#854d0e", 반도체: "#115e59", AI: "#166534",
-  지정학: "#86198f",
-};
 
 /** Compute tag frequency per day for trend chart */
 export function computeTagTrends(articles: Article[], days: number = 7): TagTrendPoint[] {
