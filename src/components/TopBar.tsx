@@ -100,7 +100,7 @@ export function TopBar({
   }, [onOpenPalette]);
 
   return (
-    <header className="relative flex items-center gap-3 px-4 h-[52px] border-b border-[var(--border)] glass-header shrink-0 select-none z-20">
+    <header className="relative flex items-center gap-3 px-4 h-[54px] glass-header shrink-0 select-none z-20">
       {/* Logo */}
       <div className="flex items-center gap-2.5 mr-1 shrink-0">
         <div className="logo-mark">
