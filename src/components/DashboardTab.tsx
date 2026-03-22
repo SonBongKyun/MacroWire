@@ -334,7 +334,7 @@ export default function DashboardTab({
                 </span>
                 <span
                   style={{
-                    fontSize: 24,
+                    fontSize: 18,
                     fontWeight: 700,
                     fontFamily: "var(--font-mono)",
                     color: "var(--foreground-bright)",
@@ -549,12 +549,11 @@ export default function DashboardTab({
                       fontSize: 12,
                       fontWeight: 600,
                       color: "var(--foreground-bright)",
-                      width: 56,
+                      minWidth: 80,
                       flexShrink: 0,
-                      fontFamily: "var(--font-mono)",
                     }}
                   >
-                    {item.symbol}
+                    {item.label}
                   </span>
                   <span style={{ flex: 1 }} />
                   <span
