@@ -52,11 +52,11 @@ const RANGES: Array<{ value: "24h" | "7d" | "30d"; label: string }> = [
 ];
 
 const REGIONS: Array<{ value: string; label: string; color: string }> = [
-  { value: "전체", label: "전체", color: "#6b7280" },
-  { value: "한국", label: "한국", color: "#e35169" },
-  { value: "미국", label: "미국", color: "#3b82f6" },
-  { value: "글로벌", label: "글로벌", color: "#10b981" },
-  { value: "환율·에너지", label: "환율·에너지", color: "#f59e0b" },
+  { value: "전체", label: "전체", color: "#8C8C91" },
+  { value: "한국", label: "한국", color: "#C9A96E" },
+  { value: "미국", label: "미국", color: "#C9A96E" },
+  { value: "글로벌", label: "글로벌", color: "#8C8C91" },
+  { value: "환율·에너지", label: "환율·에너지", color: "#C9A96E" },
 ];
 
 const READ_FILTERS: Array<{ value: "all" | "unread" | "read"; label: string }> = [

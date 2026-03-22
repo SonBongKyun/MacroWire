@@ -27,12 +27,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_ICONS: Record<string, { label: string; color: string }> = {
-  policy: { label: "P", color: "#7c3aed" },
-  macro: { label: "M", color: "#1e3a5f" },
-  global: { label: "G", color: "#059669" },
-  fx: { label: "F", color: "#c49a2c" },
-  semicon: { label: "S", color: "#0284c7" },
-  other: { label: "O", color: "#71717a" },
+  policy: { label: "P", color: "#C9A96E" },
+  macro: { label: "M", color: "#8C8C91" },
+  global: { label: "G", color: "#C9A96E" },
+  fx: { label: "F", color: "#C9A96E" },
+  semicon: { label: "S", color: "#8C8C91" },
+  other: { label: "O", color: "#8C8C91" },
 };
 
 export function SourcePanel({

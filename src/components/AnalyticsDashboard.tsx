@@ -33,10 +33,10 @@ const ECON_EVENTS = [
 ];
 
 const REGION_COLORS: Record<string, string> = {
-  미국: "#3b82f6",
-  한국: "#e35169",
-  유럽: "#10b981",
-  일본: "#f59e0b",
+  미국: "#C9A96E",
+  한국: "#C9A96E",
+  유럽: "#8C8C91",
+  일본: "#8C8C91",
 };
 
 function timeAgo(dateStr: string): string {
