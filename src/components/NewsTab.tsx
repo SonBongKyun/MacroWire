@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { Article, Source } from "@/types";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
@@ -104,7 +104,36 @@ export function NewsTab({
   onCreateCollection,
 }: NewsTabProps) {
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [regionFading, setRegionFading] = useState(false);
   const unreadCount = articles.filter((a) => !a.isRead).length;
+
+  // Compute article counts per region for superscript badges
+  const regionCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const r of REGIONS) {
+      if (r.value === "전체") {
+        counts[r.value] = articles.length;
+      } else {
+        counts[r.value] = articles.filter((a) => {
+          // Match region by tags or source categories
+          const tags = a.tags.join(" ");
+          const src = a.sourceName || "";
+          if (r.value === "한국") return tags.includes("한국") || src.includes("한국") || /부동산|가계부채|수출입|경기/.test(tags);
+          if (r.value === "미국") return tags.includes("미국") || tags.includes("연준") || src.includes("미국");
+          if (r.value === "글로벌") return tags.includes("글로벌") || tags.includes("유럽") || tags.includes("중국") || tags.includes("일본") || tags.includes("지정학");
+          if (r.value === "환율·에너지") return tags.includes("환율") || tags.includes("에너지");
+          return false;
+        }).length;
+      }
+    }
+    return counts;
+  }, [articles]);
+
+  const handleRegionChange = useCallback((value: string) => {
+    setRegionFading(true);
+    onRegionFilterChange(value);
+    setTimeout(() => setRegionFading(false), 200);
+  }, [onRegionFilterChange]);
 
   const sortedArticles = useMemo(() => {
     const list = [...articles];
@@ -187,29 +216,38 @@ export function NewsTab({
           {/* Vertical divider */}
           <span className="w-px h-5 bg-[var(--border)]" />
 
-          {/* Region chips with colored dot */}
+          {/* Region chips with colored dot and article count */}
           <div className="flex items-center gap-1">
-            {REGIONS.map((r) => (
-              <button
-                key={r.value}
-                onClick={() => onRegionFilterChange(r.value)}
-                className={`relative flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-semibold rounded-[var(--radius-sm)] border border-transparent transition-all leading-none ${
-                  regionFilter === r.value
-                    ? "bg-[var(--surface-active)] text-[var(--foreground)]"
-                    : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
-                }`}
-                style={regionFilter === r.value ? { color: "#C9A96E" } : undefined}
-              >
-                <span
-                  className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ backgroundColor: r.color, opacity: regionFilter === r.value ? 1 : 0.5 }}
-                />
-                {r.label}
-                {regionFilter === r.value && (
-                  <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#C9A96E]" />
-                )}
-              </button>
-            ))}
+            {REGIONS.map((r) => {
+              const count = regionCounts[r.value] || 0;
+              const isActive = regionFilter === r.value;
+              return (
+                <button
+                  key={r.value}
+                  onClick={() => handleRegionChange(r.value)}
+                  className={`relative flex items-center gap-1.5 px-2.5 py-1.5 font-semibold rounded-[var(--radius-sm)] border border-transparent transition-all leading-none ${
+                    isActive
+                      ? "bg-[var(--surface-active)] text-[var(--foreground)] text-[11px]"
+                      : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] text-[10px]"
+                  }`}
+                  style={isActive ? { color: "#C9A96E" } : undefined}
+                >
+                  <span
+                    className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ backgroundColor: r.color, opacity: isActive ? 1 : 0.5 }}
+                  />
+                  {r.label}
+                  {count > 0 && (
+                    <sup className="text-[8px] tabular-nums font-bold" style={{ color: isActive ? "#C9A96E" : "var(--muted)", marginLeft: 1, verticalAlign: "super" }}>
+                      {count}
+                    </sup>
+                  )}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#C9A96E]" />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Vertical divider */}
@@ -365,7 +403,7 @@ export function NewsTab({
         }}
       >
         {/* Left column */}
-        <div className="news-main overflow-y-auto">
+        <div className={`news-main overflow-y-auto transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`}>
           {/* SpikeAlert at top of article list */}
           <SpikeAlert articles={sortedArticles} onTagClick={onTagClick} />
 
@@ -412,6 +450,7 @@ export function NewsTab({
               selectedArticleId={selectedArticle?.id || null}
               onSelectArticle={onSelectArticle}
               onToggleSave={onToggleSave}
+              onToggleRead={onToggleRead}
               hasMore={hasMore}
               onLoadMore={onLoadMore}
               readFilter={readFilter}

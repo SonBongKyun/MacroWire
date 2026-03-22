@@ -797,6 +797,22 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
 }
 
 /* ══════════════════════════════════════
+   TICK FLASH (price change animations)
+   ══════════════════════════════════════ */
+
+@keyframes tick-flash {
+  0% { background-color: rgba(201, 169, 110, 0.15); }
+  100% { background-color: transparent; }
+}
+.tick-up { animation: tick-flash 0.8s ease-out; }
+
+@keyframes tick-flash-down {
+  0% { background-color: rgba(239, 68, 68, 0.12); }
+  100% { background-color: transparent; }
+}
+.tick-down { animation: tick-flash-down 0.8s ease-out; }
+
+/* ══════════════════════════════════════
    BRAND / LOGO
    ══════════════════════════════════════ */
 
@@ -1483,3 +1499,238 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
   }
   .status-bar { display: none; }
 }
+
+/* ── Card Thumbnail ── */
+.card-thumbnail {
+  background: var(--surface-active);
+  border-top: 4px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 14px;
+  gap: 10px;
+  position: relative;
+}
+
+.card-thumbnail-initial {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading), 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: var(--surface);
+}
+
+.card-thumbnail-tag {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* ── Source Badge ── */
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
+  border: 1px solid var(--border);
+  background: var(--surface-active);
+}
+
+.source-badge-initial {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: white;
+  font-family: var(--font-heading), 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.source-badge-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--foreground-bright);
+  letter-spacing: -0.01em;
+}
+
+/* ── Fullscreen Reading Mode ── */
+.fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  animation: fullscreen-fade-in 0.2s ease-out;
+}
+
+.fullscreen-reader {
+  width: 100%;
+  max-width: 720px;
+  margin: 40px auto;
+  padding: 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  position: relative;
+  animation: fullscreen-slide-in 0.25s ease-out;
+}
+
+.fullscreen-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.fullscreen-close:hover {
+  color: var(--foreground-bright);
+  border-color: var(--accent);
+}
+
+@keyframes fullscreen-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fullscreen-slide-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-color-scheme: dark) {
+  .fullscreen-overlay {
+    background: rgba(0, 0, 0, 0.85);
+  }
+}
+
+@media (max-width: 768px) {
+  .fullscreen-reader {
+    margin: 0;
+    padding: 24px 20px;
+    min-height: 100vh;
+    border: none;
+  }
+}
+
+/* ══════════════════════════════════════
+   CONTEXT MENU
+   ══════════════════════════════════════ */
+
+.ctx-menu {
+  position: fixed;
+  z-index: 50;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl), 0 0 60px rgba(201, 169, 110, 0.05);
+  padding: 4px 0;
+  animation: fade-in 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(16px);
+}
+.ctx-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0 12px;
+  height: 32px;
+  line-height: 32px;
+  font-size: 12px;
+  color: var(--foreground);
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+.ctx-menu-item:hover {
+  background: var(--surface-hover);
+  border-left-color: var(--accent);
+  color: var(--foreground-bright);
+}
+.ctx-menu-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 4px 0;
+}
+
+/* ══════════════════════════════════════
+   TAB CONTENT TRANSITION
+   ══════════════════════════════════════ */
+
+@keyframes tab-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tab-content-enter {
+  animation: tab-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ══════════════════════════════════════
+   MICRO-INTERACTIONS
+   ══════════════════════════════════════ */
+
+/* Button press effect */
+button:active { transform: scale(0.98); }
+
+/* Link hover underline — gold */
+.hover-underline {
+  position: relative;
+}
+.hover-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+.hover-underline:hover::after {
+  width: 100%;
+}
+
+/* Selection color — gold */
+::selection {
+  background: rgba(201, 169, 110, 0.25);
+  color: inherit;
+}
+
+/* Focus visible — gold outline for keyboard navigation */
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Smooth scroll */
+* { scroll-behavior: smooth; }
+
+/* Cursor styles — pointer on interactive elements */
+[role="button"], button, a, select { cursor: pointer; }

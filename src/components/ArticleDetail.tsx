@@ -75,7 +75,18 @@ export function ArticleDetail({
   const [readProgress, setReadProgress] = useState(0);
   const [noteText, setNoteText] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // ESC to close fullscreen
+  useEffect(() => {
+    if (!fullscreen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [fullscreen]);
 
   // Load note from localStorage on article change
   useEffect(() => {
@@ -168,43 +179,54 @@ export function ArticleDetail({
 
       {/* Header */}
       <div className="p-5 pb-4 border-b border-[var(--border)]">
-        {/* Status badges */}
-        <div className="flex items-center gap-1.5 mb-3">
-          {(() => {
-            const s = analyzeSentiment(article.title, article.summary);
-            return (
-              <span
-                className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
-                style={{ color: s.color, backgroundColor: `${s.color}18` }}
-              >
-                {s.label}
+        {/* Source badge */}
+        <div className="flex items-center gap-2.5 mb-3">
+          <div className="source-badge">
+            <span className="source-badge-initial">{article.sourceName.charAt(0).toUpperCase()}</span>
+            <span className="source-badge-name">{article.sourceName}</span>
+          </div>
+          <div className="flex-1" />
+          {/* Status badges */}
+          <div className="flex items-center gap-1.5">
+            {(() => {
+              const s = analyzeSentiment(article.title, article.summary);
+              return (
+                <span
+                  className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                  style={{ color: s.color, backgroundColor: `${s.color}18` }}
+                >
+                  {s.label}
+                </span>
+              );
+            })()}
+            {article.isRead && (
+              <span className="text-[9px] font-semibold text-[var(--muted)]">
+                읽음
               </span>
-            );
-          })()}
-          {article.isRead && (
-            <span className="text-[9px] font-semibold text-[var(--muted)]">
-              읽음
+            )}
+            {article.isSaved && (
+              <span className="text-[9px] font-semibold text-[var(--accent)]">
+                ★ 저장됨
+              </span>
+            )}
+            {hasNote && (
+              <span className="text-[9px] font-semibold text-[var(--foreground-secondary)]">
+                메모
+              </span>
+            )}
+            <span className="reading-time-badge">
+              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              {estimateReadingTime((article.title || "") + " " + (article.summary || ""))}분
             </span>
-          )}
-          {article.isSaved && (
-            <span className="text-[9px] font-semibold text-[var(--accent)]">
-              ★ 저장됨
-            </span>
-          )}
-          {hasNote && (
-            <span className="text-[9px] font-semibold text-[var(--foreground-secondary)]">
-              메모
-            </span>
-          )}
-          {/* Reading time estimation */}
-          <span className="reading-time-badge">
-            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            {estimateReadingTime((article.title || "") + " " + (article.summary || ""))}분
-          </span>
-          <span className="text-[10px] text-[var(--muted)] ml-auto tabular-nums font-medium flex items-center gap-2">
+          </div>
+        </div>
+
+        {/* Reading progress indicator */}
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] text-[var(--muted)] tabular-nums font-medium flex items-center gap-2 ml-auto">
             {readProgress > 0 && readProgress < 1 && (
               <span className="text-[9px] text-[var(--accent)] font-semibold">{Math.round(readProgress * 100)}%</span>
             )}
@@ -221,14 +243,12 @@ export function ArticleDetail({
         </div>
 
         {/* Title */}
-        <h2 className="text-[16px] font-extrabold leading-[1.5] text-[var(--foreground-bright)] mb-3 tracking-[-0.01em]">
+        <h2 className="text-[18px] font-heading font-extrabold leading-[1.45] text-[var(--foreground-bright)] mb-3 tracking-[-0.01em]">
           {article.title}
         </h2>
 
         {/* Meta row */}
         <div className="flex items-center gap-2 text-[11px]">
-          <span className="text-[var(--accent)] font-semibold">{article.sourceName}</span>
-          <span className="text-[var(--border-strong)]">·</span>
           <span className="text-[var(--muted)] tabular-nums">
             {formatDate(article.publishedAt)} {formatTime(article.publishedAt)}
           </span>
@@ -389,6 +409,16 @@ export function ArticleDetail({
           </svg>
           원문 보기
         </a>
+        {/* Fullscreen reading mode */}
+        <button
+          onClick={() => setFullscreen(true)}
+          className="px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
+          title="전체 화면"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+          </svg>
+        </button>
         {/* Copy URL */}
         <button
           onClick={copyUrl}
@@ -459,6 +489,103 @@ export function ArticleDetail({
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             {toast}
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen reading overlay */}
+      {fullscreen && (
+        <div
+          className="fullscreen-overlay"
+          onClick={(e) => { if (e.target === e.currentTarget) setFullscreen(false); }}
+        >
+          <div className="fullscreen-reader">
+            {/* Close button */}
+            <button
+              onClick={() => setFullscreen(false)}
+              className="fullscreen-close"
+              title="닫기 (ESC)"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Source badge */}
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="source-badge">
+                <span className="source-badge-initial">{article.sourceName.charAt(0).toUpperCase()}</span>
+                <span className="source-badge-name">{article.sourceName}</span>
+              </div>
+              <span className="text-[12px] text-[var(--muted)] tabular-nums">
+                {formatDate(article.publishedAt)} {formatTime(article.publishedAt)}
+              </span>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-[24px] font-heading font-extrabold leading-[1.4] text-[var(--foreground-bright)] mb-4 tracking-[-0.02em]">
+              {article.title}
+            </h1>
+
+            {/* Tags */}
+            {article.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {article.tags.map((tag) => {
+                  const color = TAG_COLORS[tag] || "#475569";
+                  return (
+                    <span
+                      key={tag}
+                      className="tag-pill tag-pill-lg"
+                      style={{ color, backgroundColor: `${color}15`, borderColor: `${color}30` }}
+                    >
+                      {tag}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="detail-divider mb-6" />
+
+            {/* Summary */}
+            {article.summary && (
+              <div className="mb-6">
+                <h3 className="section-label mb-3">요약</h3>
+                <p className="text-[15px] leading-[1.9] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
+                  {article.summary}
+                </p>
+              </div>
+            )}
+
+            {/* Actions at bottom */}
+            <div className="detail-divider mb-5" />
+            <div className="flex gap-2">
+              <a
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[12px] font-bold btn-primary"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                원문 보기
+              </a>
+              <button
+                onClick={copyUrl}
+                className="px-4 py-2 text-[12px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
+                title="URL 복사"
+              >
+                URL 복사
+              </button>
+              <button
+                onClick={shareArticle}
+                className="px-4 py-2 text-[12px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
+                title="공유"
+              >
+                공유
+              </button>
+            </div>
           </div>
         </div>
       )}

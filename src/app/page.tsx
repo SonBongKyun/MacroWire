@@ -24,31 +24,72 @@ import { ToastProvider, useToast } from "@/components/Toast";
 
 const POLL_INTERVAL = 5 * 60;
 
-function StatusBar({ enabledSources, totalSources, articleCount, unreadCount }: {
-  enabledSources: number; totalSources: number; articleCount: number; unreadCount: number;
+function getMarketStatusForBar(): { open: boolean; label: string } {
+  const now = new Date();
+  const kst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+  const day = kst.getDay();
+  const hour = kst.getHours();
+  const minute = kst.getMinutes();
+  const timeVal = hour * 60 + minute;
+  const isWeekday = day >= 1 && day <= 5;
+  const isOpen = isWeekday && timeVal >= 540 && timeVal < 930;
+  return { open: isOpen, label: isOpen ? "열림" : "마감" };
+}
+
+function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, lastUpdated, activeFilterCount }: {
+  enabledSources: number; totalSources: number; articleCount: number; unreadCount: number; lastUpdated: string | null; activeFilterCount: number;
 }) {
   const [clock, setClock] = useState("");
+  const [dateStr, setDateStr] = useState("");
+  const [marketStatus, setMarketStatus] = useState(getMarketStatusForBar);
+
   useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    const tick = () => {
+      const now = new Date();
+      setClock(now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      setDateStr(`${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}`);
+      setMarketStatus(getMarketStatusForBar());
+    };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
+
+  const ingestTime = lastUpdated
+    ? new Date(lastUpdated).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
+    : "--:--";
+
+  const sep = <span className="text-[8px] text-[var(--border-strong)] opacity-50 font-mono">&middot;</span>;
+
   return (
-    <div className="status-bar px-5 h-7 flex items-center gap-3 shrink-0 select-none">
-      <span className="text-[10px] tabular-nums text-[var(--muted)] font-medium">{clock}</span>
-      <span className="text-[8px] text-[var(--border-strong)]">|</span>
-      <span className="text-[10px] tabular-nums">{enabledSources}/{totalSources} 소스</span>
-      <span className="text-[8px] text-[var(--border-strong)]">|</span>
-      <span className="text-[10px] tabular-nums">{articleCount}건</span>
+    <div className="status-bar px-5 h-7 flex items-center gap-2 shrink-0 select-none font-mono">
+      <span className="text-[10px] tabular-nums text-[var(--muted)] font-medium">{dateStr}</span>
+      {sep}
+      <span className="text-[10px] tabular-nums text-[var(--foreground-secondary)] font-medium">{clock}</span>
+      {sep}
+      <span className={`text-[10px] font-bold ${marketStatus.open ? "text-[var(--success)]" : "text-[var(--muted)]"}`}>
+        {marketStatus.open ? "\u25CF" : "\u25CB"} {marketStatus.label}
+      </span>
+      {sep}
+      <span className="text-[10px] tabular-nums text-[var(--muted)]">{enabledSources}/{totalSources} 소스</span>
+      {sep}
+      <span className="text-[10px] tabular-nums text-[var(--muted)]">{articleCount}건</span>
       {unreadCount > 0 && (
         <>
-          <span className="text-[8px] text-[var(--border-strong)]">|</span>
+          {sep}
           <span className="text-[10px] tabular-nums font-semibold text-[var(--accent)]">{unreadCount} 미독</span>
         </>
       )}
+      {activeFilterCount > 0 && (
+        <>
+          {sep}
+          <span className="text-[10px] tabular-nums text-[var(--accent)]">{activeFilterCount} 필터</span>
+        </>
+      )}
+      {sep}
+      <span className="text-[9px] tabular-nums text-[var(--muted)] opacity-70">수집 {ingestTime}</span>
       <div className="flex-1" />
-      <span className="text-[9px] text-[var(--muted)] opacity-60 tracking-wide">j/k  s  /  ?</span>
+      <span className="text-[9px] text-[var(--muted)] opacity-40 tracking-wide">j/k  s  /  ?</span>
     </div>
   );
 }
@@ -410,7 +451,7 @@ function HomeInner() {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-hidden">
+      <div key={activeMainTab} className="tab-content-enter flex-1 overflow-hidden">
         {activeMainTab === "dashboard" && (
           <DashboardTab
             articles={articles}
@@ -483,6 +524,8 @@ function HomeInner() {
         totalSources={sources.length}
         articleCount={articles.length}
         unreadCount={articles.filter((a) => !a.isRead).length}
+        lastUpdated={lastUpdated}
+        activeFilterCount={[selectedSourceId, selectedTag, searchQuery, showSaved && "saved", readFilter !== "all" && "read", regionFilter !== "전체" && "region"].filter(Boolean).length}
       />
 
       {/* Global Overlays */}

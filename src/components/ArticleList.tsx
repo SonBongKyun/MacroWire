@@ -10,12 +10,20 @@ import { TAG_COLORS } from "@/lib/constants/colors";
 type ReadFilter = "all" | "unread" | "read";
 type ViewMode = "list" | "card";
 
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  article: Article | null;
+}
+
 interface ArticleListProps {
   articles: Article[];
   loading: boolean;
   selectedArticleId: string | null;
   onSelectArticle: (article: Article) => void;
   onToggleSave: (article: Article) => void;
+  onToggleRead?: (article: Article) => void;
   hasMore: boolean;
   onLoadMore: () => void;
   readFilter: ReadFilter;
@@ -58,6 +66,7 @@ export function ArticleList({
   selectedArticleId,
   onSelectArticle,
   onToggleSave,
+  onToggleRead,
   hasMore,
   onLoadMore,
   readFilter,
@@ -90,6 +99,52 @@ export function ArticleList({
     if (peekTimerRef.current) clearTimeout(peekTimerRef.current);
     setPeekArticle(null);
   }, []);
+
+  // Context menu state
+  const [ctxMenu, setCtxMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0, article: null });
+  const ctxMenuRef = useRef<HTMLDivElement>(null);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, article: Article) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCtxMenu({ visible: true, x: e.clientX, y: e.clientY, article });
+  }, []);
+
+  const closeContextMenu = useCallback(() => {
+    setCtxMenu((prev) => ({ ...prev, visible: false }));
+  }, []);
+
+  // Close context menu on click outside or Escape
+  useEffect(() => {
+    if (!ctxMenu.visible) return;
+    const handleClick = (e: MouseEvent) => {
+      if (ctxMenuRef.current && !ctxMenuRef.current.contains(e.target as Node)) {
+        closeContextMenu();
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeContextMenu();
+    };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [ctxMenu.visible, closeContextMenu]);
+
+  const ctxActions = useMemo(() => {
+    if (!ctxMenu.article) return [];
+    const a = ctxMenu.article;
+    return [
+      { label: "원문 열기", action: () => { window.open(a.url, "_blank"); closeContextMenu(); } },
+      { label: "URL 복사", action: () => { navigator.clipboard.writeText(a.url); closeContextMenu(); } },
+      { label: "제목 + URL 복사", action: () => { navigator.clipboard.writeText(`${a.title}\n${a.url}`); closeContextMenu(); } },
+      { type: "divider" as const },
+      { label: a.isSaved ? "저장 해제" : "저장", action: () => { onToggleSave(a); closeContextMenu(); } },
+      { label: a.isRead ? "읽지 않음" : "읽음 표시", action: () => { onToggleRead?.(a); closeContextMenu(); } },
+    ];
+  }, [ctxMenu.article, onToggleSave, onToggleRead, closeContextMenu]);
 
   // Apply read filter client-side
   const filteredArticles =
@@ -318,46 +373,65 @@ export function ArticleList({
             {filteredArticles.map((article) => {
               const isSelected = selectedArticleId === article.id;
               const isNew = newIds.has(article.id);
+              const firstTag = article.tags[0];
+              const tagColor = firstTag ? (TAG_COLORS[firstTag] || "#475569") : "#475569";
+              const sourceInitial = article.sourceName.charAt(0).toUpperCase();
               return (
                 <div
                   key={article.id}
                   onClick={() => onSelectArticle(article)}
+                  onContextMenu={(e) => handleContextMenu(e, article)}
                   className={`article-card ${isSelected ? "selected" : ""} ${article.isRead && !isSelected ? "opacity-60" : ""}`}
+                  style={{ padding: 0, overflow: "hidden" }}
                 >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    {isNew && <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shrink-0" />}
-                    <span className="text-[11px] text-[var(--accent)] font-semibold truncate">{article.sourceName}</span>
-                    <span className="text-[11px] text-[var(--border-strong)] tabular-nums ml-auto shrink-0">{timeAgo(article.publishedAt)}</span>
+                  {/* Thumbnail area */}
+                  <div className="card-thumbnail" style={{ borderTopColor: tagColor }}>
+                    <div className="card-thumbnail-initial" style={{ borderColor: `${tagColor}40`, color: tagColor }}>
+                      {sourceInitial}
+                    </div>
+                    {firstTag && (
+                      <span className="card-thumbnail-tag" style={{ color: tagColor, backgroundColor: `${tagColor}15` }}>
+                        {firstTag}
+                      </span>
+                    )}
                   </div>
-                  <p className={`text-[13px] leading-[1.45] line-clamp-2 mb-2 ${isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"}`}>
-                    {article.title}
-                  </p>
-                  {article.summary && (
-                    <p className="text-[11px] text-[var(--muted)] leading-[1.5] line-clamp-2 mb-2">
-                      {article.summary}
+                  {/* Card body */}
+                  <div style={{ padding: "10px 14px 12px" }}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      {isNew && <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse shrink-0" />}
+                      <span className="text-[11px] text-[var(--accent)] font-semibold truncate">{article.sourceName}</span>
+                      <span className="text-[11px] text-[var(--border-strong)] tabular-nums ml-auto shrink-0">{timeAgo(article.publishedAt)}</span>
+                    </div>
+                    <p className={`text-[13px] leading-[1.45] line-clamp-2 mb-2 ${isSelected ? "text-[var(--foreground-bright)] font-medium" : "text-[var(--foreground)]"}`}>
+                      {article.title}
                     </p>
-                  )}
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {article.tags.slice(0, 3).map((tag) => {
-                      const color = TAG_COLORS[tag] || "#475569";
-                      return (
-                        <button
-                          key={tag}
-                          className="tag-pill"
-                          style={{ color, backgroundColor: `${color}12`, borderColor: `${color}25` }}
-                          onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
-                        >
-                          {tag}
-                        </button>
-                      );
-                    })}
-                    <div className="flex-1" />
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onToggleSave(article); }}
-                      className={`text-xs transition-colors leading-none ${article.isSaved ? "text-[var(--accent)]" : "text-[var(--border-strong)] hover:text-[var(--accent)]"}`}
-                    >
-                      {article.isSaved ? "★" : "☆"}
-                    </button>
+                    {article.summary && (
+                      <p className="text-[11px] text-[var(--muted)] leading-[1.5] line-clamp-2 mb-2">
+                        {article.summary}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {article.tags.slice(0, 3).map((tag) => {
+                        const color = TAG_COLORS[tag] || "#475569";
+                        return (
+                          <button
+                            key={tag}
+                            className="tag-pill"
+                            style={{ color, backgroundColor: `${color}12`, borderColor: `${color}25` }}
+                            onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
+                          >
+                            {tag}
+                          </button>
+                        );
+                      })}
+                      <div className="flex-1" />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onToggleSave(article); }}
+                        className={`text-xs transition-colors leading-none ${article.isSaved ? "text-[var(--accent)]" : "text-[var(--border-strong)] hover:text-[var(--accent)]"}`}
+                      >
+                        {article.isSaved ? "★" : "☆"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -411,6 +485,7 @@ export function ArticleList({
                       <div
                         key={article.id}
                         onClick={() => onSelectArticle(article)}
+                        onContextMenu={(e) => handleContextMenu(e, article)}
                         className={`article-row pl-8 pr-4 py-[6px] cursor-pointer border-b border-[var(--border-subtle)] transition-all duration-150 ${
                           isSelected
                             ? "article-row-selected"
@@ -461,17 +536,20 @@ export function ArticleList({
           const { article } = entry;
           const isSelected = selectedArticleId === article.id;
           const isNew = newIds.has(article.id);
+          const firstTagColor = article.tags[0] ? (TAG_COLORS[article.tags[0]] || "#475569") : undefined;
           return (
             <div
               key={article.id}
               onClick={() => onSelectArticle(article)}
+              onContextMenu={(e) => handleContextMenu(e, article)}
               onMouseEnter={(e) => handleArticleMouseEnter(e, article)}
               onMouseLeave={handleArticleMouseLeave}
               className={`article-row px-4 py-[6px] cursor-pointer border-b border-[var(--border-subtle)] transition-all duration-150 ${
                 isSelected
                   ? "article-row-selected"
-                  : `border-l-[3px] ${!article.isRead ? "border-l-[var(--accent-light)]" : "border-l-transparent"} hover:bg-[var(--surface-hover)] hover-lift`
+                  : `hover:bg-[var(--surface-hover)] hover-lift`
               } ${article.isRead && !isSelected ? "opacity-55" : ""}`}
+              style={!isSelected && firstTagColor ? { borderLeft: `2px solid ${firstTagColor}` } : !isSelected ? { borderLeft: '2px solid transparent' } : undefined}
             >
               <div className="flex items-center gap-2">
                 {isNew && <span className="new-dot" />}
@@ -553,6 +631,29 @@ export function ArticleList({
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
           </svg>
         </button>
+      )}
+
+      {/* Context Menu */}
+      {ctxMenu.visible && ctxMenu.article && (
+        <div
+          ref={ctxMenuRef}
+          className="ctx-menu"
+          style={{ left: ctxMenu.x, top: ctxMenu.y }}
+        >
+          {ctxActions.map((item, i) =>
+            "type" in item && item.type === "divider" ? (
+              <div key={i} className="ctx-menu-divider" />
+            ) : (
+              <button
+                key={i}
+                className="ctx-menu-item"
+                onClick={"action" in item ? item.action : undefined}
+              >
+                {"label" in item ? item.label : ""}
+              </button>
+            )
+          )}
+        </div>
       )}
     </div>
   );

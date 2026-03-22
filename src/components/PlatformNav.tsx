@@ -4,6 +4,14 @@ import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 
 export type MainTab = "dashboard" | "news" | "markets" | "analytics";
 
+interface NavMarketItem {
+  symbol: string;
+  label: string;
+  price: number;
+  change: number;
+  changePct: number;
+}
+
 interface PlatformNavProps {
   activeTab: MainTab;
   onTabChange: (tab: MainTab) => void;
@@ -58,6 +66,36 @@ export function PlatformNav({
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const autocompleteRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const [navMarket, setNavMarket] = useState<NavMarketItem[]>([]);
+  const [isWide, setIsWide] = useState(false);
+
+  // Check viewport width for market strip visibility
+  useEffect(() => {
+    const check = () => setIsWide(window.innerWidth > 1200);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Fetch market data for nav strip
+  useEffect(() => {
+    const fetchNavMarket = async () => {
+      try {
+        const res = await fetch("/api/market");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          // Pick key items: KOSPI and USD/KRW
+          const keySymbols = ["KOSPI", "USD/KRW", "KOSDAQ", "WTI"];
+          const filtered = data.filter((d: NavMarketItem) => keySymbols.includes(d.label));
+          setNavMarket(filtered.length > 0 ? filtered.slice(0, 3) : data.slice(0, 3));
+        }
+      } catch { /* silent */ }
+    };
+    fetchNavMarket();
+    const interval = setInterval(fetchNavMarket, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Load search history
   useEffect(() => {
@@ -192,6 +230,35 @@ export function PlatformNav({
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* Compact market data strip — wide screens only */}
+      {isWide && navMarket.length > 0 && (
+        <>
+          <div className="flex items-center gap-2.5 shrink-0 mr-2">
+            {navMarket.map((item, idx) => {
+              const isUp = item.change >= 0;
+              const color = isUp ? "#22c55e" : "#ef4444";
+              const arrow = isUp ? "\u25B2" : "\u25BC";
+              const priceStr = item.label === "WTI"
+                ? `$${item.price.toFixed(2)}`
+                : item.label === "USD/KRW"
+                  ? item.price.toFixed(0)
+                  : item.price.toLocaleString("ko-KR", { maximumFractionDigits: 0 });
+              return (
+                <span key={item.symbol} className="flex items-center gap-1 shrink-0">
+                  {idx > 0 && <span className="text-[var(--border)] text-[7px] mr-0.5">&middot;</span>}
+                  <span className="text-[9px] font-bold text-[var(--muted)] tracking-wider">{item.label}</span>
+                  <span className="text-[10px] font-bold tabular-nums text-[var(--foreground-bright)] font-mono">{priceStr}</span>
+                  <span className="text-[9px] font-bold tabular-nums font-mono" style={{ color }}>
+                    {arrow}{Math.abs(item.changePct).toFixed(1)}%
+                  </span>
+                </span>
+              );
+            })}
+          </div>
+          <div className="topbar-divider" />
+        </>
+      )}
 
       {/* Right side: Search */}
       <div ref={searchContainerRef} className="relative shrink-0" style={{ width: 260, maxWidth: 260 }}>
