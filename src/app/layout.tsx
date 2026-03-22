@@ -1,16 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Space_Grotesk, Outfit, Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({
-  variable: "--font-geist",
-  subsets: ["latin"],
-});
+const spaceGrotesk = Space_Grotesk({ variable: "--font-heading", subsets: ["latin"] });
+const outfit = Outfit({ variable: "--font-body", subsets: ["latin"] });
+const spaceMono = Space_Mono({ variable: "--font-mono", weight: "400", subsets: ["latin"] });
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#2563eb",
+  themeColor: "#0D0D0F",
   viewportFit: "cover",
 };
 
@@ -36,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${geist.variable} antialiased`}>
+      <body className={`${spaceGrotesk.variable} ${outfit.variable} ${spaceMono.variable} antialiased`}>
         {children}
         <script
           dangerouslySetInnerHTML={{

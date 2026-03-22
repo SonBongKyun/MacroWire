@@ -83,11 +83,11 @@ export function PlatformNav({
           <span style={{ position: "relative", zIndex: 1 }}>RF</span>
         </div>
         <div className="flex flex-col">
-          <span className="text-[13px] font-extrabold leading-none tracking-[-0.03em] text-[var(--foreground-bright)]">
+          <span className="font-heading text-[13px] font-extrabold leading-none tracking-[-0.03em] text-[var(--foreground-bright)]">
             Ryzm Finance
           </span>
           <span className="text-[8px] font-medium leading-none mt-[3px] text-[var(--muted)] tracking-[0.04em] uppercase">
-            Financial Intelligence
+            macro &middot; charts &middot; reality checks
           </span>
         </div>
       </div>
