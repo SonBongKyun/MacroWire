@@ -1237,39 +1237,248 @@ body {
 }
 
 /* ══════════════════════════════════════
+   PLATFORM NAVIGATION
+   ══════════════════════════════════════ */
+
+.platform-nav {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 16px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-flat) 100%);
+  backdrop-filter: blur(16px) saturate(1.3);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 20;
+  select-none: true;
+}
+.platform-nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--accent-gradient);
+  opacity: 0.3;
+}
+
+.platform-nav-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s ease;
+  border: none;
+  background: none;
+  white-space: nowrap;
+}
+.platform-nav-tab:hover {
+  color: var(--foreground);
+}
+.platform-nav-tab.active {
+  color: var(--accent);
+  font-weight: 700;
+}
+.platform-nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 8px; right: 8px;
+  height: 2px;
+  background: var(--accent-gradient);
+  border-radius: 2px 2px 0 0;
+}
+
+.platform-nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 99px;
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--gold);
+  color: white;
+  line-height: 1;
+}
+
+/* ══════════════════════════════════════
+   DASHBOARD GRID
+   ══════════════════════════════════════ */
+
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.widget-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+.widget-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+.widget-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-flat);
+}
+.widget-card-header h3 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--foreground-bright);
+  flex: 1;
+}
+.widget-card-body {
+  padding: 12px 16px;
+}
+.widget-span-2 {
+  grid-column: span 2;
+}
+.widget-span-3 {
+  grid-column: span 3;
+}
+
+/* ══════════════════════════════════════
+   NEWS LAYOUT
+   ══════════════════════════════════════ */
+
+.news-layout {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.news-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  shrink: 0;
+}
+
+.news-main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+}
+
+.news-sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface-flat);
+}
+
+/* ══════════════════════════════════════
+   MARKETS LAYOUT
+   ══════════════════════════════════════ */
+
+.markets-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.market-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+.market-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.portfolio-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.portfolio-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-flat);
+}
+.portfolio-table td {
+  padding: 10px 12px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--foreground);
+}
+.portfolio-table tr:hover {
+  background: var(--surface-hover);
+}
+
+/* ══════════════════════════════════════
    MOBILE
    ══════════════════════════════════════ */
 
+@media (max-width: 1200px) {
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+  .widget-span-2 { grid-column: span 2; }
+  .market-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 1024px) {
   .card-grid { grid-template-columns: 1fr; }
+  .news-layout { grid-template-columns: 1fr; }
+  .news-sidebar { border-top: 1px solid var(--border); border-left: none; }
 }
 
 @media (max-width: 768px) {
-  .content-layer > .flex.flex-1 {
-    flex-direction: column !important;
-  }
-  .content-layer .sidebar-wrapper,
-  .content-layer > .flex.flex-1 > div:first-child {
-    display: none !important;
-  }
-  .content-layer main {
-    flex-direction: column !important;
-  }
-  .content-layer main > div[style] {
-    width: 100% !important;
-  }
-  .content-layer aside {
-    width: 100% !important;
-    border-left: none !important;
-    border-top: 1px solid var(--border);
-  }
-  header.glass-header {
-    padding-left: 12px;
-    padding-right: 12px;
-    gap: 6px;
-  }
-  header .topbar-divider { display: none; }
-  header .max-w-md { max-width: 160px; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .widget-span-2 { grid-column: span 1; }
+  .widget-span-3 { grid-column: span 1; }
+  .market-grid { grid-template-columns: 1fr; }
+  .platform-nav { padding: 0 8px; gap: 2px; }
+  .platform-nav-tab { padding: 0 8px; font-size: 11px; }
+  .dashboard-container { padding: 12px; }
+  .markets-container { padding: 12px; }
   .card-grid {
     grid-template-columns: 1fr;
     padding: 6px;
@@ -1283,11 +1492,8 @@ body {
 }
 
 @media (max-width: 480px) {
-  header.glass-header {
-    height: 44px;
-    padding-left: 8px;
-    padding-right: 8px;
-  }
+  .platform-nav { height: 44px; }
+  .platform-nav-tab { font-size: 10px; padding: 0 6px; }
   .article-row {
     padding-left: 10px;
     padding-right: 10px;

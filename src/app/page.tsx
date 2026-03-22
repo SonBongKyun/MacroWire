@@ -2,38 +2,29 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { Source, Article, ArticlesResponse, IngestResult } from "@/types";
-import { SourcePanel } from "@/components/SourcePanel";
-import { ArticleList } from "@/components/ArticleList";
-import { ArticleDetail } from "@/components/ArticleDetail";
-import { TopBar } from "@/components/TopBar";
-import { StatsBar } from "@/components/StatsBar";
 import { KeyboardHelp } from "@/components/KeyboardHelp";
-import { TodayPulse } from "@/components/TodayPulse";
 import { MarketTicker } from "@/components/MarketTicker";
 import { CommandPalette } from "@/components/CommandPalette";
-import { FilterBar } from "@/components/FilterBar";
 import { useCollections } from "@/hooks/useCollections";
-import { SpikeAlert } from "@/components/SpikeAlert";
-import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { AddSourceModal } from "@/components/AddSourceModal";
-import { WatchlistPanel } from "@/components/WatchlistPanel";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePortfolio } from "@/hooks/usePortfolio";
 import { useThemeCustom } from "@/hooks/useThemeCustom";
 import { useMultiView } from "@/hooks/useMultiView";
 import { NotificationPanel } from "@/components/NotificationPanel";
-import { PortfolioPanel } from "@/components/PortfolioPanel";
-import { NewsTimeline } from "@/components/NewsTimeline";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { ExportPanel } from "@/components/ExportPanel";
-import { MultiViewTabs } from "@/components/MultiViewTabs";
+import { PlatformNav, type MainTab } from "@/components/PlatformNav";
+import DashboardTab from "@/components/DashboardTab";
+import { NewsTab } from "@/components/NewsTab";
+import { MarketsTab } from "@/components/MarketsTab";
+import { AnalyticsTab } from "@/components/AnalyticsTab";
 
-const POLL_INTERVAL = 5 * 60; // 300 seconds
+const POLL_INTERVAL = 5 * 60;
 
-/** Isolated StatusBar with live clock — prevents full page re-render every second */
-function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, selectedSourceName }: {
-  enabledSources: number; totalSources: number; articleCount: number; unreadCount: number; selectedSourceName?: string;
+function StatusBar({ enabledSources, totalSources, articleCount, unreadCount }: {
+  enabledSources: number; totalSources: number; articleCount: number; unreadCount: number;
 }) {
   const [clock, setClock] = useState("");
   useEffect(() => {
@@ -42,45 +33,27 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, se
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-
   return (
     <div className="status-bar px-5 h-7 flex items-center gap-3 shrink-0 select-none">
-      <span className="text-[10px] tabular-nums text-[var(--muted)] font-medium">
-        {clock}
-      </span>
+      <span className="text-[10px] tabular-nums text-[var(--muted)] font-medium">{clock}</span>
       <span className="text-[8px] text-[var(--border-strong)]">|</span>
-      <span className="text-[10px] tabular-nums">
-        {enabledSources}/{totalSources} 소스
-      </span>
+      <span className="text-[10px] tabular-nums">{enabledSources}/{totalSources} 소스</span>
       <span className="text-[8px] text-[var(--border-strong)]">|</span>
-      <span className="text-[10px] tabular-nums">
-        {articleCount}건
-      </span>
+      <span className="text-[10px] tabular-nums">{articleCount}건</span>
       {unreadCount > 0 && (
         <>
           <span className="text-[8px] text-[var(--border-strong)]">|</span>
-          <span className="text-[10px] tabular-nums font-semibold text-[var(--accent)]">
-            {unreadCount} 미독
-          </span>
-        </>
-      )}
-      {selectedSourceName && (
-        <>
-          <span className="text-[8px] text-[var(--border-strong)]">|</span>
-          <span className="text-[10px] truncate max-w-[300px]">
-            {selectedSourceName}
-          </span>
+          <span className="text-[10px] tabular-nums font-semibold text-[var(--accent)]">{unreadCount} 미독</span>
         </>
       )}
       <div className="flex-1" />
-      <span className="text-[9px] text-[var(--muted)] opacity-60 tracking-wide">
-        j/k  s  /  ?
-      </span>
+      <span className="text-[9px] text-[var(--muted)] opacity-60 tracking-wide">j/k  s  /  ?</span>
     </div>
   );
 }
 
 export default function Home() {
+  // Core data
   const [sources, setSources] = useState<Source[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
@@ -90,6 +63,14 @@ export default function Home() {
   const [ingesting, setIngesting] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
+  // Platform tab
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("macro-wire-tab") as MainTab) || "dashboard";
+    }
+    return "dashboard";
+  });
+
   // Filters
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -97,157 +78,62 @@ export default function Home() {
   const [range, setRange] = useState<"24h" | "7d" | "30d">("24h");
   const [showSaved, setShowSaved] = useState(false);
   const [readFilter, setReadFilter] = useState<"all" | "unread" | "read">("all");
-
-  // Dark mode
-  const [darkMode, setDarkMode] = useState(false);
-
-  // Region filter (오늘의 구분 보기)
   const [regionFilter, setRegionFilter] = useState<string>("전체");
-
-  // Countdown
+  const [darkMode, setDarkMode] = useState(false);
   const [countdown, setCountdown] = useState(POLL_INTERVAL);
-
-  // Keyboard help overlay
   const [showHelp, setShowHelp] = useState(false);
-
-  // New articles badge
   const [newArticleCount, setNewArticleCount] = useState(0);
   const [newArticleIds, setNewArticleIds] = useState<string[]>([]);
   const prevArticleIds = useRef<Set<string>>(new Set());
 
-  // Collections
+  // Hooks
   const { store: collectionStore, assignArticle, createCollection, getCollection } = useCollections();
-  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
-
-  // Watchlist (#14)
   const watchlist = useWatchlist();
-
-  // Analytics & new feature states
-  const [analyticsOpen, setAnalyticsOpen] = useState(false);
-  const [addSourceOpen, setAddSourceOpen] = useState(false);
-  const [watchlistOpen, setWatchlistOpen] = useState(false);
-
-  // New feature hooks
   const notifications = useNotifications();
   const portfolio = usePortfolio();
   const themeCustom = useThemeCustom();
   const multiView = useMultiView();
 
-  // New panels state
+  // UI state
+  const [addSourceOpen, setAddSourceOpen] = useState(false);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
-  const [portfolioPanelOpen, setPortfolioPanelOpen] = useState(false);
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
   const [exportPanelOpen, setExportPanelOpen] = useState(false);
-  const [timelineMode, setTimelineMode] = useState(false);
-
-  // Resizable panels (#11) - stored widths
-  const [sidebarWidth, setSidebarWidth] = useState(220);
-  const [listWidth, setListWidth] = useState(380);
-  const resizingRef = useRef<"sidebar" | "list" | null>(null);
-  const startXRef = useRef(0);
-  const startWidthRef = useRef(0);
-
-  // v6 UI states
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
-  const [focusMode, setFocusMode] = useState(false);
+  const [timelineMode, setTimelineMode] = useState(false);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
-
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Initialize dark mode from localStorage
+  // Persist active tab
+  useEffect(() => {
+    localStorage.setItem("macro-wire-tab", activeMainTab);
+  }, [activeMainTab]);
+
+  // Init dark mode
   useEffect(() => {
     const stored = localStorage.getItem("macro-wire-dark");
     if (stored === "true") {
       setDarkMode(true);
       document.documentElement.classList.add("dark");
     }
-    // Position memory (#12) - restore panel widths
-    const sw = localStorage.getItem("macro-wire-sidebar-w");
-    const lw = localStorage.getItem("macro-wire-list-w");
-    if (sw) setSidebarWidth(Math.max(160, Math.min(400, Number(sw))));
-    if (lw) setListWidth(Math.max(280, Math.min(600, Number(lw))));
   }, []);
 
-  // Toggle dark mode with circle reveal animation
   const toggleDarkMode = useCallback(() => {
-    const btn = themeToggleRef.current;
-    const rect = btn?.getBoundingClientRect();
-    const x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
-    const y = rect ? rect.top + rect.height / 2 : 0;
-
     setDarkMode((prev) => {
       const next = !prev;
-
-      // Create circle reveal overlay
-      const overlay = document.createElement("div");
-      overlay.className = "theme-transition-overlay theme-reveal";
-      overlay.style.cssText = `--tx:${x}px;--ty:${y}px;background:${next ? "#0c0f1a" : "#f8f9fb"};`;
-      document.body.appendChild(overlay);
-
-      // Apply theme after small delay for visual effect
-      requestAnimationFrame(() => {
-        if (next) {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-      });
-
-      // Remove overlay after animation
-      setTimeout(() => overlay.remove(), 550);
-
+      if (next) document.documentElement.classList.add("dark");
+      else document.documentElement.classList.remove("dark");
       localStorage.setItem("macro-wire-dark", String(next));
       return next;
     });
   }, []);
 
-  // Resizable panel handlers (#11)
-  const startResize = useCallback((which: "sidebar" | "list", e: React.MouseEvent) => {
-    e.preventDefault();
-    resizingRef.current = which;
-    startXRef.current = e.clientX;
-    startWidthRef.current = which === "sidebar" ? sidebarWidth : listWidth;
-
-    const onMove = (ev: MouseEvent) => {
-      const delta = ev.clientX - startXRef.current;
-      if (resizingRef.current === "sidebar") {
-        const newW = Math.max(160, Math.min(400, startWidthRef.current + delta));
-        setSidebarWidth(newW);
-      } else {
-        const newW = Math.max(280, Math.min(600, startWidthRef.current + delta));
-        setListWidth(newW);
-      }
-    };
-    const onUp = () => {
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-      // persist
-      if (resizingRef.current === "sidebar") {
-        localStorage.setItem("macro-wire-sidebar-w", String(sidebarWidth));
-      } else {
-        localStorage.setItem("macro-wire-list-w", String(listWidth));
-      }
-      resizingRef.current = null;
-    };
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
-  }, [sidebarWidth, listWidth]);
-
-  // Countdown timer (tick every second)
+  // Countdown
   useEffect(() => {
-    countdownRef.current = setInterval(() => {
-      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => {
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
+    countdownRef.current = setInterval(() => setCountdown((p) => (p > 0 ? p - 1 : 0)), 1000);
+    return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
   }, []);
 
   // Fetch sources
@@ -256,93 +142,61 @@ export default function Home() {
       const res = await fetch("/api/sources");
       const data = await res.json();
       setSources(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Failed to fetch sources:", err);
-    }
+    } catch (err) { console.error("Failed to fetch sources:", err); }
   }, []);
 
-  // Build query string
-  const buildQuery = useCallback(
-    (cursor?: string | null) => {
-      const params = new URLSearchParams();
-      params.set("range", range);
-      params.set("limit", "50");
-      if (selectedSourceId) params.set("sourceId", selectedSourceId);
-      if (selectedTag) params.set("tag", selectedTag);
-      if (searchQuery) params.set("q", searchQuery);
-      if (showSaved) params.set("saved", "true");
-      if (cursor) params.set("cursor", cursor);
-      return params.toString();
-    },
-    [range, selectedSourceId, selectedTag, searchQuery, showSaved]
-  );
+  // Build query
+  const buildQuery = useCallback((cursor?: string | null) => {
+    const params = new URLSearchParams();
+    params.set("range", range);
+    params.set("limit", "50");
+    if (selectedSourceId) params.set("sourceId", selectedSourceId);
+    if (selectedTag) params.set("tag", selectedTag);
+    if (searchQuery) params.set("q", searchQuery);
+    if (showSaved) params.set("saved", "true");
+    if (cursor) params.set("cursor", cursor);
+    return params.toString();
+  }, [range, selectedSourceId, selectedTag, searchQuery, showSaved]);
 
   // Fetch articles
-  const fetchArticles = useCallback(
-    async (append = false) => {
-      setLoading(true);
-      try {
-        const qs = buildQuery(append ? nextCursor : null);
-        const res = await fetch(`/api/articles?${qs}`);
-        const json: ArticlesResponse = await res.json();
-        const items = Array.isArray(json?.data) ? json.data : [];
-
-        if (append) {
-          setArticles((prev) => [...prev, ...items]);
-        } else {
-          // Track new articles for badge
-          if (prevArticleIds.current.size > 0) {
-            const newOnes = items.filter(
-              (a: Article) => !prevArticleIds.current.has(a.id)
-            );
-            if (newOnes.length > 0) {
-              setNewArticleCount((prev) => prev + newOnes.length);
-              setNewArticleIds((prev) => [...prev, ...newOnes.map((a: Article) => a.id)]);
-              // Desktop notification
-              if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-                // Check notification rules for matching articles
-                const matched = newOnes.filter((a: Article) => notifications.checkArticle(a));
-                if (matched.length > 0) {
-                  notifications.sendNotification(
-                    "Macro Wire 알림",
-                    matched.length === 1
-                      ? matched[0].title
-                      : `관심 기사 ${matched.length}건: ${matched[0].title}`
-                  );
-                } else {
-                  new Notification("Macro Wire", {
-                    body: `새 기사 ${newOnes.length}건이 도착했습니다`,
-                    icon: "/icon.svg",
-                    tag: "macro-wire-new",
-                  });
-                }
+  const fetchArticles = useCallback(async (append = false) => {
+    setLoading(true);
+    try {
+      const qs = buildQuery(append ? nextCursor : null);
+      const res = await fetch(`/api/articles?${qs}`);
+      const json: ArticlesResponse = await res.json();
+      const items = Array.isArray(json?.data) ? json.data : [];
+      if (append) {
+        setArticles((prev) => [...prev, ...items]);
+      } else {
+        if (prevArticleIds.current.size > 0) {
+          const newOnes = items.filter((a: Article) => !prevArticleIds.current.has(a.id));
+          if (newOnes.length > 0) {
+            setNewArticleCount((prev) => prev + newOnes.length);
+            setNewArticleIds((prev) => [...prev, ...newOnes.map((a: Article) => a.id)]);
+            if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+              const matched = newOnes.filter((a: Article) => notifications.checkArticle(a));
+              if (matched.length > 0) {
+                notifications.sendNotification("Macro Wire 알림", matched.length === 1 ? matched[0].title : `관심 기사 ${matched.length}건: ${matched[0].title}`);
+              } else {
+                new Notification("Macro Wire", { body: `새 기사 ${newOnes.length}건이 도착했습니다`, icon: "/icon.svg", tag: "macro-wire-new" });
               }
             }
           }
-          // Update known IDs
-          const allIds = new Set(items.map((a: Article) => a.id));
-          prevArticleIds.current = allIds;
-
-          setArticles(items);
-          setSelectedArticle(null);
         }
-        setNextCursor(json?.nextCursor ?? null);
-        setHasMore(json?.hasMore ?? false);
-      } catch (err) {
-        console.error("Failed to fetch articles:", err);
-      } finally {
-        setLoading(false);
+        prevArticleIds.current = new Set(items.map((a: Article) => a.id));
+        setArticles(items);
+        setSelectedArticle(null);
       }
-    },
-    [buildQuery, nextCursor]
-  );
+      setNextCursor(json?.nextCursor ?? null);
+      setHasMore(json?.hasMore ?? false);
+    } catch (err) { console.error("Failed to fetch articles:", err); }
+    finally { setLoading(false); }
+  }, [buildQuery, nextCursor]);
 
   // Ingest
   const runIngest = useCallback(async () => {
-    // Request notification permission on first manual ingest
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") Notification.requestPermission();
     setIngesting(true);
     try {
       const res = await fetch("/api/ingest", { method: "POST" });
@@ -350,160 +204,58 @@ export default function Home() {
       setLastUpdated(result.lastUpdated);
       await fetchArticles();
       await fetchSources();
-      setCountdown(POLL_INTERVAL); // Reset countdown
-    } catch (err) {
-      console.error("Ingest failed:", err);
-    } finally {
-      setIngesting(false);
-    }
+      setCountdown(POLL_INTERVAL);
+    } catch (err) { console.error("Ingest failed:", err); }
+    finally { setIngesting(false); }
   }, [fetchArticles, fetchSources]);
 
-  // Add source handler (#16)
   const handleAddSource = useCallback(async (data: { name: string; feedUrl: string; category: string }) => {
     try {
-      const res = await fetch("/api/sources/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (res.ok) {
-        await fetchSources();
-        setAddSourceOpen(false);
-      }
-    } catch (err) {
-      console.error("Add source failed:", err);
-    }
+      const res = await fetch("/api/sources/create", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (res.ok) { await fetchSources(); setAddSourceOpen(false); }
+    } catch (err) { console.error("Add source failed:", err); }
   }, [fetchSources]);
 
-  // Delete source handler (#16)
-  const handleDeleteSource = useCallback(async (source: Source) => {
-    if (!confirm(`"${source.name}" 소스를 삭제하시겠습니까? 관련 기사도 모두 삭제됩니다.`)) return;
+  const toggleRead = useCallback(async (article: Article) => {
     try {
-      const res = await fetch(`/api/sources/${source.id}/delete`, { method: "DELETE" });
-      if (res.ok) {
-        await fetchSources();
-        if (selectedSourceId === source.id) setSelectedSourceId(null);
-        await fetchArticles();
-      }
-    } catch (err) {
-      console.error("Delete source failed:", err);
-    }
-  }, [fetchSources, fetchArticles, selectedSourceId]);
+      const res = await fetch(`/api/articles/${article.id}/read`, { method: "POST" });
+      const json = await res.json();
+      setArticles((prev) => prev.map((a) => (a.id === article.id ? { ...a, isRead: json.isRead } : a)));
+      if (selectedArticle?.id === article.id) setSelectedArticle((prev) => prev ? { ...prev, isRead: json.isRead } : null);
+    } catch (err) { console.error("Toggle read failed:", err); }
+  }, [selectedArticle]);
 
-  // Toggle read
-  const toggleRead = useCallback(
-    async (article: Article) => {
-      try {
-        const res = await fetch(`/api/articles/${article.id}/read`, {
-          method: "POST",
-        });
-        const json = await res.json();
-        setArticles((prev) =>
-          prev.map((a) => (a.id === article.id ? { ...a, isRead: json.isRead } : a))
-        );
-        if (selectedArticle?.id === article.id) {
-          setSelectedArticle((prev) =>
-            prev ? { ...prev, isRead: json.isRead } : null
-          );
-        }
-      } catch (err) {
-        console.error("Toggle read failed:", err);
-      }
-    },
-    [selectedArticle]
-  );
-
-  // Toggle save
-  const toggleSave = useCallback(
-    async (article: Article) => {
-      try {
-        const res = await fetch(`/api/articles/${article.id}/save`, {
-          method: "POST",
-        });
-        const json = await res.json();
-        setArticles((prev) =>
-          prev.map((a) =>
-            a.id === article.id ? { ...a, isSaved: json.isSaved } : a
-          )
-        );
-        if (selectedArticle?.id === article.id) {
-          setSelectedArticle((prev) =>
-            prev ? { ...prev, isSaved: json.isSaved } : null
-          );
-        }
-      } catch (err) {
-        console.error("Toggle save failed:", err);
-      }
-    },
-    [selectedArticle]
-  );
-
-  // Toggle source enabled
-  const toggleSource = useCallback(async (source: Source) => {
+  const toggleSave = useCallback(async (article: Article) => {
     try {
-      const res = await fetch(`/api/sources/${source.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: !source.enabled }),
-      });
-      const updated = await res.json();
-      setSources((prev) =>
-        prev.map((s) => (s.id === updated.id ? { ...s, enabled: updated.enabled } : s))
-      );
-    } catch (err) {
-      console.error("Toggle source failed:", err);
-    }
-  }, []);
+      const res = await fetch(`/api/articles/${article.id}/save`, { method: "POST" });
+      const json = await res.json();
+      setArticles((prev) => prev.map((a) => (a.id === article.id ? { ...a, isSaved: json.isSaved } : a)));
+      if (selectedArticle?.id === article.id) setSelectedArticle((prev) => prev ? { ...prev, isSaved: json.isSaved } : null);
+    } catch (err) { console.error("Toggle save failed:", err); }
+  }, [selectedArticle]);
 
-  // Select article and mark as read
-  const selectArticle = useCallback(
-    (article: Article) => {
-      setSelectedArticle(article);
-      setNewArticleCount(0); // Clear badge on interaction
-      setNewArticleIds((prev) => prev.filter((id) => id !== article.id));
-      if (!article.isRead) {
-        toggleRead(article);
-      }
-    },
-    [toggleRead]
-  );
+  const selectArticle = useCallback((article: Article) => {
+    setSelectedArticle(article);
+    setNewArticleCount(0);
+    setNewArticleIds((prev) => prev.filter((id) => id !== article.id));
+    if (!article.isRead) toggleRead(article);
+    if (activeMainTab !== "news") setActiveMainTab("news");
+  }, [toggleRead, activeMainTab]);
 
-  // Batch mark all visible as read
   const markAllRead = useCallback(async () => {
     const unreadIds = articles.filter((a) => !a.isRead).map((a) => a.id);
     if (unreadIds.length === 0) return;
     try {
-      await fetch("/api/articles/batch-read", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ articleIds: unreadIds }),
-      });
+      await fetch("/api/articles/batch-read", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ articleIds: unreadIds }) });
       setArticles((prev) => prev.map((a) => ({ ...a, isRead: true })));
-      if (selectedArticle) {
-        setSelectedArticle((prev) => (prev ? { ...prev, isRead: true } : null));
-      }
-    } catch (err) {
-      console.error("Batch read failed:", err);
-    }
+      if (selectedArticle) setSelectedArticle((prev) => (prev ? { ...prev, isRead: true } : null));
+    } catch (err) { console.error("Batch read failed:", err); }
   }, [articles, selectedArticle]);
 
-  // Export saved articles
   const exportSaved = useCallback(() => {
     const saved = articles.filter((a) => a.isSaved);
     if (saved.length === 0) return;
-
-    const md = saved
-      .map(
-        (a, i) =>
-          `### ${i + 1}. ${a.title}\n` +
-          `- **출처**: ${a.sourceName}\n` +
-          `- **시간**: ${new Date(a.publishedAt).toLocaleString("ko-KR")}\n` +
-          `- **태그**: ${a.tags.join(", ") || "없음"}\n` +
-          `- **URL**: ${a.url}\n` +
-          (a.summary ? `- **요약**: ${a.summary}\n` : "")
-      )
-      .join("\n---\n\n");
-
+    const md = saved.map((a, i) => `### ${i + 1}. ${a.title}\n- **출처**: ${a.sourceName}\n- **시간**: ${new Date(a.publishedAt).toLocaleString("ko-KR")}\n- **태그**: ${a.tags.join(", ") || "없음"}\n- **URL**: ${a.url}\n` + (a.summary ? `- **요약**: ${a.summary}\n` : "")).join("\n---\n\n");
     const header = `# Macro Wire — 저장된 기사\n\n> 내보내기: ${new Date().toLocaleString("ko-KR")}\n> 총 ${saved.length}건\n\n---\n\n`;
     const blob = new Blob([header + md], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -515,35 +267,27 @@ export default function Home() {
   }, [articles]);
 
   // Initial load
-  useEffect(() => {
-    fetchSources();
-  }, [fetchSources]);
+  useEffect(() => { fetchSources(); }, [fetchSources]);
 
-  // Refetch articles when filters change
+  // Refetch on filter change
   useEffect(() => {
     fetchArticles();
-    setNewArticleCount(0); // Clear badge on filter change
+    setNewArticleCount(0);
     setNewArticleIds([]);
   }, [range, selectedSourceId, selectedTag, searchQuery, showSaved]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-poll every 5 minutes
+  // Auto-poll
   useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setCountdown(POLL_INTERVAL);
-      runIngest();
-    }, POLL_INTERVAL * 1000);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    intervalRef.current = setInterval(() => { setCountdown(POLL_INTERVAL); runIngest(); }, POLL_INTERVAL * 1000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [runIngest]);
 
-  // Tag click handler (from ArticleList/ArticleDetail)
   const handleTagClick = useCallback((tag: string) => {
     setSelectedTag((prev) => (prev === tag ? null : tag));
+    setActiveMainTab("news");
   }, []);
 
-  // Command palette action handler
+  // Command palette
   const handlePaletteAction = useCallback((action: string) => {
     switch (action) {
       case "ingest": runIngest(); break;
@@ -555,519 +299,197 @@ export default function Home() {
       case "range7d": setRange("7d"); break;
       case "range30d": setRange("30d"); break;
       case "help": setShowHelp(true); break;
-      case "focusMode": setFocusMode((v) => !v); break;
-      case "analytics": setAnalyticsOpen(true); break;
-      case "watchlist": setWatchlistOpen((v) => !v); break;
+      case "analytics": setActiveMainTab("analytics"); break;
+      case "watchlist": setActiveMainTab("markets"); break;
       case "addSource": setAddSourceOpen(true); break;
       case "notifications": setNotificationPanelOpen((v) => !v); break;
-      case "portfolio": setPortfolioPanelOpen((v) => !v); break;
-      case "timeline": setTimelineMode((v) => !v); break;
+      case "portfolio": setActiveMainTab("markets"); break;
       case "theme": setThemeSelectorOpen((v) => !v); break;
       case "exportPanel": setExportPanelOpen((v) => !v); break;
     }
   }, [runIngest, markAllRead, exportSaved, toggleDarkMode]);
 
-  const allTags = [
-    "금리", "물가", "연준", "환율", "미국", "중국", "일본", "유럽",
-    "수출입", "경기", "부동산", "가계부채", "재정", "에너지", "반도체", "AI", "지정학",
-  ];
+  const allTags = ["금리", "물가", "연준", "환율", "미국", "중국", "일본", "유럽", "수출입", "경기", "부동산", "가계부채", "재정", "에너지", "반도체", "AI", "지정학"];
 
-  const REGION_TAGS: Record<string, { tags: string[]; icon: React.ReactNode; color: string }> = {
-    "전체": { tags: [], icon: <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>, color: "var(--accent)" },
-    "한국": { tags: ["경기", "부동산", "가계부채", "재정", "수출입"], icon: <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 000 20M2 12h20" /></svg>, color: "#e35169" },
-    "미국": { tags: ["연준", "미국"], icon: <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 21V5a2 2 0 012-2h4l2 3h8a2 2 0 012 2v3M3 21l6-6m0 0l4 4m-4-4v6" /><path strokeLinecap="round" d="M14 3v4h4" /></svg>, color: "#3b82f6" },
-    "글로벌": { tags: ["중국", "일본", "유럽", "지정학"], icon: <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg>, color: "#10b981" },
-    "환율·에너지": { tags: ["환율", "에너지"], icon: <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>, color: "#f59e0b" },
+  // Filtered articles
+  const REGION_TAGS: Record<string, string[]> = {
+    "전체": [],
+    "한국": ["경기", "부동산", "가계부채", "재정", "수출입"],
+    "미국": ["연준", "미국"],
+    "글로벌": ["중국", "일본", "유럽", "지정학"],
+    "환율·에너지": ["환율", "에너지"],
   };
 
-  // Apply collection filter (when viewing saved with collection selected)
-  const collectionFilteredArticles = useMemo(() => {
-    if (!showSaved || !selectedCollection) return articles;
-    return articles.filter((a) => collectionStore.assignments[a.id] === selectedCollection);
-  }, [articles, showSaved, selectedCollection, collectionStore.assignments]);
-
-  // Apply region filter client-side
-  const regionFilteredArticles =
-    regionFilter === "전체"
-      ? collectionFilteredArticles
-      : collectionFilteredArticles.filter((a) => {
-          const rTags = REGION_TAGS[regionFilter]?.tags || [];
-          return a.tags.some((t) => rTags.includes(t));
-        });
-
-  // Apply multi-view tab filter
-  const multiViewFilteredArticles = useMemo(() => {
-    const activeTab = multiView.getActiveTab();
-    if (!activeTab || activeTab.type === "all") return regionFilteredArticles;
-    switch (activeTab.type) {
-      case "tag":
-        return regionFilteredArticles.filter((a) => a.tags.includes(activeTab.value));
-      case "source":
-        return regionFilteredArticles.filter((a) => a.sourceName === activeTab.value);
-      case "search":
-        return regionFilteredArticles.filter((a) =>
-          a.title.toLowerCase().includes(activeTab.value.toLowerCase())
-        );
-      case "saved":
-        return regionFilteredArticles.filter((a) => a.isSaved);
-      default:
-        return regionFilteredArticles;
+  const filteredArticles = useMemo(() => {
+    let list = articles;
+    if (regionFilter !== "전체") {
+      const rTags = REGION_TAGS[regionFilter] || [];
+      list = list.filter((a) => a.tags.some((t) => rTags.includes(t)));
     }
-  }, [regionFilteredArticles, multiView]);
-
-  // Compute visible articles for keyboard navigation
-  const visibleArticles = useMemo(() => {
-    let list = multiViewFilteredArticles;
+    const activeTab = multiView.getActiveTab();
+    if (activeTab && activeTab.type !== "all") {
+      switch (activeTab.type) {
+        case "tag": list = list.filter((a) => a.tags.includes(activeTab.value)); break;
+        case "source": list = list.filter((a) => a.sourceName === activeTab.value); break;
+        case "search": list = list.filter((a) => a.title.toLowerCase().includes(activeTab.value.toLowerCase())); break;
+        case "saved": list = list.filter((a) => a.isSaved); break;
+      }
+    }
     if (readFilter === "unread") list = list.filter((a) => !a.isRead);
     else if (readFilter === "read") list = list.filter((a) => a.isRead);
     return list;
-  }, [multiViewFilteredArticles, readFilter]);
+  }, [articles, regionFilter, multiView, readFilter]);
 
-  // Global keyboard shortcuts
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Cmd+K opens command palette from anywhere
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        setCommandPaletteOpen(true);
-        return;
-      }
-
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); setCommandPaletteOpen(true); return; }
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-
       switch (e.key) {
-        case "?":
-          e.preventDefault();
-          setShowHelp((v) => !v);
-          break;
-        case "/":
-          e.preventDefault();
-          document.getElementById("wire-search")?.focus();
-          break;
-        case "j": {
-          e.preventDefault();
-          const idx = visibleArticles.findIndex((a) => a.id === selectedArticle?.id);
-          const next = idx < 0 ? 0 : Math.min(idx + 1, visibleArticles.length - 1);
-          if (visibleArticles[next]) selectArticle(visibleArticles[next]);
-          break;
-        }
-        case "k": {
-          e.preventDefault();
-          const idx = visibleArticles.findIndex((a) => a.id === selectedArticle?.id);
-          const prev = Math.max(idx - 1, 0);
-          if (visibleArticles[prev]) selectArticle(visibleArticles[prev]);
-          break;
-        }
-        case "s":
-          if (selectedArticle) {
-            e.preventDefault();
-            toggleSave(selectedArticle);
-          }
-          break;
-        case "o":
-          if (selectedArticle) {
-            e.preventDefault();
-            window.open(selectedArticle.url, "_blank");
-          }
-          break;
-        case "g":
-          e.preventDefault();
-          if (visibleArticles.length > 0) selectArticle(visibleArticles[0]);
-          break;
-        case "1":
-          e.preventDefault();
-          setRange("24h");
-          break;
-        case "2":
-          e.preventDefault();
-          setRange("7d");
-          break;
-        case "3":
-          e.preventDefault();
-          setRange("30d");
-          break;
-        case "r":
-          e.preventDefault();
-          if (selectedArticle) {
-            toggleRead(selectedArticle);
-          } else if (!ingesting) {
-            runIngest();
-          }
-          break;
-        case "d":
-          e.preventDefault();
-          toggleDarkMode();
-          break;
-        case "m":
-          e.preventDefault();
-          markAllRead();
-          break;
-        case "e":
-          e.preventDefault();
-          exportSaved();
-          break;
-        case "[":
-          e.preventDefault();
-          setSidebarCollapsed((v) => !v);
-          break;
-        case "f":
-          e.preventDefault();
-          setFocusMode((v) => !v);
-          break;
-        case "v":
-          e.preventDefault();
-          setViewMode((v) => v === "list" ? "card" : "list");
-          break;
-        case "a":
-          e.preventDefault();
-          setAnalyticsOpen((v) => !v);
-          break;
-        case "w":
-          e.preventDefault();
-          setWatchlistOpen((v) => !v);
-          break;
-        case "Escape":
-          if (analyticsOpen) {
-            e.preventDefault();
-            setAnalyticsOpen(false);
-          } else if (watchlistOpen) {
-            e.preventDefault();
-            setWatchlistOpen(false);
-          } else if (focusMode) {
-            e.preventDefault();
-            setFocusMode(false);
-          }
-          break;
+        case "?": e.preventDefault(); setShowHelp((v) => !v); break;
+        case "/": e.preventDefault(); document.getElementById("wire-search")?.focus(); break;
+        case "j": if (activeMainTab === "news") { e.preventDefault(); const idx = filteredArticles.findIndex((a) => a.id === selectedArticle?.id); const next = idx < 0 ? 0 : Math.min(idx + 1, filteredArticles.length - 1); if (filteredArticles[next]) selectArticle(filteredArticles[next]); } break;
+        case "k": if (activeMainTab === "news") { e.preventDefault(); const idx = filteredArticles.findIndex((a) => a.id === selectedArticle?.id); const prev = Math.max(idx - 1, 0); if (filteredArticles[prev]) selectArticle(filteredArticles[prev]); } break;
+        case "s": if (selectedArticle) { e.preventDefault(); toggleSave(selectedArticle); } break;
+        case "o": if (selectedArticle) { e.preventDefault(); window.open(selectedArticle.url, "_blank"); } break;
+        case "1": e.preventDefault(); setRange("24h"); break;
+        case "2": e.preventDefault(); setRange("7d"); break;
+        case "3": e.preventDefault(); setRange("30d"); break;
+        case "r": e.preventDefault(); if (!ingesting) runIngest(); break;
+        case "d": e.preventDefault(); toggleDarkMode(); break;
+        case "m": e.preventDefault(); markAllRead(); break;
+        case "e": e.preventDefault(); exportSaved(); break;
+        case "Escape": setNotificationPanelOpen(false); setThemeSelectorOpen(false); setExportPanelOpen(false); break;
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [ingesting, runIngest, toggleDarkMode, markAllRead, exportSaved, selectedArticle, visibleArticles, selectArticle, toggleRead, toggleSave, focusMode]);
-
-  // Get selected source name for filter bar
-  const selectedSourceName = sources.find((s) => s.id === selectedSourceId)?.name;
+  }, [ingesting, runIngest, toggleDarkMode, markAllRead, exportSaved, selectedArticle, filteredArticles, selectArticle, toggleSave, activeMainTab]);
 
   return (
-    <div className={`flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)] ${focusMode ? "focus-mode" : ""}`}>
-      <div className="content-layer flex flex-col h-screen">
-      <TopBar
+    <div className="flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)]">
+      {/* Platform Navigation */}
+      <PlatformNav
+        activeTab={activeMainTab}
+        onTabChange={setActiveMainTab}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        range={range}
-        onRangeChange={setRange}
-        onIngest={runIngest}
-        ingesting={ingesting}
-        lastUpdated={lastUpdated}
-        showSaved={showSaved}
-        onToggleSaved={() => setShowSaved((v) => !v)}
-        articleCount={articles.length}
         darkMode={darkMode}
         onToggleDark={toggleDarkMode}
+        onIngest={runIngest}
+        ingesting={ingesting}
         countdown={countdown}
-        newArticleCount={newArticleCount}
-        onMarkAllRead={markAllRead}
-        onExport={exportSaved}
+        lastUpdated={lastUpdated}
+        onOpenPalette={() => setCommandPaletteOpen(true)}
         onShowHelp={() => setShowHelp(true)}
         themeToggleRef={themeToggleRef}
-        onOpenPalette={() => setCommandPaletteOpen(true)}
-        onOpenAnalytics={() => setAnalyticsOpen(true)}
-        onToggleWatchlist={() => setWatchlistOpen((v) => !v)}
-        onToggleNotifications={() => setNotificationPanelOpen((v) => !v)}
-        onTogglePortfolio={() => setPortfolioPanelOpen((v) => !v)}
-        onToggleTimeline={() => setTimelineMode((v) => !v)}
-        onToggleTheme={() => setThemeSelectorOpen((v) => !v)}
-        onToggleExport={() => setExportPanelOpen((v) => !v)}
-        onAddMultiViewTab={() => {
-          if (selectedTag) {
-            multiView.addTab({ label: selectedTag, type: "tag", value: selectedTag });
-          } else if (selectedSourceId) {
-            const src = sources.find((s) => s.id === selectedSourceId);
-            if (src) multiView.addTab({ label: src.name, type: "source", value: src.name });
-          } else if (searchQuery) {
-            multiView.addTab({ label: searchQuery, type: "search", value: searchQuery });
-          }
-        }}
-        timelineMode={timelineMode}
         notificationCount={notifications.store.rules.filter((r) => r.enabled).length}
+        onToggleNotifications={() => setNotificationPanelOpen((v) => !v)}
+        newArticleCount={newArticleCount}
       />
 
-      <div className="hide-in-focus shrink-0">
-        <div className="flex items-center border-b border-[var(--border)] shrink-0">
-          <div className="shrink-0"><StatsBar articles={articles} sources={sources} /></div>
-          <div className="flex-1 overflow-hidden"><MarketTicker /></div>
-        </div>
+      {/* Market Ticker — always visible */}
+      <div className="shrink-0 border-b border-[var(--border)]">
+        <MarketTicker />
       </div>
 
-      {/* Region Tabs */}
-      <div className="hide-in-focus" style={{ flexShrink: 0 }}>
-      <div className="px-4 border-b border-[var(--border)] flex items-center gap-2 bg-[var(--surface)]" style={{ height: 38, flexShrink: 0, overflow: 'hidden' }}>
-        <span className="section-label mr-0.5" style={{ flexShrink: 0, fontSize: '9px', letterSpacing: '0.1em' }}>
-          구분
-        </span>
-        <div className="flex gap-0.5" style={{ flex: '1 1 0%', minWidth: 0, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {Object.entries(REGION_TAGS).map(([region, { icon, color }]) => {
-            const isActive = regionFilter === region;
-            const count = region === "전체"
-              ? articles.length
-              : articles.filter((a) => REGION_TAGS[region].tags.some((t) => a.tags.includes(t))).length;
-            return (
-              <button
-                key={region}
-                onClick={() => setRegionFilter(region)}
-                className={`relative flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all duration-150 rounded-[var(--radius-sm)] ${
-                  isActive
-                    ? "text-[var(--foreground-bright)] font-bold bg-[var(--accent-surface)]"
-                    : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
-                }`}
-                style={{ flex: '0 0 auto', whiteSpace: 'nowrap' }}
-              >
-                <span className="text-sm leading-none" style={{ color: isActive ? color : undefined }}>{icon}</span>
-                <span>{region}</span>
-                {count > 0 && (
-                  <span className={`text-[9px] tabular-nums font-medium ${isActive ? 'text-[var(--accent)]' : 'text-[var(--muted)]'}`}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-        {regionFilter !== "전체" && (
-          <button
-            onClick={() => setRegionFilter("전체")}
-            className="ml-auto shrink-0 text-[10px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-1 font-medium"
-          >
-            ✕ 해제
-          </button>
-        )}
-      </div>
-      </div>
-
-      {/* Multi-View Tabs */}
-      {multiView.store.tabs.length > 1 && (
-        <MultiViewTabs
-          tabs={multiView.store.tabs}
-          activeTabId={multiView.store.activeTabId}
-          onSelectTab={multiView.setActiveTab}
-          onRemoveTab={multiView.removeTab}
-          onAddTab={multiView.addTab}
-          tags={allTags}
-          sourceNames={sources.map((s) => s.name)}
-        />
-      )}
-
-      {/* Active Filter Summary Bar */}
-      <FilterBar
-        selectedSourceName={selectedSourceName}
-        selectedTag={selectedTag}
-        searchQuery={searchQuery}
-        range={range}
-        showSaved={showSaved}
-        regionFilter={regionFilter}
-        readFilter={readFilter}
-        onClearSource={() => setSelectedSourceId(null)}
-        onClearTag={() => setSelectedTag(null)}
-        onClearSearch={() => setSearchQuery("")}
-        onClearRange={() => setRange("24h")}
-        onClearSaved={() => setShowSaved(false)}
-        onClearRegion={() => setRegionFilter("전체")}
-        onClearReadFilter={() => setReadFilter("all")}
-        onClearAll={() => {
-          setSelectedSourceId(null);
-          setSelectedTag(null);
-          setSearchQuery("");
-          setRange("24h");
-          setShowSaved(false);
-          setRegionFilter("전체");
-          setReadFilter("all");
-        }}
-      />
-
-      {/* Collection filter tabs (when viewing saved) */}
-      {showSaved && collectionStore.names.length > 0 && (
-        <div className="px-5 h-9 border-b border-[var(--border-subtle)] flex items-center gap-2 shrink-0 bg-[var(--gold-surface)]">
-          <svg className="w-3 h-3 text-[var(--gold)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-          </svg>
-          <span className="text-[9px] font-bold text-[var(--gold)] tracking-[0.1em] uppercase">Collection</span>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setSelectedCollection(null)}
-              className={`px-2.5 py-1 text-[10px] font-semibold rounded-[var(--radius-sm)] transition-colors ${
-                !selectedCollection
-                  ? "bg-[var(--foreground-bright)] text-white shadow-sm"
-                  : "text-[var(--muted)] hover:text-[var(--foreground)] metal-btn"
-              }`}
-            >
-              전체
-            </button>
-            {collectionStore.names.map((name) => (
-              <button
-                key={name}
-                onClick={() => setSelectedCollection(name === selectedCollection ? null : name)}
-                className={`px-2.5 py-1 text-[10px] font-semibold rounded-[var(--radius-sm)] transition-colors ${
-                  selectedCollection === name
-                    ? "bg-[var(--accent)] text-white shadow-sm"
-                    : "text-[var(--muted)] hover:text-[var(--foreground)] metal-btn"
-                }`}
-              >
-                {name}
-                <span className="ml-1 text-[9px] opacity-70">
-                  {Object.values(collectionStore.assignments).filter((v) => v === name).length}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-1 overflow-hidden">
-        <div style={{ width: sidebarCollapsed || focusMode ? 0 : sidebarWidth }} className="shrink-0 relative transition-all duration-300 overflow-hidden">
-        <SourcePanel
-          sources={sources}
-          selectedSourceId={selectedSourceId}
-          onSelectSource={(id) =>
-            setSelectedSourceId((prev) => (prev === id ? null : id))
-          }
-          onToggleSource={toggleSource}
-          tags={allTags}
-          selectedTag={selectedTag}
-          onSelectTag={(tag) =>
-            setSelectedTag((prev) => (prev === tag ? null : tag))
-          }
-          collapsed={sidebarCollapsed || focusMode}
-          onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
-          onAddSource={() => setAddSourceOpen(true)}
-          onDeleteSource={handleDeleteSource}
-        />
-        {/* Sidebar resize handle */}
-        {!sidebarCollapsed && !focusMode && (
-          <div
-            onMouseDown={(e) => startResize("sidebar", e)}
-            className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-[var(--accent)] hover:opacity-40 transition-colors z-10"
-          />
-        )}
-        </div>
-
-        <main className="flex flex-1 overflow-hidden relative">
-
-          <div style={{ width: listWidth }} className="shrink-0 flex flex-col relative">
-          {/* Spike Alert Bar (#3) — in flow before article list */}
-          <SpikeAlert articles={articles} />
-          {timelineMode ? (
-            <NewsTimeline articles={multiViewFilteredArticles} onSelectArticle={selectArticle} />
-          ) : (
-          <ArticleList
-            articles={multiViewFilteredArticles}
-            loading={loading}
-            selectedArticleId={selectedArticle?.id ?? null}
+      {/* Tab Content */}
+      <div className="flex-1 overflow-hidden">
+        {activeMainTab === "dashboard" && (
+          <DashboardTab
+            articles={articles}
+            sources={sources}
+            portfolioPrices={portfolio.prices}
+            portfolioLoading={portfolio.loading}
+            watchlistStore={watchlist.store}
             onSelectArticle={selectArticle}
-            onToggleSave={toggleSave}
-            hasMore={hasMore}
-            onLoadMore={() => fetchArticles(true)}
-            readFilter={readFilter}
-            onReadFilterChange={setReadFilter}
-            onTagClick={handleTagClick}
-            newArticleIds={newArticleIds}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
+            onTabChange={(tab) => setActiveMainTab(tab as MainTab)}
           />
-          )}
-          {/* List resize handle */}
-          <div
-            onMouseDown={(e) => startResize("list", e)}
-            className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-[var(--accent)] hover:opacity-40 transition-colors z-10"
-          />
-          </div>
+        )}
 
-          {selectedArticle ? (
-            <ArticleDetail
-              article={selectedArticle}
-              onToggleRead={toggleRead}
-              onToggleSave={toggleSave}
-              onTagClick={handleTagClick}
-              collectionName={getCollection(selectedArticle.id)}
-              collectionNames={collectionStore.names}
-              onCollectionChange={assignArticle}
-              onCreateCollection={createCollection}
-              articles={articles}
-              onSelectArticle={selectArticle}
-            />
-          ) : (
-            <TodayPulse articles={articles} />
-          )}
-        </main>
+        {activeMainTab === "news" && (
+          <NewsTab
+            articles={filteredArticles}
+            selectedArticle={selectedArticle}
+            loading={loading}
+            hasMore={hasMore}
+            sources={sources}
+            selectedSourceId={selectedSourceId}
+            selectedTag={selectedTag}
+            range={range}
+            showSaved={showSaved}
+            readFilter={readFilter}
+            regionFilter={regionFilter}
+            searchQuery={searchQuery}
+            viewMode={viewMode}
+            timelineMode={timelineMode}
+            newArticleIds={newArticleIds}
+            onSelectArticle={selectArticle}
+            onSelectSource={(id) => setSelectedSourceId((prev) => (prev === id ? null : id))}
+            onSelectTag={(tag) => setSelectedTag((prev) => (prev === tag ? null : tag))}
+            onRangeChange={setRange}
+            onToggleSaved={() => setShowSaved((v) => !v)}
+            onReadFilterChange={setReadFilter}
+            onRegionFilterChange={setRegionFilter}
+            onLoadMore={() => fetchArticles(true)}
+            onToggleSave={toggleSave}
+            onToggleRead={toggleRead}
+            onTagClick={handleTagClick}
+            onViewModeChange={setViewMode}
+            onMarkAllRead={markAllRead}
+            onExport={exportSaved}
+            collectionName={selectedArticle ? getCollection(selectedArticle.id) : ""}
+            collectionNames={collectionStore.names}
+            onCollectionChange={assignArticle}
+            onCreateCollection={createCollection}
+          />
+        )}
+
+        {activeMainTab === "markets" && (
+          <MarketsTab
+            portfolioPrices={portfolio.prices}
+            portfolioAssets={portfolio.store.assets}
+            portfolioLoading={portfolio.loading}
+            onAddAsset={portfolio.addAsset}
+            onRemoveAsset={portfolio.removeAsset}
+            onRefreshPrices={portfolio.fetchPrices}
+          />
+        )}
+
+        {activeMainTab === "analytics" && (
+          <AnalyticsTab articles={articles} />
+        )}
       </div>
 
-      {/* Keyboard help overlay */}
+      {/* Status Bar */}
+      <StatusBar
+        enabledSources={sources.filter((s) => s.enabled).length}
+        totalSources={sources.length}
+        articleCount={articles.length}
+        unreadCount={articles.filter((a) => !a.isRead).length}
+      />
+
+      {/* Global Overlays */}
       <KeyboardHelp open={showHelp} onClose={() => setShowHelp(false)} />
 
-      {/* Command Palette */}
       <CommandPalette
         open={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
         articles={articles}
         sources={sources}
         onSelectArticle={selectArticle}
-        onSelectSource={(id) => setSelectedSourceId((prev) => (prev === id ? null : id))}
-        onSelectTag={(tag) => setSelectedTag((prev) => (prev === tag ? null : tag))}
+        onSelectSource={(id) => { setSelectedSourceId((prev) => (prev === id ? null : id)); setActiveMainTab("news"); }}
+        onSelectTag={(tag) => { setSelectedTag((prev) => (prev === tag ? null : tag)); setActiveMainTab("news"); }}
         onAction={handlePaletteAction}
         tags={allTags}
       />
 
-      {/* Analytics Dashboard (#1-5, #17-20) */}
-      {analyticsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setAnalyticsOpen(false)}>
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-          <div className="relative w-[90vw] max-w-[1100px] h-[80vh] glass-modal overflow-hidden animate-fade-in" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border)] glass-header">
-              <h3 className="text-[13px] font-bold text-[var(--foreground-bright)] flex items-center gap-2 tracking-[-0.01em]">
-                <div className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--accent)] flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                애널리틱스 대시보드
-              </h3>
-              <button onClick={() => setAnalyticsOpen(false)} className="text-[var(--muted)] hover:text-[var(--foreground)] w-6 h-6 flex items-center justify-center rounded-[var(--radius-sm)] hover:bg-[var(--surface-hover)] transition-colors">✕</button>
-            </div>
-            <div className="h-[calc(80vh-48px)] overflow-y-auto">
-              <AnalyticsDashboard articles={articles} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Source Modal (#16) */}
       {addSourceOpen && (
-        <AddSourceModal
-          open={addSourceOpen}
-          onClose={() => setAddSourceOpen(false)}
-          onAdd={handleAddSource}
-        />
+        <AddSourceModal open={addSourceOpen} onClose={() => setAddSourceOpen(false)} onAdd={handleAddSource} />
       )}
 
-      {/* Watchlist Panel (#14) */}
-      {watchlistOpen && (
-        <div className="fixed right-4 top-14 z-40 w-72 animate-fade-in">
-          <WatchlistPanel
-            store={watchlist.store}
-            articles={articles}
-            onAdd={watchlist.addKeyword}
-            onRemove={watchlist.removeKeyword}
-            onSelectArticle={selectArticle}
-          />
-          <button
-            onClick={() => setWatchlistOpen(false)}
-            className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      {/* Notification Panel */}
+      {/* Floating Panels */}
       {notificationPanelOpen && (
         <div className="fixed right-4 top-14 z-40 animate-fade-in">
           <NotificationPanel
@@ -1081,80 +503,22 @@ export default function Home() {
             tags={allTags}
             sourceNames={sources.map((s) => s.name)}
           />
-          <button
-            onClick={() => setNotificationPanelOpen(false)}
-            className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs z-50"
-          >
-            ✕
-          </button>
+          <button onClick={() => setNotificationPanelOpen(false)} className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs z-50">✕</button>
         </div>
       )}
 
-      {/* Portfolio Panel */}
-      {portfolioPanelOpen && (
-        <div className="fixed right-4 top-14 z-40 animate-fade-in">
-          <PortfolioPanel
-            prices={portfolio.prices}
-            assets={portfolio.store.assets}
-            loading={portfolio.loading}
-            onAddAsset={portfolio.addAsset}
-            onRemoveAsset={portfolio.removeAsset}
-            onRefresh={portfolio.fetchPrices}
-          />
-          <button
-            onClick={() => setPortfolioPanelOpen(false)}
-            className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs z-50"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      {/* Theme Selector */}
       {themeSelectorOpen && (
         <div className="fixed right-4 top-14 z-40 animate-fade-in">
-          <ThemeSelector
-            activeTheme={themeCustom.activeTheme}
-            presets={themeCustom.presets}
-            onSelect={themeCustom.selectTheme}
-            onReset={themeCustom.resetTheme}
-          />
-          <button
-            onClick={() => setThemeSelectorOpen(false)}
-            className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs z-50"
-          >
-            ✕
-          </button>
+          <ThemeSelector activeTheme={themeCustom.activeTheme} presets={themeCustom.presets} onSelect={themeCustom.selectTheme} onReset={themeCustom.resetTheme} />
+          <button onClick={() => setThemeSelectorOpen(false)} className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs z-50">✕</button>
         </div>
       )}
 
-      {/* Export Panel */}
       {exportPanelOpen && (
         <div className="fixed right-4 top-14 z-40 animate-fade-in">
           <ExportPanel articles={articles} onClose={() => setExportPanelOpen(false)} />
         </div>
       )}
-
-      {/* Focus mode indicator */}
-      {focusMode && (
-        <div className="fixed bottom-3 right-3 z-40 px-3 py-2 rounded-[var(--radius-md)] bg-[var(--surface)] border border-[var(--border)] text-[10px] text-[var(--muted)] select-none shadow-md flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-          <span className="font-medium">포커스 모드</span>
-          <kbd className="kbd-key" style={{ fontSize: '8px', height: '16px', minWidth: '28px' }}>ESC</kbd>
-        </div>
-      )}
-
-      {/* Bottom status bar */}
-      {!focusMode && (
-        <StatusBar
-          enabledSources={sources.filter((s) => s.enabled).length}
-          totalSources={sources.length}
-          articleCount={articles.length}
-          unreadCount={articles.filter(a => !a.isRead).length}
-          selectedSourceName={selectedArticle?.sourceName}
-        />
-      )}
-      </div>{/* end content-layer */}
     </div>
   );
 }
