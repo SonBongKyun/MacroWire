@@ -18,6 +18,16 @@ import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { AddSourceModal } from "@/components/AddSourceModal";
 import { WatchlistPanel } from "@/components/WatchlistPanel";
 import { useWatchlist } from "@/hooks/useWatchlist";
+import { useNotifications } from "@/hooks/useNotifications";
+import { usePortfolio } from "@/hooks/usePortfolio";
+import { useThemeCustom } from "@/hooks/useThemeCustom";
+import { useMultiView } from "@/hooks/useMultiView";
+import { NotificationPanel } from "@/components/NotificationPanel";
+import { PortfolioPanel } from "@/components/PortfolioPanel";
+import { NewsTimeline } from "@/components/NewsTimeline";
+import { ThemeSelector } from "@/components/ThemeSelector";
+import { ExportPanel } from "@/components/ExportPanel";
+import { MultiViewTabs } from "@/components/MultiViewTabs";
 
 const POLL_INTERVAL = 5 * 60; // 300 seconds
 
@@ -116,6 +126,19 @@ export default function Home() {
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [addSourceOpen, setAddSourceOpen] = useState(false);
   const [watchlistOpen, setWatchlistOpen] = useState(false);
+
+  // New feature hooks
+  const notifications = useNotifications();
+  const portfolio = usePortfolio();
+  const themeCustom = useThemeCustom();
+  const multiView = useMultiView();
+
+  // New panels state
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [portfolioPanelOpen, setPortfolioPanelOpen] = useState(false);
+  const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
+  const [exportPanelOpen, setExportPanelOpen] = useState(false);
+  const [timelineMode, setTimelineMode] = useState(false);
 
   // Resizable panels (#11) - stored widths
   const [sidebarWidth, setSidebarWidth] = useState(220);
@@ -277,11 +300,22 @@ export default function Home() {
               setNewArticleIds((prev) => [...prev, ...newOnes.map((a: Article) => a.id)]);
               // Desktop notification
               if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-                new Notification("Macro Wire", {
-                  body: `새 기사 ${newOnes.length}건이 도착했습니다`,
-                  icon: "/icon.svg",
-                  tag: "macro-wire-new",
-                });
+                // Check notification rules for matching articles
+                const matched = newOnes.filter((a: Article) => notifications.checkArticle(a));
+                if (matched.length > 0) {
+                  notifications.sendNotification(
+                    "Macro Wire 알림",
+                    matched.length === 1
+                      ? matched[0].title
+                      : `관심 기사 ${matched.length}건: ${matched[0].title}`
+                  );
+                } else {
+                  new Notification("Macro Wire", {
+                    body: `새 기사 ${newOnes.length}건이 도착했습니다`,
+                    icon: "/icon.svg",
+                    tag: "macro-wire-new",
+                  });
+                }
               }
             }
           }
@@ -525,6 +559,11 @@ export default function Home() {
       case "analytics": setAnalyticsOpen(true); break;
       case "watchlist": setWatchlistOpen((v) => !v); break;
       case "addSource": setAddSourceOpen(true); break;
+      case "notifications": setNotificationPanelOpen((v) => !v); break;
+      case "portfolio": setPortfolioPanelOpen((v) => !v); break;
+      case "timeline": setTimelineMode((v) => !v); break;
+      case "theme": setThemeSelectorOpen((v) => !v); break;
+      case "exportPanel": setExportPanelOpen((v) => !v); break;
     }
   }, [runIngest, markAllRead, exportSaved, toggleDarkMode]);
 
@@ -556,13 +595,33 @@ export default function Home() {
           return a.tags.some((t) => rTags.includes(t));
         });
 
+  // Apply multi-view tab filter
+  const multiViewFilteredArticles = useMemo(() => {
+    const activeTab = multiView.getActiveTab();
+    if (!activeTab || activeTab.type === "all") return regionFilteredArticles;
+    switch (activeTab.type) {
+      case "tag":
+        return regionFilteredArticles.filter((a) => a.tags.includes(activeTab.value));
+      case "source":
+        return regionFilteredArticles.filter((a) => a.sourceName === activeTab.value);
+      case "search":
+        return regionFilteredArticles.filter((a) =>
+          a.title.toLowerCase().includes(activeTab.value.toLowerCase())
+        );
+      case "saved":
+        return regionFilteredArticles.filter((a) => a.isSaved);
+      default:
+        return regionFilteredArticles;
+    }
+  }, [regionFilteredArticles, multiView]);
+
   // Compute visible articles for keyboard navigation
   const visibleArticles = useMemo(() => {
-    let list = regionFilteredArticles;
+    let list = multiViewFilteredArticles;
     if (readFilter === "unread") list = list.filter((a) => !a.isRead);
     else if (readFilter === "read") list = list.filter((a) => a.isRead);
     return list;
-  }, [regionFilteredArticles, readFilter]);
+  }, [multiViewFilteredArticles, readFilter]);
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -714,6 +773,23 @@ export default function Home() {
         onOpenPalette={() => setCommandPaletteOpen(true)}
         onOpenAnalytics={() => setAnalyticsOpen(true)}
         onToggleWatchlist={() => setWatchlistOpen((v) => !v)}
+        onToggleNotifications={() => setNotificationPanelOpen((v) => !v)}
+        onTogglePortfolio={() => setPortfolioPanelOpen((v) => !v)}
+        onToggleTimeline={() => setTimelineMode((v) => !v)}
+        onToggleTheme={() => setThemeSelectorOpen((v) => !v)}
+        onToggleExport={() => setExportPanelOpen((v) => !v)}
+        onAddMultiViewTab={() => {
+          if (selectedTag) {
+            multiView.addTab({ label: selectedTag, type: "tag", value: selectedTag });
+          } else if (selectedSourceId) {
+            const src = sources.find((s) => s.id === selectedSourceId);
+            if (src) multiView.addTab({ label: src.name, type: "source", value: src.name });
+          } else if (searchQuery) {
+            multiView.addTab({ label: searchQuery, type: "search", value: searchQuery });
+          }
+        }}
+        timelineMode={timelineMode}
+        notificationCount={notifications.store.rules.filter((r) => r.enabled).length}
       />
 
       <div className="hide-in-focus shrink-0">
@@ -767,6 +843,19 @@ export default function Home() {
         )}
       </div>
       </div>
+
+      {/* Multi-View Tabs */}
+      {multiView.store.tabs.length > 1 && (
+        <MultiViewTabs
+          tabs={multiView.store.tabs}
+          activeTabId={multiView.store.activeTabId}
+          onSelectTab={multiView.setActiveTab}
+          onRemoveTab={multiView.removeTab}
+          onAddTab={multiView.addTab}
+          tags={allTags}
+          sourceNames={sources.map((s) => s.name)}
+        />
+      )}
 
       {/* Active Filter Summary Bar */}
       <FilterBar
@@ -866,8 +955,11 @@ export default function Home() {
           <div style={{ width: listWidth }} className="shrink-0 flex flex-col relative">
           {/* Spike Alert Bar (#3) — in flow before article list */}
           <SpikeAlert articles={articles} />
+          {timelineMode ? (
+            <NewsTimeline articles={multiViewFilteredArticles} onSelectArticle={selectArticle} />
+          ) : (
           <ArticleList
-            articles={regionFilteredArticles}
+            articles={multiViewFilteredArticles}
             loading={loading}
             selectedArticleId={selectedArticle?.id ?? null}
             onSelectArticle={selectArticle}
@@ -881,6 +973,7 @@ export default function Home() {
             viewMode={viewMode}
             onViewModeChange={setViewMode}
           />
+          )}
           {/* List resize handle */}
           <div
             onMouseDown={(e) => startResize("list", e)}
@@ -971,6 +1064,74 @@ export default function Home() {
           >
             ✕
           </button>
+        </div>
+      )}
+
+      {/* Notification Panel */}
+      {notificationPanelOpen && (
+        <div className="fixed right-4 top-14 z-40 animate-fade-in">
+          <NotificationPanel
+            store={notifications.store}
+            onAddRule={notifications.addRule}
+            onRemoveRule={notifications.removeRule}
+            onToggleRule={notifications.toggleRule}
+            onToggleGlobal={notifications.toggleGlobal}
+            onToggleSound={notifications.toggleSound}
+            onRequestPermission={notifications.requestPermission}
+            tags={allTags}
+            sourceNames={sources.map((s) => s.name)}
+          />
+          <button
+            onClick={() => setNotificationPanelOpen(false)}
+            className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs z-50"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Portfolio Panel */}
+      {portfolioPanelOpen && (
+        <div className="fixed right-4 top-14 z-40 animate-fade-in">
+          <PortfolioPanel
+            prices={portfolio.prices}
+            assets={portfolio.store.assets}
+            loading={portfolio.loading}
+            onAddAsset={portfolio.addAsset}
+            onRemoveAsset={portfolio.removeAsset}
+            onRefresh={portfolio.fetchPrices}
+          />
+          <button
+            onClick={() => setPortfolioPanelOpen(false)}
+            className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs z-50"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Theme Selector */}
+      {themeSelectorOpen && (
+        <div className="fixed right-4 top-14 z-40 animate-fade-in">
+          <ThemeSelector
+            activeTheme={themeCustom.activeTheme}
+            presets={themeCustom.presets}
+            onSelect={themeCustom.selectTheme}
+            onReset={themeCustom.resetTheme}
+          />
+          <button
+            onClick={() => setThemeSelectorOpen(false)}
+            className="absolute top-2 right-2 text-[var(--muted)] hover:text-[var(--foreground)] w-5 h-5 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] text-xs z-50"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Export Panel */}
+      {exportPanelOpen && (
+        <div className="fixed right-4 top-14 z-40 animate-fade-in">
+          <ExportPanel articles={articles} onClose={() => setExportPanelOpen(false)} />
         </div>
       )}
 

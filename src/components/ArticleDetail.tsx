@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import type { Article } from "@/types";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { RelatedArticles } from "@/components/RelatedArticles";
+import { ArticleSummary } from "@/components/ArticleSummary";
 
 interface ArticleDetailProps {
   article: Article | null;
@@ -249,6 +250,7 @@ export function ArticleDetail({
             <p className="text-[13.5px] leading-[1.85] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
               {article.summary}
             </p>
+            <ArticleSummary title={article.title} summary={article.summary} url={article.url} />
             <div className="detail-divider mt-4" />
             <div className="flex items-center gap-2 pt-1">
               <span className="text-[9px] text-[var(--muted)] font-medium">발행일</span>
@@ -267,6 +269,7 @@ export function ArticleDetail({
             <p className="text-[11px] text-[var(--muted)]">
               요약 정보가 없습니다
             </p>
+            <ArticleSummary title={article.title} summary={article.summary} url={article.url} />
           </div>
         )}
 

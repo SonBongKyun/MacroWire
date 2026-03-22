@@ -24,6 +24,14 @@ interface TopBarProps {
   onOpenPalette?: () => void;
   onOpenAnalytics?: () => void;
   onToggleWatchlist?: () => void;
+  onToggleNotifications?: () => void;
+  onTogglePortfolio?: () => void;
+  onToggleTimeline?: () => void;
+  onToggleTheme?: () => void;
+  onToggleExport?: () => void;
+  onAddMultiViewTab?: () => void;
+  timelineMode?: boolean;
+  notificationCount?: number;
 }
 
 export function TopBar({
@@ -48,6 +56,14 @@ export function TopBar({
   onOpenPalette,
   onOpenAnalytics,
   onToggleWatchlist,
+  onToggleNotifications,
+  onTogglePortfolio,
+  onToggleTimeline,
+  onToggleTheme,
+  onToggleExport,
+  onAddMultiViewTab,
+  timelineMode = false,
+  notificationCount = 0,
 }: TopBarProps) {
   const ranges: { key: "24h" | "7d" | "30d"; label: string }[] = [
     { key: "24h", label: "24H" },
@@ -204,6 +220,59 @@ export function TopBar({
             </svg>
           </button>
         )}
+        {onTogglePortfolio && (
+          <button
+            onClick={onTogglePortfolio}
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--gold-surface)] transition-all"
+            title="포트폴리오"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </button>
+        )}
+        {onToggleTimeline && (
+          <button
+            onClick={onToggleTimeline}
+            className={`w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] transition-all ${
+              timelineMode
+                ? "text-[var(--accent)] bg-[var(--accent-surface)]"
+                : "text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)]"
+            }`}
+            title="타임라인 뷰"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+        )}
+        {onToggleNotifications && (
+          <button
+            onClick={onToggleNotifications}
+            className="relative w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all"
+            title="알림 설정"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {notificationCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[var(--danger)] text-white text-[7px] font-bold flex items-center justify-center">
+                {notificationCount > 9 ? "9+" : notificationCount}
+              </span>
+            )}
+          </button>
+        )}
+        {onAddMultiViewTab && (
+          <button
+            onClick={onAddMultiViewTab}
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all"
+            title="멀티 뷰 탭 추가"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+            </svg>
+          </button>
+        )}
         {onMarkAllRead && (
           <button
             onClick={onMarkAllRead}
@@ -215,14 +284,25 @@ export function TopBar({
             </svg>
           </button>
         )}
-        {onExport && (
+        {(onExport || onToggleExport) && (
           <button
-            onClick={onExport}
+            onClick={onToggleExport || onExport}
             className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all"
-            title="저장 기사 내보내기 (E)"
+            title="내보내기 (E)"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </button>
+        )}
+        {onToggleTheme && (
+          <button
+            onClick={onToggleTheme}
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all"
+            title="테마 설정"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
             </svg>
           </button>
         )}
