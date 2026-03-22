@@ -15,13 +15,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Macro Wire",
+  title: "Ryzm Finance",
   description: "실시간 한국 매크로 경제 뉴스 와이어",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Macro Wire",
+    title: "Ryzm Finance",
   },
   icons: {
     icon: "/icon.svg",

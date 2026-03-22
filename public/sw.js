@@ -1,6 +1,6 @@
-const CACHE_NAME = "macro-wire-v2";
+const CACHE_NAME = "ryzm-finance-v2";
 const STATIC_ASSETS = ["/", "/manifest.json", "/icon.svg"];
-const API_CACHE = "macro-wire-api-v1";
+const API_CACHE = "ryzm-finance-api-v1";
 const MAX_API_CACHE_AGE = 24 * 60 * 60 * 1000; // 24 hours
 
 self.addEventListener("install", (event) => {

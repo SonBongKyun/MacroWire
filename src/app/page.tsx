@@ -66,7 +66,7 @@ export default function Home() {
   // Platform tab
   const [activeMainTab, setActiveMainTab] = useState<MainTab>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("macro-wire-tab") as MainTab) || "dashboard";
+      return (localStorage.getItem("ryzm-finance-tab") as MainTab) || "dashboard";
     }
     return "dashboard";
   });
@@ -108,12 +108,12 @@ export default function Home() {
 
   // Persist active tab
   useEffect(() => {
-    localStorage.setItem("macro-wire-tab", activeMainTab);
+    localStorage.setItem("ryzm-finance-tab", activeMainTab);
   }, [activeMainTab]);
 
   // Init dark mode
   useEffect(() => {
-    const stored = localStorage.getItem("macro-wire-dark");
+    const stored = localStorage.getItem("ryzm-finance-dark");
     if (stored === "true") {
       setDarkMode(true);
       document.documentElement.classList.add("dark");
@@ -125,7 +125,7 @@ export default function Home() {
       const next = !prev;
       if (next) document.documentElement.classList.add("dark");
       else document.documentElement.classList.remove("dark");
-      localStorage.setItem("macro-wire-dark", String(next));
+      localStorage.setItem("ryzm-finance-dark", String(next));
       return next;
     });
   }, []);
@@ -177,9 +177,9 @@ export default function Home() {
             if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
               const matched = newOnes.filter((a: Article) => notifications.checkArticle(a));
               if (matched.length > 0) {
-                notifications.sendNotification("Macro Wire 알림", matched.length === 1 ? matched[0].title : `관심 기사 ${matched.length}건: ${matched[0].title}`);
+                notifications.sendNotification("Ryzm Finance 알림", matched.length === 1 ? matched[0].title : `관심 기사 ${matched.length}건: ${matched[0].title}`);
               } else {
-                new Notification("Macro Wire", { body: `새 기사 ${newOnes.length}건이 도착했습니다`, icon: "/icon.svg", tag: "macro-wire-new" });
+                new Notification("Ryzm Finance", { body: `새 기사 ${newOnes.length}건이 도착했습니다`, icon: "/icon.svg", tag: "ryzm-finance-new" });
               }
             }
           }
@@ -256,12 +256,12 @@ export default function Home() {
     const saved = articles.filter((a) => a.isSaved);
     if (saved.length === 0) return;
     const md = saved.map((a, i) => `### ${i + 1}. ${a.title}\n- **출처**: ${a.sourceName}\n- **시간**: ${new Date(a.publishedAt).toLocaleString("ko-KR")}\n- **태그**: ${a.tags.join(", ") || "없음"}\n- **URL**: ${a.url}\n` + (a.summary ? `- **요약**: ${a.summary}\n` : "")).join("\n---\n\n");
-    const header = `# Macro Wire — 저장된 기사\n\n> 내보내기: ${new Date().toLocaleString("ko-KR")}\n> 총 ${saved.length}건\n\n---\n\n`;
+    const header = `# Ryzm Finance — 저장된 기사\n\n> 내보내기: ${new Date().toLocaleString("ko-KR")}\n> 총 ${saved.length}건\n\n---\n\n`;
     const blob = new Blob([header + md], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `macro-wire-saved-${new Date().toISOString().slice(0, 10)}.md`;
+    link.download = `ryzm-finance-saved-${new Date().toISOString().slice(0, 10)}.md`;
     link.click();
     URL.revokeObjectURL(url);
   }, [articles]);

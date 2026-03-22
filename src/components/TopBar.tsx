@@ -104,14 +104,14 @@ export function TopBar({
       {/* Logo */}
       <div className="flex items-center gap-2.5 mr-1 shrink-0">
         <div className="logo-mark">
-          <span style={{ position: 'relative', zIndex: 1 }}>MW</span>
+          <span style={{ position: 'relative', zIndex: 1 }}>RF</span>
         </div>
         <div className="flex flex-col">
           <span className="text-[13px] font-extrabold leading-none tracking-[-0.03em] text-[var(--foreground-bright)]">
-            Macro Wire
+            Ryzm Finance
           </span>
           <span className="text-[8px] font-semibold tracking-[0.12em] text-[var(--muted)] uppercase leading-none mt-0.5">
-            Economic Intelligence
+            Financial Intelligence
           </span>
         </div>
       </div>

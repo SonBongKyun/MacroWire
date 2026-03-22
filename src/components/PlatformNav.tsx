@@ -80,14 +80,14 @@ export function PlatformNav({
       {/* Logo */}
       <div className="flex items-center gap-2.5 shrink-0">
         <div className="logo-mark">
-          <span style={{ position: "relative", zIndex: 1 }}>MW</span>
+          <span style={{ position: "relative", zIndex: 1 }}>RF</span>
         </div>
         <div className="flex flex-col">
           <span className="text-[13px] font-extrabold leading-none tracking-[-0.03em] text-[var(--foreground-bright)]">
-            Macro Wire
+            Ryzm Finance
           </span>
           <span className="text-[8px] font-medium leading-none mt-[3px] text-[var(--muted)] tracking-[0.04em] uppercase">
-            Economic Intelligence
+            Financial Intelligence
           </span>
         </div>
       </div>

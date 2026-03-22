@@ -22,8 +22,8 @@ export interface PortfolioStore {
   assets: PortfolioAsset[];
 }
 
-const STORAGE_KEY = "macro-wire-portfolio";
-const PRICE_CACHE_KEY = "macro-wire-portfolio-prices";
+const STORAGE_KEY = "ryzm-finance-portfolio";
+const PRICE_CACHE_KEY = "ryzm-finance-portfolio-prices";
 
 const DEFAULT_ASSETS: PortfolioAsset[] = [
   { symbol: "005930.KS", label: "삼성전자", type: "stock", addedAt: "" },

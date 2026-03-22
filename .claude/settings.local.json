@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx next:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npm:*)",
+      "Bash(where npx:*)",
+      "Bash(npm run:*)",
+      "Bash(curl -s -X POST http://localhost:3000/api/ingest)"
+    ]
+  }
+}

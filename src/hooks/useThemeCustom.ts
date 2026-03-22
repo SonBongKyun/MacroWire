@@ -97,7 +97,7 @@ const PRESETS: ThemePreset[] = [
   },
 ];
 
-const STORAGE_KEY = "macro-wire-theme-preset";
+const STORAGE_KEY = "ryzm-finance-theme-preset";
 
 export function useThemeCustom() {
   const [activeTheme, setActiveTheme] = useState<string>("ink-gold");

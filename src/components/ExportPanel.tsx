@@ -21,7 +21,7 @@ export function ExportPanel({ articles, onClose }: ExportPanelProps) {
       summary: a.summary,
     }));
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
-    download(blob, `macro-wire-export-${dateStr()}.json`);
+    download(blob, `ryzm-finance-export-${dateStr()}.json`);
   }, [savedArticles]);
 
   const exportCSV = useCallback(() => {
@@ -38,7 +38,7 @@ export function ExportPanel({ articles, onClose }: ExportPanelProps) {
     );
     const bom = "\uFEFF"; // UTF-8 BOM for Excel
     const blob = new Blob([bom + header + rows.join("\n")], { type: "text/csv;charset=utf-8" });
-    download(blob, `macro-wire-export-${dateStr()}.csv`);
+    download(blob, `ryzm-finance-export-${dateStr()}.csv`);
   }, [savedArticles]);
 
   const exportMarkdown = useCallback(() => {
@@ -54,9 +54,9 @@ export function ExportPanel({ articles, onClose }: ExportPanelProps) {
       )
       .join("\n---\n\n");
 
-    const header = `# Macro Wire — 저장된 기사\n\n> 내보내기: ${new Date().toLocaleString("ko-KR")}\n> 총 ${savedArticles.length}건\n\n---\n\n`;
+    const header = `# Ryzm Finance — 저장된 기사\n\n> 내보내기: ${new Date().toLocaleString("ko-KR")}\n> 총 ${savedArticles.length}건\n\n---\n\n`;
     const blob = new Blob([header + md], { type: "text/markdown;charset=utf-8" });
-    download(blob, `macro-wire-export-${dateStr()}.md`);
+    download(blob, `ryzm-finance-export-${dateStr()}.md`);
   }, [savedArticles]);
 
   const exportHTML = useCallback(() => {
@@ -72,7 +72,7 @@ export function ExportPanel({ articles, onClose }: ExportPanelProps) {
 
     const html = `<!DOCTYPE html>
 <html lang="ko">
-<head><meta charset="UTF-8"><title>Macro Wire Export</title>
+<head><meta charset="UTF-8"><title>Ryzm Finance Export</title>
 <style>
 body{font-family:-apple-system,sans-serif;margin:40px;color:#333}
 table{border-collapse:collapse;width:100%}
@@ -85,14 +85,14 @@ h1{font-size:20px;margin-bottom:4px}
 p{color:#888;font-size:12px}
 </style></head>
 <body>
-<h1>Macro Wire — 저장된 기사</h1>
+<h1>Ryzm Finance — 저장된 기사</h1>
 <p>${new Date().toLocaleString("ko-KR")} | ${savedArticles.length}건</p>
 <table><thead><tr><th>제목</th><th>출처</th><th>발행일</th><th>태그</th></tr></thead>
 <tbody>${rows}</tbody></table>
 </body></html>`;
 
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    download(blob, `macro-wire-export-${dateStr()}.html`);
+    download(blob, `ryzm-finance-export-${dateStr()}.html`);
   }, [savedArticles]);
 
   return (
