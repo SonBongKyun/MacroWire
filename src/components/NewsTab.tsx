@@ -148,7 +148,7 @@ export function NewsTab({
             <select
               value={selectedSourceId || ""}
               onChange={(e) => onSelectSource(e.target.value || null)}
-              className="appearance-none text-[11px] font-medium bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-sm)] pl-2.5 pr-7 py-1.5 text-[var(--foreground)] outline-none cursor-pointer min-w-[110px] hover:border-[var(--accent)] transition-colors"
+              className="appearance-none text-[12px] font-medium bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-sm)] pl-2.5 pr-7 py-1.5 text-[var(--foreground)] outline-none cursor-pointer min-w-[110px] hover:border-[var(--accent)] transition-colors"
             >
               <option value="">전체 소스</option>
               {sources.map((s) => (
@@ -171,18 +171,21 @@ export function NewsTab({
               <button
                 key={r.value}
                 onClick={() => onRegionFilterChange(r.value)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-semibold rounded-[var(--radius-sm)] border transition-all leading-none ${
+                className={`relative flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-semibold rounded-[var(--radius-sm)] border border-transparent transition-all leading-none ${
                   regionFilter === r.value
-                    ? "border-current bg-[var(--surface-active)] text-[var(--foreground)]"
-                    : "border-transparent text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
+                    ? "bg-[var(--surface-active)] text-[var(--foreground)]"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
                 }`}
-                style={regionFilter === r.value ? { borderColor: r.color } : undefined}
+                style={regionFilter === r.value ? { color: "#C9A96E" } : undefined}
               >
                 <span
                   className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
                   style={{ backgroundColor: r.color, opacity: regionFilter === r.value ? 1 : 0.5 }}
                 />
                 {r.label}
+                {regionFilter === r.value && (
+                  <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#C9A96E]" />
+                )}
               </button>
             ))}
           </div>

@@ -62,7 +62,7 @@ function MiniSparkline({ data }: { data: number[] }) {
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: "block" }}>
       <polyline
         fill="none"
-        stroke={isUp ? "var(--accent-green, #22c55e)" : "var(--accent-red, #ef4444)"}
+        stroke={isUp ? "#22c55e" : "#ef4444"}
         strokeWidth="1.5"
         points={points}
       />
@@ -185,6 +185,7 @@ export default function DashboardTab({
               color: "var(--foreground-bright)",
               letterSpacing: "-0.01em",
               lineHeight: 1.3,
+              fontFamily: "var(--font-heading)",
             }}
           >
             {formatDateKo()}
@@ -223,6 +224,7 @@ export default function DashboardTab({
                   style={{
                     fontWeight: 700,
                     fontVariantNumeric: "tabular-nums",
+                    fontFamily: "var(--font-mono)",
                     color: "var(--foreground-bright)",
                     margin: "0 4px",
                   }}
@@ -233,9 +235,10 @@ export default function DashboardTab({
                   style={{
                     fontWeight: 600,
                     fontVariantNumeric: "tabular-nums",
+                    fontFamily: "var(--font-mono)",
                     color: item.changePct >= 0
-                      ? "var(--accent-green, #22c55e)"
-                      : "var(--accent-red, #ef4444)",
+                      ? "#22c55e"
+                      : "#ef4444",
                   }}
                 >
                   {item.changePct >= 0 ? "\u25B2" : "\u25BC"}{Math.abs(item.changePct).toFixed(1)}%
@@ -260,7 +263,8 @@ export default function DashboardTab({
               width: "100%",
               background: "none",
               border: "none",
-              padding: 0,
+              borderLeft: "4px solid #C9A96E",
+              padding: "0 0 0 16px",
               cursor: "pointer",
             }}
           >
@@ -268,10 +272,11 @@ export default function DashboardTab({
               style={{
                 fontSize: 22,
                 fontWeight: 700,
-                color: "var(--foreground-bright)",
+                color: "#C9A96E",
                 lineHeight: 1.35,
                 letterSpacing: "-0.01em",
                 margin: 0,
+                fontFamily: "var(--font-heading)",
               }}
             >
               {!heroArticle.isRead && (
@@ -422,9 +427,10 @@ export default function DashboardTab({
                   style={{
                     fontSize: 28,
                     fontWeight: 800,
-                    color: "var(--foreground-bright)",
+                    color: "#C9A96E",
                     lineHeight: 1,
                     fontVariantNumeric: "tabular-nums",
+                    fontFamily: "var(--font-mono)",
                   }}
                 >
                   {stat.value}
@@ -461,7 +467,7 @@ export default function DashboardTab({
                 fontWeight: 600,
                 color: "var(--muted)",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.1em",
                 marginBottom: 10,
               }}
             >
@@ -519,7 +525,7 @@ export default function DashboardTab({
                 fontWeight: 600,
                 color: "var(--muted)",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.1em",
                 marginBottom: 8,
               }}
             >
@@ -549,6 +555,7 @@ export default function DashboardTab({
                         color: "var(--foreground-bright)",
                         width: 56,
                         flexShrink: 0,
+                        fontFamily: "var(--font-mono)",
                       }}
                     >
                       {item.symbol}
@@ -560,6 +567,7 @@ export default function DashboardTab({
                         fontWeight: 700,
                         color: "var(--foreground-bright)",
                         fontVariantNumeric: "tabular-nums",
+                        fontFamily: "var(--font-mono)",
                         marginLeft: "auto",
                       }}
                     >
@@ -570,9 +578,10 @@ export default function DashboardTab({
                         fontSize: 12,
                         fontWeight: 600,
                         fontVariantNumeric: "tabular-nums",
+                        fontFamily: "var(--font-mono)",
                         color: item.changePct >= 0
-                          ? "var(--accent-green, #22c55e)"
-                          : "var(--accent-red, #ef4444)",
+                          ? "#22c55e"
+                          : "#ef4444",
                         width: 52,
                         textAlign: "right",
                         flexShrink: 0,
@@ -594,7 +603,7 @@ export default function DashboardTab({
                 fontWeight: 600,
                 color: "var(--muted)",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.1em",
                 marginBottom: 8,
               }}
             >
@@ -625,7 +634,7 @@ export default function DashboardTab({
                           width: 5,
                           height: 5,
                           borderRadius: "50%",
-                          background: count > 0 ? "var(--accent-green, #22c55e)" : "var(--muted)",
+                          background: count > 0 ? "#22c55e" : "var(--muted)",
                           display: "inline-block",
                           flexShrink: 0,
                           position: "relative",

@@ -145,7 +145,7 @@ export function MarketsTab({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </span>
-            <h2 className="section-label text-[13px]">주요 시장 지표</h2>
+            <h2 className="section-label text-[13px] uppercase tracking-[0.1em]">주요 시장 지표</h2>
             {marketLoading && (
               <span className="ml-auto text-[9px] text-[var(--muted)] animate-pulse font-medium">
                 업데이트 중...
@@ -171,7 +171,7 @@ export function MarketsTab({
                   <div className="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1.5 pl-2">
                     {item.label}
                   </div>
-                  <div className="text-2xl font-extrabold text-[var(--foreground-bright)] tabular-nums leading-tight pl-2">
+                  <div className="text-2xl font-extrabold text-[var(--foreground-bright)] tabular-nums leading-tight pl-2 font-mono">
                     {item.price > 0 ? formatPrice(item.price, item.symbol) : "--"}
                   </div>
                   <div className="flex items-center gap-2 mt-2 pl-2">
@@ -216,7 +216,7 @@ export function MarketsTab({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </span>
-            <h2 className="section-label text-[13px]">내 포트폴리오</h2>
+            <h2 className="section-label text-[13px] uppercase tracking-[0.1em] border-l-[4px] border-[#C9A96E] pl-2">내 포트폴리오</h2>
 
             <div className="ml-auto flex items-center gap-2">
               {portfolioLoading && (
@@ -383,14 +383,14 @@ export function MarketsTab({
         </section>
 
         {/* ── Section 3: Popular Symbols ── */}
-        <section>
+        <section className="border-t border-[var(--border)] pt-8">
           <div className="flex items-center gap-3 mb-4">
             <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--accent-surface)]">
               <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
               </svg>
             </span>
-            <h2 className="section-label text-[13px]">인기 종목</h2>
+            <h2 className="section-label text-[13px] uppercase tracking-[0.1em]">인기 종목</h2>
           </div>
 
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">

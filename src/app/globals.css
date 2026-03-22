@@ -56,6 +56,8 @@
   --saved: #C9A96E;
   --danger: #dc2626;
   --success: #16a34a;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
   --info: #C9A96E;
   --warning: #C9A96E;
 
@@ -1137,6 +1139,8 @@ body {
   --saved: #C9A96E;
   --danger: #ef4444;
   --success: #4ade80;
+  --accent-green: #4ade80;
+  --accent-red: #f87171;
   --info: #C9A96E;
   --warning: #C9A96E;
 }

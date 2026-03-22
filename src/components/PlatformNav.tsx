@@ -83,10 +83,10 @@ export function PlatformNav({
           <span style={{ position: "relative", zIndex: 1 }}>RF</span>
         </div>
         <div className="flex flex-col">
-          <span className="font-heading text-[13px] font-extrabold leading-none tracking-[-0.03em] text-[var(--foreground-bright)]">
-            Ryzm Finance
+          <span className="font-heading text-[13px] font-extrabold leading-none tracking-[0.08em] text-[var(--foreground-bright)] uppercase">
+            RYZM FINANCE
           </span>
-          <span className="text-[8px] font-medium leading-none mt-[3px] text-[var(--muted)] tracking-[0.04em] uppercase">
+          <span className="font-mono text-[8px] font-medium leading-none mt-[3px] text-[var(--muted)] tracking-[0.04em] uppercase">
             macro &middot; charts &middot; reality checks
           </span>
         </div>
@@ -115,7 +115,7 @@ export function PlatformNav({
                 </span>
               )}
               {isActive && (
-                <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-[var(--accent)]" />
+                <span className="absolute bottom-0 left-3 right-3 h-[3px] bg-[var(--accent)]" />
               )}
             </button>
           );
