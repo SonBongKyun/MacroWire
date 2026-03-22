@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 
 export type MainTab = "dashboard" | "news" | "markets" | "analytics";
 
@@ -21,7 +21,10 @@ interface PlatformNavProps {
   notificationCount: number;
   onToggleNotifications: () => void;
   newArticleCount: number;
+  tags?: string[];
 }
+
+const SEARCH_HISTORY_KEY = "ryzm-finance-search-history";
 
 const tabs: { key: MainTab; label: string }[] = [
   { key: "dashboard", label: "홈" },
@@ -47,8 +50,73 @@ export function PlatformNav({
   notificationCount,
   onToggleNotifications,
   newArticleCount,
+  tags = [],
 }: PlatformNavProps) {
   const [now, setNow] = useState(Date.now());
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const autocompleteRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load search history
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SEARCH_HISTORY_KEY);
+      if (stored) setSearchHistory(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  // Close autocomplete on click outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowAutocomplete(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const matchingTags = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return tags.filter((t) => t.toLowerCase().includes(q));
+  }, [searchQuery, tags]);
+
+  const recentSearches = useMemo(() => {
+    return searchHistory.slice(0, 5);
+  }, [searchHistory]);
+
+  const shouldShowDropdown = searchFocused && searchQuery.trim().length > 0 && (matchingTags.length > 0 || recentSearches.length > 0);
+
+  const saveSearchHistory = useCallback((query: string) => {
+    if (!query.trim()) return;
+    setSearchHistory((prev) => {
+      const filtered = prev.filter((h) => h !== query);
+      const next = [query, ...filtered].slice(0, 10);
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      saveSearchHistory(searchQuery.trim());
+      setShowAutocomplete(false);
+      (e.target as HTMLInputElement).blur();
+    }
+    if (e.key === "Escape") {
+      setShowAutocomplete(false);
+      (e.target as HTMLInputElement).blur();
+    }
+  }, [searchQuery, saveSearchHistory]);
+
+  const handleSuggestionClick = useCallback((value: string) => {
+    onSearchChange(value);
+    saveSearchHistory(value);
+    setShowAutocomplete(false);
+  }, [onSearchChange, saveSearchHistory]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 60_000);
@@ -126,7 +194,7 @@ export function PlatformNav({
       <div className="flex-1" />
 
       {/* Right side: Search */}
-      <div className="relative shrink-0" style={{ width: 260, maxWidth: 260 }}>
+      <div ref={searchContainerRef} className="relative shrink-0" style={{ width: 260, maxWidth: 260 }}>
         <svg
           className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--muted)]"
           fill="none"
@@ -139,9 +207,12 @@ export function PlatformNav({
         <input
           id="wire-search"
           type="text"
-          placeholder="\uAE30\uC0AC, \uD0DC\uADF8, \uC18C\uC2A4 \uAC80\uC0C9..."
+          placeholder={"\uAE30\uC0AC, \uD0DC\uADF8, \uC18C\uC2A4 \uAC80\uC0C9..."}
           value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => { onSearchChange(e.target.value); setShowAutocomplete(true); }}
+          onFocus={() => { setSearchFocused(true); setShowAutocomplete(true); }}
+          onBlur={() => { setTimeout(() => setSearchFocused(false), 150); }}
+          onKeyDown={handleSearchKeyDown}
           className="w-full bg-[var(--surface-active)] border border-[var(--border)] rounded-[var(--radius-md)] pl-8 pr-14 py-[6px] text-[12px] placeholder-[var(--muted)] focus:outline-none search-input transition-all"
         />
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -161,6 +232,53 @@ export function PlatformNav({
             </kbd>
           )}
         </div>
+
+        {/* Autocomplete dropdown */}
+        {shouldShowDropdown && showAutocomplete && (
+          <div
+            ref={autocompleteRef}
+            className="absolute top-full left-0 right-0 mt-1 glass-modal rounded-[var(--radius-md)] border border-[var(--border)] shadow-lg overflow-hidden z-50"
+            style={{ maxHeight: 250, overflowY: "auto" }}
+          >
+            {matchingTags.length > 0 && (
+              <div className="px-3 pt-2.5 pb-1">
+                <span className="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wider">태그</span>
+                <div className="mt-1.5 flex flex-col">
+                  {matchingTags.map((tag) => (
+                    <button
+                      key={tag}
+                      onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(tag); }}
+                      className="text-left px-2 py-1.5 text-[11px] text-[var(--foreground)] hover:bg-[var(--surface-hover)] rounded-[var(--radius-sm)] transition-colors flex items-center gap-2"
+                    >
+                      <span className="text-[var(--accent)] text-[10px]">#</span>
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {recentSearches.length > 0 && (
+              <div className="px-3 pt-2 pb-2.5">
+                {matchingTags.length > 0 && <div className="border-t border-[var(--border-subtle)] mb-2" />}
+                <span className="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wider">최근 검색</span>
+                <div className="mt-1.5 flex flex-col">
+                  {recentSearches.map((q, i) => (
+                    <button
+                      key={`${q}-${i}`}
+                      onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(q); }}
+                      className="text-left px-2 py-1.5 text-[11px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] rounded-[var(--radius-sm)] transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-3 h-3 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="topbar-divider" />

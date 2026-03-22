@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { PortfolioPrice, PortfolioAsset } from "@/hooks/usePortfolio";
 
 interface MarketsTabProps {
@@ -62,6 +62,139 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
         strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+const DONUT_PALETTE = [
+  "#C9A96E", "#8C8C91", "#EBEBEB", "#2D2D32",
+  "#D4B878", "#A0A0A6", "#D0D0D0", "#44444A",
+  "#B8944F", "#6E6E73",
+];
+
+function PortfolioDonut({ prices }: { prices: PortfolioPrice[] }) {
+  const data = useMemo(() => {
+    const total = prices.reduce((sum, p) => sum + Math.abs(p.price), 0);
+    if (total === 0) return [];
+    return prices.map((p, i) => ({
+      label: p.label || p.symbol,
+      symbol: p.symbol,
+      value: Math.abs(p.price),
+      pct: (Math.abs(p.price) / total) * 100,
+      color: DONUT_PALETTE[i % DONUT_PALETTE.length],
+    }));
+  }, [prices]);
+
+  if (data.length === 0) return null;
+
+  const size = 150;
+  const cx = size / 2;
+  const cy = size / 2;
+  const outerR = 65;
+  const innerR = 40;
+
+  // Build arc paths
+  let cumAngle = -Math.PI / 2;
+  const arcs = data.map((d) => {
+    const angle = (d.pct / 100) * 2 * Math.PI;
+    const startAngle = cumAngle;
+    const endAngle = cumAngle + angle;
+    cumAngle = endAngle;
+
+    const largeArc = angle > Math.PI ? 1 : 0;
+    const x1o = cx + outerR * Math.cos(startAngle);
+    const y1o = cy + outerR * Math.sin(startAngle);
+    const x2o = cx + outerR * Math.cos(endAngle);
+    const y2o = cy + outerR * Math.sin(endAngle);
+    const x1i = cx + innerR * Math.cos(endAngle);
+    const y1i = cy + innerR * Math.sin(endAngle);
+    const x2i = cx + innerR * Math.cos(startAngle);
+    const y2i = cy + innerR * Math.sin(startAngle);
+
+    const path = [
+      `M ${x1o} ${y1o}`,
+      `A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2o} ${y2o}`,
+      `L ${x1i} ${y1i}`,
+      `A ${innerR} ${innerR} 0 ${largeArc} 0 ${x2i} ${y2i}`,
+      "Z",
+    ].join(" ");
+
+    return { ...d, path };
+  });
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-6 flex-wrap">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: "block", flexShrink: 0 }}>
+          {arcs.map((a) => (
+            <path key={a.symbol} d={a.path} fill={a.color} stroke="var(--surface)" strokeWidth="1.5">
+              <title>{`${a.label}: ${a.pct.toFixed(1)}%`}</title>
+            </path>
+          ))}
+          <text x={cx} y={cy - 4} textAnchor="middle" fill="var(--foreground-bright)" fontSize="18" fontWeight="800" fontFamily="var(--font-mono)">
+            {data.length}
+          </text>
+          <text x={cx} y={cy + 12} textAnchor="middle" fill="var(--muted)" fontSize="9" fontWeight="600">
+            assets
+          </text>
+        </svg>
+        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+          {data.map((d) => (
+            <div key={d.symbol} className="flex items-center gap-2 text-[11px]">
+              <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: d.color }} />
+              <span className="font-medium text-[var(--foreground-bright)] truncate flex-1">{d.label}</span>
+              <span className="font-bold text-[var(--foreground)] tabular-nums font-mono shrink-0">{d.pct.toFixed(1)}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarketHeatmap({ prices }: { prices: PortfolioPrice[] }) {
+  if (prices.length < 3) return null;
+
+  const maxPrice = Math.max(...prices.map((p) => p.price), 1);
+
+  return (
+    <section className="border-t border-[var(--border)] pt-8">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--accent-surface)]">
+          <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+        </span>
+        <h2 className="section-label text-[13px] uppercase tracking-[0.1em]">Market Heatmap</h2>
+      </div>
+      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-1.5">
+        {prices.map((p) => {
+          const isUp = p.changePct >= 0;
+          const magnitude = Math.min(Math.abs(p.changePct) / 5, 1);
+          const baseColor = isUp ? "22, 197, 94" : "239, 68, 68";
+          const alpha = 0.25 + magnitude * 0.65;
+          const textColor = alpha > 0.5 ? "#fff" : "var(--foreground-bright)";
+          return (
+            <div
+              key={p.symbol}
+              className="rounded-md flex flex-col items-center justify-center text-center transition-all hover:scale-105"
+              style={{
+                backgroundColor: `rgba(${baseColor}, ${alpha})`,
+                padding: "10px 6px",
+                minHeight: 56,
+              }}
+              title={`${p.label}: ${p.changePct >= 0 ? "+" : ""}${p.changePct.toFixed(2)}%`}
+            >
+              <span className="text-[10px] font-bold truncate max-w-full" style={{ color: textColor }}>
+                {p.symbol}
+              </span>
+              <span className="text-[12px] font-extrabold tabular-nums font-mono" style={{ color: textColor }}>
+                {isUp ? "+" : ""}{p.changePct.toFixed(2)}%
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -154,7 +287,18 @@ export function MarketsTab({
           </div>
 
           <div className="grid grid-cols-4 gap-3">
-            {marketItems.map((item) => {
+            {marketLoading && marketData.length === 0 ? (
+              [1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="relative bg-[var(--surface)] border border-[var(--border-subtle)] rounded-lg p-4 overflow-hidden"
+                >
+                  <div className="skeleton" style={{ height: 10, width: "50%", marginBottom: 10, borderRadius: 4 }} />
+                  <div className="skeleton" style={{ height: 24, width: "70%", marginBottom: 10, borderRadius: 4 }} />
+                  <div className="skeleton" style={{ height: 12, width: "40%", borderRadius: 4 }} />
+                </div>
+              ))
+            ) : marketItems.map((item) => {
               const isUp = item.changePct >= 0;
               const borderColor = isUp ? "var(--success)" : "var(--danger)";
               return (
@@ -206,6 +350,10 @@ export function MarketsTab({
               );
             })}
           </div>
+
+          {/* Market Heatmap */}
+
+          <MarketHeatmap prices={portfolioPrices} />
         </section>
 
         {/* ── Section 2: Portfolio ── */}
@@ -245,6 +393,11 @@ export function MarketsTab({
               </button>
             </div>
           </div>
+
+          {/* Portfolio donut chart */}
+          {portfolioPrices.length > 0 && (
+            <PortfolioDonut prices={portfolioPrices} />
+          )}
 
           <div className="bg-[var(--surface)] rounded-lg border border-[var(--border-subtle)] overflow-hidden shadow-sm">
             <table className="portfolio-table">
@@ -323,19 +476,22 @@ export function MarketsTab({
                           </>
                         ) : (
                           <>
-                            <div className="w-12 h-12 rounded-xl bg-[var(--surface-active)] flex items-center justify-center">
-                              <svg className="w-6 h-6 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                            <div className="w-16 h-16 rounded-2xl bg-[var(--accent-surface)] flex items-center justify-center mb-1">
+                              <svg className="w-8 h-8 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                               </svg>
                             </div>
                             <div className="text-center">
-                              <p className="text-[12px] font-semibold text-[var(--foreground-secondary)]">
-                                종목을 추가하세요
+                              <p className="text-[15px] font-bold text-[var(--foreground-bright)]">
+                                포트폴리오에 종목을 추가하세요
                               </p>
-                              <p className="text-[10px] text-[var(--muted)] mt-0.5">
-                                아래 인기 종목에서 선택하거나 직접 추가할 수 있습니다
+                              <p className="text-[12px] text-[var(--muted)] mt-1">
+                                아래 인기 종목에서 바로 추가할 수 있습니다
                               </p>
                             </div>
+                            <svg className="w-5 h-5 text-[var(--muted)] mt-2 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
                           </>
                         )}
                       </div>

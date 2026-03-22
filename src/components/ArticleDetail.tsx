@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import type { Article } from "@/types";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { RelatedArticles } from "@/components/RelatedArticles";
@@ -73,12 +73,33 @@ export function ArticleDetail({
   const [toastExiting, setToastExiting] = useState(false);
   const [newCollectionInput, setNewCollectionInput] = useState("");
   const [readProgress, setReadProgress] = useState(0);
+  const [noteText, setNoteText] = useState("");
+  const [notesOpen, setNotesOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Load note from localStorage on article change
   useEffect(() => {
     setReadProgress(0);
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    if (article?.id) {
+      const saved = localStorage.getItem(`ryzm-finance-notes-${article.id}`);
+      setNoteText(saved || "");
+    } else {
+      setNoteText("");
+    }
   }, [article?.id]);
+
+  // Auto-save note to localStorage
+  useEffect(() => {
+    if (!article?.id) return;
+    if (noteText) {
+      localStorage.setItem(`ryzm-finance-notes-${article.id}`, noteText);
+    } else {
+      localStorage.removeItem(`ryzm-finance-notes-${article.id}`);
+    }
+  }, [noteText, article?.id]);
+
+  const hasNote = noteText.trim().length > 0;
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -108,6 +129,14 @@ export function ArticleDetail({
     const text = `${article.title}\n${article.url}`;
     navigator.clipboard.writeText(text).then(() => {
       showToast("제목 + URL이 복사되었습니다");
+    });
+  }, [article, showToast]);
+
+  const shareArticle = useCallback(() => {
+    if (!article) return;
+    const text = `${article.title}\n${article.url}\n\nvia RYZM FINANCE`;
+    navigator.clipboard.writeText(text).then(() => {
+      showToast("공유 텍스트가 복사되었습니다");
     });
   }, [article, showToast]);
 
@@ -160,6 +189,11 @@ export function ArticleDetail({
           {article.isSaved && (
             <span className="text-[9px] font-semibold text-[var(--accent)]">
               ★ 저장됨
+            </span>
+          )}
+          {hasNote && (
+            <span className="text-[9px] font-semibold text-[var(--foreground-secondary)]">
+              메모
             </span>
           )}
           {/* Reading time estimation */}
@@ -254,6 +288,34 @@ export function ArticleDetail({
           </div>
         )}
 
+        {/* Notes section */}
+        <div className="mt-4">
+          <button
+            onClick={() => setNotesOpen((v) => !v)}
+            className="flex items-center gap-1.5 w-full text-left group"
+          >
+            <svg className={`w-2.5 h-2.5 text-[var(--muted)] transition-transform ${notesOpen ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+            <span className="section-label" style={{ marginBottom: 0 }}>메모</span>
+            {hasNote && (
+              <span className="text-[9px] text-[var(--accent)] font-semibold">1</span>
+            )}
+          </button>
+          {notesOpen && (
+            <div className="mt-2">
+              <textarea
+                rows={3}
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="이 기사에 대한 메모..."
+                className="w-full bg-[var(--surface-active)] border border-[var(--border)] rounded-[var(--radius-sm)] px-3 py-2 text-[12px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] resize-none metal-inset"
+                style={{ fontSize: 12 }}
+              />
+            </div>
+          )}
+        </div>
+
         {/* Related Articles (#7) */}
         {articles.length > 0 && onSelectArticle && (
           <RelatedArticles
@@ -345,6 +407,16 @@ export function ArticleDetail({
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+          </svg>
+        </button>
+        {/* Share */}
+        <button
+          onClick={shareArticle}
+          className="px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
+          title="공유"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
         </button>
         <button

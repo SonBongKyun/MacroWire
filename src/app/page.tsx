@@ -20,6 +20,7 @@ import DashboardTab from "@/components/DashboardTab";
 import { NewsTab } from "@/components/NewsTab";
 import { MarketsTab } from "@/components/MarketsTab";
 import { AnalyticsTab } from "@/components/AnalyticsTab";
+import { ToastProvider, useToast } from "@/components/Toast";
 
 const POLL_INTERVAL = 5 * 60;
 
@@ -53,6 +54,15 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount }: 
 }
 
 export default function Home() {
+  return (
+    <ToastProvider>
+      <HomeInner />
+    </ToastProvider>
+  );
+}
+
+function HomeInner() {
+  const { showToast } = useToast();
   // Core data
   const [sources, setSources] = useState<Source[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -205,9 +215,10 @@ export default function Home() {
       await fetchArticles();
       await fetchSources();
       setCountdown(POLL_INTERVAL);
-    } catch (err) { console.error("Ingest failed:", err); }
+      showToast(`기사 수집 완료: ${result.added ?? 0}건 추가`);
+    } catch (err) { console.error("Ingest failed:", err); showToast("기사 수집 실패", "error"); }
     finally { setIngesting(false); }
-  }, [fetchArticles, fetchSources]);
+  }, [fetchArticles, fetchSources, showToast]);
 
   const handleAddSource = useCallback(async (data: { name: string; feedUrl: string; category: string }) => {
     try {
@@ -231,8 +242,9 @@ export default function Home() {
       const json = await res.json();
       setArticles((prev) => prev.map((a) => (a.id === article.id ? { ...a, isSaved: json.isSaved } : a)));
       if (selectedArticle?.id === article.id) setSelectedArticle((prev) => prev ? { ...prev, isSaved: json.isSaved } : null);
+      showToast(json.isSaved ? "저장됨" : "저장 해제");
     } catch (err) { console.error("Toggle save failed:", err); }
-  }, [selectedArticle]);
+  }, [selectedArticle, showToast]);
 
   const selectArticle = useCallback((article: Article) => {
     setSelectedArticle(article);
@@ -249,8 +261,9 @@ export default function Home() {
       await fetch("/api/articles/batch-read", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ articleIds: unreadIds }) });
       setArticles((prev) => prev.map((a) => ({ ...a, isRead: true })));
       if (selectedArticle) setSelectedArticle((prev) => (prev ? { ...prev, isRead: true } : null));
+      showToast("전체 읽음 처리");
     } catch (err) { console.error("Batch read failed:", err); }
-  }, [articles, selectedArticle]);
+  }, [articles, selectedArticle, showToast]);
 
   const exportSaved = useCallback(() => {
     const saved = articles.filter((a) => a.isSaved);
@@ -264,7 +277,8 @@ export default function Home() {
     link.download = `ryzm-finance-saved-${new Date().toISOString().slice(0, 10)}.md`;
     link.click();
     URL.revokeObjectURL(url);
-  }, [articles]);
+    showToast("내보내기 완료");
+  }, [articles, showToast]);
 
   // Initial load
   useEffect(() => { fetchSources(); }, [fetchSources]);
@@ -387,6 +401,7 @@ export default function Home() {
         notificationCount={notifications.store.rules.filter((r) => r.enabled).length}
         onToggleNotifications={() => setNotificationPanelOpen((v) => !v)}
         newArticleCount={newArticleCount}
+        tags={allTags}
       />
 
       {/* Market Ticker — always visible */}

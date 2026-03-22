@@ -1,11 +1,14 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import type { Article, Source } from "@/types";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
 import { TodayPulse } from "@/components/TodayPulse";
 import { SpikeAlert } from "@/components/SpikeAlert";
 import { NewsTimeline } from "@/components/NewsTimeline";
+
+type SortMode = "newest" | "oldest" | "source";
 
 interface NewsTabProps {
   articles: Article[];
@@ -100,7 +103,26 @@ export function NewsTab({
   onCollectionChange,
   onCreateCollection,
 }: NewsTabProps) {
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
   const unreadCount = articles.filter((a) => !a.isRead).length;
+
+  const sortedArticles = useMemo(() => {
+    const list = [...articles];
+    switch (sortMode) {
+      case "newest":
+        return list.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+      case "oldest":
+        return list.sort((a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime());
+      case "source":
+        return list.sort((a, b) => {
+          const cmp = a.sourceName.localeCompare(b.sourceName);
+          if (cmp !== 0) return cmp;
+          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+        });
+      default:
+        return list;
+    }
+  }, [articles, sortMode]);
 
   /* Collect active filter chips for dismissable display */
   const activeFilters: Array<{ key: string; label: string; onClear: () => void }> = [];
@@ -258,9 +280,25 @@ export function NewsTab({
             </button>
           </div>
 
+          {/* Sort dropdown */}
+          <div className="relative">
+            <select
+              value={sortMode}
+              onChange={(e) => setSortMode(e.target.value as SortMode)}
+              className="appearance-none text-[12px] font-medium bg-[var(--surface)] border border-[var(--border-subtle)] rounded-[var(--radius-sm)] pl-2.5 pr-7 py-1.5 text-[var(--foreground)] outline-none cursor-pointer min-w-[90px] hover:border-[var(--accent)] transition-colors"
+            >
+              <option value="newest">최신순</option>
+              <option value="oldest">오래된순</option>
+              <option value="source">소스별</option>
+            </select>
+            <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--muted)] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+
           {/* Article count badge */}
           <span className="inline-flex items-center px-2 py-1 text-[10px] tabular-nums font-bold text-[var(--muted)] bg-[var(--surface-active)] rounded-full border border-[var(--border-subtle)]">
-            {articles.length}
+            {sortedArticles.length}
             <span className="font-normal ml-0.5">건</span>
           </span>
 
@@ -329,13 +367,47 @@ export function NewsTab({
         {/* Left column */}
         <div className="news-main overflow-y-auto">
           {/* SpikeAlert at top of article list */}
-          <SpikeAlert articles={articles} onTagClick={onTagClick} />
+          <SpikeAlert articles={sortedArticles} onTagClick={onTagClick} />
 
-          {timelineMode ? (
-            <NewsTimeline articles={articles} onSelectArticle={onSelectArticle} />
+          {sortedArticles.length === 0 && !loading ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 20px", textAlign: "center" }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "var(--foreground-bright)", marginBottom: 6 }}>
+                {activeFilters.length > 0 || searchQuery ? "검색 결과가 없습니다" : "기사가 없습니다"}
+              </div>
+              {(activeFilters.length > 0 || searchQuery) ? (
+                <>
+                  <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16, lineHeight: 1.6 }}>
+                    현재 필터:{" "}
+                    {activeFilters.map((f) => f.label).join(", ")}
+                    {searchQuery && ((activeFilters.length > 0 ? ", " : "") + `"${searchQuery}"`)}
+                  </div>
+                  <button
+                    onClick={() => { activeFilters.forEach((f) => f.onClear()); }}
+                    style={{
+                      padding: "8px 20px",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: "var(--accent)",
+                      background: "var(--accent-surface)",
+                      border: "1px solid var(--accent)",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                    }}
+                  >
+                    필터 초기화
+                  </button>
+                </>
+              ) : (
+                <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.6, maxWidth: 300 }}>
+                  새로고침 버튼을 눌러 기사를 수집하거나 소스를 추가해 보세요
+                </div>
+              )}
+            </div>
+          ) : timelineMode ? (
+            <NewsTimeline articles={sortedArticles} onSelectArticle={onSelectArticle} />
           ) : (
             <ArticleList
-              articles={articles}
+              articles={sortedArticles}
               loading={loading}
               selectedArticleId={selectedArticle?.id || null}
               onSelectArticle={onSelectArticle}
@@ -364,7 +436,7 @@ export function NewsTab({
               collectionNames={collectionNames}
               onCollectionChange={onCollectionChange}
               onCreateCollection={onCreateCollection}
-              articles={articles}
+              articles={sortedArticles}
               onSelectArticle={onSelectArticle}
             />
           ) : (
@@ -381,7 +453,7 @@ export function NewsTab({
                 </h3>
               </div>
               <div className="flex-1 overflow-y-auto">
-                <TodayPulse articles={articles} />
+                <TodayPulse articles={sortedArticles} />
               </div>
             </div>
           )}

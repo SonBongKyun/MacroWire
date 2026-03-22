@@ -1,10 +1,35 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import type { Article, Source } from "@/types";
 import type { PortfolioPrice } from "@/hooks/usePortfolio";
 import type { WatchlistStore } from "@/hooks/useWatchlist";
 import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
+
+const ECON_EVENTS = [
+  { date: "2026-03-18", title: "FOMC 회의 시작", region: "미국", importance: "high" },
+  { date: "2026-03-19", title: "FOMC 금리 결정", region: "미국", importance: "high" },
+  { date: "2026-03-13", title: "한은 금통위", region: "한국", importance: "high" },
+  { date: "2026-03-10", title: "미국 CPI 발표", region: "미국", importance: "high" },
+  { date: "2026-03-07", title: "미국 고용보고서", region: "미국", importance: "high" },
+  { date: "2026-03-04", title: "한국 CPI 발표", region: "한국", importance: "medium" },
+  { date: "2026-03-05", title: "ECB 금리 결정", region: "유럽", importance: "high" },
+  { date: "2026-03-12", title: "미국 PPI 발표", region: "미국", importance: "medium" },
+  { date: "2026-03-20", title: "일본은행 금리 결정", region: "일본", importance: "high" },
+  { date: "2026-03-25", title: "한국 소비자심리지수", region: "한국", importance: "medium" },
+  { date: "2026-03-27", title: "미국 4Q GDP 최종", region: "미국", importance: "medium" },
+  { date: "2026-03-28", title: "미국 PCE 물가", region: "미국", importance: "high" },
+  { date: "2026-04-02", title: "FOMC 의사록 공개", region: "미국", importance: "medium" },
+  { date: "2026-04-10", title: "미국 CPI 발표", region: "미국", importance: "high" },
+  { date: "2026-04-16", title: "ECB 금리 결정", region: "유럽", importance: "high" },
+];
+
+const REGION_TAG_COLORS: Record<string, string> = {
+  "미국": "#C9A96E",
+  "한국": "#C9A96E",
+  "유럽": "#8C8C91",
+  "일본": "#8C8C91",
+};
 
 interface MarketItem {
   symbol: string;
@@ -67,6 +92,193 @@ function MiniSparkline({ data }: { data: number[] }) {
         points={points}
       />
     </svg>
+  );
+}
+
+function ArticleVolumeChart({ articles }: { articles: Article[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const hourlyData = useMemo(() => {
+    const now = Date.now();
+    const currentHour = new Date().getHours();
+    const counts = new Array(24).fill(0);
+    const cutoff = now - 24 * 60 * 60 * 1000;
+    for (const a of articles) {
+      const t = new Date(a.publishedAt).getTime();
+      if (t >= cutoff && t <= now) {
+        const h = new Date(a.publishedAt).getHours();
+        counts[h] += 1;
+      }
+    }
+    return { counts, currentHour };
+  }, [articles]);
+
+  const maxCount = Math.max(...hourlyData.counts, 1);
+  const svgHeight = 60;
+  const barGap = 1;
+  const w = containerWidth || 400;
+  const barWidth = Math.max((w - barGap * 23) / 24, 2);
+
+  return (
+    <div ref={containerRef} style={{ width: "100%", marginBottom: 24 }}>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: "var(--muted)",
+          textTransform: "uppercase" as const,
+          letterSpacing: "0.1em",
+          marginBottom: 8,
+        }}
+      >
+        24H Activity
+      </div>
+      <svg
+        width={w}
+        height={svgHeight + 18}
+        viewBox={`0 0 ${w} ${svgHeight + 18}`}
+        style={{ display: "block" }}
+      >
+        <style>{`
+          .vol-bar:hover { opacity: 1 !important; }
+          .vol-bar:hover + .vol-tip { display: block; }
+          .vol-tip { display: none; }
+        `}</style>
+        {hourlyData.counts.map((count, i) => {
+          const barH = maxCount > 0 ? (count / maxCount) * svgHeight : 0;
+          const isCurrent = i === hourlyData.currentHour;
+          const x = i * (barWidth + barGap);
+          const y = svgHeight - barH;
+          return (
+            <g key={i}>
+              <rect
+                className="vol-bar"
+                x={x}
+                y={y}
+                width={barWidth}
+                height={Math.max(barH, 1)}
+                fill={isCurrent ? "#D4B878" : "#C9A96E"}
+                opacity={isCurrent ? 1 : 0.7}
+                rx={1}
+              >
+                <title>{`${String(i).padStart(2, "0")}:00 — ${count}건`}</title>
+              </rect>
+              {i % 6 === 0 && (
+                <text
+                  x={x + barWidth / 2}
+                  y={svgHeight + 14}
+                  textAnchor="middle"
+                  fill="var(--muted)"
+                  fontSize="9"
+                  fontFamily="var(--font-mono)"
+                >
+                  {String(i).padStart(2, "0")}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function EconomicCalendar() {
+  const upcomingEvents = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return ECON_EVENTS
+      .filter((ev) => ev.date >= today)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 5);
+  }, []);
+
+  return (
+    <div>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: "var(--muted)",
+          textTransform: "uppercase" as const,
+          letterSpacing: "0.1em",
+          marginBottom: 8,
+        }}
+      >
+        Economic Calendar
+      </div>
+      {upcomingEvents.length === 0 ? (
+        <div style={{ fontSize: 12, color: "var(--muted)" }}>예정된 이벤트 없음</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {upcomingEvents.map((ev, idx) => (
+            <div
+              key={`${ev.date}-${ev.title}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "8px 0",
+                borderBottom: idx < upcomingEvents.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                borderLeft: ev.importance === "high" ? "4px solid #C9A96E" : "4px solid transparent",
+                paddingLeft: 10,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--muted)",
+                  flexShrink: 0,
+                  width: 52,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {ev.date.slice(5)}
+              </span>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "var(--foreground-bright)",
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {ev.title}
+              </span>
+              <span
+                style={{
+                  fontSize: 9,
+                  fontWeight: 600,
+                  padding: "2px 6px",
+                  borderRadius: 3,
+                  color: REGION_TAG_COLORS[ev.region] || "#8C8C91",
+                  background: `${REGION_TAG_COLORS[ev.region] || "#8C8C91"}15`,
+                  flexShrink: 0,
+                }}
+              >
+                {ev.region}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -252,6 +464,80 @@ export default function DashboardTab({
         </div>
       </div>
 
+      {/* ── Empty State ── */}
+      {articles.length === 0 && marketData.length === 0 && !marketLoading && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "80px 20px",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              color: "var(--foreground-bright)",
+              marginBottom: 8,
+              fontFamily: "var(--font-heading)",
+            }}
+          >
+            데이터를 수집하세요
+          </div>
+          <div
+            style={{
+              fontSize: 13,
+              color: "var(--muted)",
+              maxWidth: 360,
+              lineHeight: 1.6,
+              marginBottom: 20,
+            }}
+          >
+            새로고침 버튼을 눌러 최신 기사와 시장 데이터를 불러올 수 있습니다
+          </div>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 24px",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "#fff",
+              background: "var(--accent)",
+              borderRadius: 6,
+              cursor: "default",
+            }}
+            className="btn-primary"
+          >
+            첫 수집 시작
+          </div>
+        </div>
+      )}
+
+      {/* ── Hero Skeleton ── */}
+      {!heroArticle && articles.length === 0 && (marketData.length > 0 || marketLoading) && (
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ borderLeft: "4px solid var(--border-subtle)", paddingLeft: 16 }}>
+            <div className="skeleton" style={{ height: 24, width: "70%", marginBottom: 10, borderRadius: 4 }} />
+            <div className="skeleton" style={{ height: 14, width: "45%", marginBottom: 6, borderRadius: 4 }} />
+            <div className="skeleton" style={{ height: 14, width: "30%", borderRadius: 4 }} />
+          </div>
+          {/* Stats row skeleton */}
+          <div style={{ display: "flex", gap: 32, marginTop: 24 }}>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i}>
+                <div className="skeleton" style={{ height: 28, width: 48, marginBottom: 6, borderRadius: 4 }} />
+                <div className="skeleton" style={{ height: 12, width: 60, borderRadius: 4 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Hero News ── */}
       {heroArticle && (
         <div style={{ marginBottom: 28 }}>
@@ -396,6 +682,9 @@ export default function DashboardTab({
           )}
         </div>
       )}
+
+      {/* ── 24H Article Volume ── */}
+      <ArticleVolumeChart articles={articles} />
 
       {/* ── Bottom: Asymmetric 2-column ── */}
       <div
@@ -664,6 +953,11 @@ export default function DashboardTab({
                 })}
               </div>
             )}
+          </div>
+
+          {/* Economic Calendar */}
+          <div style={{ marginTop: 24 }}>
+            <EconomicCalendar />
           </div>
         </div>
       </div>
