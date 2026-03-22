@@ -130,7 +130,7 @@ function HomeInner() {
   const [showSaved, setShowSaved] = useState(false);
   const [readFilter, setReadFilter] = useState<"all" | "unread" | "read">("all");
   const [regionFilter, setRegionFilter] = useState<string>("전체");
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [countdown, setCountdown] = useState(POLL_INTERVAL);
   const [showHelp, setShowHelp] = useState(false);
   const [newArticleCount, setNewArticleCount] = useState(0);
@@ -162,10 +162,13 @@ function HomeInner() {
     localStorage.setItem("ryzm-finance-tab", activeMainTab);
   }, [activeMainTab]);
 
-  // Init dark mode
+  // Init dark mode (default: dark per RYZM brand kit)
   useEffect(() => {
     const stored = localStorage.getItem("ryzm-finance-dark");
-    if (stored === "true") {
+    if (stored === "false") {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    } else {
       setDarkMode(true);
       document.documentElement.classList.add("dark");
     }
