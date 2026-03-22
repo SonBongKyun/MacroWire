@@ -23,43 +23,11 @@ interface PlatformNavProps {
   newArticleCount: number;
 }
 
-const tabs: { key: MainTab; label: string; icon: React.ReactNode }[] = [
-  {
-    key: "dashboard",
-    label: "\uB300\uC2DC\uBCF4\uB4DC",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-      </svg>
-    ),
-  },
-  {
-    key: "news",
-    label: "\uB274\uC2A4",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-      </svg>
-    ),
-  },
-  {
-    key: "markets",
-    label: "\uC2DC\uC7A5",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>
-    ),
-  },
-  {
-    key: "analytics",
-    label: "\uBD84\uC11D",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
-  },
+const tabs: { key: MainTab; label: string }[] = [
+  { key: "dashboard", label: "홈" },
+  { key: "news", label: "뉴스" },
+  { key: "markets", label: "시장" },
+  { key: "analytics", label: "분석" },
 ];
 
 export function PlatformNav({
@@ -126,32 +94,28 @@ export function PlatformNav({
 
       <div className="topbar-divider" />
 
-      {/* Center: Tab Navigation */}
-      <nav className="flex items-center gap-0.5 shrink-0">
+      {/* Tab Navigation — text only, clean */}
+      <nav className="flex items-center h-full shrink-0">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
             <button
               key={tab.key}
               onClick={() => onTabChange(tab.key)}
-              className={`relative flex items-center gap-1.5 px-4 py-2 text-[13px] rounded-[var(--radius-sm)] transition-all ${
+              className={`relative h-full flex items-center px-4 text-[13px] transition-colors ${
                 isActive
-                  ? "font-bold text-[var(--accent)] bg-[var(--accent-surface)]"
-                  : "font-medium text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
+                  ? "font-bold text-[var(--foreground-bright)]"
+                  : "font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >
-              {tab.icon}
-              <span>{tab.label}</span>
+              {tab.label}
               {tab.key === "news" && newArticleCount > 0 && (
-                <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[9px] font-bold rounded-full bg-[var(--accent)] text-white leading-none">
+                <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[9px] font-bold rounded-full bg-[var(--danger)] text-white leading-none">
                   {newArticleCount > 99 ? "99+" : newArticleCount}
                 </span>
               )}
               {isActive && (
-                <span
-                  className="absolute bottom-0 left-2 right-2 h-[3px] rounded-full"
-                  style={{ background: "var(--accent-gradient, var(--accent))" }}
-                />
+                <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-[var(--accent)]" />
               )}
             </button>
           );
