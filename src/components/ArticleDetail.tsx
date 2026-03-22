@@ -153,27 +153,29 @@ export function ArticleDetail({
 
   if (!article) {
     return (
-      <aside className="w-[440px] shrink-0 bg-[var(--surface-flat)] border-l border-[var(--border)] flex flex-col items-center justify-center gap-5 select-none">
-        <div className="empty-state-icon" style={{ width: 64, height: 64 }}>
-          <svg className="w-7 h-7 text-[var(--accent)] opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <aside className="shrink-0 bg-[#0D0D0F] flex flex-col items-center justify-center gap-4 select-none" style={{ width: "100%", height: "100%" }}>
+        <div style={{ opacity: 0.3 }}>
+          <svg style={{ width: 40, height: 40, color: "#8C8C91" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
           </svg>
         </div>
-        <div className="text-center px-8">
-          <p className="text-[14px] text-[var(--foreground-secondary)] font-semibold">기사를 선택하세요</p>
-          <p className="text-[11px] text-[var(--muted)] mt-2 leading-relaxed">
-            왼쪽 목록에서 기사를 클릭하거나<br />
-            <kbd className="kbd-key mx-0.5" style={{ fontSize: '9px', height: '16px', minWidth: '16px', padding: '0 4px' }}>j</kbd>
-            <kbd className="kbd-key mx-0.5" style={{ fontSize: '9px', height: '16px', minWidth: '16px', padding: '0 4px' }}>k</kbd>
-            키로 이동할 수 있습니다
+        <div style={{ textAlign: "center", padding: "0 32px" }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "#EBEBEB" }}>기사를 선택하세요</p>
+          <p style={{ fontSize: 11, color: "#8C8C91", marginTop: 8, lineHeight: 1.6 }}>
+            왼쪽 목록에서 기사를 클릭하거나
           </p>
+          <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 8 }}>
+            <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>j</kbd>
+            <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>k</kbd>
+            <span style={{ fontSize: 10, color: "#8C8C91" }}>키로 이동</span>
+          </div>
         </div>
       </aside>
     );
   }
 
   return (
-    <aside key={article.id} className="w-[440px] shrink-0 bg-[var(--surface-flat)] border-l border-[var(--border)] flex flex-col overflow-hidden relative detail-enter">
+    <aside key={article.id} className="shrink-0 bg-[#0D0D0F] flex flex-col overflow-hidden relative detail-enter" style={{ width: "100%", height: "100%" }}>
       {/* Reading progress bar */}
       <div className="reading-progress" style={{ width: `${readProgress * 100}%` }} />
 

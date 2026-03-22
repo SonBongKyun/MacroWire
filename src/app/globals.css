@@ -1734,3 +1734,99 @@ button:active { transform: scale(0.98); }
 
 /* Cursor styles — pointer on interactive elements */
 [role="button"], button, a, select { cursor: pointer; }
+
+/* ══════════════════════════════════════
+   DASHBOARD SECTIONS
+   ══════════════════════════════════════ */
+
+.dash-section-title {
+  font-family: var(--font-heading), "Space Grotesk", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.dash-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+.dash-row:hover {
+  background: var(--surface-hover);
+}
+.dash-row:last-child {
+  border-bottom: none;
+}
+
+.market-strip {
+  display: flex;
+  align-items: center;
+  background: var(--surface-flat);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  gap: 0;
+}
+.market-strip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 24px;
+}
+.market-strip-item:first-child {
+  padding-left: 0;
+}
+.market-strip-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.dash-two-col {
+  display: grid;
+  grid-template-columns: 65fr 35fr;
+  gap: 0;
+  min-height: 0;
+}
+.dash-left-col {
+  padding: 24px 32px 24px 24px;
+  border-right: 1px solid var(--border-subtle);
+}
+.dash-right-col {
+  padding: 24px;
+}
+
+.dash-separator {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 16px 0;
+}
+
+.dash-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.dash-stat-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.dash-price-row:last-child {
+  border-bottom: none;
+}
