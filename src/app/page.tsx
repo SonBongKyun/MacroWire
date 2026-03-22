@@ -21,6 +21,9 @@ import { NewsTab } from "@/components/NewsTab";
 import { MarketsTab } from "@/components/MarketsTab";
 import { AnalyticsTab } from "@/components/AnalyticsTab";
 import { ToastProvider, useToast } from "@/components/Toast";
+import { SplitViewPanel } from "@/components/SplitViewPanel";
+import { ArticleList } from "@/components/ArticleList";
+import { ArticleDetail } from "@/components/ArticleDetail";
 
 const POLL_INTERVAL = 5 * 60;
 
@@ -89,7 +92,7 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
       {sep}
       <span className="text-[9px] tabular-nums text-[var(--muted)] opacity-70">수집 {ingestTime}</span>
       <div className="flex-1" />
-      <span className="text-[9px] text-[var(--muted)] opacity-40 tracking-wide">j/k  s  /  ?</span>
+      <span className="text-[9px] text-[var(--muted)] opacity-40 tracking-wide">j/k  s  /  Tab  n  h  ?</span>
     </div>
   );
 }
@@ -153,6 +156,7 @@ function HomeInner() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
   const [timelineMode, setTimelineMode] = useState(false);
+  const [splitView, setSplitView] = useState(false);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -385,10 +389,26 @@ function HomeInner() {
 
   // Keyboard shortcuts
   useEffect(() => {
+    const TAB_ORDER: MainTab[] = ["dashboard", "news", "markets", "analytics"];
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); setCommandPaletteOpen(true); return; }
+      // Ctrl+Shift+S: toggle split view
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "S") { e.preventDefault(); setSplitView((v) => !v); return; }
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      // Tab / Shift+Tab: cycle main tabs
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const curIdx = TAB_ORDER.indexOf(activeMainTab);
+        if (e.shiftKey) {
+          const prevIdx = curIdx <= 0 ? TAB_ORDER.length - 1 : curIdx - 1;
+          setActiveMainTab(TAB_ORDER[prevIdx]);
+        } else {
+          const nextIdx = curIdx >= TAB_ORDER.length - 1 ? 0 : curIdx + 1;
+          setActiveMainTab(TAB_ORDER[nextIdx]);
+        }
+        return;
+      }
       switch (e.key) {
         case "?": e.preventDefault(); setShowHelp((v) => !v); break;
         case "/": e.preventDefault(); document.getElementById("wire-search")?.focus(); break;
@@ -396,6 +416,8 @@ function HomeInner() {
         case "k": if (activeMainTab === "news") { e.preventDefault(); const idx = filteredArticles.findIndex((a) => a.id === selectedArticle?.id); const prev = Math.max(idx - 1, 0); if (filteredArticles[prev]) selectArticle(filteredArticles[prev]); } break;
         case "s": if (selectedArticle) { e.preventDefault(); toggleSave(selectedArticle); } break;
         case "o": if (selectedArticle) { e.preventDefault(); window.open(selectedArticle.url, "_blank"); } break;
+        case "n": e.preventDefault(); setActiveMainTab("news"); break;
+        case "h": e.preventDefault(); setActiveMainTab("dashboard"); break;
         case "1": e.preventDefault(); setRange("24h"); break;
         case "2": e.preventDefault(); setRange("7d"); break;
         case "3": e.preventDefault(); setRange("30d"); break;
@@ -408,7 +430,7 @@ function HomeInner() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [ingesting, runIngest, toggleDarkMode, markAllRead, exportSaved, selectedArticle, filteredArticles, selectArticle, toggleSave, activeMainTab]);
+  }, [ingesting, runIngest, toggleDarkMode, markAllRead, exportSaved, selectedArticle, filteredArticles, selectArticle, toggleSave, activeMainTab, splitView]);
 
   return (
     <div className="flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -431,6 +453,8 @@ function HomeInner() {
         onToggleNotifications={() => setNotificationPanelOpen((v) => !v)}
         newArticleCount={newArticleCount}
         tags={allTags}
+        onToggleSplit={() => setSplitView((v) => !v)}
+        splitView={splitView}
       />
 
       {/* Market Ticker — always visible */}
@@ -452,7 +476,7 @@ function HomeInner() {
           />
         )}
 
-        {activeMainTab === "news" && (
+        {activeMainTab === "news" && !splitView && (
           <NewsTab
             articles={filteredArticles}
             selectedArticle={selectedArticle}
@@ -488,6 +512,71 @@ function HomeInner() {
             onCollectionChange={assignArticle}
             onCreateCollection={createCollection}
           />
+        )}
+
+        {activeMainTab === "news" && splitView && (
+          <div
+            className="flex-1 min-h-0"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "30% 40% 30%",
+              height: "100%",
+            }}
+          >
+            {/* Left: Compact Article List */}
+            <div className="overflow-y-auto border-r border-[#2D2D32]">
+              <ArticleList
+                articles={filteredArticles}
+                loading={loading}
+                selectedArticleId={selectedArticle?.id || null}
+                onSelectArticle={selectArticle}
+                onToggleSave={toggleSave}
+                onToggleRead={toggleRead}
+                hasMore={hasMore}
+                onLoadMore={() => fetchArticles(true)}
+                readFilter={readFilter}
+                onReadFilterChange={setReadFilter}
+                onTagClick={handleTagClick}
+                newArticleIds={newArticleIds}
+                viewMode="list"
+                onViewModeChange={setViewMode}
+              />
+            </div>
+
+            {/* Center: Article Detail */}
+            <div className="overflow-y-auto border-r border-[#2D2D32]">
+              {selectedArticle ? (
+                <ArticleDetail
+                  article={selectedArticle}
+                  onToggleRead={toggleRead}
+                  onToggleSave={toggleSave}
+                  onTagClick={handleTagClick}
+                  collectionName={selectedArticle ? getCollection(selectedArticle.id) : ""}
+                  collectionNames={collectionStore.names}
+                  onCollectionChange={assignArticle}
+                  onCreateCollection={createCollection}
+                  articles={filteredArticles}
+                  onSelectArticle={selectArticle}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full" style={{ color: "#8C8C91" }}>
+                  <div style={{ marginBottom: 12, opacity: 0.3 }}>
+                    <svg style={{ width: 36, height: 36 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                  </div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "#EBEBEB" }}>기사를 선택하세요</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Secondary Panel */}
+            <SplitViewPanel
+              portfolioPrices={portfolio.prices}
+              portfolioLoading={portfolio.loading}
+              articles={articles}
+            />
+          </div>
         )}
 
         {activeMainTab === "markets" && (

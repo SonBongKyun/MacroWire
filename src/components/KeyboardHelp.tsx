@@ -13,6 +13,10 @@ const SHORTCUTS = [
     { keys: ["k"], desc: "이전 기사" },
     { keys: ["g"], desc: "맨 위로 이동" },
     { keys: ["o"], desc: "원문 열기" },
+    { keys: ["Tab"], desc: "다음 탭으로 이동" },
+    { keys: ["Shift", "Tab"], desc: "이전 탭으로 이동" },
+    { keys: ["n"], desc: "뉴스 탭으로 이동" },
+    { keys: ["h"], desc: "홈/대시보드로 이동" },
   ]},
   { section: "검색·필터", items: [
     { keys: ["/"], desc: "검색창 포커스" },
@@ -30,6 +34,7 @@ const SHORTCUTS = [
     { keys: ["?"], desc: "이 도움말 표시/닫기" },
   ]},
   { section: "UI 전환", items: [
+    { keys: ["Ctrl", "Shift", "S"], desc: "분할 뷰 토글 (뉴스)" },
     { keys: ["["], desc: "사이드바 접기/펼치기" },
     { keys: ["f"], desc: "포커스 리딩 모드" },
     { keys: ["v"], desc: "리스트/카드 뷰 전환" },

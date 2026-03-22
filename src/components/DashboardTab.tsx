@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import type { Article, Source } from "@/types";
 import type { PortfolioPrice } from "@/hooks/usePortfolio";
 import type { WatchlistStore } from "@/hooks/useWatchlist";
+import { MiniSparkline } from "@/components/PriceChart";
 // TAG_COLORS kept available for future use
 // import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
 
@@ -38,6 +39,140 @@ interface MarketItem {
   price: number;
   change: number;
   changePct: number;
+  open?: number;
+  high?: number;
+  low?: number;
+  close?: number;
+  fullName?: string;
+}
+
+const MARKET_FULL_NAMES: Record<string, string> = {
+  "KOSPI": "Korea Composite Stock Price Index",
+  "KOSDAQ": "Korea Securities Dealers Automated Quotations",
+  "S&P500": "S&P 500 Index",
+  "SPX": "S&P 500 Index",
+  "NASDAQ": "NASDAQ Composite",
+  "IXIC": "NASDAQ Composite",
+  "DOW": "Dow Jones Industrial Average",
+  "DJI": "Dow Jones Industrial Average",
+  "NIKKEI": "Nikkei 225",
+  "N225": "Nikkei 225",
+  "USD/KRW": "US Dollar / Korean Won",
+  "EUR/USD": "Euro / US Dollar",
+  "WTI": "West Texas Intermediate Crude Oil",
+  "GOLD": "Gold Spot",
+  "BTC": "Bitcoin",
+  "ETH": "Ethereum",
+};
+
+function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }) {
+  if (!visible) return null;
+  const fullName = item.fullName || MARKET_FULL_NAMES[item.symbol] || MARKET_FULL_NAMES[item.label] || item.label;
+  const hasRange = item.high != null && item.low != null;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: "100%",
+        left: "50%",
+        transform: "translateX(-50%)",
+        marginTop: 6,
+        zIndex: 50,
+        background: "#1A1A1F",
+        border: "1px solid #2D2D32",
+        borderRadius: 2,
+        boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+        maxWidth: 200,
+        minWidth: 160,
+        padding: "10px 12px",
+        pointerEvents: "none",
+      }}
+    >
+      <div style={{ fontSize: 10, color: "#8C8C91", marginBottom: 6, lineHeight: 1.3 }}>
+        {fullName}
+      </div>
+      <div
+        style={{
+          fontSize: 18,
+          fontWeight: 800,
+          fontFamily: "var(--font-mono)",
+          color: "#EBEBEB",
+          fontVariantNumeric: "tabular-nums",
+          lineHeight: 1.1,
+          marginBottom: 4,
+        }}
+      >
+        {formatPrice(item.price)}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: hasRange ? 8 : 4,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: "var(--font-mono)",
+            fontVariantNumeric: "tabular-nums",
+            color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
+          }}
+        >
+          {item.changePct >= 0 ? "+" : ""}{item.change.toFixed(2)}
+        </span>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            fontFamily: "var(--font-mono)",
+            fontVariantNumeric: "tabular-nums",
+            color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
+          }}
+        >
+          ({item.changePct >= 0 ? "+" : ""}{item.changePct.toFixed(2)}%)
+        </span>
+      </div>
+      {hasRange ? (
+        <div style={{ borderTop: "1px solid #2D2D32", paddingTop: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91" }}>
+            <span>저가</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
+              {formatPrice(item.low!)}
+            </span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91", marginTop: 2 }}>
+            <span>고가</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
+              {formatPrice(item.high!)}
+            </span>
+          </div>
+        </div>
+      ) : item.open != null ? (
+        <div style={{ borderTop: "1px solid #2D2D32", paddingTop: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91" }}>
+            <span>시가</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
+              {formatPrice(item.open)}
+            </span>
+          </div>
+          {item.close != null && (
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91", marginTop: 2 }}>
+              <span>종가</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
+                {formatPrice(item.close)}
+              </span>
+            </div>
+          )}
+        </div>
+      ) : null}
+      <div style={{ marginTop: 6, fontSize: 9, color: "#C9A96E" }}>
+        시장 탭에서 자세히 보기
+      </div>
+    </div>
+  );
 }
 
 interface DashboardTabProps {
@@ -245,6 +380,7 @@ export default function DashboardTab({
 }: DashboardTabProps) {
   const [marketData, setMarketData] = useState<MarketItem[]>([]);
   const [marketLoading, setMarketLoading] = useState(true);
+  const [hoveredMarketIdx, setHoveredMarketIdx] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -316,48 +452,73 @@ export default function DashboardTab({
             ))}
           </div>
         ) : marketData.length > 0 ? (
-          marketData.map((item, idx) => (
-            <div key={item.symbol} style={{ display: "contents" }}>
-              {idx > 0 && <div className="market-strip-divider" />}
-              <div className="market-strip-item">
-                <span
-                  style={{
-                    fontSize: 10,
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--muted)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    fontWeight: 500,
-                  }}
+          marketData.map((item, idx) => {
+            // Generate fake historical data from change% for sparkline visual
+            const startPrice = item.price / (1 + item.changePct / 100);
+            const steps = 16;
+            const diff = item.price - startPrice;
+            const sparkData: number[] = [startPrice];
+            for (let i = 1; i < steps; i++) {
+              const progress = i / (steps - 1);
+              const noise = (Math.sin(i * 2.7 + item.changePct) * 0.3 + Math.cos(i * 1.3) * 0.2) * Math.abs(diff) * 0.5;
+              sparkData.push(startPrice + diff * progress + noise);
+            }
+            sparkData.push(item.price);
+            return (
+              <div key={item.symbol} style={{ display: "contents" }}>
+                {idx > 0 && <div className="market-strip-divider" />}
+                <div
+                  className="market-strip-item"
+                  style={{ position: "relative" }}
+                  onMouseEnter={() => setHoveredMarketIdx(idx)}
+                  onMouseLeave={() => setHoveredMarketIdx(null)}
                 >
-                  {item.label}
-                </span>
-                <span
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 700,
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--foreground-bright)",
-                    fontVariantNumeric: "tabular-nums",
-                    lineHeight: 1.1,
-                  }}
-                >
-                  {formatPrice(item.price)}
-                </span>
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    fontFamily: "var(--font-mono)",
-                    fontVariantNumeric: "tabular-nums",
-                    color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
-                  }}
-                >
-                  {item.changePct >= 0 ? "\u25B2" : "\u25BC"} {Math.abs(item.changePct).toFixed(1)}%
-                </span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--muted)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 700,
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--foreground-bright)",
+                      fontVariantNumeric: "tabular-nums",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {formatPrice(item.price)}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      fontFamily: "var(--font-mono)",
+                      fontVariantNumeric: "tabular-nums",
+                      color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
+                    }}
+                  >
+                    {item.changePct >= 0 ? "\u25B2" : "\u25BC"} {Math.abs(item.changePct).toFixed(1)}%
+                  </span>
+                  <MiniSparkline
+                    data={sparkData}
+                    width={80}
+                    height={30}
+                    change={item.changePct}
+                  />
+                  <MarketPopover item={item} visible={hoveredMarketIdx === idx} />
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <span style={{ fontSize: 12, color: "var(--muted)" }}>
             시장 데이터 없음

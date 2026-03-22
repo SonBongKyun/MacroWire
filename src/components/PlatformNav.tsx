@@ -22,6 +22,8 @@ interface PlatformNavProps {
   onToggleNotifications: () => void;
   newArticleCount: number;
   tags?: string[];
+  onToggleSplit?: () => void;
+  splitView?: boolean;
 }
 
 const SEARCH_HISTORY_KEY = "ryzm-finance-search-history";
@@ -51,6 +53,8 @@ export function PlatformNav({
   onToggleNotifications,
   newArticleCount,
   tags = [],
+  onToggleSplit,
+  splitView = false,
 }: PlatformNavProps) {
   const [now, setNow] = useState(Date.now());
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -208,6 +212,28 @@ export function PlatformNav({
 
       {/* Spacer */}
       <div className="flex-1" />
+
+      {/* Split View Toggle — news tab only */}
+      {activeTab === "news" && onToggleSplit && (
+        <button
+          onClick={onToggleSplit}
+          className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
+          style={{
+            borderRadius: 2,
+            border: splitView ? "1px solid #C9A96E" : "1px solid transparent",
+            background: splitView ? "rgba(201,169,110,0.1)" : "transparent",
+            color: splitView ? "#C9A96E" : "#8C8C91",
+            cursor: "pointer",
+          }}
+          title="분할 뷰 (Ctrl+Shift+S)"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="1" y="2" width="14" height="12" rx="1" />
+            <line x1="5.5" y1="2" x2="5.5" y2="14" />
+            <line x1="10.5" y1="2" x2="10.5" y2="14" />
+          </svg>
+        </button>
+      )}
 
       {/* Search */}
       <div ref={searchContainerRef} className="relative shrink-0" style={{ width: 240 }}>

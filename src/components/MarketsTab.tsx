@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import type { PortfolioPrice, PortfolioAsset } from "@/hooks/usePortfolio";
+import { PriceChart, MiniSparkline } from "@/components/PriceChart";
+import { usePriceAlerts } from "@/hooks/usePriceAlerts";
+import { usePortfolioPnL } from "@/hooks/usePortfolioPnL";
 
 interface MarketsTabProps {
   portfolioPrices: PortfolioPrice[];
@@ -50,6 +53,76 @@ function formatPrice(price: number, symbol: string): string {
     : price.toFixed(4);
 }
 
+function formatPnL(value: number): string {
+  const prefix = value >= 0 ? "+" : "";
+  return prefix + value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/* ── Shared styles ── */
+const sectionHeaderStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 700,
+  color: "#8C8C91",
+  textTransform: "uppercase",
+  letterSpacing: "0.1em",
+  borderBottom: "1px solid #2D2D32",
+  paddingBottom: 8,
+  marginBottom: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+};
+
+const thStyle: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 600,
+  color: "#8C8C91",
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+  padding: "10px 0",
+  borderBottom: "1px solid #2D2D32",
+};
+
+const inputStyle: React.CSSProperties = {
+  padding: "6px 10px",
+  fontSize: 11,
+  backgroundColor: "transparent",
+  border: "1px solid #2D2D32",
+  borderRadius: 2,
+  color: "#EBEBEB",
+  outline: "none",
+};
+
+const goldBtnStyle: React.CSSProperties = {
+  padding: "6px 14px",
+  fontSize: 10,
+  fontWeight: 700,
+  backgroundColor: "#C9A96E",
+  color: "#0D0D0F",
+  border: "none",
+  borderRadius: 2,
+  cursor: "pointer",
+};
+
+const cancelBtnStyle: React.CSSProperties = {
+  padding: "6px 10px",
+  fontSize: 10,
+  color: "#8C8C91",
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  appearance: "none",
+  WebkitAppearance: "none",
+  paddingRight: 24,
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%238C8C91' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E")`,
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 8px center",
+};
+
 export function MarketsTab({
   portfolioPrices,
   portfolioAssets,
@@ -64,8 +137,41 @@ export function MarketsTab({
   const [customSymbol, setCustomSymbol] = useState("");
   const [customLabel, setCustomLabel] = useState("");
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [selectedChartIdx, setSelectedChartIdx] = useState(0);
+
+  // Alert state
+  const { alerts, addAlert, removeAlert, toggleAlert, checkAlerts } = usePriceAlerts();
+  const [showAlertForm, setShowAlertForm] = useState(false);
+  const [alertSymbol, setAlertSymbol] = useState("");
+  const [alertPrice, setAlertPrice] = useState("");
+  const [alertDirection, setAlertDirection] = useState<"above" | "below">("above");
+
+  // Position P&L state
+  const { positions, addPosition, removePosition, computePnL } = usePortfolioPnL();
+  const [showPositionForm, setShowPositionForm] = useState(false);
+  const [posSymbol, setPosSymbol] = useState("");
+  const [posQuantity, setPosQuantity] = useState("");
+  const [posAvgCost, setPosAvgCost] = useState("");
 
   const existingSymbols = new Set(portfolioAssets.map((a) => a.symbol));
+
+  // Generate fake sparkline from price & changePct for visual purposes
+  const fakeSparkline = useMemo(() => {
+    return (price: number, changePct: number): number[] => {
+      if (!price) return [];
+      const startPrice = price / (1 + changePct / 100);
+      const steps = 24;
+      const result: number[] = [startPrice];
+      const diff = price - startPrice;
+      for (let i = 1; i < steps; i++) {
+        const progress = i / (steps - 1);
+        const noise = (Math.sin(i * 2.7 + changePct) * 0.3 + Math.cos(i * 1.3) * 0.2) * Math.abs(diff) * 0.5;
+        result.push(startPrice + diff * progress + noise);
+      }
+      result.push(price);
+      return result;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,12 +197,59 @@ export function MarketsTab({
     };
   }, []);
 
+  // Check alerts when prices update
+  useEffect(() => {
+    if (portfolioPrices.length > 0) {
+      checkAlerts(portfolioPrices.map((p) => ({ symbol: p.symbol, price: p.price })));
+    }
+  }, [portfolioPrices, checkAlerts]);
+
+  // Compute P&L from current prices
+  const pnlData = useMemo(() => {
+    if (positions.length === 0 || portfolioPrices.length === 0) {
+      return { items: [], totalValue: 0, totalCost: 0, totalPnL: 0, totalReturnPct: 0 };
+    }
+    return computePnL(portfolioPrices.map((p) => ({ symbol: p.symbol, price: p.price })));
+  }, [positions, portfolioPrices, computePnL]);
+
   const handleAddCustom = () => {
     if (!customSymbol.trim() || !customLabel.trim()) return;
     onAddAsset({ symbol: customSymbol.trim().toUpperCase(), label: customLabel.trim(), type: "stock" });
     setCustomSymbol("");
     setCustomLabel("");
     setShowAddForm(false);
+  };
+
+  const handleAddAlert = () => {
+    if (!alertSymbol || !alertPrice) return;
+    const asset = portfolioAssets.find((a) => a.symbol === alertSymbol);
+    if (!asset) return;
+    addAlert({
+      symbol: alertSymbol,
+      label: asset.label,
+      targetPrice: parseFloat(alertPrice),
+      direction: alertDirection,
+    });
+    setAlertSymbol("");
+    setAlertPrice("");
+    setAlertDirection("above");
+    setShowAlertForm(false);
+  };
+
+  const handleAddPosition = () => {
+    if (!posSymbol || !posQuantity || !posAvgCost) return;
+    const asset = portfolioAssets.find((a) => a.symbol === posSymbol);
+    if (!asset) return;
+    addPosition({
+      symbol: posSymbol,
+      label: asset.label,
+      quantity: parseFloat(posQuantity),
+      avgCost: parseFloat(posAvgCost),
+    });
+    setPosSymbol("");
+    setPosQuantity("");
+    setPosAvgCost("");
+    setShowPositionForm(false);
   };
 
   const defaultMarketItems: MarketItem[] = [
@@ -168,28 +321,87 @@ export function MarketsTab({
                     }}>
                       {item.price > 0 ? `${isUp ? "+" : ""}${item.changePct.toFixed(2)}%` : ""}
                     </div>
+                    {item.price > 0 && (
+                      <div style={{ marginTop: 6 }}>
+                        <MiniSparkline
+                          data={fakeSparkline(item.price, item.changePct)}
+                          width={120}
+                          height={36}
+                          change={item.changePct}
+                        />
+                      </div>
+                    )}
                   </div>
                 );
               })
           }
         </div>
 
+        {/* ── Section 1.5: Price Chart ── */}
+        {portfolioPrices.length > 0 && (
+          <div style={{ marginBottom: 32 }}>
+            <div style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "#8C8C91",
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              borderBottom: "1px solid #2D2D32",
+              paddingBottom: 8,
+              marginBottom: 12,
+              fontFamily: "var(--font-mono)",
+            }}>
+              PRICE CHART
+            </div>
+
+            {/* Asset selector */}
+            <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid #2D2D32" }}>
+              {portfolioPrices.map((p, idx) => (
+                <button
+                  key={p.symbol}
+                  onClick={() => setSelectedChartIdx(idx)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "6px 12px",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    fontFamily: "var(--font-mono)",
+                    color: idx === selectedChartIdx ? "#C9A96E" : "#8C8C91",
+                    borderBottom: idx === selectedChartIdx ? "2px solid #C9A96E" : "2px solid transparent",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                    marginBottom: -1,
+                  }}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Chart */}
+            {portfolioPrices[selectedChartIdx] && (
+              <PriceChart
+                data={
+                  portfolioPrices[selectedChartIdx].sparkline.length >= 2
+                    ? portfolioPrices[selectedChartIdx].sparkline
+                    : fakeSparkline(
+                        portfolioPrices[selectedChartIdx].price,
+                        portfolioPrices[selectedChartIdx].changePct
+                      )
+                }
+                height={180}
+                change={portfolioPrices[selectedChartIdx].changePct}
+                label={portfolioPrices[selectedChartIdx].label}
+              />
+            )}
+          </div>
+        )}
+
         {/* ── Section 2: Portfolio Table ── */}
         <div style={{ marginBottom: 32 }}>
-          {/* Section title */}
-          <div style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: "#8C8C91",
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            borderBottom: "1px solid #2D2D32",
-            paddingBottom: 8,
-            marginBottom: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}>
+          <div style={sectionHeaderStyle}>
             <span>PORTFOLIO</span>
             {portfolioLoading && (
               <span style={{ fontSize: 9, color: "#8C8C91", fontWeight: 400, textTransform: "none" }} className="animate-pulse">
@@ -198,15 +410,14 @@ export function MarketsTab({
             )}
           </div>
 
-          {/* Table */}
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
-                <th style={{ textAlign: "left", fontSize: 10, fontWeight: 600, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.04em", padding: "10px 0", borderBottom: "1px solid #2D2D32" }}>종목명</th>
-                <th style={{ textAlign: "left", fontSize: 10, fontWeight: 600, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.04em", padding: "10px 0", borderBottom: "1px solid #2D2D32" }}>심볼</th>
-                <th style={{ textAlign: "right", fontSize: 10, fontWeight: 600, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.04em", padding: "10px 0", borderBottom: "1px solid #2D2D32" }}>현재가</th>
-                <th style={{ textAlign: "right", fontSize: 10, fontWeight: 600, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.04em", padding: "10px 0", borderBottom: "1px solid #2D2D32" }}>변동</th>
-                <th style={{ textAlign: "right", fontSize: 10, fontWeight: 600, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.04em", padding: "10px 0", borderBottom: "1px solid #2D2D32" }}>변동%</th>
+                <th style={{ ...thStyle, textAlign: "left" }}>종목명</th>
+                <th style={{ ...thStyle, textAlign: "left" }}>심볼</th>
+                <th style={{ ...thStyle, textAlign: "right" }}>현재가</th>
+                <th style={{ ...thStyle, textAlign: "right" }}>변동</th>
+                <th style={{ ...thStyle, textAlign: "right" }}>변동%</th>
                 <th style={{ width: 32, borderBottom: "1px solid #2D2D32" }} />
               </tr>
             </thead>
@@ -280,7 +491,6 @@ export function MarketsTab({
             </tbody>
           </table>
 
-          {/* Add button */}
           {!showAddForm ? (
             <button
               onClick={() => setShowAddForm(true)}
@@ -298,80 +508,375 @@ export function MarketsTab({
               + 종목 추가
             </button>
           ) : (
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "10px 0",
-            }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0" }}>
               <input
                 type="text"
                 value={customSymbol}
                 onChange={(e) => setCustomSymbol(e.target.value)}
                 placeholder="심볼 (예: AAPL)"
-                style={{
-                  flex: 1,
-                  padding: "6px 10px",
-                  fontSize: 11,
-                  backgroundColor: "transparent",
-                  border: "1px solid #2D2D32",
-                  borderRadius: 2,
-                  color: "#EBEBEB",
-                  outline: "none",
-                }}
+                style={{ ...inputStyle, flex: 1 }}
               />
               <input
                 type="text"
                 value={customLabel}
                 onChange={(e) => setCustomLabel(e.target.value)}
                 placeholder="종목명 (예: Apple)"
-                style={{
-                  flex: 1,
-                  padding: "6px 10px",
-                  fontSize: 11,
-                  backgroundColor: "transparent",
-                  border: "1px solid #2D2D32",
-                  borderRadius: 2,
-                  color: "#EBEBEB",
-                  outline: "none",
-                }}
+                style={{ ...inputStyle, flex: 1 }}
                 onKeyDown={(e) => { if (e.key === "Enter") handleAddCustom(); }}
               />
-              <button
-                onClick={handleAddCustom}
-                style={{
-                  padding: "6px 14px",
-                  fontSize: 10,
-                  fontWeight: 700,
-                  backgroundColor: "#C9A96E",
-                  color: "#0D0D0F",
-                  border: "none",
-                  borderRadius: 2,
-                  cursor: "pointer",
-                }}
-              >
-                추가
-              </button>
-              <button
-                onClick={() => setShowAddForm(false)}
-                style={{
-                  padding: "6px 10px",
-                  fontSize: 10,
-                  color: "#8C8C91",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                취소
-              </button>
+              <button onClick={handleAddCustom} style={goldBtnStyle}>추가</button>
+              <button onClick={() => setShowAddForm(false)} style={cancelBtnStyle}>취소</button>
             </div>
           )}
         </div>
 
-        {/* ── Section 3: Popular Symbols ── */}
+        {/* ── Section 3: Alerts ── */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={sectionHeaderStyle}>
+            <span>ALERTS</span>
+            <span style={{ fontSize: 9, color: "#8C8C91", fontWeight: 400, textTransform: "none" }}>
+              {alerts.filter((a) => a.active && !a.triggeredAt).length} active
+            </span>
+          </div>
+
+          {alerts.length > 0 ? (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ ...thStyle, textAlign: "left" }}>종목</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>목표가</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>방향</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>상태</th>
+                  <th style={{ width: 60, borderBottom: "1px solid #2D2D32" }} />
+                </tr>
+              </thead>
+              <tbody>
+                {alerts.map((alert) => {
+                  const isTriggered = !!alert.triggeredAt;
+                  const rowColor = isTriggered ? "#C9A96E" : alert.active ? "#EBEBEB" : "#8C8C91";
+                  return (
+                    <tr key={alert.id}>
+                      <td style={{
+                        padding: "8px 0",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: rowColor,
+                        borderBottom: "1px solid #2D2D32",
+                      }}>
+                        {alert.label}
+                        <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91" }}>
+                          {alert.symbol}
+                        </span>
+                      </td>
+                      <td style={{
+                        padding: "8px 0",
+                        textAlign: "right",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        fontFamily: "var(--font-mono)",
+                        color: rowColor,
+                        borderBottom: "1px solid #2D2D32",
+                      }}>
+                        {formatPrice(alert.targetPrice, alert.symbol)}
+                      </td>
+                      <td style={{
+                        padding: "8px 0",
+                        textAlign: "center",
+                        fontSize: 13,
+                        fontFamily: "var(--font-mono)",
+                        fontWeight: 600,
+                        color: alert.direction === "above" ? "#16a34a" : "#dc2626",
+                        borderBottom: "1px solid #2D2D32",
+                      }}>
+                        {alert.direction === "above" ? "▲" : "▼"}
+                      </td>
+                      <td style={{
+                        padding: "8px 0",
+                        textAlign: "center",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em",
+                        color: isTriggered ? "#C9A96E" : alert.active ? "#16a34a" : "#8C8C91",
+                        borderBottom: "1px solid #2D2D32",
+                      }}>
+                        {isTriggered ? "TRIGGERED" : alert.active ? "ACTIVE" : "OFF"}
+                      </td>
+                      <td style={{ padding: "8px 0", textAlign: "right", borderBottom: "1px solid #2D2D32", width: 60, whiteSpace: "nowrap" }}>
+                        {!isTriggered && (
+                          <button
+                            onClick={() => toggleAlert(alert.id)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "#8C8C91",
+                              fontSize: 10,
+                              fontFamily: "var(--font-mono)",
+                              padding: "2px 4px",
+                              marginRight: 2,
+                            }}
+                            title={alert.active ? "비활성화" : "활성화"}
+                          >
+                            {alert.active ? "off" : "on"}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => removeAlert(alert.id)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#8C8C91",
+                            fontSize: 12,
+                            fontFamily: "var(--font-mono)",
+                            padding: "2px 4px",
+                          }}
+                          title="삭제"
+                        >
+                          x
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div style={{ padding: "24px 0", textAlign: "center" }}>
+              <p style={{ fontSize: 12, color: "#8C8C91" }}>설정된 알림이 없습니다</p>
+            </div>
+          )}
+
+          {!showAlertForm ? (
+            <button
+              onClick={() => {
+                if (portfolioAssets.length > 0) setAlertSymbol(portfolioAssets[0].symbol);
+                setShowAlertForm(true);
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 500,
+                color: "#C9A96E",
+                padding: "10px 0",
+                display: "block",
+              }}
+            >
+              + 알림 추가
+            </button>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0" }}>
+              <select
+                value={alertSymbol}
+                onChange={(e) => setAlertSymbol(e.target.value)}
+                style={{ ...selectStyle, flex: 1 }}
+              >
+                {portfolioAssets.map((a) => (
+                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#0D0D0F", color: "#EBEBEB" }}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                value={alertPrice}
+                onChange={(e) => setAlertPrice(e.target.value)}
+                placeholder="목표가"
+                style={{ ...inputStyle, width: 120 }}
+                onKeyDown={(e) => { if (e.key === "Enter") handleAddAlert(); }}
+              />
+              <select
+                value={alertDirection}
+                onChange={(e) => setAlertDirection(e.target.value as "above" | "below")}
+                style={{ ...selectStyle, width: 80 }}
+              >
+                <option value="above" style={{ backgroundColor: "#0D0D0F", color: "#EBEBEB" }}>▲ 이상</option>
+                <option value="below" style={{ backgroundColor: "#0D0D0F", color: "#EBEBEB" }}>▼ 이하</option>
+              </select>
+              <button onClick={handleAddAlert} style={goldBtnStyle}>추가</button>
+              <button onClick={() => setShowAlertForm(false)} style={cancelBtnStyle}>취소</button>
+            </div>
+          )}
+        </div>
+
+        {/* ── Section 4: Positions P&L ── */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={sectionHeaderStyle}>
+            <span>POSITIONS</span>
+            {pnlData.items.length > 0 && (
+              <span style={{
+                fontSize: 11,
+                fontFamily: "var(--font-mono)",
+                fontWeight: 600,
+                color: pnlData.totalPnL >= 0 ? "#16a34a" : "#dc2626",
+                textTransform: "none",
+              }}>
+                {formatPnL(pnlData.totalPnL)}
+              </span>
+            )}
+          </div>
+
+          {pnlData.items.length > 0 ? (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ ...thStyle, textAlign: "left" }}>종목명</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>수량</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>평균단가</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>현재가</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>손익</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>손익%</th>
+                  <th style={{ width: 32, borderBottom: "1px solid #2D2D32" }} />
+                </tr>
+              </thead>
+              <tbody>
+                {pnlData.items.map((item) => {
+                  const pnlColor = item.pnl >= 0 ? "#16a34a" : "#dc2626";
+                  return (
+                    <tr key={item.symbol}>
+                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "#EBEBEB", borderBottom: "1px solid #2D2D32" }}>
+                        {item.label}
+                        <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91" }}>
+                          {item.symbol}
+                        </span>
+                      </td>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2D2D32" }}>
+                        {item.quantity.toLocaleString()}
+                      </td>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "#8C8C91", borderBottom: "1px solid #2D2D32" }}>
+                        {formatPrice(item.avgCost, item.symbol)}
+                      </td>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2D2D32" }}>
+                        {item.currentPrice > 0 ? formatPrice(item.currentPrice, item.symbol) : "--"}
+                      </td>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid #2D2D32" }}>
+                        {formatPnL(item.pnl)}
+                      </td>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid #2D2D32" }}>
+                        {item.pnl >= 0 ? "+" : ""}{item.pnlPct.toFixed(2)}%
+                      </td>
+                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid #2D2D32", width: 32 }}>
+                        <button
+                          onClick={() => removePosition(item.symbol)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#8C8C91",
+                            fontSize: 12,
+                            fontFamily: "var(--font-mono)",
+                            padding: "2px 4px",
+                          }}
+                          title="삭제"
+                        >
+                          x
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {/* Total row */}
+                <tr>
+                  <td style={{ padding: "10px 0", fontSize: 12, fontWeight: 700, color: "#EBEBEB", borderTop: "1px solid #2D2D32" }}>
+                    TOTAL
+                  </td>
+                  <td style={{ borderTop: "1px solid #2D2D32" }} />
+                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontFamily: "var(--font-mono)", color: "#8C8C91", borderTop: "1px solid #2D2D32" }}>
+                    {pnlData.totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderTop: "1px solid #2D2D32" }}>
+                    {pnlData.totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td style={{
+                    padding: "10px 0",
+                    textAlign: "right",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    fontFamily: "var(--font-mono)",
+                    color: pnlData.totalPnL >= 0 ? "#16a34a" : "#dc2626",
+                    borderTop: "1px solid #2D2D32",
+                  }}>
+                    {formatPnL(pnlData.totalPnL)}
+                  </td>
+                  <td style={{
+                    padding: "10px 0",
+                    textAlign: "right",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    fontFamily: "var(--font-mono)",
+                    color: pnlData.totalReturnPct >= 0 ? "#16a34a" : "#dc2626",
+                    borderTop: "1px solid #2D2D32",
+                  }}>
+                    {pnlData.totalReturnPct >= 0 ? "+" : ""}{pnlData.totalReturnPct.toFixed(2)}%
+                  </td>
+                  <td style={{ borderTop: "1px solid #2D2D32" }} />
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <div style={{ padding: "24px 0", textAlign: "center" }}>
+              <p style={{ fontSize: 12, color: "#8C8C91" }}>등록된 포지션이 없습니다</p>
+            </div>
+          )}
+
+          {!showPositionForm ? (
+            <button
+              onClick={() => {
+                if (portfolioAssets.length > 0) setPosSymbol(portfolioAssets[0].symbol);
+                setShowPositionForm(true);
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 500,
+                color: "#C9A96E",
+                padding: "10px 0",
+                display: "block",
+              }}
+            >
+              + 포지션 추가
+            </button>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 0" }}>
+              <select
+                value={posSymbol}
+                onChange={(e) => setPosSymbol(e.target.value)}
+                style={{ ...selectStyle, flex: 1 }}
+              >
+                {portfolioAssets.map((a) => (
+                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#0D0D0F", color: "#EBEBEB" }}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                value={posQuantity}
+                onChange={(e) => setPosQuantity(e.target.value)}
+                placeholder="수량"
+                style={{ ...inputStyle, width: 100 }}
+              />
+              <input
+                type="number"
+                value={posAvgCost}
+                onChange={(e) => setPosAvgCost(e.target.value)}
+                placeholder="평균단가"
+                style={{ ...inputStyle, width: 120 }}
+                onKeyDown={(e) => { if (e.key === "Enter") handleAddPosition(); }}
+              />
+              <button onClick={handleAddPosition} style={goldBtnStyle}>추가</button>
+              <button onClick={() => setShowPositionForm(false)} style={cancelBtnStyle}>취소</button>
+            </div>
+          )}
+        </div>
+
+        {/* ── Section 5: Popular Symbols ── */}
         <div>
-          {/* Section title */}
           <div style={{
             fontSize: 11,
             fontWeight: 700,
@@ -385,7 +890,6 @@ export function MarketsTab({
             POPULAR
           </div>
 
-          {/* Simple text list */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px" }}>
             {POPULAR_SYMBOLS.map((s) => {
               const alreadyAdded = existingSymbols.has(s.symbol);

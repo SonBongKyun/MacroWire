@@ -34,6 +34,7 @@ export function MarketTicker() {
   const [tickClasses, setTickClasses] = useState<Record<string, string>>({});
   const prevPrices = useRef<Record<string, number>>({});
   const [marketStatus, setMarketStatus] = useState(getMarketStatus);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchMarket = useCallback(async () => {
     try {
@@ -58,6 +59,7 @@ export function MarketTicker() {
 
         setTickClasses(newTickClasses);
         setItems(data);
+        setLastUpdated(new Date());
 
         // Clear tick classes after animation
         if (Object.keys(newTickClasses).length > 0) {
@@ -142,10 +144,29 @@ export function MarketTicker() {
               >
                 {arrow}{Math.abs(item.changePct).toFixed(2)}%
               </span>
+              <span
+                className="text-[8px] tabular-nums font-mono"
+                style={{ color, opacity: 0.7 }}
+              >
+                {isUp ? "+" : ""}{item.change.toFixed(2)}
+              </span>
             </div>
           );
         })}
       </div>
+
+      {/* Last updated timestamp */}
+      {lastUpdated && (
+        <>
+          <span className="text-[8px] text-[var(--border-strong)] mx-2">|</span>
+          <span
+            className="text-[9px] tabular-nums font-mono shrink-0"
+            style={{ color: "#8C8C91", whiteSpace: "nowrap" }}
+          >
+            {lastUpdated.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
+          </span>
+        </>
+      )}
     </div>
   );
 }
