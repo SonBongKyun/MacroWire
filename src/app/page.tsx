@@ -130,7 +130,7 @@ function HomeInner() {
   const [showSaved, setShowSaved] = useState(false);
   const [readFilter, setReadFilter] = useState<"all" | "unread" | "read">("all");
   const [regionFilter, setRegionFilter] = useState<string>("전체");
-  const [darkMode, setDarkMode] = useState(true);
+  const darkMode = true; // RYZM: dark only
   const [countdown, setCountdown] = useState(POLL_INTERVAL);
   const [showHelp, setShowHelp] = useState(false);
   const [newArticleCount, setNewArticleCount] = useState(0);
@@ -162,27 +162,12 @@ function HomeInner() {
     localStorage.setItem("ryzm-finance-tab", activeMainTab);
   }, [activeMainTab]);
 
-  // Init dark mode (default: dark per RYZM brand kit)
+  // Always dark mode (RYZM brand)
   useEffect(() => {
-    const stored = localStorage.getItem("ryzm-finance-dark");
-    if (stored === "false") {
-      setDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    } else {
-      setDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
+    document.documentElement.classList.add("dark");
   }, []);
 
-  const toggleDarkMode = useCallback(() => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      if (next) document.documentElement.classList.add("dark");
-      else document.documentElement.classList.remove("dark");
-      localStorage.setItem("ryzm-finance-dark", String(next));
-      return next;
-    });
-  }, []);
+  const toggleDarkMode = useCallback(() => {}, []);
 
   // Countdown
   useEffect(() => {
