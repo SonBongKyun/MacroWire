@@ -24,6 +24,10 @@ interface PlatformNavProps {
   tags?: string[];
   onToggleSplit?: () => void;
   splitView?: boolean;
+  onToggleCalculator?: () => void;
+  calculatorOpen?: boolean;
+  onOpenWeeklyReport?: () => void;
+  onOpenNewsletter?: () => void;
 }
 
 const SEARCH_HISTORY_KEY = "ryzm-finance-search-history";
@@ -55,8 +59,14 @@ export function PlatformNav({
   tags = [],
   onToggleSplit,
   splitView = false,
+  onToggleCalculator,
+  calculatorOpen = false,
+  onOpenWeeklyReport,
+  onOpenNewsletter,
 }: PlatformNavProps) {
   const [now, setNow] = useState(Date.now());
+  const [reportDropdownOpen, setReportDropdownOpen] = useState(false);
+  const reportDropdownRef = useRef<HTMLDivElement>(null);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -71,11 +81,14 @@ export function PlatformNav({
     } catch {}
   }, []);
 
-  // Close autocomplete on click outside
+  // Close autocomplete and report dropdown on click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
         setShowAutocomplete(false);
+      }
+      if (reportDropdownRef.current && !reportDropdownRef.current.contains(e.target as Node)) {
+        setReportDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -218,6 +231,96 @@ export function PlatformNav({
             <line x1="10.5" y1="2" x2="10.5" y2="14" />
           </svg>
         </button>
+      )}
+
+      {/* Currency Calculator Toggle */}
+      {onToggleCalculator && (
+        <button
+          onClick={onToggleCalculator}
+          className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
+          style={{
+            borderRadius: 2,
+            border: calculatorOpen ? "1px solid #C9A96E" : "1px solid transparent",
+            background: calculatorOpen ? "rgba(201,169,110,0.1)" : "transparent",
+            color: calculatorOpen ? "#C9A96E" : "#8C8C91",
+            cursor: "pointer",
+            fontFamily: "var(--font-mono)",
+            fontSize: 13,
+            fontWeight: 700,
+          }}
+          title="환율 계산기"
+        >
+          ₩
+        </button>
+      )}
+
+      {/* Report / Newsletter */}
+      {(onOpenWeeklyReport || onOpenNewsletter) && (
+        <div ref={reportDropdownRef} className="relative shrink-0">
+          <button
+            onClick={() => setReportDropdownOpen((v) => !v)}
+            className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
+            style={{
+              borderRadius: 2,
+              border: reportDropdownOpen ? "1px solid #C9A96E" : "1px solid transparent",
+              background: reportDropdownOpen ? "rgba(201,169,110,0.1)" : "transparent",
+              color: reportDropdownOpen ? "#C9A96E" : "#8C8C91",
+              cursor: "pointer",
+            }}
+            title="리포트"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="3" y="1" width="10" height="14" rx="1" />
+              <line x1="5.5" y1="4.5" x2="10.5" y2="4.5" />
+              <line x1="5.5" y1="7" x2="10.5" y2="7" />
+              <line x1="5.5" y1="9.5" x2="8.5" y2="9.5" />
+            </svg>
+          </button>
+          {reportDropdownOpen && (
+            <div
+              className="absolute right-0 top-full mt-1 z-50"
+              style={{
+                background: "#1A1A1E",
+                border: "1px solid #2D2D32",
+                minWidth: 160,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+              }}
+            >
+              {onOpenWeeklyReport && (
+                <button
+                  onClick={() => { setReportDropdownOpen(false); onOpenWeeklyReport(); }}
+                  className="w-full text-left px-3 py-2 text-[11px] transition-colors flex items-center gap-2"
+                  style={{ color: "#EBEBEB" }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.1)"; }}
+                  onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#8C8C91" strokeWidth="1.2">
+                    <rect x="1" y="1" width="10" height="10" rx="1" />
+                    <line x1="3" y1="4" x2="9" y2="4" />
+                    <line x1="3" y1="6" x2="7" y2="6" />
+                    <line x1="3" y1="8" x2="5" y2="8" />
+                  </svg>
+                  주간 리포트
+                </button>
+              )}
+              {onOpenNewsletter && (
+                <button
+                  onClick={() => { setReportDropdownOpen(false); onOpenNewsletter(); }}
+                  className="w-full text-left px-3 py-2 text-[11px] transition-colors flex items-center gap-2"
+                  style={{ color: "#EBEBEB" }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.1)"; }}
+                  onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#8C8C91" strokeWidth="1.2">
+                    <rect x="1" y="2" width="10" height="8" rx="1" />
+                    <path d="M1 3l5 3 5-3" />
+                  </svg>
+                  뉴스레터 생성
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Search */}

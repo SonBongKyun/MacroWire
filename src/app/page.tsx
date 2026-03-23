@@ -16,6 +16,7 @@ import { NotificationPanel } from "@/components/NotificationPanel";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { ExportPanel } from "@/components/ExportPanel";
 import { PlatformNav, type MainTab } from "@/components/PlatformNav";
+import { CurrencyCalculator } from "@/components/CurrencyCalculator";
 import DashboardTab from "@/components/DashboardTab";
 import { NewsTab } from "@/components/NewsTab";
 import { MarketsTab } from "@/components/MarketsTab";
@@ -24,6 +25,8 @@ import { ToastProvider, useToast } from "@/components/Toast";
 import { SplitViewPanel } from "@/components/SplitViewPanel";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
+import { WeeklyReport } from "@/components/WeeklyReport";
+import { NewsletterGenerator } from "@/components/NewsletterGenerator";
 
 const POLL_INTERVAL = 5 * 60;
 
@@ -160,10 +163,13 @@ function HomeInner() {
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
   const [exportPanelOpen, setExportPanelOpen] = useState(false);
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
   const [timelineMode, setTimelineMode] = useState(false);
   const [splitView, setSplitView] = useState(false);
+  const [weeklyReportOpen, setWeeklyReportOpen] = useState(false);
+  const [newsletterOpen, setNewsletterOpen] = useState(false);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -360,6 +366,8 @@ function HomeInner() {
       case "portfolio": setActiveMainTab("markets"); break;
       case "theme": setThemeSelectorOpen((v) => !v); break;
       case "exportPanel": setExportPanelOpen((v) => !v); break;
+      case "weeklyReport": setWeeklyReportOpen(true); break;
+      case "newsletter": setNewsletterOpen(true); break;
     }
   }, [runIngest, markAllRead, exportSaved, toggleDarkMode]);
 
@@ -403,6 +411,8 @@ function HomeInner() {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "S") { e.preventDefault(); setSplitView((v) => !v); return; }
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      // Shift+W: open weekly report
+      if (e.shiftKey && e.key === "W") { e.preventDefault(); setWeeklyReportOpen(true); return; }
       // Tab / Shift+Tab: cycle main tabs
       if (e.key === "Tab") {
         e.preventDefault();
@@ -432,7 +442,7 @@ function HomeInner() {
         case "d": e.preventDefault(); toggleDarkMode(); break;
         case "m": e.preventDefault(); markAllRead(); break;
         case "e": e.preventDefault(); exportSaved(); break;
-        case "Escape": setNotificationPanelOpen(false); setThemeSelectorOpen(false); setExportPanelOpen(false); break;
+        case "Escape": setNotificationPanelOpen(false); setThemeSelectorOpen(false); setExportPanelOpen(false); setCalculatorOpen(false); setWeeklyReportOpen(false); setNewsletterOpen(false); break;
       }
     };
     window.addEventListener("keydown", handler);
@@ -462,6 +472,10 @@ function HomeInner() {
         tags={allTags}
         onToggleSplit={() => setSplitView((v) => !v)}
         splitView={splitView}
+        onToggleCalculator={() => setCalculatorOpen((v) => !v)}
+        calculatorOpen={calculatorOpen}
+        onOpenWeeklyReport={() => setWeeklyReportOpen(true)}
+        onOpenNewsletter={() => setNewsletterOpen(true)}
       />
 
       {/* Market Ticker — always visible */}
@@ -649,6 +663,13 @@ function HomeInner() {
         </div>
       )}
 
+      {/* Currency Calculator Panel */}
+      {calculatorOpen && (
+        <div className="fixed right-4 top-14 z-40 animate-fade-in">
+          <CurrencyCalculator open={calculatorOpen} onClose={() => setCalculatorOpen(false)} />
+        </div>
+      )}
+
       {themeSelectorOpen && (
         <div className="fixed right-4 top-14 z-40 animate-fade-in">
           <ThemeSelector activeTheme={themeCustom.activeTheme} presets={themeCustom.presets} onSelect={themeCustom.selectTheme} onReset={themeCustom.resetTheme} />
@@ -661,6 +682,20 @@ function HomeInner() {
           <ExportPanel articles={articles} onClose={() => setExportPanelOpen(false)} />
         </div>
       )}
+
+      <WeeklyReport
+        open={weeklyReportOpen}
+        onClose={() => setWeeklyReportOpen(false)}
+        articles={articles}
+        portfolioPrices={portfolio.prices}
+      />
+
+      <NewsletterGenerator
+        open={newsletterOpen}
+        onClose={() => setNewsletterOpen(false)}
+        articles={articles}
+        portfolioPrices={portfolio.prices}
+      />
     </div>
   );
 }

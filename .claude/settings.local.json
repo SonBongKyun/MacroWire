@@ -6,7 +6,10 @@
       "Bash(where npm:*)",
       "Bash(where npx:*)",
       "Bash(npm run:*)",
-      "Bash(curl -s -X POST http://localhost:3000/api/ingest)"
+      "Bash(curl -s -X POST http://localhost:3000/api/ingest)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(findstr :300)"
     ]
   }
 }

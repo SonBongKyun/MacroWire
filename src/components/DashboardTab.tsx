@@ -5,6 +5,9 @@ import type { Article, Source } from "@/types";
 import type { PortfolioPrice } from "@/hooks/usePortfolio";
 import type { WatchlistStore } from "@/hooks/useWatchlist";
 import { MiniSparkline } from "@/components/PriceChart";
+import { EconomicCalendar } from "@/components/EconomicCalendar";
+import { useSourceRanking } from "@/hooks/useSourceRanking";
+import type { SourceRank } from "@/hooks/useSourceRanking";
 // TAG_COLORS kept available for future use
 // import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
 
@@ -31,30 +34,6 @@ function AnimatedNumber({ value, duration = 600 }: { value: number; duration?: n
   return <>{display.toLocaleString()}</>;
 }
 
-const ECON_EVENTS = [
-  { date: "2026-03-18", title: "FOMC 회의 시작", region: "미국", importance: "high" },
-  { date: "2026-03-19", title: "FOMC 금리 결정", region: "미국", importance: "high" },
-  { date: "2026-03-13", title: "한은 금통위", region: "한국", importance: "high" },
-  { date: "2026-03-10", title: "미국 CPI 발표", region: "미국", importance: "high" },
-  { date: "2026-03-07", title: "미국 고용보고서", region: "미국", importance: "high" },
-  { date: "2026-03-04", title: "한국 CPI 발표", region: "한국", importance: "medium" },
-  { date: "2026-03-05", title: "ECB 금리 결정", region: "유럽", importance: "high" },
-  { date: "2026-03-12", title: "미국 PPI 발표", region: "미국", importance: "medium" },
-  { date: "2026-03-20", title: "일본은행 금리 결정", region: "일본", importance: "high" },
-  { date: "2026-03-25", title: "한국 소비자심리지수", region: "한국", importance: "medium" },
-  { date: "2026-03-27", title: "미국 4Q GDP 최종", region: "미국", importance: "medium" },
-  { date: "2026-03-28", title: "미국 PCE 물가", region: "미국", importance: "high" },
-  { date: "2026-04-02", title: "FOMC 의사록 공개", region: "미국", importance: "medium" },
-  { date: "2026-04-10", title: "미국 CPI 발표", region: "미국", importance: "high" },
-  { date: "2026-04-16", title: "ECB 금리 결정", region: "유럽", importance: "high" },
-];
-
-const REGION_TAG_COLORS: Record<string, string> = {
-  "미국": "#C9A96E",
-  "한국": "#C9A96E",
-  "유럽": "#8C8C91",
-  "일본": "#8C8C91",
-};
 
 interface MarketItem {
   symbol: string;
@@ -316,70 +295,130 @@ function ArticleVolumeChart({ articles }: { articles: Article[] }) {
   );
 }
 
-function EconomicCalendar() {
-  const upcomingEvents = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    return ECON_EVENTS
-      .filter((ev) => ev.date >= today)
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(0, 5);
-  }, []);
+
+function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
+  const top5 = rankings.slice(0, 5);
+
+  if (top5.length === 0) {
+    return (
+      <div>
+        <div className="dash-section-title">SOURCE QUALITY</div>
+        <div style={{ fontSize: 12, color: "var(--muted)" }}>소스 데이터 없음</div>
+      </div>
+    );
+  }
+
+  const FRESHNESS_LABELS: Record<string, { text: string; color: string }> = {
+    active: { text: "ACTIVE", color: "#22c55e" },
+    slow: { text: "SLOW", color: "#C9A96E" },
+    stale: { text: "STALE", color: "#ef4444" },
+  };
 
   return (
     <div>
-      <div className="dash-section-title">ECONOMIC CALENDAR</div>
-      {upcomingEvents.length === 0 ? (
-        <div style={{ fontSize: 12, color: "var(--muted)" }}>예정된 이벤트 없음</div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-          {upcomingEvents.map((ev, idx) => (
+      <div className="dash-section-title">SOURCE QUALITY</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        {top5.map((rank, idx) => {
+          const scoreColor =
+            rank.qualityScore > 70 ? "#C9A96E" : rank.qualityScore >= 40 ? "#8C8C91" : "#ef4444";
+          const freshness = FRESHNESS_LABELS[rank.freshness] || FRESHNESS_LABELS.stale;
+
+          return (
             <div
-              key={`${ev.date}-${ev.title}`}
+              key={rank.sourceId}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
                 padding: "8px 0",
-                borderBottom: idx < upcomingEvents.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                borderLeft: ev.importance === "high" ? "4px solid #C9A96E" : "4px solid transparent",
-                paddingLeft: 10,
+                borderBottom: idx < top5.length - 1 ? "1px solid var(--border-subtle)" : "none",
               }}
             >
-              <span className="type-data-sm" style={{ color: "var(--muted)", flexShrink: 0, width: 52 }}>
-                {ev.date.slice(5)}
-              </span>
+              {/* Name */}
               <span
                 className="type-small"
                 style={{
-                  fontWeight: 500,
+                  fontWeight: 600,
                   color: "var(--foreground-bright)",
-                  flex: 1,
                   minWidth: 0,
+                  flex: 1,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                   fontSize: 12,
                 }}
               >
-                {ev.title}
+                {rank.sourceName}
               </span>
+
+              {/* Score bar */}
+              <div
+                style={{
+                  width: 60,
+                  height: 4,
+                  background: "var(--border)",
+                  flexShrink: 0,
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${rank.qualityScore}%`,
+                    height: "100%",
+                    background: scoreColor,
+                    transition: "width 0.4s ease",
+                  }}
+                />
+              </div>
+
+              {/* Score number */}
+              <span
+                className="type-data-sm"
+                style={{
+                  color: scoreColor,
+                  fontWeight: 700,
+                  width: 24,
+                  textAlign: "right",
+                  flexShrink: 0,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {rank.qualityScore}
+              </span>
+
+              {/* Article count */}
+              <span
+                className="type-data-sm"
+                style={{
+                  color: "var(--muted)",
+                  width: 28,
+                  textAlign: "right",
+                  flexShrink: 0,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {rank.articleCount}
+              </span>
+
+              {/* Freshness badge */}
               <span
                 className="type-micro"
                 style={{
-                  padding: "2px 6px",
-                  borderRadius: 2,
-                  color: REGION_TAG_COLORS[ev.region] || "#8C8C91",
-                  background: `${REGION_TAG_COLORS[ev.region] || "#8C8C91"}15`,
-                  flexShrink: 0,
+                  padding: "2px 5px",
+                  color: freshness.color,
+                  background: `${freshness.color}15`,
                   fontWeight: 600,
+                  flexShrink: 0,
+                  fontSize: 9,
+                  letterSpacing: "0.05em",
                 }}
               >
-                {ev.region}
+                {freshness.text}
               </span>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -398,6 +437,7 @@ export default function DashboardTab({
   const [hoveredMarketIdx, setHoveredMarketIdx] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { visibleRankings } = useSourceRanking(articles, sources);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -786,6 +826,10 @@ export default function DashboardTab({
               ))}
             </div>
           )}
+
+          {/* Source Quality */}
+          <div className="dash-separator" />
+          <SourceQualityPanel rankings={visibleRankings} />
 
           {/* Economic Calendar */}
           <div style={{ marginTop: 20 }}>

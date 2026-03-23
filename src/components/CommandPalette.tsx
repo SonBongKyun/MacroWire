@@ -37,6 +37,8 @@ const ACTIONS: { id: string; label: string; shortcut?: string }[] = [
   { id: "analytics", label: "애널리틱스 대시보드 열기", shortcut: "A" },
   { id: "watchlist", label: "키워드 워치리스트 토글", shortcut: "W" },
   { id: "addSource", label: "새 소스 추가" },
+  { id: "weeklyReport", label: "주간 리포트 생성", shortcut: "Shift+W" },
+  { id: "newsletter", label: "뉴스레터 생성" },
 ];
 
 function fuzzyMatch(text: string, query: string): boolean {
