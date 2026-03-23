@@ -13,6 +13,7 @@ interface PriceChartProps {
 export function PriceChart({ data, width: propWidth, height = 120, label, change }: PriceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(propWidth || 0);
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (propWidth) return;
@@ -64,14 +65,34 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
       }))
     : [];
 
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const svg = e.currentTarget;
+    const rect = svg.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    // Find closest data point index
+    const idx = Math.round((mouseX / chartW) * (data.length - 1));
+    const clampedIdx = Math.max(0, Math.min(data.length - 1, idx));
+    setHoverIndex(clampedIdx);
+  };
+
+  const handleMouseLeave = () => {
+    setHoverIndex(null);
+  };
+
+  const hoverPoint = hoverIndex !== null ? points[hoverIndex] : null;
+  const hoverPrice = hoverIndex !== null ? data[hoverIndex] : null;
+
   return (
     <div ref={containerRef} style={{ width: propWidth || "100%", position: "relative" }}>
       {w > 0 && (
+        <>
         <svg
           width={w}
           height={height}
           viewBox={`0 0 ${w} ${height}`}
-          style={{ display: "block", overflow: "visible" }}
+          style={{ display: "block", overflow: "visible", cursor: hoverIndex !== null ? "crosshair" : "default" }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
           {/* Reference line at start price */}
           <line
@@ -149,7 +170,57 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
               {xl.label}
             </text>
           ))}
+
+          {/* Hover crosshair */}
+          {hoverPoint && (
+            <>
+              <line
+                x1={hoverPoint.x}
+                y1={padTop}
+                x2={hoverPoint.x}
+                y2={padTop + chartH}
+                stroke="#8C8C91"
+                strokeWidth={1}
+                strokeDasharray="3,3"
+                pointerEvents="none"
+              />
+              <circle
+                cx={hoverPoint.x}
+                cy={hoverPoint.y}
+                r={4}
+                fill="#C9A96E"
+                pointerEvents="none"
+              />
+            </>
+          )}
         </svg>
+
+        {/* Hover tooltip */}
+        {hoverPoint && hoverPrice !== null && (
+          <div
+            style={{
+              position: "absolute",
+              left: hoverPoint.x,
+              top: hoverPoint.y - 32,
+              transform: "translateX(-50%)",
+              background: "#1A1A1F",
+              border: "1px solid #2D2D32",
+              padding: "4px 8px",
+              fontFamily: "'Space Mono', var(--font-mono), monospace",
+              fontSize: 11,
+              color: "#EBEBEB",
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+              zIndex: 10,
+              borderRadius: 2,
+            }}
+          >
+            {hoverPrice >= 1000
+              ? hoverPrice.toLocaleString("en-US", { maximumFractionDigits: 0 })
+              : hoverPrice.toFixed(2)}
+          </div>
+        )}
+        </>
       )}
     </div>
   );

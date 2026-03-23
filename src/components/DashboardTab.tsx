@@ -1,12 +1,35 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import type { Article, Source } from "@/types";
 import type { PortfolioPrice } from "@/hooks/usePortfolio";
 import type { WatchlistStore } from "@/hooks/useWatchlist";
 import { MiniSparkline } from "@/components/PriceChart";
 // TAG_COLORS kept available for future use
 // import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
+
+function AnimatedNumber({ value, duration = 600 }: { value: number; duration?: number }) {
+  const [display, setDisplay] = useState(0);
+  const prev = useRef(0);
+
+  useEffect(() => {
+    const start = prev.current;
+    const diff = value - start;
+    if (diff === 0) return;
+    const startTime = Date.now();
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      setDisplay(Math.round(start + diff * eased));
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    prev.current = value;
+  }, [value, duration]);
+
+  return <>{display.toLocaleString()}</>;
+}
 
 const ECON_EVENTS = [
   { date: "2026-03-18", title: "FOMC 회의 시작", region: "미국", importance: "high" },
@@ -322,21 +345,12 @@ function EconomicCalendar() {
                 paddingLeft: 10,
               }}
             >
-              <span
-                style={{
-                  fontSize: 11,
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--muted)",
-                  flexShrink: 0,
-                  width: 52,
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
+              <span className="type-data-sm" style={{ color: "var(--muted)", flexShrink: 0, width: 52 }}>
                 {ev.date.slice(5)}
               </span>
               <span
+                className="type-small"
                 style={{
-                  fontSize: 12,
                   fontWeight: 500,
                   color: "var(--foreground-bright)",
                   flex: 1,
@@ -344,19 +358,20 @@ function EconomicCalendar() {
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
+                  fontSize: 12,
                 }}
               >
                 {ev.title}
               </span>
               <span
+                className="type-micro"
                 style={{
-                  fontSize: 9,
-                  fontWeight: 600,
                   padding: "2px 6px",
-                  borderRadius: 3,
+                  borderRadius: 2,
                   color: REGION_TAG_COLORS[ev.region] || "#8C8C91",
                   background: `${REGION_TAG_COLORS[ev.region] || "#8C8C91"}15`,
                   flexShrink: 0,
+                  fontWeight: 600,
                 }}
               >
                 {ev.region}
@@ -381,6 +396,23 @@ export default function DashboardTab({
   const [marketData, setMarketData] = useState<MarketItem[]>([]);
   const [marketLoading, setMarketLoading] = useState(true);
   const [hoveredMarketIdx, setHoveredMarketIdx] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setScrolled(el.scrollTop > 0);
+  }, []);
+
+  // Check if Korean market is currently open
+  const isMarketOpen = useMemo(() => {
+    const now = new Date();
+    const kst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    const day = kst.getDay();
+    const timeVal = kst.getHours() * 60 + kst.getMinutes();
+    return day >= 1 && day <= 5 && timeVal >= 540 && timeVal < 930;
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -438,9 +470,9 @@ export default function DashboardTab({
   const secondaryArticles = latestArticles.slice(1, 7);
 
   return (
-    <div className="overflow-y-auto" style={{ height: "100%" }}>
+    <div className="overflow-y-auto" ref={scrollRef} onScroll={handleScroll} style={{ height: "100%" }}>
       {/* ── Market Overview Strip ── */}
-      <div className="market-strip">
+      <div className="market-strip" style={{ transition: "box-shadow 0.2s ease", boxShadow: scrolled ? "0 1px 8px rgba(0,0,0,0.3)" : "none" }}>
         {marketLoading ? (
           <div style={{ display: "flex", gap: 32 }}>
             {[1, 2, 3, 4].map((i) => (
@@ -464,49 +496,32 @@ export default function DashboardTab({
               sparkData.push(startPrice + diff * progress + noise);
             }
             sparkData.push(item.price);
+            const isUp = item.changePct >= 0;
+            const borderColor = isUp ? "#22c55e" : "#ef4444";
             return (
               <div key={item.symbol} style={{ display: "contents" }}>
                 {idx > 0 && <div className="market-strip-divider" />}
                 <div
                   className="market-strip-item"
-                  style={{ position: "relative" }}
+                  style={{ position: "relative", borderLeft: `2px solid ${borderColor}`, paddingLeft: 12 }}
                   onMouseEnter={() => setHoveredMarketIdx(idx)}
                   onMouseLeave={() => setHoveredMarketIdx(null)}
                 >
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontFamily: "var(--font-mono)",
-                      color: "var(--muted)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                      fontWeight: 500,
-                    }}
-                  >
+                  <span className="type-label">
                     {item.label}
                   </span>
-                  <span
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 700,
-                      fontFamily: "var(--font-mono)",
-                      color: "var(--foreground-bright)",
-                      fontVariantNumeric: "tabular-nums",
-                      lineHeight: 1.1,
-                    }}
-                  >
+                  <span className="type-data-lg" style={{ fontSize: 18, lineHeight: 1.1, display: "flex", alignItems: "center", gap: 6 }}>
                     {formatPrice(item.price)}
+                    {!isMarketOpen && (
+                      <span style={{ fontSize: 9, fontWeight: 500, color: "var(--muted)" }}>마감</span>
+                    )}
                   </span>
                   <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      fontFamily: "var(--font-mono)",
-                      fontVariantNumeric: "tabular-nums",
-                      color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
-                    }}
+                    className="type-data-sm"
+                    style={{ color: isUp ? "#22c55e" : "#ef4444", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
                   >
-                    {item.changePct >= 0 ? "\u25B2" : "\u25BC"} {Math.abs(item.changePct).toFixed(1)}%
+                    <span style={{ display: "inline-block", transition: "transform 0.3s ease", transform: isUp ? "rotate(0deg)" : "rotate(180deg)", fontSize: 10 }}>▲</span>
+                    {isUp ? "+" : ""}{item.change.toFixed(2)} ({Math.abs(item.changePct).toFixed(1)}%)
                   </span>
                   <MiniSparkline
                     data={sparkData}
@@ -585,17 +600,7 @@ export default function DashboardTab({
                 marginBottom: 20,
               }}
             >
-              <h2
-                style={{
-                  fontSize: 20,
-                  fontWeight: 700,
-                  color: "var(--foreground-bright)",
-                  lineHeight: 1.35,
-                  letterSpacing: "-0.01em",
-                  margin: 0,
-                  fontFamily: "var(--font-heading)",
-                }}
-              >
+              <h2 className="type-h1" style={{ margin: 0, lineHeight: 1.35 }}>
                 {heroArticle.title}
               </h2>
               <div
@@ -606,10 +611,10 @@ export default function DashboardTab({
                   marginTop: 6,
                 }}
               >
-                <span style={{ fontSize: 12, color: "var(--muted-bright)", fontWeight: 500 }}>
+                <span className="type-small" style={{ color: "var(--muted-bright)", fontWeight: 500 }}>
                   {heroArticle.sourceName}
                 </span>
-                <span style={{ color: "var(--muted)", fontSize: 11, fontFamily: "var(--font-mono)" }}>
+                <span className="type-small type-data" style={{ color: "var(--muted)" }}>
                   {timeAgo(heroArticle.publishedAt)}
                 </span>
               </div>
@@ -657,10 +662,9 @@ export default function DashboardTab({
                     />
                   )}
                   <span
+                    className="type-body"
                     style={{
-                      fontSize: 13,
                       fontWeight: 500,
-                      color: "var(--foreground-bright)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -671,14 +675,8 @@ export default function DashboardTab({
                     {article.title}
                   </span>
                   <span
-                    style={{
-                      fontSize: 11,
-                      color: "var(--muted)",
-                      flexShrink: 0,
-                      fontFamily: "var(--font-mono)",
-                      fontVariantNumeric: "tabular-nums",
-                      whiteSpace: "nowrap",
-                    }}
+                    className="type-small type-data"
+                    style={{ flexShrink: 0, whiteSpace: "nowrap" }}
                   >
                     {article.sourceName} {timeAgo(article.publishedAt)}
                   </span>
@@ -706,34 +704,19 @@ export default function DashboardTab({
               {portfolioPrices.map((item) => (
                 <div key={item.symbol} className="dash-price-row">
                   <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: "var(--foreground-bright)",
-                      minWidth: 80,
-                      flexShrink: 0,
-                    }}
+                    className="type-small"
+                    style={{ fontWeight: 600, color: "var(--foreground-bright)", minWidth: 80, flexShrink: 0 }}
                   >
                     {item.label}
                   </span>
                   <span style={{ flex: 1 }} />
-                  <span
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "var(--foreground-bright)",
-                      fontVariantNumeric: "tabular-nums",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
+                  <span className="type-data-md" style={{ color: "var(--foreground-bright)", fontWeight: 700, fontSize: 13 }}>
                     {formatPrice(item.price)}
                   </span>
                   <span
+                    className="type-data-sm"
                     style={{
-                      fontSize: 12,
                       fontWeight: 600,
-                      fontVariantNumeric: "tabular-nums",
-                      fontFamily: "var(--font-mono)",
                       color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
                       width: 60,
                       textAlign: "right",
@@ -759,27 +742,10 @@ export default function DashboardTab({
               { label: "활성 소스", value: todayStats.sourceCount },
             ].map((stat) => (
               <div key={stat.label} className="dash-stat-cell">
-                <span
-                  style={{
-                    fontSize: 26,
-                    fontWeight: 800,
-                    color: "var(--accent)",
-                    fontFamily: "var(--font-mono)",
-                    fontVariantNumeric: "tabular-nums",
-                    lineHeight: 1,
-                  }}
-                >
-                  {stat.value}
+                <span className="type-data-lg" style={{ color: "var(--accent)", fontWeight: 800, fontSize: 26, lineHeight: 1 }}>
+                  <AnimatedNumber value={stat.value} />
                 </span>
-                <span
-                  style={{
-                    fontSize: 10,
-                    color: "var(--muted)",
-                    fontWeight: 500,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
+                <span className="type-micro">
                   {stat.label}
                 </span>
               </div>
@@ -809,15 +775,7 @@ export default function DashboardTab({
                     }}
                   >
                     {tag}
-                    <span
-                      style={{
-                        fontSize: 10,
-                        color: "var(--muted)",
-                        marginLeft: 3,
-                        fontFamily: "var(--font-mono)",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
+                    <span className="type-data-sm" style={{ color: "var(--muted)", marginLeft: 3, fontSize: 10 }}>
                       {count}
                     </span>
                   </button>

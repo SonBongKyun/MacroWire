@@ -112,6 +112,17 @@ export function ArticleDetail({
 
   const hasNote = noteText.trim().length > 0;
 
+  // Count articles per tag for tooltip
+  const tagCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const a of articles) {
+      for (const t of a.tags) {
+        counts[t] = (counts[t] || 0) + 1;
+      }
+    }
+    return counts;
+  }, [articles]);
+
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -175,7 +186,7 @@ export function ArticleDetail({
   }
 
   return (
-    <aside key={article.id} className="shrink-0 bg-[#0D0D0F] flex flex-col overflow-hidden relative detail-enter" style={{ width: "100%", height: "100%" }}>
+    <aside key={article.id} className="shrink-0 bg-[#0D0D0F] flex flex-col overflow-hidden relative detail-enter" style={{ width: "100%", height: "100%", borderTop: "2px solid #C9A96E" }}>
       {/* Reading progress bar */}
       <div className="reading-progress" style={{ width: `${readProgress * 100}%` }} />
 
@@ -245,7 +256,7 @@ export function ArticleDetail({
         </div>
 
         {/* Title */}
-        <h2 className="text-[18px] font-heading font-extrabold leading-[1.45] text-[var(--foreground-bright)] mb-3 tracking-[-0.01em]">
+        <h2 className="text-[18px] font-heading font-extrabold leading-[1.45] text-[var(--foreground-bright)] mb-3 tracking-[-0.01em]" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
           {article.title}
         </h2>
 
@@ -267,7 +278,7 @@ export function ArticleDetail({
                   className="tag-pill tag-pill-lg"
                   style={{ color, backgroundColor: `${color}15`, borderColor: `${color}30` }}
                   onClick={() => onTagClick?.(tag)}
-                  title={`"${tag}" 태그로 필터`}
+                  title={`${tag} — ${tagCounts[tag] || 0}건`}
                 >
                   {tag}
                 </button>
@@ -284,7 +295,7 @@ export function ArticleDetail({
             <h3 className="section-label">
               요약
             </h3>
-            <p className="text-[13.5px] leading-[1.85] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
+            <p className="article-summary text-[13.5px] leading-[1.85] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
               {article.summary}
             </p>
             <ArticleSummary title={article.title} summary={article.summary} url={article.url} />

@@ -151,26 +151,10 @@ export function PlatformNav({
     <header className="relative flex items-center gap-3 px-4 h-[48px] glass-header shrink-0 select-none z-20">
       {/* Logo — text only */}
       <div className="flex items-center gap-1 shrink-0">
-        <span
-          style={{
-            fontFamily: "var(--font-heading), 'Space Grotesk', sans-serif",
-            fontSize: 15,
-            fontWeight: 700,
-            color: "#C9A96E",
-            letterSpacing: "0.06em",
-          }}
-        >
+        <span className="type-h2" style={{ color: "#C9A96E", letterSpacing: "0.06em", fontSize: 15 }}>
           RYZM
         </span>
-        <span
-          style={{
-            fontFamily: "var(--font-heading), 'Space Grotesk', sans-serif",
-            fontSize: 15,
-            fontWeight: 300,
-            color: "#8C8C91",
-            letterSpacing: "0.06em",
-          }}
-        >
+        <span className="type-label" style={{ fontSize: 15, fontWeight: 300, letterSpacing: "0.06em" }}>
           FINANCE
         </span>
       </div>
@@ -185,12 +169,13 @@ export function PlatformNav({
             <button
               key={tab.key}
               onClick={() => onTabChange(tab.key)}
-              className="relative h-full flex items-center transition-colors"
+              className="relative h-full flex items-center transition-colors font-heading"
               style={{
                 padding: "0 20px",
                 fontSize: 13,
                 fontWeight: isActive ? 700 : 500,
                 color: isActive ? "var(--accent)" : "var(--muted)",
+                letterSpacing: "0.02em",
               }}
             >
               {tab.label}
@@ -255,7 +240,7 @@ export function PlatformNav({
           onFocus={() => { setSearchFocused(true); setShowAutocomplete(true); }}
           onBlur={() => { setTimeout(() => setSearchFocused(false), 150); }}
           onKeyDown={handleSearchKeyDown}
-          className="w-full bg-[var(--surface-active)] border border-[var(--border)] rounded-[var(--radius-md)] pl-8 pr-14 py-[5px] text-[12px] placeholder-[var(--muted)] focus:outline-none search-input transition-all"
+          className="w-full bg-[var(--surface-active)] border border-[var(--border)] rounded-[var(--radius-md)] pl-8 pr-14 py-[5px] text-[11px] placeholder-[var(--muted)] focus:outline-none search-input transition-all"
         />
         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
           {searchQuery ? (
@@ -328,7 +313,7 @@ export function PlatformNav({
       {/* Refresh */}
       <div className="flex items-center gap-1.5 shrink-0">
         {countdown > 0 && !ingesting && (
-          <span className="text-[10px] text-[var(--muted)] tabular-nums font-medium">
+          <span className="type-data-sm" style={{ color: "var(--muted)" }}>
             {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, "0")}
           </span>
         )}

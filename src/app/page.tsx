@@ -71,12 +71,19 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
       <span className="text-[10px] tabular-nums text-[var(--foreground-secondary)] font-medium">{clock}</span>
       {sep}
       <span className={`text-[10px] font-bold ${marketStatus.open ? "text-[var(--success)]" : "text-[var(--muted)]"}`}>
-        {marketStatus.open ? "\u25CF" : "\u25CB"} {marketStatus.label}
+        <span className={marketStatus.open ? "stat-dot-live" : ""} style={{ display: "inline-block" }}>{marketStatus.open ? "\u25CF" : "\u25CB"}</span> {marketStatus.label}
       </span>
       {sep}
       <span className="text-[10px] tabular-nums text-[var(--muted)]">{enabledSources}/{totalSources} 소스</span>
       {sep}
-      <span className="text-[10px] tabular-nums text-[var(--muted)]">{articleCount}건</span>
+      <span className="text-[10px] tabular-nums text-[var(--muted)]" style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ display: "inline-block", verticalAlign: "middle" }}>
+          <rect x="1" y="5" width="2" height="5" rx="0.5" fill="currentColor" opacity="0.5" />
+          <rect x="4" y="3" width="2" height="7" rx="0.5" fill="currentColor" opacity="0.7" />
+          <rect x="7" y="1" width="2" height="9" rx="0.5" fill="currentColor" />
+        </svg>
+        {articleCount}건
+      </span>
       {unreadCount > 0 && (
         <>
           {sep}
@@ -86,7 +93,7 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
       {activeFilterCount > 0 && (
         <>
           {sep}
-          <span className="text-[10px] tabular-nums text-[var(--accent)]">{activeFilterCount} 필터</span>
+          <span className="text-[10px] tabular-nums font-semibold" style={{ background: "rgba(201,169,110,0.15)", color: "#C9A96E", padding: "1px 6px", borderRadius: 2, fontSize: 9 }}>{activeFilterCount} 필터</span>
         </>
       )}
       {sep}

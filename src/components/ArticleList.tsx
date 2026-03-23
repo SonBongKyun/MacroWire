@@ -222,6 +222,7 @@ export function ArticleList({
         )}
 
         {/* List view only */}
+        <div className="list-stagger">
         {filteredArticles.map((article) => {
           const isSelected = selectedArticleId === article.id;
           const isUnread = !article.isRead;
@@ -317,6 +318,7 @@ export function ArticleList({
             </div>
           );
         })}
+        </div>
 
         {hasMore && <div ref={sentinelRef} style={{ height: 32 }} />}
 
