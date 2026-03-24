@@ -6,6 +6,7 @@ import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { RelatedArticles } from "@/components/RelatedArticles";
 import { ArticleSummary } from "@/components/ArticleSummary";
 import { TAG_COLORS } from "@/lib/constants/colors";
+import { useArticleNotes } from "@/hooks/useArticleNotes";
 
 interface ArticleDetailProps {
   article: Article | null;
@@ -73,10 +74,23 @@ export function ArticleDetail({
   const [toastExiting, setToastExiting] = useState(false);
   const [newCollectionInput, setNewCollectionInput] = useState("");
   const [readProgress, setReadProgress] = useState(0);
-  const [noteText, setNoteText] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
+  const [highlightInput, setHighlightInput] = useState("");
   const [fullscreen, setFullscreen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Article notes hook
+  const articleNotes = useArticleNotes();
+  const currentNote = article ? articleNotes.getNote(article.id) : null;
+  const noteText = currentNote?.text || "";
+  const highlights = currentNote?.highlights || [];
+
+  const setNoteText = useCallback(
+    (text: string) => {
+      if (article) articleNotes.saveNote(article.id, text);
+    },
+    [article, articleNotes]
+  );
 
   // ESC to close fullscreen
   useEffect(() => {
@@ -88,29 +102,13 @@ export function ArticleDetail({
     return () => window.removeEventListener("keydown", handler);
   }, [fullscreen]);
 
-  // Load note from localStorage on article change
+  // Reset scroll on article change
   useEffect(() => {
     setReadProgress(0);
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
-    if (article?.id) {
-      const saved = localStorage.getItem(`ryzm-finance-notes-${article.id}`);
-      setNoteText(saved || "");
-    } else {
-      setNoteText("");
-    }
   }, [article?.id]);
 
-  // Auto-save note to localStorage
-  useEffect(() => {
-    if (!article?.id) return;
-    if (noteText) {
-      localStorage.setItem(`ryzm-finance-notes-${article.id}`, noteText);
-    } else {
-      localStorage.removeItem(`ryzm-finance-notes-${article.id}`);
-    }
-  }, [noteText, article?.id]);
-
-  const hasNote = noteText.trim().length > 0;
+  const hasNote = noteText.trim().length > 0 || highlights.length > 0;
 
   // Count articles per tag for tooltip
   const tagCounts = useMemo(() => {
@@ -321,7 +319,7 @@ export function ArticleDetail({
           </div>
         )}
 
-        {/* Notes section */}
+        {/* Notes & Highlights section */}
         <div className="mt-4">
           <button
             onClick={() => setNotesOpen((v) => !v)}
@@ -330,21 +328,79 @@ export function ArticleDetail({
             <svg className={`w-2.5 h-2.5 text-[var(--muted)] transition-transform ${notesOpen ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
-            <span className="section-label" style={{ marginBottom: 0 }}>메모</span>
+            <span className="section-label" style={{ marginBottom: 0 }}>메모 &amp; 하이라이트</span>
             {hasNote && (
-              <span className="text-[9px] text-[var(--accent)] font-semibold">1</span>
+              <span className="text-[9px] text-[var(--accent)] font-semibold">
+                {(noteText.trim() ? 1 : 0) + highlights.length}
+              </span>
             )}
           </button>
           {notesOpen && (
-            <div className="mt-2">
+            <div className="mt-2 space-y-3">
               <textarea
                 rows={3}
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 placeholder="이 기사에 대한 메모..."
-                className="w-full bg-[var(--surface-active)] border border-[var(--border)] rounded-[var(--radius-sm)] px-3 py-2 text-[12px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] resize-none metal-inset"
+                className="w-full bg-[var(--surface-active)] border border-[var(--border)] px-3 py-2 text-[12px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] resize-none metal-inset"
                 style={{ fontSize: 12 }}
               />
+
+              {/* Highlights */}
+              {highlights.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wider">하이라이트</span>
+                  {highlights.map((h, i) => (
+                    <div
+                      key={i}
+                      className="relative pl-3 py-2 pr-7 text-[11px] leading-[1.7] text-[var(--foreground-secondary)]"
+                      style={{
+                        borderLeft: "2px solid #C9A96E",
+                        background: "rgba(201,169,110,0.06)",
+                      }}
+                    >
+                      {h}
+                      <button
+                        onClick={() => article && articleNotes.removeHighlight(article.id, h)}
+                        className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center text-[var(--muted)] hover:text-[var(--danger)] text-[10px] transition-colors"
+                        title="삭제"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add highlight input */}
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={highlightInput}
+                  onChange={(e) => setHighlightInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && highlightInput.trim() && article) {
+                      articleNotes.addHighlight(article.id, highlightInput.trim());
+                      setHighlightInput("");
+                    }
+                  }}
+                  placeholder="하이라이트 추가..."
+                  className="flex-1 bg-[var(--surface-active)] border border-[var(--border)] px-2.5 py-1.5 text-[11px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] metal-inset"
+                  style={{ fontSize: 11 }}
+                />
+                <button
+                  onClick={() => {
+                    if (highlightInput.trim() && article) {
+                      articleNotes.addHighlight(article.id, highlightInput.trim());
+                      setHighlightInput("");
+                    }
+                  }}
+                  className="px-2 py-1.5 text-[10px] font-semibold metal-btn transition-colors"
+                  style={{ color: "#C9A96E", borderColor: "rgba(201,169,110,0.3)" }}
+                >
+                  + 추가
+                </button>
+              </div>
             </div>
           )}
         </div>

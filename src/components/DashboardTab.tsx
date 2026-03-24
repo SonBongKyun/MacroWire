@@ -6,6 +6,7 @@ import type { PortfolioPrice } from "@/hooks/usePortfolio";
 import type { WatchlistStore } from "@/hooks/useWatchlist";
 import { MiniSparkline } from "@/components/PriceChart";
 import { EconomicCalendar } from "@/components/EconomicCalendar";
+import { SentimentGauge } from "@/components/SentimentGauge";
 import { useSourceRanking } from "@/hooks/useSourceRanking";
 import type { SourceRank } from "@/hooks/useSourceRanking";
 // TAG_COLORS kept available for future use
@@ -724,6 +725,11 @@ export default function DashboardTab({
               ))}
             </div>
           )}
+
+          {/* Sentiment Gauge */}
+          <div style={{ marginTop: 20 }}>
+            <SentimentGauge articles={articles} />
+          </div>
 
           {/* 24H Activity */}
           <div style={{ marginTop: 24 }}>

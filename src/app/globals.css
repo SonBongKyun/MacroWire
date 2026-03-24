@@ -1522,6 +1522,25 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
     max-width: 95vw !important;
     height: 90vh !important;
   }
+
+  /* Stack dashboard columns vertically */
+  .dash-two-col { grid-template-columns: 1fr !important; }
+  .market-strip { flex-wrap: wrap; gap: 8px; }
+  .market-strip-item { flex: 1 1 45%; }
+  .market-strip-divider { display: none; }
+
+  /* News tab: stack list and detail vertically */
+  .news-layout { grid-template-columns: 1fr !important; }
+
+  /* PlatformNav: hide search on small screens, compact tabs */
+  header.glass-header { height: 44px; padding: 0 8px; }
+  header .topbar-divider { display: none; }
+
+  /* Status bar: simpler on mobile */
+  .status-bar { font-size: 9px; padding: 0 8px; }
+
+  /* Hide split view on mobile */
+  .split-view-panel { display: none; }
 }
 
 @media (max-width: 480px) {
@@ -1532,6 +1551,11 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
     padding-right: 10px;
   }
   .status-bar { display: none; }
+
+  /* Ultra compact for phones */
+  header.glass-header { height: 40px; }
+  .market-strip { display: none; }
+  .dash-section-title { font-size: 9px; }
 }
 
 /* ── Card Thumbnail ── */

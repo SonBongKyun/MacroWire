@@ -9,7 +9,8 @@
       "Bash(curl -s -X POST http://localhost:3000/api/ingest)",
       "Bash(netstat -ano)",
       "Bash(findstr \"LISTENING\")",
-      "Bash(findstr :300)"
+      "Bash(findstr :300)",
+      "Bash(curl -s -X POST http://localhost:3004/api/ingest)"
     ]
   }
 }

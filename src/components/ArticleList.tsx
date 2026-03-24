@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import type { Article } from "@/types";
 import { TAG_COLORS } from "@/lib/constants/colors";
+import { useArticleScoring } from "@/hooks/useArticleScoring";
 
 type ReadFilter = "all" | "unread" | "read";
 type ViewMode = "list" | "card";
@@ -30,6 +31,9 @@ interface ArticleListProps {
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
 }
+
+const ROW_HEIGHT = 56;
+const BUFFER_COUNT = 10;
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -75,9 +79,11 @@ export function ArticleList({
   viewMode = "list",
   onViewModeChange,
 }: ArticleListProps) {
+  const { getScore } = useArticleScoring(articles);
   const listRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
 
   // Context menu state
   const [ctxMenu, setCtxMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0, article: null });
@@ -134,24 +140,38 @@ export function ArticleList({
 
   const newIds = useMemo(() => new Set(newArticleIds), [newArticleIds]);
 
+  // Measure container height on mount and resize
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const measure = () => setContainerHeight(el.clientHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Virtual scrolling calculations
+  const totalHeight = filteredArticles.length * ROW_HEIGHT;
+  const startIndex = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - BUFFER_COUNT);
+  const visibleCount = Math.ceil(containerHeight / ROW_HEIGHT) + 2 * BUFFER_COUNT;
+  const endIndex = Math.min(filteredArticles.length, startIndex + visibleCount);
+  const visibleArticles = filteredArticles.slice(startIndex, endIndex);
+  const offsetY = startIndex * ROW_HEIGHT;
+
+  // Infinite scroll: trigger load more when near the bottom
   useEffect(() => {
     if (!hasMore || loading) return;
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) onLoadMore();
-      },
-      { root: listRef.current, rootMargin: "200px" }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, loading, onLoadMore]);
+    const scrollBottom = scrollTop + containerHeight;
+    if (scrollBottom >= totalHeight - 200) {
+      onLoadMore();
+    }
+  }, [scrollTop, containerHeight, totalHeight, hasMore, loading, onLoadMore]);
 
   const handleListScroll = useCallback(() => {
     const el = listRef.current;
     if (!el) return;
+    setScrollTop(el.scrollTop);
     setShowScrollTop(el.scrollTop > 400);
   }, []);
 
@@ -167,10 +187,29 @@ export function ArticleList({
         e.preventDefault();
         const next = Math.min(idx + 1, filteredArticles.length - 1);
         onSelectArticle(filteredArticles[next]);
+        // Scroll selected item into view
+        const itemTop = next * ROW_HEIGHT;
+        const el = listRef.current;
+        if (el) {
+          if (itemTop < el.scrollTop) {
+            el.scrollTop = itemTop;
+          } else if (itemTop + ROW_HEIGHT > el.scrollTop + el.clientHeight) {
+            el.scrollTop = itemTop + ROW_HEIGHT - el.clientHeight;
+          }
+        }
       } else if (e.key === "ArrowUp" || e.key === "k") {
         e.preventDefault();
         const prev = Math.max(idx - 1, 0);
         onSelectArticle(filteredArticles[prev]);
+        const itemTop = prev * ROW_HEIGHT;
+        const el = listRef.current;
+        if (el) {
+          if (itemTop < el.scrollTop) {
+            el.scrollTop = itemTop;
+          } else if (itemTop + ROW_HEIGHT > el.scrollTop + el.clientHeight) {
+            el.scrollTop = itemTop + ROW_HEIGHT - el.clientHeight;
+          }
+        }
       } else if (e.key === "s" && idx >= 0) {
         e.preventDefault();
         onToggleSave(filteredArticles[idx]);
@@ -221,106 +260,134 @@ export function ArticleList({
           </div>
         )}
 
-        {/* List view only */}
-        <div className="list-stagger">
-        {filteredArticles.map((article) => {
-          const isSelected = selectedArticleId === article.id;
-          const isUnread = !article.isRead;
-          return (
-            <div
-              key={article.id}
-              onClick={() => onSelectArticle(article)}
-              onContextMenu={(e) => handleContextMenu(e, article)}
-              style={{
-                padding: "10px 16px",
-                borderBottom: "1px solid #2D2D32",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 10,
-                transition: "background-color 0.1s",
-                backgroundColor: isSelected ? "rgba(201,169,110,0.06)" : "transparent",
-                borderLeft: isSelected ? "2px solid #C9A96E" : "2px solid transparent",
-                opacity: !isUnread && !isSelected ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(235,235,235,0.03)";
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-              }}
-            >
-              {/* Unread dot */}
-              <div style={{ width: 5, paddingTop: 5, flexShrink: 0 }}>
-                {isUnread && (
-                  <div style={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: "50%",
-                    backgroundColor: "#C9A96E",
-                  }} />
-                )}
-              </div>
+        {/* Virtualized list view */}
+        {filteredArticles.length > 0 && (
+          <div style={{ height: totalHeight, position: "relative" }}>
+            <div style={{ transform: `translateY(${offsetY}px)`, position: "absolute", left: 0, right: 0, top: 0 }}>
+              {visibleArticles.map((article) => {
+                const isSelected = selectedArticleId === article.id;
+                const isUnread = !article.isRead;
+                return (
+                  <div
+                    key={article.id}
+                    onClick={() => onSelectArticle(article)}
+                    onContextMenu={(e) => handleContextMenu(e, article)}
+                    style={{
+                      height: ROW_HEIGHT,
+                      padding: "10px 16px",
+                      borderBottom: "1px solid #2D2D32",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 10,
+                      transition: "background-color 0.1s",
+                      backgroundColor: isSelected ? "rgba(201,169,110,0.06)" : "transparent",
+                      borderLeft: isSelected ? "2px solid #C9A96E" : "2px solid transparent",
+                      opacity: !isUnread && !isSelected ? 0.6 : 1,
+                      boxSizing: "border-box",
+                      overflow: "hidden",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(235,235,235,0.03)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                    }}
+                  >
+                    {/* Unread dot */}
+                    <div style={{ width: 5, paddingTop: 5, flexShrink: 0 }}>
+                      {isUnread && (
+                        <div style={{
+                          width: 5,
+                          height: 5,
+                          borderRadius: "50%",
+                          backgroundColor: "#C9A96E",
+                        }} />
+                      )}
+                    </div>
 
-              {/* Content */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                {/* Title row */}
-                <p style={{
-                  fontSize: 13,
-                  fontWeight: isUnread ? 500 : 400,
-                  color: "#EBEBEB",
-                  lineHeight: 1.4,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  margin: 0,
-                }}>
-                  {article.title}
-                </p>
+                    {/* Content */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {/* Title row with impact indicator */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <p style={{
+                          fontSize: 13,
+                          fontWeight: isUnread ? 500 : 400,
+                          color: "#EBEBEB",
+                          lineHeight: 1.4,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          margin: 0,
+                          flex: 1,
+                          minWidth: 0,
+                        }}>
+                          {article.title}
+                        </p>
+                        {(() => {
+                          const score = getScore(article.id);
+                          if (!score) return null;
+                          const isHigh = score.impactScore > 70;
+                          return (
+                            <div
+                              title={`Impact: ${score.impactScore}`}
+                              style={{
+                                width: 2,
+                                height: 12,
+                                flexShrink: 0,
+                                borderRadius: 1,
+                                backgroundColor: isHigh ? "#C9A96E" : "#8C8C91",
+                                opacity: isHigh ? 1 : 0.4 + (score.impactScore / 100) * 0.6,
+                                transition: "opacity 0.3s ease",
+                              }}
+                            />
+                          );
+                        })()}
+                      </div>
 
-                {/* Tags row */}
-                {article.tags.length > 0 && (
-                  <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
-                    {article.tags.slice(0, 3).map((tag) => {
-                      const color = TAG_COLORS[tag] || "#475569";
-                      return (
-                        <button
-                          key={tag}
-                          onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
-                          style={{
-                            fontSize: 9,
-                            color,
-                            background: "none",
-                            border: "none",
-                            padding: 0,
-                            cursor: "pointer",
-                            fontWeight: 500,
-                            lineHeight: 1,
-                          }}
-                        >
-                          {tag}
-                        </button>
-                      );
-                    })}
+                      {/* Tags row */}
+                      {article.tags.length > 0 && (
+                        <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                          {article.tags.slice(0, 3).map((tag) => {
+                            const color = TAG_COLORS[tag] || "#475569";
+                            return (
+                              <button
+                                key={tag}
+                                onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
+                                style={{
+                                  fontSize: 9,
+                                  color,
+                                  background: "none",
+                                  border: "none",
+                                  padding: 0,
+                                  cursor: "pointer",
+                                  fontWeight: 500,
+                                  lineHeight: 1,
+                                }}
+                              >
+                                {tag}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right: source + time */}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
+                      <span style={{ fontSize: 10, color: "#8C8C91", fontWeight: 400, whiteSpace: "nowrap" }}>
+                        {article.sourceName}
+                      </span>
+                      <span style={{ fontSize: 10, color: "#8C8C91", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
+                        {timeAgo(article.publishedAt)}
+                      </span>
+                    </div>
                   </div>
-                )}
-              </div>
-
-              {/* Right: source + time */}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
-                <span style={{ fontSize: 10, color: "#8C8C91", fontWeight: 400, whiteSpace: "nowrap" }}>
-                  {article.sourceName}
-                </span>
-                <span style={{ fontSize: 10, color: "#8C8C91", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
-                  {timeAgo(article.publishedAt)}
-                </span>
-              </div>
+                );
+              })}
             </div>
-          );
-        })}
-        </div>
-
-        {hasMore && <div ref={sentinelRef} style={{ height: 32 }} />}
+          </div>
+        )}
 
         {loading && articles.length > 0 && (
           <div style={{ display: "flex", justifyContent: "center", padding: 24 }}>

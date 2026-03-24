@@ -27,6 +27,9 @@ import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
 import { WeeklyReport } from "@/components/WeeklyReport";
 import { NewsletterGenerator } from "@/components/NewsletterGenerator";
+import { CuratedFeed } from "@/components/CuratedFeed";
+import { InsightMemo } from "@/components/InsightMemo";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const POLL_INTERVAL = 5 * 60;
 
@@ -170,6 +173,8 @@ function HomeInner() {
   const [splitView, setSplitView] = useState(false);
   const [weeklyReportOpen, setWeeklyReportOpen] = useState(false);
   const [newsletterOpen, setNewsletterOpen] = useState(false);
+  const [curatedFeedOpen, setCuratedFeedOpen] = useState(false);
+  const [memoOpen, setMemoOpen] = useState(false);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -368,6 +373,8 @@ function HomeInner() {
       case "exportPanel": setExportPanelOpen((v) => !v); break;
       case "weeklyReport": setWeeklyReportOpen(true); break;
       case "newsletter": setNewsletterOpen(true); break;
+      case "curatedFeed": setCuratedFeedOpen(true); break;
+      case "insightMemo": setMemoOpen((v) => !v); break;
     }
   }, [runIngest, markAllRead, exportSaved, toggleDarkMode]);
 
@@ -413,6 +420,10 @@ function HomeInner() {
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       // Shift+W: open weekly report
       if (e.shiftKey && e.key === "W") { e.preventDefault(); setWeeklyReportOpen(true); return; }
+      // Shift+C: open curated feed
+      if (e.shiftKey && e.key === "C") { e.preventDefault(); setCuratedFeedOpen((v) => !v); return; }
+      // Shift+M: open insight memo
+      if (e.shiftKey && e.key === "M") { e.preventDefault(); setMemoOpen((v) => !v); return; }
       // Tab / Shift+Tab: cycle main tabs
       if (e.key === "Tab") {
         e.preventDefault();
@@ -442,7 +453,7 @@ function HomeInner() {
         case "d": e.preventDefault(); toggleDarkMode(); break;
         case "m": e.preventDefault(); markAllRead(); break;
         case "e": e.preventDefault(); exportSaved(); break;
-        case "Escape": setNotificationPanelOpen(false); setThemeSelectorOpen(false); setExportPanelOpen(false); setCalculatorOpen(false); setWeeklyReportOpen(false); setNewsletterOpen(false); break;
+        case "Escape": setNotificationPanelOpen(false); setThemeSelectorOpen(false); setExportPanelOpen(false); setCalculatorOpen(false); setWeeklyReportOpen(false); setNewsletterOpen(false); setCuratedFeedOpen(false); setMemoOpen(false); break;
       }
     };
     window.addEventListener("keydown", handler);
@@ -476,6 +487,8 @@ function HomeInner() {
         calculatorOpen={calculatorOpen}
         onOpenWeeklyReport={() => setWeeklyReportOpen(true)}
         onOpenNewsletter={() => setNewsletterOpen(true)}
+        onToggleMemo={() => setMemoOpen((v) => !v)}
+        memoOpen={memoOpen}
       />
 
       {/* Market Ticker — always visible */}
@@ -484,7 +497,8 @@ function HomeInner() {
       </div>
 
       {/* Tab Content */}
-      <div key={activeMainTab} className="tab-content-enter flex-1 overflow-hidden">
+      <ErrorBoundary key={activeMainTab}>
+      <div className="tab-content-enter flex-1 overflow-hidden">
         {activeMainTab === "dashboard" && (
           <DashboardTab
             articles={articles}
@@ -615,6 +629,7 @@ function HomeInner() {
           <AnalyticsTab articles={articles} />
         )}
       </div>
+      </ErrorBoundary>
 
       {/* Status Bar */}
       <StatusBar
@@ -695,6 +710,18 @@ function HomeInner() {
         onClose={() => setNewsletterOpen(false)}
         articles={articles}
         portfolioPrices={portfolio.prices}
+      />
+
+      <CuratedFeed
+        open={curatedFeedOpen}
+        onClose={() => setCuratedFeedOpen(false)}
+        articles={articles}
+      />
+
+      <InsightMemo
+        open={memoOpen}
+        onClose={() => setMemoOpen(false)}
+        articles={articles}
       />
     </div>
   );

@@ -28,6 +28,8 @@ interface PlatformNavProps {
   calculatorOpen?: boolean;
   onOpenWeeklyReport?: () => void;
   onOpenNewsletter?: () => void;
+  onToggleMemo?: () => void;
+  memoOpen?: boolean;
 }
 
 const SEARCH_HISTORY_KEY = "ryzm-finance-search-history";
@@ -63,6 +65,8 @@ export function PlatformNav({
   calculatorOpen = false,
   onOpenWeeklyReport,
   onOpenNewsletter,
+  onToggleMemo,
+  memoOpen = false,
 }: PlatformNavProps) {
   const [now, setNow] = useState(Date.now());
   const [reportDropdownOpen, setReportDropdownOpen] = useState(false);
@@ -251,6 +255,29 @@ export function PlatformNav({
           title="환율 계산기"
         >
           ₩
+        </button>
+      )}
+
+      {/* Insight Memo Toggle */}
+      {onToggleMemo && (
+        <button
+          onClick={onToggleMemo}
+          className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
+          style={{
+            borderRadius: 2,
+            border: memoOpen ? "1px solid #C9A96E" : "1px solid transparent",
+            background: memoOpen ? "rgba(201,169,110,0.1)" : "transparent",
+            color: memoOpen ? "#C9A96E" : "#8C8C91",
+            cursor: "pointer",
+          }}
+          title={"\uC778\uC0AC\uC774\uD2B8 \uBA54\uBAA8 (Shift+M)"}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M3 2h7l3 3v9H3V2z" />
+            <path d="M10 2v3h3" />
+            <line x1="5" y1="8" x2="11" y2="8" />
+            <line x1="5" y1="10.5" x2="9" y2="10.5" />
+          </svg>
         </button>
       )}
 
