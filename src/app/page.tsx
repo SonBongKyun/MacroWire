@@ -12,6 +12,8 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { usePortfolio } from "@/hooks/usePortfolio";
 import { useThemeCustom } from "@/hooks/useThemeCustom";
 import { useMultiView } from "@/hooks/useMultiView";
+import { useDashboardLayout } from "@/hooks/useDashboardLayout";
+import { useReadingGoals } from "@/hooks/useReadingGoals";
 import { NotificationPanel } from "@/components/NotificationPanel";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { ExportPanel } from "@/components/ExportPanel";
@@ -29,6 +31,8 @@ import { WeeklyReport } from "@/components/WeeklyReport";
 import { NewsletterGenerator } from "@/components/NewsletterGenerator";
 import { CuratedFeed } from "@/components/CuratedFeed";
 import { InsightMemo } from "@/components/InsightMemo";
+import { AlertFeed } from "@/components/AlertFeed";
+import { FinancialCalculators } from "@/components/FinancialCalculators";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const POLL_INTERVAL = 5 * 60;
@@ -160,6 +164,8 @@ function HomeInner() {
   const portfolio = usePortfolio();
   const themeCustom = useThemeCustom();
   const multiView = useMultiView();
+  const dashboardLayout = useDashboardLayout();
+  const readingGoals = useReadingGoals();
 
   // UI state
   const [addSourceOpen, setAddSourceOpen] = useState(false);
@@ -175,6 +181,8 @@ function HomeInner() {
   const [newsletterOpen, setNewsletterOpen] = useState(false);
   const [curatedFeedOpen, setCuratedFeedOpen] = useState(false);
   const [memoOpen, setMemoOpen] = useState(false);
+  const [alertFeedOpen, setAlertFeedOpen] = useState(false);
+  const [financialCalcOpen, setFinancialCalcOpen] = useState(false);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -301,9 +309,12 @@ function HomeInner() {
     setSelectedArticle(article);
     setNewArticleCount(0);
     setNewArticleIds((prev) => prev.filter((id) => id !== article.id));
-    if (!article.isRead) toggleRead(article);
+    if (!article.isRead) {
+      toggleRead(article);
+      readingGoals.incrementRead();
+    }
     if (activeMainTab !== "news") setActiveMainTab("news");
-  }, [toggleRead, activeMainTab]);
+  }, [toggleRead, activeMainTab, readingGoals]);
 
   const markAllRead = useCallback(async () => {
     const unreadIds = articles.filter((a) => !a.isRead).map((a) => a.id);
@@ -375,6 +386,7 @@ function HomeInner() {
       case "newsletter": setNewsletterOpen(true); break;
       case "curatedFeed": setCuratedFeedOpen(true); break;
       case "insightMemo": setMemoOpen((v) => !v); break;
+      case "financialCalc": setFinancialCalcOpen((v) => !v); break;
     }
   }, [runIngest, markAllRead, exportSaved, toggleDarkMode]);
 
@@ -422,8 +434,12 @@ function HomeInner() {
       if (e.shiftKey && e.key === "W") { e.preventDefault(); setWeeklyReportOpen(true); return; }
       // Shift+C: open curated feed
       if (e.shiftKey && e.key === "C") { e.preventDefault(); setCuratedFeedOpen((v) => !v); return; }
+      // Shift+A: open alert feed
+      if (e.shiftKey && e.key === "A") { e.preventDefault(); setAlertFeedOpen((v) => !v); return; }
       // Shift+M: open insight memo
       if (e.shiftKey && e.key === "M") { e.preventDefault(); setMemoOpen((v) => !v); return; }
+      // Shift+F: open financial calculators
+      if (e.shiftKey && e.key === "F") { e.preventDefault(); setFinancialCalcOpen((v) => !v); return; }
       // Tab / Shift+Tab: cycle main tabs
       if (e.key === "Tab") {
         e.preventDefault();
@@ -453,7 +469,7 @@ function HomeInner() {
         case "d": e.preventDefault(); toggleDarkMode(); break;
         case "m": e.preventDefault(); markAllRead(); break;
         case "e": e.preventDefault(); exportSaved(); break;
-        case "Escape": setNotificationPanelOpen(false); setThemeSelectorOpen(false); setExportPanelOpen(false); setCalculatorOpen(false); setWeeklyReportOpen(false); setNewsletterOpen(false); setCuratedFeedOpen(false); setMemoOpen(false); break;
+        case "Escape": setNotificationPanelOpen(false); setThemeSelectorOpen(false); setExportPanelOpen(false); setCalculatorOpen(false); setWeeklyReportOpen(false); setNewsletterOpen(false); setCuratedFeedOpen(false); setMemoOpen(false); setAlertFeedOpen(false); setFinancialCalcOpen(false); break;
       }
     };
     window.addEventListener("keydown", handler);
@@ -489,6 +505,8 @@ function HomeInner() {
         onOpenNewsletter={() => setNewsletterOpen(true)}
         onToggleMemo={() => setMemoOpen((v) => !v)}
         memoOpen={memoOpen}
+        onToggleAlertFeed={() => setAlertFeedOpen((v) => !v)}
+        alertFeedOpen={alertFeedOpen}
       />
 
       {/* Market Ticker — always visible */}
@@ -508,6 +526,17 @@ function HomeInner() {
             watchlistStore={watchlist.store}
             onSelectArticle={selectArticle}
             onTabChange={(tab) => setActiveMainTab(tab as MainTab)}
+            layoutSections={dashboardLayout.currentSections}
+            layouts={dashboardLayout.layouts}
+            activeLayoutId={dashboardLayout.activeLayoutId}
+            onSaveLayout={dashboardLayout.saveLayout}
+            onLoadLayout={dashboardLayout.loadLayout}
+            onDeleteLayout={dashboardLayout.deleteLayout}
+            onToggleSection={dashboardLayout.toggleSection}
+            readingGoal={readingGoals.goal}
+            readingProgress={readingGoals.progress}
+            readingStreak={readingGoals.getStreak()}
+            onSetReadingGoal={readingGoals.setGoal}
           />
         )}
 
@@ -685,6 +714,13 @@ function HomeInner() {
         </div>
       )}
 
+      {/* Financial Calculators Panel */}
+      {financialCalcOpen && (
+        <div className="fixed right-4 top-14 z-40 animate-fade-in">
+          <FinancialCalculators open={financialCalcOpen} onClose={() => setFinancialCalcOpen(false)} />
+        </div>
+      )}
+
       {themeSelectorOpen && (
         <div className="fixed right-4 top-14 z-40 animate-fade-in">
           <ThemeSelector activeTheme={themeCustom.activeTheme} presets={themeCustom.presets} onSelect={themeCustom.selectTheme} onReset={themeCustom.resetTheme} />
@@ -723,6 +759,18 @@ function HomeInner() {
         onClose={() => setMemoOpen(false)}
         articles={articles}
       />
+
+      {/* Alert Feed Panel */}
+      {alertFeedOpen && (
+        <div className="fixed right-4 top-14 z-40 animate-fade-in">
+          <AlertFeed
+            articles={articles}
+            rules={notifications.store.rules}
+            onSelectArticle={selectArticle}
+            onClose={() => setAlertFeedOpen(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

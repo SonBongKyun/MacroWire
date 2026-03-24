@@ -7,8 +7,10 @@ import type { WatchlistStore } from "@/hooks/useWatchlist";
 import { MiniSparkline } from "@/components/PriceChart";
 import { EconomicCalendar } from "@/components/EconomicCalendar";
 import { SentimentGauge } from "@/components/SentimentGauge";
+import { GlobalMacroDashboard } from "@/components/GlobalMacroDashboard";
 import { useSourceRanking } from "@/hooks/useSourceRanking";
 import type { SourceRank } from "@/hooks/useSourceRanking";
+import type { DashboardSections, DashboardLayout } from "@/hooks/useDashboardLayout";
 // TAG_COLORS kept available for future use
 // import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
 
@@ -97,7 +99,7 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
       <div
         style={{
           fontSize: 18,
-          fontWeight: 800,
+          fontWeight: 700,
           fontFamily: "var(--font-mono)",
           color: "#EBEBEB",
           fontVariantNumeric: "tabular-nums",
@@ -186,6 +188,297 @@ interface DashboardTabProps {
   watchlistStore: WatchlistStore;
   onSelectArticle: (article: Article) => void;
   onTabChange: (tab: string) => void;
+  layoutSections?: DashboardSections;
+  layouts?: DashboardLayout[];
+  activeLayoutId?: string | null;
+  onSaveLayout?: (name: string) => DashboardLayout;
+  onLoadLayout?: (id: string) => void;
+  onDeleteLayout?: (id: string) => void;
+  onToggleSection?: (key: keyof DashboardSections) => void;
+  readingGoal?: { dailyTarget: number; weeklyTarget: number };
+  readingProgress?: { todayRead: number; weekRead: number; streak: number; lastReadDate: string };
+  readingStreak?: number;
+  onSetReadingGoal?: (goal: Partial<{ dailyTarget: number; weeklyTarget: number }>) => void;
+}
+
+const SECTION_LABELS: Record<keyof DashboardSections, string> = {
+  marketStrip: "시장 스트립",
+  topStories: "주요 뉴스",
+  activityChart: "24H 활동",
+  marketData: "시장 데이터",
+  statistics: "통계",
+  trending: "트렌딩",
+  sentiment: "심리 지표",
+  sourceQuality: "소스 품질",
+  macroIndicators: "매크로 지표",
+  calendar: "경제 캘린더",
+};
+
+function LayoutDropdown({
+  layouts,
+  activeLayoutId,
+  onSaveLayout,
+  onLoadLayout,
+  onDeleteLayout,
+  onToggleSection,
+  sections,
+}: {
+  layouts: DashboardLayout[];
+  activeLayoutId: string | null;
+  onSaveLayout: (name: string) => void;
+  onLoadLayout: (id: string) => void;
+  onDeleteLayout: (id: string) => void;
+  onToggleSection: (key: keyof DashboardSections) => void;
+  sections: DashboardSections;
+}) {
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [showSaveInput, setShowSaveInput] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setEditing(false);
+        setShowSaveInput(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={dropdownRef} style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          background: open ? "rgba(201,169,110,0.1)" : "transparent",
+          border: open ? "1px solid #C9A96E" : "1px solid #2D2D32",
+          color: open ? "#C9A96E" : "#8C8C91",
+          fontSize: 10,
+          fontWeight: 600,
+          padding: "4px 10px",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          letterSpacing: "0.04em",
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2">
+          <rect x="1" y="1" width="4" height="4" rx="0.5" />
+          <rect x="7" y="1" width="4" height="4" rx="0.5" />
+          <rect x="1" y="7" width="4" height="4" rx="0.5" />
+          <rect x="7" y="7" width="4" height="4" rx="0.5" />
+        </svg>
+        레이아웃
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            right: 0,
+            top: "100%",
+            marginTop: 4,
+            background: "#1A1A1E",
+            border: "1px solid #2D2D32",
+            minWidth: 220,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+            zIndex: 50,
+          }}
+        >
+          {!editing ? (
+            <>
+              {/* Saved layouts */}
+              {layouts.length > 0 && (
+                <div style={{ padding: "6px 0", borderBottom: "1px solid #2D2D32" }}>
+                  <div style={{ padding: "4px 12px", fontSize: 9, color: "#8C8C91", fontWeight: 700, letterSpacing: "0.06em" }}>
+                    저장된 레이아웃
+                  </div>
+                  {layouts.map((layout) => (
+                    <div
+                      key={layout.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "6px 12px",
+                        gap: 6,
+                      }}
+                    >
+                      <button
+                        onClick={() => { onLoadLayout(layout.id); setOpen(false); }}
+                        style={{
+                          flex: 1,
+                          background: "none",
+                          border: "none",
+                          color: layout.id === activeLayoutId ? "#C9A96E" : "#EBEBEB",
+                          fontSize: 11,
+                          fontWeight: layout.id === activeLayoutId ? 700 : 400,
+                          textAlign: "left",
+                          cursor: "pointer",
+                          padding: 0,
+                        }}
+                      >
+                        {layout.name}
+                        {layout.id === activeLayoutId && (
+                          <span style={{ marginLeft: 6, fontSize: 9, color: "#C9A96E" }}>&#10003;</span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => onDeleteLayout(layout.id)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#8C8C91",
+                          fontSize: 11,
+                          cursor: "pointer",
+                          padding: "0 2px",
+                          lineHeight: 1,
+                        }}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Save current */}
+              {!showSaveInput ? (
+                <button
+                  onClick={() => setShowSaveInput(true)}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "8px 12px",
+                    background: "none",
+                    border: "none",
+                    color: "#EBEBEB",
+                    fontSize: 11,
+                    cursor: "pointer",
+                    borderBottom: "1px solid #2D2D32",
+                  }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.08)"; }}
+                  onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                >
+                  현재 레이아웃 저장
+                  {layouts.length >= 5 && (
+                    <span style={{ fontSize: 9, color: "#8C8C91", marginLeft: 6 }}>(최대 5개)</span>
+                  )}
+                </button>
+              ) : (
+                <div style={{ padding: "8px 12px", borderBottom: "1px solid #2D2D32", display: "flex", gap: 6 }}>
+                  <input
+                    autoFocus
+                    value={saveName}
+                    onChange={(e) => setSaveName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && saveName.trim()) {
+                        onSaveLayout(saveName.trim());
+                        setSaveName("");
+                        setShowSaveInput(false);
+                      }
+                      if (e.key === "Escape") setShowSaveInput(false);
+                    }}
+                    placeholder="레이아웃 이름"
+                    style={{
+                      flex: 1,
+                      background: "#0D0D0F",
+                      border: "1px solid #2D2D32",
+                      color: "#EBEBEB",
+                      fontSize: 11,
+                      padding: "3px 8px",
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (saveName.trim()) {
+                        onSaveLayout(saveName.trim());
+                        setSaveName("");
+                        setShowSaveInput(false);
+                      }
+                    }}
+                    style={{
+                      background: "#C9A96E",
+                      border: "none",
+                      color: "#0D0D0F",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: "3px 8px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    저장
+                  </button>
+                </div>
+              )}
+
+              {/* Edit sections */}
+              <button
+                onClick={() => setEditing(true)}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "8px 12px",
+                  background: "none",
+                  border: "none",
+                  color: "#EBEBEB",
+                  fontSize: 11,
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.08)"; }}
+                onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+              >
+                섹션 편집
+              </button>
+            </>
+          ) : (
+            <>
+              <div style={{ padding: "8px 12px", borderBottom: "1px solid #2D2D32", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#EBEBEB", letterSpacing: "0.04em" }}>섹션 편집</span>
+                <button
+                  onClick={() => setEditing(false)}
+                  style={{ background: "none", border: "none", color: "#8C8C91", fontSize: 10, cursor: "pointer", fontWeight: 600 }}
+                >
+                  완료
+                </button>
+              </div>
+              {(Object.keys(SECTION_LABELS) as (keyof DashboardSections)[]).map((key) => (
+                <label
+                  key={key}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "6px 12px",
+                    cursor: "pointer",
+                    fontSize: 11,
+                    color: sections[key] ? "#EBEBEB" : "#8C8C91",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={sections[key]}
+                    onChange={() => onToggleSection(key)}
+                    style={{
+                      accentColor: "#C9A96E",
+                      width: 13,
+                      height: 13,
+                    }}
+                  />
+                  {SECTION_LABELS[key]}
+                </label>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function timeAgo(dateStr: string): string {
@@ -424,6 +717,166 @@ function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
   );
 }
 
+function ReadingProgressSection({
+  goal,
+  progress,
+  streak,
+  onSetGoal,
+}: {
+  goal: { dailyTarget: number; weeklyTarget: number };
+  progress: { todayRead: number; weekRead: number };
+  streak: number;
+  onSetGoal: (g: Partial<{ dailyTarget: number; weeklyTarget: number }>) => void;
+}) {
+  const [editingGoals, setEditingGoals] = useState(false);
+
+  const dailyPct = goal.dailyTarget > 0 ? Math.min((progress.todayRead / goal.dailyTarget) * 100, 100) : 0;
+  const weeklyPct = goal.weeklyTarget > 0 ? Math.min((progress.weekRead / goal.weeklyTarget) * 100, 100) : 0;
+
+  return (
+    <>
+      <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span>READING PROGRESS</span>
+        <button
+          onClick={() => setEditingGoals((v) => !v)}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#8C8C91",
+            fontSize: 9,
+            cursor: "pointer",
+            fontWeight: 600,
+            padding: "0 2px",
+          }}
+        >
+          {editingGoals ? "완료" : "목표 설정"}
+        </button>
+      </div>
+
+      {editingGoals ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 11, color: "#8C8C91", minWidth: 60 }}>일일 목표</span>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={goal.dailyTarget}
+              onChange={(e) => onSetGoal({ dailyTarget: Math.max(1, parseInt(e.target.value) || 1) })}
+              style={{
+                width: 60,
+                background: "#0D0D0F",
+                border: "1px solid #2D2D32",
+                color: "#EBEBEB",
+                fontSize: 12,
+                fontFamily: "var(--font-mono)",
+                padding: "3px 8px",
+                textAlign: "center",
+                outline: "none",
+              }}
+            />
+            <span style={{ fontSize: 10, color: "#8C8C91" }}>건/일</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 11, color: "#8C8C91", minWidth: 60 }}>주간 목표</span>
+            <input
+              type="number"
+              min={1}
+              max={500}
+              value={goal.weeklyTarget}
+              onChange={(e) => onSetGoal({ weeklyTarget: Math.max(1, parseInt(e.target.value) || 1) })}
+              style={{
+                width: 60,
+                background: "#0D0D0F",
+                border: "1px solid #2D2D32",
+                color: "#EBEBEB",
+                fontSize: 12,
+                fontFamily: "var(--font-mono)",
+                padding: "3px 8px",
+                textAlign: "center",
+                outline: "none",
+              }}
+            />
+            <span style={{ fontSize: 10, color: "#8C8C91" }}>건/주</span>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {/* Daily progress */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+              <span style={{ fontSize: 11, color: "#EBEBEB", fontWeight: 500 }}>오늘</span>
+              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: dailyPct >= 100 ? "#C9A96E" : "#EBEBEB", fontWeight: 700 }}>
+                {progress.todayRead}/{goal.dailyTarget}
+              </span>
+            </div>
+            <div style={{ width: "100%", height: 4, background: "#2D2D32", overflow: "hidden" }}>
+              <div
+                style={{
+                  width: `${dailyPct}%`,
+                  height: "100%",
+                  background: "#C9A96E",
+                  transition: "width 0.4s ease",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Weekly progress */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+              <span style={{ fontSize: 11, color: "#EBEBEB", fontWeight: 500 }}>이번 주</span>
+              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: weeklyPct >= 100 ? "#C9A96E" : "#EBEBEB", fontWeight: 700 }}>
+                {progress.weekRead}/{goal.weeklyTarget}
+              </span>
+            </div>
+            <div style={{ width: "100%", height: 4, background: "#2D2D32", overflow: "hidden" }}>
+              <div
+                style={{
+                  width: `${weeklyPct}%`,
+                  height: "100%",
+                  background: "#C9A96E",
+                  transition: "width 0.4s ease",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Streak */}
+          {streak > 0 && (
+            <div style={{ marginTop: 2 }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#C9A96E",
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                {streak}일 연속 달성
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+      <div className="dash-separator" />
+    </>
+  );
+}
+
+const DEFAULT_SECTIONS: DashboardSections = {
+  marketStrip: true,
+  topStories: true,
+  activityChart: true,
+  marketData: true,
+  statistics: true,
+  trending: true,
+  sentiment: true,
+  sourceQuality: true,
+  macroIndicators: true,
+  calendar: true,
+};
+
 export default function DashboardTab({
   articles,
   sources,
@@ -432,7 +885,19 @@ export default function DashboardTab({
   watchlistStore,
   onSelectArticle,
   onTabChange,
+  layoutSections,
+  layouts = [],
+  activeLayoutId = null,
+  onSaveLayout,
+  onLoadLayout,
+  onDeleteLayout,
+  onToggleSection,
+  readingGoal,
+  readingProgress,
+  readingStreak = 0,
+  onSetReadingGoal,
 }: DashboardTabProps) {
+  const sections = layoutSections || DEFAULT_SECTIONS;
   const [marketData, setMarketData] = useState<MarketItem[]>([]);
   const [marketLoading, setMarketLoading] = useState(true);
   const [hoveredMarketIdx, setHoveredMarketIdx] = useState<number | null>(null);
@@ -512,8 +977,23 @@ export default function DashboardTab({
 
   return (
     <div className="overflow-y-auto" ref={scrollRef} onScroll={handleScroll} style={{ height: "100%" }}>
+      {/* ── Layout Controls ── */}
+      {onSaveLayout && onLoadLayout && onDeleteLayout && onToggleSection && (
+        <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 24px 0" }}>
+          <LayoutDropdown
+            layouts={layouts}
+            activeLayoutId={activeLayoutId}
+            onSaveLayout={onSaveLayout}
+            onLoadLayout={onLoadLayout}
+            onDeleteLayout={onDeleteLayout}
+            onToggleSection={onToggleSection}
+            sections={sections}
+          />
+        </div>
+      )}
+
       {/* ── Market Overview Strip ── */}
-      <div className="market-strip" style={{ transition: "box-shadow 0.2s ease", boxShadow: scrolled ? "0 1px 8px rgba(0,0,0,0.3)" : "none" }}>
+      {sections.marketStrip && <div className="market-strip" style={{ transition: "box-shadow 0.2s ease", boxShadow: scrolled ? "0 1px 8px rgba(0,0,0,0.3)" : "none" }}>
         {marketLoading ? (
           <div style={{ display: "flex", gap: 32 }}>
             {[1, 2, 3, 4].map((i) => (
@@ -543,7 +1023,7 @@ export default function DashboardTab({
               <div key={item.symbol} style={{ display: "contents" }}>
                 {idx > 0 && <div className="market-strip-divider" />}
                 <div
-                  className="market-strip-item"
+                  className="market-strip-item section-reveal"
                   style={{ position: "relative", borderLeft: `2px solid ${borderColor}`, paddingLeft: 12 }}
                   onMouseEnter={() => setHoveredMarketIdx(idx)}
                   onMouseLeave={() => setHoveredMarketIdx(null)}
@@ -580,7 +1060,7 @@ export default function DashboardTab({
             시장 데이터 없음
           </span>
         )}
-      </div>
+      </div>}
 
       {/* ── Empty State ── */}
       {articles.length === 0 && marketData.length === 0 && !marketLoading && (
@@ -623,6 +1103,7 @@ export default function DashboardTab({
       <div className="dash-two-col">
         {/* ── Left Column: Top Stories + Activity ── */}
         <div className="dash-left-col">
+          {sections.topStories && (<>
           <div className="dash-section-title">TOP STORIES</div>
 
           {/* Hero article */}
@@ -635,7 +1116,7 @@ export default function DashboardTab({
                 width: "100%",
                 background: "none",
                 border: "none",
-                borderLeft: "4px solid #C9A96E",
+                borderLeft: "2px solid #C9A96E",
                 padding: "0 0 0 20px",
                 cursor: "pointer",
                 marginBottom: 20,
@@ -661,7 +1142,7 @@ export default function DashboardTab({
               </div>
             </button>
           ) : (
-            <div style={{ borderLeft: "4px solid var(--border-subtle)", paddingLeft: 20, marginBottom: 20 }}>
+            <div style={{ borderLeft: "2px solid var(--border-subtle)", paddingLeft: 20, marginBottom: 20 }}>
               <div className="skeleton" style={{ height: 20, width: "70%", marginBottom: 8 }} />
               <div className="skeleton" style={{ height: 12, width: "40%" }} />
             </div>
@@ -725,21 +1206,27 @@ export default function DashboardTab({
               ))}
             </div>
           )}
+          </>)}
 
           {/* Sentiment Gauge */}
+          {sections.sentiment && (
           <div style={{ marginTop: 20 }}>
             <SentimentGauge articles={articles} />
           </div>
+          )}
 
           {/* 24H Activity */}
+          {sections.activityChart && (
           <div style={{ marginTop: 24 }}>
             <ArticleVolumeChart articles={articles} />
           </div>
+          )}
         </div>
 
         {/* ── Right Column: Market Data + Stats + Trending ── */}
         <div className="dash-right-col">
           {/* Market Data */}
+          {sections.marketData && (<>
           <div className="dash-section-title">MARKET DATA</div>
           {portfolioLoading ? (
             <div style={{ fontSize: 12, color: "var(--muted)" }}>로딩...</div>
@@ -775,10 +1262,11 @@ export default function DashboardTab({
               ))}
             </div>
           )}
-
           <div className="dash-separator" />
+          </>)}
 
           {/* Statistics */}
+          {sections.statistics && (<>
           <div className="dash-section-title">STATISTICS</div>
           <div className="dash-stat-grid">
             {[
@@ -788,7 +1276,7 @@ export default function DashboardTab({
               { label: "활성 소스", value: todayStats.sourceCount },
             ].map((stat) => (
               <div key={stat.label} className="dash-stat-cell">
-                <span className="type-data-lg" style={{ color: "var(--accent)", fontWeight: 800, fontSize: 26, lineHeight: 1 }}>
+                <span className="type-data-lg" style={{ color: "var(--accent)" }}>
                   <AnimatedNumber value={stat.value} />
                 </span>
                 <span className="type-micro">
@@ -797,10 +1285,21 @@ export default function DashboardTab({
               </div>
             ))}
           </div>
-
           <div className="dash-separator" />
+          </>)}
+
+          {/* Reading Progress */}
+          {readingGoal && readingProgress && onSetReadingGoal && (
+          <ReadingProgressSection
+            goal={readingGoal}
+            progress={readingProgress}
+            streak={readingStreak}
+            onSetGoal={onSetReadingGoal}
+          />
+          )}
 
           {/* Trending */}
+          {sections.trending && (<>
           <div className="dash-section-title">TRENDING</div>
           {trendingTags.length === 0 ? (
             <span style={{ fontSize: 12, color: "var(--muted)" }}>태그 데이터 없음</span>
@@ -832,15 +1331,26 @@ export default function DashboardTab({
               ))}
             </div>
           )}
+          </>)}
 
           {/* Source Quality */}
+          {sections.sourceQuality && (<>
           <div className="dash-separator" />
           <SourceQualityPanel rankings={visibleRankings} />
+          </>)}
+
+          {/* Macro Indicators */}
+          {sections.macroIndicators && (<>
+          <div className="dash-separator" />
+          <GlobalMacroDashboard />
+          </>)}
 
           {/* Economic Calendar */}
+          {sections.calendar && (
           <div style={{ marginTop: 20 }}>
             <EconomicCalendar />
           </div>
+          )}
         </div>
       </div>
     </div>

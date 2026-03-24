@@ -158,3 +158,68 @@ export function useNotifications() {
     sendNotification,
   };
 }
+
+export interface AlertMatch {
+  article: { id: string; title: string; url: string; sourceName: string; tags: string[]; publishedAt: string };
+  matchedRules: { ruleId: string; type: NotificationRule["type"]; value: string }[];
+}
+
+export interface GroupedAlertResult {
+  ruleId: string;
+  type: NotificationRule["type"];
+  value: string;
+  articles: AlertMatch["article"][];
+}
+
+/**
+ * Check an array of new articles against notification rules.
+ * Returns articles matching ANY active rule, grouped by rule for notification purposes.
+ */
+export function checkNewArticlesForAlerts(
+  newArticles: { id: string; title: string; url: string; sourceName: string; tags: string[]; publishedAt: string }[],
+  rules: NotificationRule[]
+): { matches: AlertMatch[]; grouped: GroupedAlertResult[] } {
+  const activeRules = rules.filter((r) => r.enabled);
+  if (activeRules.length === 0 || newArticles.length === 0) {
+    return { matches: [], grouped: [] };
+  }
+
+  const matches: AlertMatch[] = [];
+
+  for (const article of newArticles) {
+    const matchedRules: AlertMatch["matchedRules"] = [];
+    for (const rule of activeRules) {
+      let hit = false;
+      switch (rule.type) {
+        case "keyword":
+          hit = article.title.toLowerCase().includes(rule.value.toLowerCase());
+          break;
+        case "tag":
+          hit = article.tags.includes(rule.value);
+          break;
+        case "source":
+          hit = article.sourceName === rule.value;
+          break;
+      }
+      if (hit) {
+        matchedRules.push({ ruleId: rule.id, type: rule.type, value: rule.value });
+      }
+    }
+    if (matchedRules.length > 0) {
+      matches.push({ article, matchedRules });
+    }
+  }
+
+  // Group by rule
+  const ruleMap = new Map<string, GroupedAlertResult>();
+  for (const m of matches) {
+    for (const r of m.matchedRules) {
+      if (!ruleMap.has(r.ruleId)) {
+        ruleMap.set(r.ruleId, { ruleId: r.ruleId, type: r.type, value: r.value, articles: [] });
+      }
+      ruleMap.get(r.ruleId)!.articles.push(m.article);
+    }
+  }
+
+  return { matches, grouped: Array.from(ruleMap.values()) };
+}

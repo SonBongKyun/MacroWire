@@ -203,7 +203,7 @@ export function ArticleDetail({
               const s = analyzeSentiment(article.title, article.summary);
               return (
                 <span
-                  className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                  className="text-[9px] font-semibold px-1.5 py-0.5 rounded-[2px]"
                   style={{ color: s.color, backgroundColor: `${s.color}18` }}
                 >
                   {s.label}
@@ -289,11 +289,11 @@ export function ArticleDetail({
       {/* Summary */}
       <div className="flex-1 overflow-y-auto p-5" ref={scrollRef} onScroll={handleScroll}>
         {article.summary ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <h3 className="section-label">
               요약
             </h3>
-            <p className="article-summary text-[13.5px] leading-[1.85] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
+            <p className="article-summary text-[13px] leading-[1.8] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
               {article.summary}
             </p>
             <ArticleSummary title={article.title} summary={article.summary} url={article.url} />
@@ -620,7 +620,7 @@ export function ArticleDetail({
             {article.summary && (
               <div className="mb-6">
                 <h3 className="section-label mb-3">요약</h3>
-                <p className="text-[15px] leading-[1.9] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
+                <p className="text-[13px] leading-[1.8] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
                   {article.summary}
                 </p>
               </div>
