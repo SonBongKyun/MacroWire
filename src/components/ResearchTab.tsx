@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
-import type { Article } from "@/types";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import type { Article, ArticlesResponse } from "@/types";
 
 interface ResearchTabProps {
   articles: Article[];
@@ -25,10 +25,31 @@ function highlightKeyword(text: string, keyword: string): React.ReactElement {
   );
 }
 
-export function ResearchTab({ articles, onSelectArticle }: ResearchTabProps) {
+export function ResearchTab({ articles: propArticles, onSelectArticle }: ResearchTabProps) {
   const [query, setQuery] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [allArticles, setAllArticles] = useState<Article[]>([]);
+
+  // Fetch a wider range of articles for research (30 days)
+  useEffect(() => {
+    async function fetchAll() {
+      try {
+        const res = await fetch("/api/articles?range=30d&limit=200");
+        const json: ArticlesResponse = await res.json();
+        if (Array.isArray(json?.data)) {
+          setAllArticles(json.data);
+        }
+      } catch {
+        // Fallback to prop articles
+        setAllArticles(propArticles);
+      }
+    }
+    fetchAll();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Use fetched articles, fallback to props
+  const articles = allArticles.length > 0 ? allArticles : propArticles;
 
   const handleSearch = useCallback(() => {
     setActiveQuery(query.trim());
@@ -136,7 +157,7 @@ export function ResearchTab({ articles, onSelectArticle }: ResearchTabProps) {
   const maxSourceFreq = sourceDistribution.length > 0 ? sourceDistribution[0][1] : 1;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, overflow: "hidden" }}>
       {/* Top section: Search */}
       <div
         style={{
