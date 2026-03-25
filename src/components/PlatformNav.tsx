@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 
-export type MainTab = "dashboard" | "news" | "markets" | "analytics";
+export type MainTab = "dashboard" | "news" | "markets" | "analytics" | "research" | "portfolio";
 
 interface PlatformNavProps {
   activeTab: MainTab;
@@ -41,6 +41,8 @@ const tabs: { key: MainTab; label: string }[] = [
   { key: "news", label: "\uB274\uC2A4" },
   { key: "markets", label: "\uC2DC\uC7A5" },
   { key: "analytics", label: "\uBD84\uC11D" },
+  { key: "research", label: "\uB9AC\uC11C\uCE58" },
+  { key: "portfolio", label: "\uD3EC\uD2B8\uD3F4\uB9AC\uC624" },
 ];
 
 export function PlatformNav({
@@ -467,13 +469,33 @@ export function PlatformNav({
 
       <div className="topbar-divider" />
 
-      {/* Refresh */}
+      {/* Refresh with countdown ring */}
       <div className="flex items-center gap-1.5 shrink-0">
-        {countdown > 0 && !ingesting && (
-          <span className="type-data-sm" style={{ color: "var(--muted)" }}>
-            {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, "0")}
-          </span>
-        )}
+        {countdown > 0 && !ingesting && (() => {
+          const maxCountdown = 300; // 5 minutes
+          const radius = 8;
+          const circumference = 2 * Math.PI * radius;
+          const progress = countdown / maxCountdown;
+          const dashOffset = circumference * (1 - progress);
+          const mins = Math.floor(countdown / 60);
+          const secs = countdown % 60;
+          return (
+            <div style={{ position: "relative", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" style={{ transform: "rotate(-90deg)" }}>
+                <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#2D2D32" strokeWidth="2" />
+                <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#C9A96E" strokeWidth="2"
+                  strokeDasharray={circumference} strokeDashoffset={dashOffset}
+                  strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s linear" }} />
+              </svg>
+              <span style={{
+                position: "absolute", fontSize: 7, fontFamily: "'Space Mono', var(--font-mono), monospace",
+                fontVariantNumeric: "tabular-nums", color: "#8C8C91", fontWeight: 600, lineHeight: 1,
+              }}>
+                {mins}:{String(secs).padStart(2, "0")}
+              </span>
+            </div>
+          );
+        })()}
         <button
           onClick={onIngest}
           disabled={ingesting}

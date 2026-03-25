@@ -152,7 +152,7 @@ export function NewsTab({
       {/* ── Filter Bar: single 40px row ── */}
       <div
         className="shrink-0 border-b border-[#2D2D32] bg-[#0D0D0F]"
-        style={{ height: 40 }}
+        style={{ height: 40, borderTop: "1px solid rgba(201,169,110,0.2)" }}
       >
         <div className="flex items-center h-full px-4 gap-3">
 
@@ -337,8 +337,8 @@ export function NewsTab({
                 fontSize: 10,
                 fontWeight: 600,
                 color: "#C9A96E",
-                background: "rgba(201,169,110,0.08)",
-                border: "1px solid rgba(201,169,110,0.2)",
+                background: "rgba(201,169,110,0.15)",
+                border: "1px solid rgba(201,169,110,0.3)",
                 borderRadius: 2,
                 cursor: "pointer",
               }}
@@ -376,7 +376,7 @@ export function NewsTab({
         }}
       >
         {/* Left column: article list */}
-        <div className={`overflow-y-auto transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`}>
+        <div className={`overflow-y-auto transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`} style={{ borderLeft: "1px solid rgba(201,169,110,0.12)" }}>
           <SpikeAlert articles={sortedArticles} onTagClick={onTagClick} />
 
           {sortedArticles.length === 0 && !loading ? (

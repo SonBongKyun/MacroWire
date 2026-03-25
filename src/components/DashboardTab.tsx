@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, DragEvent } from "react";
 import type { Article, Source } from "@/types";
 import type { PortfolioPrice } from "@/hooks/usePortfolio";
 import type { WatchlistStore } from "@/hooks/useWatchlist";
@@ -905,6 +905,70 @@ export default function DashboardTab({
   const scrollRef = useRef<HTMLDivElement>(null);
   const { visibleRankings } = useSourceRanking(articles, sources);
 
+  // ── Drag & Drop section reordering ──
+  const DEFAULT_SECTION_ORDER = ["market", "stats", "trending", "source-quality", "macro", "calendar", "reading"];
+  const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("ryzm-finance-section-order");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length === DEFAULT_SECTION_ORDER.length) return parsed;
+        }
+      } catch { /* ignore */ }
+    }
+    return DEFAULT_SECTION_ORDER;
+  });
+  const [draggedSection, setDraggedSection] = useState<string | null>(null);
+  const [dragOverSection, setDragOverSection] = useState<string | null>(null);
+
+  const handleDragStart = useCallback((e: DragEvent<HTMLDivElement>, sectionId: string) => {
+    setDraggedSection(sectionId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", sectionId);
+    // Make the drag image semi-transparent
+    if (e.currentTarget) {
+      e.currentTarget.style.opacity = "0.5";
+    }
+  }, []);
+
+  const handleDragEnd = useCallback((e: DragEvent<HTMLDivElement>) => {
+    if (e.currentTarget) {
+      e.currentTarget.style.opacity = "1";
+    }
+    setDraggedSection(null);
+    setDragOverSection(null);
+  }, []);
+
+  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>, sectionId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverSection(sectionId);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverSection(null);
+  }, []);
+
+  const handleDrop = useCallback((e: DragEvent<HTMLDivElement>, targetId: string) => {
+    e.preventDefault();
+    const sourceId = e.dataTransfer.getData("text/plain");
+    if (sourceId && sourceId !== targetId) {
+      setSectionOrder((prev) => {
+        const newOrder = [...prev];
+        const fromIdx = newOrder.indexOf(sourceId);
+        const toIdx = newOrder.indexOf(targetId);
+        if (fromIdx === -1 || toIdx === -1) return prev;
+        newOrder.splice(fromIdx, 1);
+        newOrder.splice(toIdx, 0, sourceId);
+        localStorage.setItem("ryzm-finance-section-order", JSON.stringify(newOrder));
+        return newOrder;
+      });
+    }
+    setDraggedSection(null);
+    setDragOverSection(null);
+  }, []);
+
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -1051,6 +1115,7 @@ export default function DashboardTab({
                   display: "flex",
                   alignItems: "baseline",
                   gap: 6,
+                  textShadow: "0 0 20px rgba(201,169,110,0.15)",
                 }}>
                   {formatPrice(item.price)}
                   {!isMarketOpen && (
@@ -1141,21 +1206,22 @@ export default function DashboardTab({
                 display: "block",
                 textAlign: "left",
                 width: "100%",
-                background: "#131316",
+                background: "#141418",
                 border: "1px solid #2D2D32",
-                borderLeft: "4px solid #C9A96E",
-                padding: "20px 24px",
+                borderTop: "1px solid rgba(201,169,110,0.25)",
+                borderLeft: "3px solid #C9A96E",
+                padding: "24px 28px",
                 cursor: "pointer",
                 marginBottom: 24,
-                transition: "box-shadow 0.2s ease",
+                transition: "box-shadow 0.2s ease, border-color 0.2s ease",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(201,169,110,0.08)"; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 24px rgba(201,169,110,0.1)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
             >
               <h2 style={{
                 margin: 0,
                 lineHeight: 1.35,
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: 700,
                 fontFamily: "var(--font-heading)",
                 color: "#EBEBEB",
@@ -1163,24 +1229,40 @@ export default function DashboardTab({
               }}>
                 {heroArticle.title}
               </h2>
+              {heroArticle.summary && (
+                <p style={{
+                  margin: "10px 0 0",
+                  fontSize: 13,
+                  color: "#8C8C91",
+                  lineHeight: 1.5,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical" as const,
+                }}>
+                  {heroArticle.summary}
+                </p>
+              )}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
-                  marginTop: 10,
+                  marginTop: 12,
                 }}
               >
                 <span style={{ fontSize: 12, fontWeight: 600, color: "#C9A96E" }}>
                   {heroArticle.sourceName}
                 </span>
+                <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#C9A96E", opacity: 0.5 }} />
                 <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#C9A96E", opacity: 0.7 }}>
                   {timeAgo(heroArticle.publishedAt)}
                 </span>
               </div>
             </button>
           ) : (
-            <div style={{ borderLeft: "4px solid #2D2D32", paddingLeft: 24, marginBottom: 24, background: "#131316", padding: "20px 24px", border: "1px solid #2D2D32" }}>
+            <div style={{ borderLeft: "3px solid #2D2D32", paddingLeft: 24, marginBottom: 24, background: "#141418", padding: "24px 28px", border: "1px solid #2D2D32", borderTop: "1px solid rgba(201,169,110,0.15)" }}>
               <div className="skeleton" style={{ height: 24, width: "70%", marginBottom: 10 }} />
               <div className="skeleton" style={{ height: 14, width: "40%" }} />
             </div>
@@ -1196,11 +1278,10 @@ export default function DashboardTab({
                   className="dash-row"
                   style={{
                     textAlign: "left",
-                    background: "none",
                     border: "none",
                     borderBottom: "1px solid #1e1e22",
                     width: "100%",
-                    padding: "10px 0",
+                    padding: "10px 8px",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -1268,154 +1349,124 @@ export default function DashboardTab({
           )}
         </div>
 
-        {/* ── Right Column: Market Data + Stats + Trending ── */}
+        {/* ── Right Column: Drag & Drop Reorderable Sections ── */}
         <div className="dash-right-col">
-          {/* Market Data */}
-          {sections.marketData && (<>
-          <div className="dash-section-title">MARKET DATA</div>
-          {portfolioLoading ? (
-            <div style={{ fontSize: 12, color: "var(--muted)" }}>로딩...</div>
-          ) : portfolioPrices.length === 0 ? (
-            <div style={{ fontSize: 12, color: "var(--muted)" }}>포트폴리오 비어있음</div>
-          ) : (
-            <div>
-              {portfolioPrices.map((item) => (
-                <div key={item.symbol} className="dash-price-row">
-                  <span
-                    className="type-small"
-                    style={{ fontWeight: 600, color: "var(--foreground-bright)", minWidth: 80, flexShrink: 0 }}
-                  >
-                    {item.label}
-                  </span>
-                  <span style={{ flex: 1 }} />
-                  <span className="type-data-md" style={{ color: "var(--foreground-bright)", fontWeight: 700, fontSize: 13 }}>
-                    {formatPrice(item.price)}
-                  </span>
-                  <span
-                    className="type-data-sm"
-                    style={{
-                      fontWeight: 600,
-                      color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
-                      width: 60,
-                      textAlign: "right",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {item.changePct >= 0 ? "+" : ""}{item.changePct.toFixed(2)}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="dash-separator" />
-          </>)}
-
-          {/* Statistics — 2x2 grid with large numbers & colored accents */}
-          {sections.statistics && (<>
-          <div className="dash-section-title">STATISTICS</div>
-          <div className="dash-stat-grid">
-            {[
-              { label: "오늘 기사", value: todayStats.total },
-              { label: "읽지 않음", value: todayStats.unread },
-              { label: "저장됨", value: todayStats.saved },
-              { label: "활성 소스", value: todayStats.sourceCount },
-            ].map((stat) => (
-              <div key={stat.label} className="dash-stat-cell">
-                <span style={{
-                  fontSize: 28,
-                  fontWeight: 700,
-                  fontFamily: "var(--font-mono)",
-                  fontVariantNumeric: "tabular-nums",
-                  lineHeight: 1,
-                  letterSpacing: "-0.02em",
-                  color: "#EBEBEB",
-                }}>
-                  <AnimatedNumber value={stat.value} />
-                </span>
-                <span style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: "uppercase" as const,
-                  letterSpacing: "0.06em",
-                  color: "#8C8C91",
-                  marginTop: 4,
-                }}>
-                  {stat.label}
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="dash-separator" />
-          </>)}
-
-          {/* Reading Progress */}
-          {readingGoal && readingProgress && onSetReadingGoal && (
-          <ReadingProgressSection
-            goal={readingGoal}
-            progress={readingProgress}
-            streak={readingStreak}
-            onSetGoal={onSetReadingGoal}
-          />
-          )}
-
-          {/* Trending — colored tag badges */}
-          {sections.trending && (<>
-          <div className="dash-section-title">TRENDING</div>
-          {trendingTags.length === 0 ? (
-            <span style={{ fontSize: 12, color: "#8C8C91" }}>태그 데이터 없음</span>
-          ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {trendingTags.map(([tag, count]) => {
-                const tagColors = ["#C9A96E", "#22c55e", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f59e0b", "#ec4899", "#10b981", "#8b5cf6"];
-                const colorIdx = Math.abs(tag.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length;
-                const color = tagColors[colorIdx];
+          {sectionOrder.map((sectionId) => {
+            const isDragOver = dragOverSection === sectionId && draggedSection !== sectionId;
+            const sectionDragProps = {
+              draggable: true,
+              onDragStart: (e: DragEvent<HTMLDivElement>) => handleDragStart(e, sectionId),
+              onDragEnd: handleDragEnd,
+              onDragOver: (e: DragEvent<HTMLDivElement>) => handleDragOver(e, sectionId),
+              onDragLeave: handleDragLeave,
+              onDrop: (e: DragEvent<HTMLDivElement>) => handleDrop(e, sectionId),
+              style: {
+                border: isDragOver ? "1px dashed #C9A96E" : "1px solid transparent",
+                borderRadius: 2,
+                padding: isDragOver ? "8px" : "0px",
+                transition: "border 0.15s ease, padding 0.15s ease",
+              } as React.CSSProperties,
+            };
+            const grip = (
+              <span style={{ cursor: "grab", color: "#8C8C91", fontSize: 12, lineHeight: 1, userSelect: "none", opacity: 0.5, letterSpacing: "0.08em" }} title="드래그하여 순서 변경">⋮⋮</span>
+            );
+            switch (sectionId) {
+              case "market":
+                if (!sections.marketData) return null;
                 return (
-                  <button
-                    key={tag}
-                    onClick={() => onTabChange("news")}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                      padding: "4px 10px",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      color,
-                      background: `${color}15`,
-                      border: `1px solid ${color}30`,
-                      cursor: "pointer",
-                      transition: "all 0.15s ease",
-                    }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}25`; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}15`; }}
-                  >
-                    {tag}
-                    <span style={{ fontSize: 9, opacity: 0.7, fontFamily: "var(--font-mono)" }}>{count}</span>
-                  </button>
+                  <div key={sectionId} {...sectionDragProps}>
+                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>MARKET DATA</span>{grip}</div>
+                    {portfolioLoading ? (
+                      <div style={{ fontSize: 12, color: "var(--muted)" }}>로딩...</div>
+                    ) : portfolioPrices.length === 0 ? (
+                      <div style={{ fontSize: 12, color: "var(--muted)" }}>포트폴리오 비어있음</div>
+                    ) : (
+                      <div>{portfolioPrices.map((item) => (
+                        <div key={item.symbol} className="dash-price-row">
+                          <span className="type-small" style={{ fontWeight: 600, color: "var(--foreground-bright)", minWidth: 80, flexShrink: 0 }}>{item.label}</span>
+                          <span style={{ flex: 1 }} />
+                          <span className="type-data-md" style={{ color: "var(--foreground-bright)", fontWeight: 700, fontSize: 13 }}>{formatPrice(item.price)}</span>
+                          <span className="type-data-sm" style={{ fontWeight: 600, color: item.changePct >= 0 ? "#22c55e" : "#ef4444", width: 60, textAlign: "right", flexShrink: 0 }}>{item.changePct >= 0 ? "+" : ""}{item.changePct.toFixed(2)}%</span>
+                        </div>
+                      ))}</div>
+                    )}
+                    <div className="dash-separator" />
+                  </div>
                 );
-              })}
-            </div>
-          )}
-          </>)}
-
-          {/* Source Quality */}
-          {sections.sourceQuality && (<>
-          <div className="dash-separator" />
-          <SourceQualityPanel rankings={visibleRankings} />
-          </>)}
-
-          {/* Macro Indicators */}
-          {sections.macroIndicators && (<>
-          <div className="dash-separator" />
-          <GlobalMacroDashboard />
-          </>)}
-
-          {/* Economic Calendar */}
-          {sections.calendar && (
-          <div style={{ marginTop: 20 }}>
-            <EconomicCalendar />
-          </div>
-          )}
+              case "stats":
+                if (!sections.statistics) return null;
+                return (
+                  <div key={sectionId} {...sectionDragProps}>
+                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>STATISTICS</span>{grip}</div>
+                    <div className="dash-stat-grid">
+                      {[{ label: "오늘 기사", value: todayStats.total }, { label: "읽지 않음", value: todayStats.unread }, { label: "저장됨", value: todayStats.saved }, { label: "활성 소스", value: todayStats.sourceCount }].map((stat) => (
+                        <div key={stat.label} className="dash-stat-cell">
+                          <span style={{ fontSize: 28, fontWeight: 700, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", lineHeight: 1, letterSpacing: "-0.02em", color: "#EBEBEB" }}><AnimatedNumber value={stat.value} /></span>
+                          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", color: "#8C8C91", marginTop: 4 }}>{stat.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="dash-separator" />
+                  </div>
+                );
+              case "reading":
+                if (!readingGoal || !readingProgress || !onSetReadingGoal) return null;
+                return (
+                  <div key={sectionId} {...sectionDragProps}>
+                    <ReadingProgressSection goal={readingGoal} progress={readingProgress} streak={readingStreak} onSetGoal={onSetReadingGoal} />
+                  </div>
+                );
+              case "trending":
+                if (!sections.trending) return null;
+                return (
+                  <div key={sectionId} {...sectionDragProps}>
+                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>TRENDING</span>{grip}</div>
+                    {trendingTags.length === 0 ? (
+                      <span style={{ fontSize: 12, color: "#8C8C91" }}>태그 데이터 없음</span>
+                    ) : (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {trendingTags.map(([tag, count]) => {
+                          const tagColors = ["#C9A96E", "#22c55e", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f59e0b", "#ec4899", "#10b981", "#8b5cf6"];
+                          const colorIdx = Math.abs(tag.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length;
+                          const color = tagColors[colorIdx];
+                          return (
+                            <button key={tag} onClick={() => onTabChange("news")} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", fontSize: 10, fontWeight: 600, color, background: `${color}15`, border: `1px solid ${color}30`, cursor: "pointer", transition: "all 0.15s ease" }}
+                              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}25`; }}
+                              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}15`; }}>
+                              {tag}<span style={{ fontSize: 9, opacity: 0.7, fontFamily: "var(--font-mono)" }}>{count}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              case "source-quality":
+                if (!sections.sourceQuality) return null;
+                return (
+                  <div key={sectionId} {...sectionDragProps}>
+                    <div className="dash-separator" />
+                    <div style={{ position: "relative" }}><div style={{ position: "absolute", right: 0, top: 0 }}>{grip}</div><SourceQualityPanel rankings={visibleRankings} /></div>
+                  </div>
+                );
+              case "macro":
+                if (!sections.macroIndicators) return null;
+                return (
+                  <div key={sectionId} {...sectionDragProps}>
+                    <div className="dash-separator" />
+                    <div style={{ position: "relative" }}><div style={{ position: "absolute", right: 0, top: 0 }}>{grip}</div><GlobalMacroDashboard /></div>
+                  </div>
+                );
+              case "calendar":
+                if (!sections.calendar) return null;
+                return (
+                  <div key={sectionId} {...sectionDragProps}>
+                    <div style={{ marginTop: 20, position: "relative" }}><div style={{ position: "absolute", right: 0, top: 0, zIndex: 2 }}>{grip}</div><EconomicCalendar /></div>
+                  </div>
+                );
+              default: return null;
+            }
+          })}
         </div>
       </div>
     </div>

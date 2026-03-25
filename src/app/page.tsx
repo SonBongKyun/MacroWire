@@ -23,6 +23,8 @@ import DashboardTab from "@/components/DashboardTab";
 import { NewsTab } from "@/components/NewsTab";
 import { MarketsTab } from "@/components/MarketsTab";
 import { AnalyticsTab } from "@/components/AnalyticsTab";
+import { ResearchTab } from "@/components/ResearchTab";
+import { PortfolioTab } from "@/components/PortfolioTab";
 import { ToastProvider, useToast } from "@/components/Toast";
 import { SplitViewPanel } from "@/components/SplitViewPanel";
 import { ArticleList } from "@/components/ArticleList";
@@ -155,7 +157,10 @@ function HomeInner() {
   const [showHelp, setShowHelp] = useState(false);
   const [newArticleCount, setNewArticleCount] = useState(0);
   const [newArticleIds, setNewArticleIds] = useState<string[]>([]);
+  const [showNewArticlesBar, setShowNewArticlesBar] = useState(false);
+  const [newArticlesBarCount, setNewArticlesBarCount] = useState(0);
   const prevArticleIds = useRef<Set<string>>(new Set());
+  const newArticlesBarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Hooks
   const { store: collectionStore, assignArticle, createCollection, getCollection } = useCollections();
@@ -243,6 +248,11 @@ function HomeInner() {
           if (newOnes.length > 0) {
             setNewArticleCount((prev) => prev + newOnes.length);
             setNewArticleIds((prev) => [...prev, ...newOnes.map((a: Article) => a.id)]);
+            // Show gold notification bar
+            setNewArticlesBarCount(newOnes.length);
+            setShowNewArticlesBar(true);
+            if (newArticlesBarTimer.current) clearTimeout(newArticlesBarTimer.current);
+            newArticlesBarTimer.current = setTimeout(() => setShowNewArticlesBar(false), 3000);
             if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
               const matched = newOnes.filter((a: Article) => notifications.checkArticle(a));
               if (matched.length > 0) {
@@ -379,7 +389,8 @@ function HomeInner() {
       case "watchlist": setActiveMainTab("markets"); break;
       case "addSource": setAddSourceOpen(true); break;
       case "notifications": setNotificationPanelOpen((v) => !v); break;
-      case "portfolio": setActiveMainTab("markets"); break;
+      case "portfolio": setActiveMainTab("portfolio"); break;
+      case "research": setActiveMainTab("research"); break;
       case "theme": setThemeSelectorOpen((v) => !v); break;
       case "exportPanel": setExportPanelOpen((v) => !v); break;
       case "weeklyReport": setWeeklyReportOpen(true); break;
@@ -423,7 +434,7 @@ function HomeInner() {
 
   // Keyboard shortcuts
   useEffect(() => {
-    const TAB_ORDER: MainTab[] = ["dashboard", "news", "markets", "analytics"];
+    const TAB_ORDER: MainTab[] = ["dashboard", "news", "markets", "analytics", "research", "portfolio"];
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); setCommandPaletteOpen(true); return; }
       // Ctrl+Shift+S: toggle split view
@@ -440,6 +451,10 @@ function HomeInner() {
       if (e.shiftKey && e.key === "M") { e.preventDefault(); setMemoOpen((v) => !v); return; }
       // Shift+F: open financial calculators
       if (e.shiftKey && e.key === "F") { e.preventDefault(); setFinancialCalcOpen((v) => !v); return; }
+      // Shift+R: research tab
+      if (e.shiftKey && e.key === "R") { e.preventDefault(); setActiveMainTab("research"); return; }
+      // Shift+P: portfolio tab
+      if (e.shiftKey && e.key === "P") { e.preventDefault(); setActiveMainTab("portfolio"); return; }
       // Tab / Shift+Tab: cycle main tabs
       if (e.key === "Tab") {
         e.preventDefault();
@@ -513,6 +528,20 @@ function HomeInner() {
       <div className="shrink-0 border-b border-[var(--border)]">
         <MarketTicker />
       </div>
+
+      {/* New articles notification bar */}
+      {showNewArticlesBar && newArticlesBarCount > 0 && (
+        <div
+          className="new-articles-bar"
+          onClick={() => {
+            setShowNewArticlesBar(false);
+            setActiveMainTab("news");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
+          {newArticlesBarCount}건의 새 기사가 도착했습니다
+        </div>
+      )}
 
       {/* Tab Content */}
       <ErrorBoundary key={activeMainTab}>
@@ -656,6 +685,24 @@ function HomeInner() {
 
         {activeMainTab === "analytics" && (
           <AnalyticsTab articles={articles} />
+        )}
+
+        {activeMainTab === "research" && (
+          <ResearchTab
+            articles={articles}
+            onSelectArticle={selectArticle}
+          />
+        )}
+
+        {activeMainTab === "portfolio" && (
+          <PortfolioTab
+            portfolioPrices={portfolio.prices}
+            portfolioAssets={portfolio.store.assets}
+            onAddAsset={portfolio.addAsset}
+            onRemoveAsset={portfolio.removeAsset}
+            onRefreshPrices={portfolio.fetchPrices}
+            loading={portfolio.loading}
+          />
         )}
       </div>
       </ErrorBoundary>

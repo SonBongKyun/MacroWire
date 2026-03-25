@@ -93,6 +93,7 @@
 body {
   background: var(--background);
   background-image: var(--background-mesh);
+  background-size: cover;
   color: var(--foreground);
   font-family: var(--font-body), "Outfit", -apple-system, sans-serif;
   font-size: 13px;
@@ -821,6 +822,9 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
   background: var(--accent);
   opacity: 0.15;
 }
+.dark .status-bar {
+  border-top-color: rgba(201, 169, 110, 0.1);
+}
 
 /* ══════════════════════════════════════
    LIVE DOT
@@ -1155,10 +1159,10 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
   height: 100%;
   border-radius: 0 2px 2px 0;
 }
-.stat-card:nth-child(1)::before { background: var(--accent); }
-.stat-card:nth-child(2)::before { background: var(--accent); }
-.stat-card:nth-child(3)::before { background: var(--accent); }
-.stat-card:nth-child(4)::before { background: var(--accent); }
+.stat-card:nth-child(1)::before { background: #C9A96E; }
+.stat-card:nth-child(2)::before { background: #3B82F6; }
+.stat-card:nth-child(3)::before { background: #22C55E; }
+.stat-card:nth-child(4)::before { background: #8B5CF6; }
 
 /* ══════════════════════════════════════
    DARK MODE
@@ -1166,7 +1170,7 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
 
 .dark {
   --background: #0D0D0F;
-  --background-mesh: none;
+  --background-mesh: radial-gradient(ellipse at 50% 0%, rgba(201,169,110,0.03) 0%, transparent 60%);
   --foreground: #EBEBEB;
   --foreground-bright: #ffffff;
   --foreground-secondary: #8C8C91;
@@ -1255,7 +1259,8 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
 }
 .dark .glass-header {
   backdrop-filter: blur(16px) saturate(1.1);
-  border-bottom-color: rgba(201, 169, 110, 0.06);
+  border-bottom-color: rgba(201, 169, 110, 0.08);
+  box-shadow: 0 1px 12px rgba(201, 169, 110, 0.04);
 }
 .dark .tag-pill:hover {
   filter: brightness(1.15) saturate(1.2);
@@ -1371,6 +1376,10 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
 .widget-card:hover {
   border-color: var(--border-strong);
   box-shadow: var(--shadow-md);
+}
+.dark .widget-card:hover {
+  border-color: rgba(201, 169, 110, 0.15);
+  box-shadow: 0 4px 20px rgba(201, 169, 110, 0.05);
 }
 .widget-card-header {
   display: flex;
@@ -1810,6 +1819,17 @@ button:active { transform: scale(0.98); }
   margin-bottom: 16px;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(201, 169, 110, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dash-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 2px;
+  background: #C9A96E;
+  flex-shrink: 0;
 }
 
 .dash-row {
@@ -1827,13 +1847,16 @@ button:active { transform: scale(0.98); }
 .dash-row:last-child {
   border-bottom: none;
 }
+.dash-row:nth-child(even) {
+  background: #111115;
+}
 
 .market-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
   padding: 20px 24px;
-  background: var(--background);
+  background: linear-gradient(180deg, #141418 0%, #0D0D0F 100%);
   border-bottom: 1px solid var(--border);
 }
 .market-strip-item {
@@ -1875,7 +1898,7 @@ button:active { transform: scale(0.98); }
 
 .dash-separator {
   height: 1px;
-  background: rgba(201, 169, 110, 0.2);
+  background: linear-gradient(90deg, transparent 0%, rgba(201, 169, 110, 0.25) 20%, rgba(201, 169, 110, 0.25) 80%, transparent 100%);
   margin: 20px 0;
 }
 
@@ -1902,9 +1925,9 @@ button:active { transform: scale(0.98); }
   width: 3px;
 }
 .dash-stat-cell:nth-child(1)::before { background: #C9A96E; }
-.dash-stat-cell:nth-child(2)::before { background: #22c55e; }
-.dash-stat-cell:nth-child(3)::before { background: #3b82f6; }
-.dash-stat-cell:nth-child(4)::before { background: #ef4444; }
+.dash-stat-cell:nth-child(2)::before { background: #3B82F6; }
+.dash-stat-cell:nth-child(3)::before { background: #22C55E; }
+.dash-stat-cell:nth-child(4)::before { background: #8B5CF6; }
 
 .dash-price-row {
   display: flex;
@@ -2094,6 +2117,32 @@ button:active { transform: scale(0.98); }
 .stat-accent.accent-green::before { background: #22c55e; }
 .stat-accent.accent-blue::before { background: #3b82f6; }
 .stat-accent.accent-red::before { background: #ef4444; }
+
+/* New articles notification bar */
+@keyframes notification-slide-down {
+  from { transform: translateY(-100%) translateX(-50%); opacity: 0; }
+  to { transform: translateY(0) translateX(-50%); opacity: 1; }
+}
+.new-articles-bar {
+  position: fixed;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 45;
+  padding: 8px 20px;
+  background: rgba(201,169,110,0.12);
+  border: 1px solid rgba(201,169,110,0.25);
+  color: #C9A96E;
+  font-size: 12px;
+  font-weight: 600;
+  animation: notification-slide-down 0.3s ease-out;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.new-articles-bar:hover {
+  background: rgba(201,169,110,0.18);
+}
 
 /* Tag badges — more colorful */
 .tag-badge {
