@@ -1804,10 +1804,12 @@ button:active { transform: scale(0.98); }
   font-family: var(--font-heading), "Space Grotesk", sans-serif;
   font-size: 10px;
   font-weight: 700;
-  color: #8C8C91;
+  color: #C9A96E;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 12px;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.15);
 }
 
 .dash-row {
@@ -1827,47 +1829,54 @@ button:active { transform: scale(0.98); }
 }
 
 .market-strip {
-  display: flex;
-  align-items: center;
-  background: var(--surface-flat);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 0;
+  padding: 20px 24px;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
 }
 .market-strip-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0 24px;
+  gap: 4px;
+  padding: 16px;
+  background: #131316;
+  border: 1px solid #2D2D32;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+}
+.market-strip-item:hover {
+  box-shadow: 0 0 20px rgba(201, 169, 110, 0.08);
 }
 .market-strip-item:first-child {
-  padding-left: 0;
+  padding: 16px;
 }
 .market-strip-divider {
-  width: 1px;
-  height: 36px;
-  background: var(--border);
-  flex-shrink: 0;
+  display: none;
 }
 
 .dash-two-col {
   display: grid;
-  grid-template-columns: 65fr 35fr;
+  grid-template-columns: 60fr 40fr;
   gap: 0;
   min-height: 0;
 }
 .dash-left-col {
-  padding: 24px 32px 24px 24px;
-  border-right: 1px solid var(--border-subtle);
+  padding: 32px 32px 32px 24px;
+  border-right: 1px solid var(--border);
 }
 .dash-right-col {
-  padding: 24px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .dash-separator {
   height: 1px;
-  background: var(--border-subtle);
-  margin: 16px 0;
+  background: rgba(201, 169, 110, 0.2);
+  margin: 20px 0;
 }
 
 .dash-stat-grid {
@@ -1876,10 +1885,26 @@ button:active { transform: scale(0.98); }
   gap: 12px;
 }
 .dash-stat-cell {
+  background: #131316;
+  border: 1px solid #2D2D32;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  position: relative;
 }
+.dash-stat-cell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+.dash-stat-cell:nth-child(1)::before { background: #C9A96E; }
+.dash-stat-cell:nth-child(2)::before { background: #22c55e; }
+.dash-stat-cell:nth-child(3)::before { background: #3b82f6; }
+.dash-stat-cell:nth-child(4)::before { background: #ef4444; }
 
 .dash-price-row {
   display: flex;
@@ -2010,4 +2035,73 @@ button:active { transform: scale(0.98); }
   margin-right: 4px;
   color: #C9A96E;
   font-family: var(--font-heading);
+}
+
+/* ══════════════════════════════════════
+   CARD SURFACE — raised dark cards
+   ══════════════════════════════════════ */
+
+.card-surface {
+  background: #131316;
+  border: 1px solid #2D2D32;
+}
+.card-surface:hover {
+  border-color: #3D3D42;
+  box-shadow: 0 0 20px rgba(201, 169, 110, 0.06);
+}
+
+/* Stronger positive/negative colors */
+.text-positive { color: #22c55e !important; }
+.text-negative { color: #ef4444 !important; }
+.bg-positive { background: rgba(34, 197, 94, 0.1); }
+.bg-negative { background: rgba(239, 68, 68, 0.1); }
+.border-positive { border-color: #22c55e; }
+.border-negative { border-color: #ef4444; }
+
+/* Gold section dividers */
+.gold-divider {
+  height: 1px;
+  background: rgba(201, 169, 110, 0.2);
+  margin: 20px 0;
+}
+
+/* Large data display */
+.data-hero {
+  font-family: var(--font-mono), 'Space Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stat card with colored accent */
+.stat-accent {
+  background: #131316;
+  border: 1px solid #2D2D32;
+  padding: 16px;
+  position: relative;
+}
+.stat-accent::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+.stat-accent.accent-gold::before { background: #C9A96E; }
+.stat-accent.accent-green::before { background: #22c55e; }
+.stat-accent.accent-blue::before { background: #3b82f6; }
+.stat-accent.accent-red::before { background: #ef4444; }
+
+/* Tag badges — more colorful */
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid;
 }

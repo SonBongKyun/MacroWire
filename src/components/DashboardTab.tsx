@@ -992,23 +992,23 @@ export default function DashboardTab({
         </div>
       )}
 
-      {/* ── Market Overview Strip ── */}
+      {/* ── Market Overview — 4 large cards ── */}
       {sections.marketStrip && <div className="market-strip" style={{ transition: "box-shadow 0.2s ease", boxShadow: scrolled ? "0 1px 8px rgba(0,0,0,0.3)" : "none" }}>
         {marketLoading ? (
-          <div style={{ display: "flex", gap: 32 }}>
+          <>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i}>
-                <div className="skeleton" style={{ height: 10, width: 48, marginBottom: 6 }} />
-                <div className="skeleton" style={{ height: 24, width: 80, marginBottom: 4 }} />
-                <div className="skeleton" style={{ height: 12, width: 56 }} />
+              <div key={i} style={{ background: "#131316", border: "1px solid #2D2D32", padding: 16 }}>
+                <div className="skeleton" style={{ height: 10, width: 48, marginBottom: 8 }} />
+                <div className="skeleton" style={{ height: 28, width: 100, marginBottom: 6 }} />
+                <div className="skeleton" style={{ height: 15, width: 70, marginBottom: 8 }} />
+                <div className="skeleton" style={{ height: 40, width: "100%" }} />
               </div>
             ))}
-          </div>
+          </>
         ) : marketData.length > 0 ? (
-          marketData.map((item, idx) => {
-            // Generate fake historical data from change% for sparkline visual
+          marketData.slice(0, 4).map((item) => {
             const startPrice = item.price / (1 + item.changePct / 100);
-            const steps = 16;
+            const steps = 20;
             const diff = item.price - startPrice;
             const sparkData: number[] = [startPrice];
             for (let i = 1; i < steps; i++) {
@@ -1020,45 +1020,72 @@ export default function DashboardTab({
             const isUp = item.changePct >= 0;
             const borderColor = isUp ? "#22c55e" : "#ef4444";
             return (
-              <div key={item.symbol} style={{ display: "contents" }}>
-                {idx > 0 && <div className="market-strip-divider" />}
-                <div
-                  className="market-strip-item section-reveal"
-                  style={{ position: "relative", borderLeft: `2px solid ${borderColor}`, paddingLeft: 12 }}
-                  onMouseEnter={() => setHoveredMarketIdx(idx)}
-                  onMouseLeave={() => setHoveredMarketIdx(null)}
-                >
-                  <span className="type-label">
-                    {item.label}
-                  </span>
-                  <span className="type-data-lg" style={{ fontSize: 18, lineHeight: 1.1, display: "flex", alignItems: "center", gap: 6 }}>
-                    {formatPrice(item.price)}
-                    {!isMarketOpen && (
-                      <span style={{ fontSize: 9, fontWeight: 500, color: "var(--muted)" }}>마감</span>
-                    )}
-                  </span>
-                  <span
-                    className="type-data-sm"
-                    style={{ color: isUp ? "#22c55e" : "#ef4444", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
-                  >
-                    <span style={{ display: "inline-block", transition: "transform 0.3s ease", transform: isUp ? "rotate(0deg)" : "rotate(180deg)", fontSize: 10 }}>▲</span>
-                    {isUp ? "+" : ""}{item.change.toFixed(2)} ({Math.abs(item.changePct).toFixed(1)}%)
-                  </span>
+              <div
+                key={item.symbol}
+                className="market-strip-item section-reveal"
+                style={{
+                  borderLeft: `3px solid ${borderColor}`,
+                  position: "relative",
+                }}
+                onMouseEnter={() => setHoveredMarketIdx(marketData.indexOf(item))}
+                onMouseLeave={() => setHoveredMarketIdx(null)}
+              >
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.06em",
+                  color: "#8C8C91",
+                  fontFamily: "var(--font-heading)",
+                }}>
+                  {item.label}
+                </span>
+                <span style={{
+                  fontSize: 28,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                  fontVariantNumeric: "tabular-nums" as const,
+                  color: "#EBEBEB",
+                  lineHeight: 1,
+                  letterSpacing: "-0.02em",
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 6,
+                }}>
+                  {formatPrice(item.price)}
+                  {!isMarketOpen && (
+                    <span style={{ fontSize: 9, fontWeight: 500, color: "#8C8C91" }}>마감</span>
+                  )}
+                </span>
+                <span style={{
+                  fontSize: 15,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                  fontVariantNumeric: "tabular-nums" as const,
+                  color: isUp ? "#22c55e" : "#ef4444",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}>
+                  <span style={{ fontSize: 12 }}>{isUp ? "\u25B2" : "\u25BC"}</span>
+                  {isUp ? "+" : ""}{item.change.toFixed(2)} ({Math.abs(item.changePct).toFixed(1)}%)
+                </span>
+                <div style={{ marginTop: 4 }}>
                   <MiniSparkline
                     data={sparkData}
-                    width={80}
-                    height={30}
+                    width={120}
+                    height={40}
                     change={item.changePct}
                   />
-                  <MarketPopover item={item} visible={hoveredMarketIdx === idx} />
                 </div>
+                <MarketPopover item={item} visible={hoveredMarketIdx === marketData.indexOf(item)} />
               </div>
             );
           })
         ) : (
-          <span style={{ fontSize: 12, color: "var(--muted)" }}>
+          <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "#8C8C91" }}>
             시장 데이터 없음
-          </span>
+          </div>
         )}
       </div>}
 
@@ -1106,7 +1133,7 @@ export default function DashboardTab({
           {sections.topStories && (<>
           <div className="dash-section-title">TOP STORIES</div>
 
-          {/* Hero article */}
+          {/* Hero article — large, gold-accented */}
           {heroArticle ? (
             <button
               onClick={() => { onSelectArticle(heroArticle); onTabChange("news"); }}
@@ -1114,15 +1141,26 @@ export default function DashboardTab({
                 display: "block",
                 textAlign: "left",
                 width: "100%",
-                background: "none",
-                border: "none",
-                borderLeft: "2px solid #C9A96E",
-                padding: "0 0 0 20px",
+                background: "#131316",
+                border: "1px solid #2D2D32",
+                borderLeft: "4px solid #C9A96E",
+                padding: "20px 24px",
                 cursor: "pointer",
-                marginBottom: 20,
+                marginBottom: 24,
+                transition: "box-shadow 0.2s ease",
               }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(201,169,110,0.08)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
             >
-              <h2 className="type-h1" style={{ margin: 0, lineHeight: 1.35 }}>
+              <h2 style={{
+                margin: 0,
+                lineHeight: 1.35,
+                fontSize: 24,
+                fontWeight: 700,
+                fontFamily: "var(--font-heading)",
+                color: "#EBEBEB",
+                letterSpacing: "-0.01em",
+              }}>
                 {heroArticle.title}
               </h2>
               <div
@@ -1130,25 +1168,25 @@ export default function DashboardTab({
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
-                  marginTop: 6,
+                  marginTop: 10,
                 }}
               >
-                <span className="type-small" style={{ color: "var(--muted-bright)", fontWeight: 500 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#C9A96E" }}>
                   {heroArticle.sourceName}
                 </span>
-                <span className="type-small type-data" style={{ color: "var(--muted)" }}>
+                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#C9A96E", opacity: 0.7 }}>
                   {timeAgo(heroArticle.publishedAt)}
                 </span>
               </div>
             </button>
           ) : (
-            <div style={{ borderLeft: "2px solid var(--border-subtle)", paddingLeft: 20, marginBottom: 20 }}>
-              <div className="skeleton" style={{ height: 20, width: "70%", marginBottom: 8 }} />
-              <div className="skeleton" style={{ height: 12, width: "40%" }} />
+            <div style={{ borderLeft: "4px solid #2D2D32", paddingLeft: 24, marginBottom: 24, background: "#131316", padding: "20px 24px", border: "1px solid #2D2D32" }}>
+              <div className="skeleton" style={{ height: 24, width: "70%", marginBottom: 10 }} />
+              <div className="skeleton" style={{ height: 14, width: "40%" }} />
             </div>
           )}
 
-          {/* Article rows */}
+          {/* Secondary article rows — compact with gold dots */}
           {secondaryArticles.length > 0 && (
             <div>
               {secondaryArticles.map((article) => (
@@ -1160,33 +1198,35 @@ export default function DashboardTab({
                     textAlign: "left",
                     background: "none",
                     border: "none",
-                    borderBottom: "1px solid var(--border-subtle)",
+                    borderBottom: "1px solid #1e1e22",
                     width: "100%",
-                    padding: "8px 0",
+                    padding: "10px 0",
                     cursor: "pointer",
                     display: "flex",
-                    alignItems: "baseline",
-                    gap: 8,
+                    alignItems: "center",
+                    gap: 10,
                   }}
                 >
-                  {!article.isRead && (
+                  {!article.isRead ? (
                     <span
                       style={{
                         display: "inline-block",
-                        width: 5,
-                        height: 5,
+                        width: 6,
+                        height: 6,
                         borderRadius: "50%",
-                        background: "var(--accent)",
+                        background: "#C9A96E",
                         flexShrink: 0,
-                        position: "relative",
-                        top: -1,
+                        boxShadow: "0 0 6px rgba(201,169,110,0.4)",
                       }}
                     />
+                  ) : (
+                    <span style={{ width: 6, flexShrink: 0 }} />
                   )}
                   <span
-                    className="type-body"
                     style={{
-                      fontWeight: 500,
+                      fontSize: 14,
+                      fontWeight: article.isRead ? 400 : 600,
+                      color: "#EBEBEB",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -1197,8 +1237,13 @@ export default function DashboardTab({
                     {article.title}
                   </span>
                   <span
-                    className="type-small type-data"
-                    style={{ flexShrink: 0, whiteSpace: "nowrap" }}
+                    style={{
+                      flexShrink: 0,
+                      whiteSpace: "nowrap",
+                      fontSize: 10,
+                      color: "#8C8C91",
+                      fontFamily: "var(--font-mono)",
+                    }}
                   >
                     {article.sourceName} {timeAgo(article.publishedAt)}
                   </span>
@@ -1265,7 +1310,7 @@ export default function DashboardTab({
           <div className="dash-separator" />
           </>)}
 
-          {/* Statistics */}
+          {/* Statistics — 2x2 grid with large numbers & colored accents */}
           {sections.statistics && (<>
           <div className="dash-section-title">STATISTICS</div>
           <div className="dash-stat-grid">
@@ -1276,10 +1321,25 @@ export default function DashboardTab({
               { label: "활성 소스", value: todayStats.sourceCount },
             ].map((stat) => (
               <div key={stat.label} className="dash-stat-cell">
-                <span className="type-data-lg" style={{ color: "var(--accent)" }}>
+                <span style={{
+                  fontSize: 28,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                  fontVariantNumeric: "tabular-nums",
+                  lineHeight: 1,
+                  letterSpacing: "-0.02em",
+                  color: "#EBEBEB",
+                }}>
                   <AnimatedNumber value={stat.value} />
                 </span>
-                <span className="type-micro">
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.06em",
+                  color: "#8C8C91",
+                  marginTop: 4,
+                }}>
                   {stat.label}
                 </span>
               </div>
@@ -1298,37 +1358,42 @@ export default function DashboardTab({
           />
           )}
 
-          {/* Trending */}
+          {/* Trending — colored tag badges */}
           {sections.trending && (<>
           <div className="dash-section-title">TRENDING</div>
           {trendingTags.length === 0 ? (
-            <span style={{ fontSize: 12, color: "var(--muted)" }}>태그 데이터 없음</span>
+            <span style={{ fontSize: 12, color: "#8C8C91" }}>태그 데이터 없음</span>
           ) : (
-            <div style={{ fontSize: 13, lineHeight: 1.8, color: "var(--foreground-bright)" }}>
-              {trendingTags.map(([tag, count], i) => (
-                <span key={tag}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {trendingTags.map(([tag, count]) => {
+                const tagColors = ["#C9A96E", "#22c55e", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f59e0b", "#ec4899", "#10b981", "#8b5cf6"];
+                const colorIdx = Math.abs(tag.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length;
+                const color = tagColors[colorIdx];
+                return (
                   <button
+                    key={tag}
                     onClick={() => onTabChange("news")}
                     style={{
-                      background: "none",
-                      border: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "4px 10px",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color,
+                      background: `${color}15`,
+                      border: `1px solid ${color}30`,
                       cursor: "pointer",
-                      padding: 0,
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: "var(--foreground-bright)",
+                      transition: "all 0.15s ease",
                     }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}25`; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}15`; }}
                   >
                     {tag}
-                    <span className="type-data-sm" style={{ color: "var(--muted)", marginLeft: 3, fontSize: 10 }}>
-                      {count}
-                    </span>
+                    <span style={{ fontSize: 9, opacity: 0.7, fontFamily: "var(--font-mono)" }}>{count}</span>
                   </button>
-                  {i < trendingTags.length - 1 && (
-                    <span style={{ color: "var(--muted)", margin: "0 6px" }}>{" \u00B7 "}</span>
-                  )}
-                </span>
-              ))}
+                );
+              })}
             </div>
           )}
           </>)}
