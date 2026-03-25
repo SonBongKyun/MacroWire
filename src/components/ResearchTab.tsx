@@ -46,7 +46,12 @@ export function ResearchTab({ articles, onSelectArticle }: ResearchTabProps) {
   );
 
   const filtered = useMemo(() => {
-    if (!activeQuery) return [];
+    if (!activeQuery) {
+      // Show latest articles when no search
+      return [...articles]
+        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+        .slice(0, 30);
+    }
     const q = activeQuery.toLowerCase();
     return articles.filter(
       (a) =>
@@ -109,7 +114,7 @@ export function ResearchTab({ articles, onSelectArticle }: ResearchTabProps) {
 
   // Related tags: tags that co-occur with the search term (excluding the search term itself)
   const relatedTags = useMemo(() => {
-    if (!activeQuery) return [];
+    if (!activeQuery) return tagFrequency.slice(0, 10).map(([tag, count]) => [tag, count] as [string, number]);
     const q = activeQuery.toLowerCase();
     const map: Record<string, number> = {};
     for (const a of filtered) {
@@ -246,11 +251,11 @@ export function ResearchTab({ articles, onSelectArticle }: ResearchTabProps) {
                 letterSpacing: "0.1em",
               }}
             >
-              RESEARCH RESULTS
+              {activeQuery ? "RESEARCH RESULTS" : "LATEST ARTICLES"}
             </span>
           </div>
           <div style={{ flex: 1, overflowY: "auto" }}>
-            {!activeQuery && (
+            {!activeQuery && filtered.length === 0 && (
               <div
                 style={{
                   display: "flex",
@@ -261,23 +266,10 @@ export function ResearchTab({ articles, onSelectArticle }: ResearchTabProps) {
                   color: "#8C8C91",
                 }}
               >
-                <svg
-                  style={{ width: 32, height: 32, opacity: 0.3, marginBottom: 12 }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
                 <p style={{ fontSize: 12, fontWeight: 600, color: "#EBEBEB" }}>
-                  검색어를 입력하세요
+                  기사가 없습니다
                 </p>
-                <p style={{ fontSize: 10, marginTop: 4 }}>키워드를 입력하고 Enter</p>
+                <p style={{ fontSize: 10, marginTop: 4 }}>새로고침으로 기사를 수집하세요</p>
               </div>
             )}
             {activeQuery && filtered.length === 0 && (
@@ -418,24 +410,11 @@ export function ResearchTab({ articles, onSelectArticle }: ResearchTabProps) {
                 letterSpacing: "0.1em",
               }}
             >
-              TOPIC ANALYSIS
+              {activeQuery ? "TOPIC ANALYSIS" : "OVERVIEW"}
             </span>
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
-            {!activeQuery ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                  color: "#8C8C91",
-                  fontSize: 11,
-                }}
-              >
-                검색 후 분석 결과가 표시됩니다
-              </div>
-            ) : (
+            {(
               <>
                 {/* Tag Frequency */}
                 {tagFrequency.length > 0 && (
