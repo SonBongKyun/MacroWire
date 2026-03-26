@@ -7,6 +7,8 @@ import { RelatedArticles } from "@/components/RelatedArticles";
 import { ArticleSummary } from "@/components/ArticleSummary";
 import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleNotes } from "@/hooks/useArticleNotes";
+import { generateSmartSummary } from "@/lib/ai/summarizer";
+import type { SmartSummary } from "@/lib/ai/summarizer";
 
 interface ArticleDetailProps {
   article: Article | null;
@@ -120,6 +122,12 @@ export function ArticleDetail({
     }
     return counts;
   }, [articles]);
+
+  // Auto-generate smart summary for selected article
+  const smartSummary: SmartSummary | null = useMemo(() => {
+    if (!article) return null;
+    return generateSmartSummary(article);
+  }, [article]);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -297,6 +305,97 @@ export function ArticleDetail({
               {article.summary}
             </p>
             <ArticleSummary title={article.title} summary={article.summary} url={article.url} />
+
+            {/* AI Smart Summary */}
+            {smartSummary && (
+              <div style={{ marginTop: 12 }}>
+                <div style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "#C9A96E",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase" as const,
+                  marginBottom: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                  </svg>
+                  AI 분석
+                </div>
+
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center" }}>
+                  {/* Key Entities */}
+                  {smartSummary.keyEntities.length > 0 && smartSummary.keyEntities.map((entity) => (
+                    <span
+                      key={entity}
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: "#C9A96E",
+                        border: "1px solid rgba(201,169,110,0.3)",
+                        padding: "1px 6px",
+                        background: "rgba(201,169,110,0.06)",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {entity}
+                    </span>
+                  ))}
+
+                  {/* Impact Level Badge */}
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: "0.06em",
+                      padding: "2px 6px",
+                      color: smartSummary.impactLevel === "high" ? "#0D0D0F" : smartSummary.impactLevel === "medium" ? "#EBEBEB" : "#8C8C91",
+                      background: smartSummary.impactLevel === "high" ? "#C9A96E" : smartSummary.impactLevel === "medium" ? "#2D2D32" : "rgba(45,45,50,0.5)",
+                      textTransform: "uppercase" as const,
+                    }}
+                  >
+                    {smartSummary.impactLevel === "high" ? "HIGH" : smartSummary.impactLevel === "medium" ? "MED" : "LOW"}
+                  </span>
+
+                  {/* Sentiment Indicator */}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 10, color: "#8C8C91" }}>
+                    <span style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: smartSummary.sentiment === "positive" ? "#22c55e" : smartSummary.sentiment === "negative" ? "#ef4444" : "#94a3b8",
+                    }} />
+                    {smartSummary.sentiment === "positive" ? "긍정" : smartSummary.sentiment === "negative" ? "부정" : "중립"}
+                  </span>
+                </div>
+
+                {/* Related Topics */}
+                {smartSummary.relatedTopics.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                    {smartSummary.relatedTopics.map((topic) => (
+                      <button
+                        key={topic}
+                        onClick={() => onTagClick?.(topic)}
+                        style={{
+                          fontSize: 9,
+                          color: "#8C8C91",
+                          background: "rgba(140,140,145,0.08)",
+                          border: "none",
+                          padding: "1px 5px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        #{topic}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="detail-divider mt-4" />
             <div className="flex items-center gap-2 pt-1">
               <span className="text-[9px] text-[var(--muted)] font-medium">발행일</span>

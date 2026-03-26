@@ -493,6 +493,17 @@ function HomeInner() {
 
   return (
     <div className="flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)]">
+      {/* Cosmic Background */}
+      <div className="cosmic-bg">
+        <div className="stars" />
+        <div className="stars-layer-2" />
+        <div className="nebula nebula-1" />
+        <div className="nebula nebula-2" />
+        <div className="nebula nebula-3" />
+        <div className="nebula nebula-4" />
+        <div className="shooting-star" />
+        <div className="shooting-star-2" />
+      </div>
       {/* Platform Navigation */}
       <PlatformNav
         activeTab={activeMainTab}

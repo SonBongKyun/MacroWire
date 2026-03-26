@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 export interface DashboardSections {
   marketStrip: boolean;
   topStories: boolean;
+  aiInsights: boolean;
   activityChart: boolean;
   marketData: boolean;
   statistics: boolean;
@@ -29,6 +30,7 @@ const MAX_LAYOUTS = 5;
 const DEFAULT_SECTIONS: DashboardSections = {
   marketStrip: true,
   topStories: true,
+  aiInsights: true,
   activityChart: true,
   marketData: true,
   statistics: true,

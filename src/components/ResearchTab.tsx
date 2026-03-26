@@ -48,8 +48,15 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
     fetchAll();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Use fetched articles, fallback to props
+  // Use fetched articles, fallback to props immediately
   const articles = allArticles.length > 0 ? allArticles : propArticles;
+
+  // Also update when propArticles change (so initial load shows data)
+  useEffect(() => {
+    if (allArticles.length === 0 && propArticles.length > 0) {
+      setAllArticles(propArticles);
+    }
+  }, [propArticles, allArticles.length]);
 
   const handleSearch = useCallback(() => {
     setActiveQuery(query.trim());

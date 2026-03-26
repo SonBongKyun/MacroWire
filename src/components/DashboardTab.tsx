@@ -9,8 +9,12 @@ import { EconomicCalendar } from "@/components/EconomicCalendar";
 import { SentimentGauge } from "@/components/SentimentGauge";
 import { GlobalMacroDashboard } from "@/components/GlobalMacroDashboard";
 import { useSourceRanking } from "@/hooks/useSourceRanking";
+import { generateInsights } from "@/lib/ai/insights";
+import type { MarketInsight } from "@/lib/ai/insights";
 import type { SourceRank } from "@/hooks/useSourceRanking";
 import type { DashboardSections, DashboardLayout } from "@/hooks/useDashboardLayout";
+import { getRecommendations } from "@/lib/ai/recommendations";
+import type { Recommendation } from "@/lib/ai/recommendations";
 // TAG_COLORS kept available for future use
 // import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
 
@@ -204,6 +208,7 @@ interface DashboardTabProps {
 const SECTION_LABELS: Record<keyof DashboardSections, string> = {
   marketStrip: "시장 스트립",
   topStories: "주요 뉴스",
+  aiInsights: "AI 인사이트",
   activityChart: "24H 활동",
   marketData: "시장 데이터",
   statistics: "통계",
@@ -864,9 +869,136 @@ function ReadingProgressSection({
   );
 }
 
+// ── AI Insights Panel ──
+const INSIGHT_TYPE_CONFIG: Record<MarketInsight["type"], { color: string; label: string }> = {
+  trend: { color: "#3B82F6", label: "TREND" },
+  alert: { color: "#F59E0B", label: "ALERT" },
+  opportunity: { color: "#22C55E", label: "OPPORTUNITY" },
+  risk: { color: "#EF4444", label: "RISK" },
+};
+
+function AiInsightsPanel({ articles }: { articles: Article[] }) {
+  const insights = useMemo(() => generateInsights(articles), [articles]);
+
+  if (insights.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: 24 }}>
+      <div
+        className="dash-section-title"
+        style={{ display: "flex", alignItems: "center", gap: 8 }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+        </svg>
+        AI INSIGHTS
+      </div>
+      <div>
+        {insights.slice(0, 5).map((insight, i) => {
+          const cfg = INSIGHT_TYPE_CONFIG[insight.type];
+          return (
+            <div
+              key={i}
+              style={{
+                padding: "10px 0",
+                borderBottom: i < insights.length - 1 ? "1px solid #1e1e22" : "none",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <span
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: cfg.color,
+                    flexShrink: 0,
+                    boxShadow: `0 0 6px ${cfg.color}60`,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: cfg.color,
+                    letterSpacing: "0.06em",
+                    flexShrink: 0,
+                  }}
+                >
+                  {cfg.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "#EBEBEB",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  {insight.title}
+                </span>
+              </div>
+              <p
+                style={{
+                  margin: "0 0 6px 15px",
+                  fontSize: 11,
+                  color: "#8C8C91",
+                  lineHeight: 1.5,
+                }}
+              >
+                {insight.description}
+              </p>
+              {/* Confidence bar */}
+              <div style={{ marginLeft: 15, display: "flex", alignItems: "center", gap: 8 }}>
+                <div
+                  style={{
+                    flex: 1,
+                    maxWidth: 120,
+                    height: 3,
+                    background: "#1e1e22",
+                    borderRadius: 1,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${insight.confidence}%`,
+                      height: "100%",
+                      background: insight.confidence >= 70 ? "#C9A96E" : "#8C8C91",
+                      borderRadius: 1,
+                      transition: "width 0.5s ease",
+                    }}
+                  />
+                </div>
+                <span
+                  style={{
+                    fontSize: 9,
+                    fontFamily: "var(--font-mono)",
+                    color: insight.confidence >= 70 ? "#C9A96E" : "#8C8C91",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {insight.confidence}%
+                </span>
+                <span style={{ fontSize: 9, color: "#8C8C91" }}>
+                  {insight.basedOn.length}건 기반
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const DEFAULT_SECTIONS: DashboardSections = {
   marketStrip: true,
   topStories: true,
+  aiInsights: true,
   activityChart: true,
   marketData: true,
   statistics: true,
@@ -1038,6 +1170,14 @@ export default function DashboardTab({
 
   const heroArticle = latestArticles[0];
   const secondaryArticles = latestArticles.slice(1, 7);
+
+  // ── AI Recommendations ──
+  const recommendations: Recommendation[] = useMemo(() => {
+    if (articles.length === 0) return [];
+    const readIds = articles.filter((a) => a.isRead).map((a) => a.id);
+    const savedIds = articles.filter((a) => a.isSaved).map((a) => a.id);
+    return getRecommendations(articles, readIds, savedIds, 5);
+  }, [articles]);
 
   return (
     <div className="overflow-y-auto" ref={scrollRef} onScroll={handleScroll} style={{ height: "100%" }}>
@@ -1333,6 +1473,102 @@ export default function DashboardTab({
             </div>
           )}
           </>)}
+
+          {/* AI Insights */}
+          {sections.aiInsights && (
+          <AiInsightsPanel articles={articles} />
+          )}
+
+          {/* FOR YOU — AI Recommendations */}
+          {recommendations.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: "#C9A96E", fontFamily: "var(--font-heading)" }}>
+                  FOR YOU
+                </span>
+              </div>
+              <div style={{ fontSize: 10, color: "#8C8C91", marginBottom: 12 }}>
+                읽기 패턴 기반 추천
+              </div>
+
+              <div>
+                {recommendations.map((rec) => {
+                  const dotColor =
+                    rec.type === "trending" ? "#C9A96E" :
+                    rec.type === "personalized" ? "#60a5fa" :
+                    rec.type === "breaking" ? "#ef4444" :
+                    "#22c55e";
+                  return (
+                    <button
+                      key={rec.article.id}
+                      onClick={() => { onSelectArticle(rec.article); onTabChange("news"); }}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "left",
+                        background: "transparent",
+                        border: "none",
+                        borderBottom: "1px solid #1e1e22",
+                        padding: "8px 4px",
+                        cursor: "pointer",
+                        transition: "background 0.15s ease",
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.04)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            background: dotColor,
+                            flexShrink: 0,
+                            boxShadow: `0 0 6px ${dotColor}40`,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 500,
+                            color: "#EBEBEB",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            flex: 1,
+                            minWidth: 0,
+                          }}
+                        >
+                          {rec.article.title}
+                        </span>
+                        <span
+                          style={{
+                            flexShrink: 0,
+                            whiteSpace: "nowrap",
+                            fontSize: 10,
+                            color: "#8C8C91",
+                            fontFamily: "var(--font-mono)",
+                          }}
+                        >
+                          {rec.article.sourceName} {timeAgo(rec.article.publishedAt)}
+                        </span>
+                      </div>
+                      <div style={{ marginLeft: 14, marginTop: 2 }}>
+                        <span style={{ fontSize: 10, color: "#8C8C91", fontStyle: "italic" }}>
+                          {rec.reason}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Sentiment Gauge */}
           {sections.sentiment && (

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { Article } from "@/types";
-import { findRelatedArticles } from "@/lib/analytics/trends";
+import { findSimilarArticles } from "@/lib/ai/similarity";
 
 interface RelatedArticlesProps {
   article: Article;
@@ -21,9 +21,9 @@ function timeAgo(dateStr: string): string {
 }
 
 export function RelatedArticles({ article, articles, onSelectArticle }: RelatedArticlesProps) {
-  const related = useMemo(() => findRelatedArticles(article, articles, 5), [article, articles]);
+  const similar = useMemo(() => findSimilarArticles(article, articles, 5), [article, articles]);
 
-  if (related.length === 0) return null;
+  if (similar.length === 0) return null;
 
   return (
     <div className="mt-4">
@@ -34,19 +34,77 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
         </svg>
         관련 기사
       </h3>
-      <div className="space-y-1">
-        {related.map((a) => (
+      <div>
+        {similar.map((s) => (
           <button
-            key={a.id}
-            onClick={() => onSelectArticle(a)}
-            className="w-full text-left p-2 rounded-[var(--radius-sm)] hover:bg-[var(--surface-hover)] transition-colors group"
+            key={s.article.id}
+            onClick={() => onSelectArticle(s.article)}
+            className="w-full text-left group"
+            style={{
+              display: "block",
+              padding: "8px 4px",
+              borderBottom: "1px solid #1e1e22",
+              background: "transparent",
+              border: "none",
+              borderBlockEnd: "1px solid #1e1e22",
+              cursor: "pointer",
+              transition: "background 0.15s ease",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.04)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
-            <p className="text-[11px] leading-[1.4] text-[var(--foreground)] line-clamp-1 group-hover:text-[var(--accent)]">
-              {a.title}
+            <p style={{
+              fontSize: 11,
+              lineHeight: 1.4,
+              color: "#EBEBEB",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              margin: 0,
+            }}>
+              {s.article.title}
             </p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[9px] text-[var(--accent)] font-medium">{a.sourceName}</span>
-              <span className="text-[9px] text-[var(--muted)]">{timeAgo(a.publishedAt)}</span>
+
+            {/* Similarity score bar */}
+            <div style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{
+                flex: 1,
+                height: 2,
+                background: "#2D2D32",
+                borderRadius: 1,
+                overflow: "hidden",
+              }}>
+                <div style={{
+                  width: `${Math.round(s.score * 100)}%`,
+                  height: "100%",
+                  background: "#C9A96E",
+                  borderRadius: 1,
+                  transition: "width 0.3s ease",
+                }} />
+              </div>
+              <span style={{
+                fontSize: 9,
+                color: "#C9A96E",
+                fontFamily: "var(--font-mono)",
+                fontVariantNumeric: "tabular-nums",
+                flexShrink: 0,
+              }}>
+                {Math.round(s.score * 100)}%
+              </span>
+            </div>
+
+            {/* Reasons */}
+            {s.reasons.length > 0 && (
+              <div style={{ marginTop: 3 }}>
+                <span style={{ fontSize: 9, color: "#8C8C91", fontStyle: "italic" }}>
+                  {s.reasons.join(" · ")}
+                </span>
+              </div>
+            )}
+
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+              <span style={{ fontSize: 9, color: "#C9A96E", fontWeight: 500 }}>{s.article.sourceName}</span>
+              <span style={{ fontSize: 9, color: "#8C8C91" }}>{timeAgo(s.article.publishedAt)}</span>
             </div>
           </button>
         ))}
