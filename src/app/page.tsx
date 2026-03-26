@@ -24,6 +24,7 @@ import { NewsTab } from "@/components/NewsTab";
 import { MarketsTab } from "@/components/MarketsTab";
 import { AnalyticsTab } from "@/components/AnalyticsTab";
 import { ResearchTab } from "@/components/ResearchTab";
+import { AiTab } from "@/components/AiTab";
 import { PortfolioTab } from "@/components/PortfolioTab";
 import { ToastProvider, useToast } from "@/components/Toast";
 import { SplitViewPanel } from "@/components/SplitViewPanel";
@@ -386,6 +387,7 @@ function HomeInner() {
       case "range30d": setRange("30d"); break;
       case "help": setShowHelp(true); break;
       case "analytics": setActiveMainTab("analytics"); break;
+      case "ai": setActiveMainTab("ai"); break;
       case "watchlist": setActiveMainTab("markets"); break;
       case "addSource": setAddSourceOpen(true); break;
       case "notifications": setNotificationPanelOpen((v) => !v); break;
@@ -434,7 +436,7 @@ function HomeInner() {
 
   // Keyboard shortcuts
   useEffect(() => {
-    const TAB_ORDER: MainTab[] = ["dashboard", "news", "markets", "analytics", "research", "portfolio"];
+    const TAB_ORDER: MainTab[] = ["dashboard", "news", "markets", "analytics", "ai", "research", "portfolio"];
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); setCommandPaletteOpen(true); return; }
       // Ctrl+Shift+S: toggle split view
@@ -451,6 +453,8 @@ function HomeInner() {
       if (e.shiftKey && e.key === "M") { e.preventDefault(); setMemoOpen((v) => !v); return; }
       // Shift+F: open financial calculators
       if (e.shiftKey && e.key === "F") { e.preventDefault(); setFinancialCalcOpen((v) => !v); return; }
+      // Shift+I: AI tab
+      if (e.shiftKey && e.key === "I") { e.preventDefault(); setActiveMainTab("ai"); return; }
       // Shift+R: research tab
       if (e.shiftKey && e.key === "R") { e.preventDefault(); setActiveMainTab("research"); return; }
       // Shift+P: portfolio tab
@@ -696,6 +700,16 @@ function HomeInner() {
 
         {activeMainTab === "analytics" && (
           <AnalyticsTab articles={articles} />
+        )}
+
+        {activeMainTab === "ai" && (
+          <AiTab
+            articles={articles}
+            sources={sources}
+            onSelectArticle={selectArticle}
+            onTabChange={(tab) => setActiveMainTab(tab as MainTab)}
+            portfolioPrices={portfolio.prices}
+          />
         )}
 
         {activeMainTab === "research" && (

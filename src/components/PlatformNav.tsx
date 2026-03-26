@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 
-export type MainTab = "dashboard" | "news" | "markets" | "analytics" | "research" | "portfolio";
+export type MainTab = "dashboard" | "news" | "markets" | "analytics" | "ai" | "research" | "portfolio";
 
 interface PlatformNavProps {
   activeTab: MainTab;
@@ -41,6 +41,7 @@ const tabs: { key: MainTab; label: string }[] = [
   { key: "news", label: "\uB274\uC2A4" },
   { key: "markets", label: "\uC2DC\uC7A5" },
   { key: "analytics", label: "\uBD84\uC11D" },
+  { key: "ai", label: "AI" },
   { key: "research", label: "\uB9AC\uC11C\uCE58" },
   { key: "portfolio", label: "\uD3EC\uD2B8\uD3F4\uB9AC\uC624" },
 ];
