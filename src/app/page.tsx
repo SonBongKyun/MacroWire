@@ -353,8 +353,38 @@ function HomeInner() {
     showToast("내보내기 완료");
   }, [articles, showToast]);
 
-  // Initial load
-  useEffect(() => { fetchSources(); }, [fetchSources]);
+  // Initial load — auto-seed sources if empty, auto-ingest if no articles
+  useEffect(() => {
+    const init = async () => {
+      // 1) fetch or seed sources
+      let srcs: Source[] = [];
+      try {
+        const r = await fetch("/api/sources");
+        const d = await r.json();
+        srcs = Array.isArray(d) ? d : [];
+        setSources(srcs);
+        if (srcs.length === 0) {
+          await fetch("/api/sources/seed", { method: "POST" });
+          const r2 = await fetch("/api/sources");
+          const d2 = await r2.json();
+          srcs = Array.isArray(d2) ? d2 : [];
+          setSources(srcs);
+        }
+      } catch { /* silent */ }
+
+      // 2) fetch articles; auto-ingest on empty DB
+      try {
+        const r = await fetch("/api/articles?range=24h&limit=50");
+        const json = await r.json();
+        const items: Article[] = Array.isArray(json?.data) ? json.data : [];
+        if (items.length === 0 && srcs.length > 0) {
+          // DB is empty — trigger a one-time silent ingest
+          runIngest();
+        }
+      } catch { /* silent */ }
+    };
+    init();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Refetch on filter change
   useEffect(() => {
@@ -526,6 +556,7 @@ function HomeInner() {
         notificationCount={notifications.store.rules.filter((r) => r.enabled).length}
         onToggleNotifications={() => setNotificationPanelOpen((v) => !v)}
         newArticleCount={newArticleCount}
+        unreadCount={articles.filter((a) => !a.isRead).length}
         tags={allTags}
         onToggleSplit={() => setSplitView((v) => !v)}
         splitView={splitView}

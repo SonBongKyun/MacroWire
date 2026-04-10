@@ -1295,38 +1295,80 @@ export default function DashboardTab({
       </div>}
 
       {/* ── Empty State ── */}
-      {articles.length === 0 && marketData.length === 0 && !marketLoading && (
+      {articles.length === 0 && !marketLoading && (
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            padding: "80px 20px",
+            padding: "60px 20px",
             textAlign: "center",
+            gap: 0,
           }}
         >
+          {/* Animated logo icon */}
+          <div style={{
+            width: 56, height: 56,
+            borderRadius: 4,
+            border: "1px solid rgba(201,169,110,0.2)",
+            background: "rgba(201,169,110,0.05)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 20,
+            position: "relative",
+            overflow: "hidden",
+          }}>
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(201,169,110,0.4)" />
+              <rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(201,169,110,0.6)" />
+              <rect x="15" y="7" width="4" height="18" rx="1" fill="rgba(201,169,110,0.8)" />
+              <rect x="21" y="3" width="4" height="22" rx="1" fill="#C9A96E" />
+            </svg>
+            <div style={{
+              position: "absolute",
+              top: 0, left: "-30%",
+              width: "50%",
+              height: "100%",
+              background: "linear-gradient(90deg, transparent, rgba(201,169,110,0.15), transparent)",
+              animation: "card-shimmer 2s ease-in-out infinite",
+            }} />
+          </div>
           <div
             style={{
-              fontSize: 22,
+              fontSize: 15,
               fontWeight: 700,
               color: "var(--foreground-bright)",
               marginBottom: 8,
               fontFamily: "var(--font-heading)",
+              letterSpacing: "-0.01em",
             }}
           >
-            데이터를 수집하세요
+            기사 수집 중
           </div>
           <div
             style={{
-              fontSize: 13,
+              fontSize: 12,
               color: "var(--muted)",
-              maxWidth: 360,
+              maxWidth: 320,
               lineHeight: 1.6,
-              marginBottom: 20,
             }}
           >
-            새로고침 버튼을 눌러 최신 기사와 시장 데이터를 불러올 수 있습니다
+            RSS 소스에서 최신 기사를 불러오고 있습니다.<br/>
+            잠시 후 자동으로 업데이트됩니다.
+          </div>
+          {/* Pulsing dots */}
+          <div style={{ display: "flex", gap: 6, marginTop: 20 }}>
+            {[0, 1, 2].map((i) => (
+              <div key={i} style={{
+                width: 5, height: 5,
+                borderRadius: "50%",
+                background: "#C9A96E",
+                opacity: 0.4,
+                animation: `pulse-dot 1.5s ease-in-out ${i * 0.3}s infinite`,
+              }} />
+            ))}
           </div>
         </div>
       )}

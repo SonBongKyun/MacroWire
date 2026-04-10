@@ -21,6 +21,7 @@ interface PlatformNavProps {
   notificationCount: number;
   onToggleNotifications: () => void;
   newArticleCount: number;
+  unreadCount?: number;
   tags?: string[];
   onToggleSplit?: () => void;
   splitView?: boolean;
@@ -63,6 +64,7 @@ export function PlatformNav({
   notificationCount,
   onToggleNotifications,
   newArticleCount,
+  unreadCount = 0,
   tags = [],
   onToggleSplit,
   splitView = false,
@@ -206,6 +208,12 @@ export function PlatformNav({
               {tab.key === "news" && newArticleCount > 0 && (
                 <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[9px] font-bold rounded-full bg-[var(--danger)] text-white leading-none">
                   {newArticleCount > 99 ? "99+" : newArticleCount}
+                </span>
+              )}
+              {tab.key === "news" && newArticleCount === 0 && unreadCount > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-bold leading-none"
+                  style={{ borderRadius: 2, background: "rgba(201,169,110,0.15)", color: "#C9A96E" }}>
+                  {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
               {isActive && (

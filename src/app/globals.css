@@ -1177,10 +1177,10 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
 .dark {
   --background: #0D0D0F;
   --background-mesh:
-    radial-gradient(ellipse at 20% 0%, rgba(201,169,110,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 10%, rgba(100,80,180,0.03) 0%, transparent 40%),
-    radial-gradient(ellipse at 60% 80%, rgba(50,120,180,0.02) 0%, transparent 50%),
-    radial-gradient(circle at 10% 60%, rgba(201,169,110,0.015) 0%, transparent 30%);
+    radial-gradient(ellipse at 20% 0%, rgba(201,169,110,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%, rgba(100,80,180,0.05) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 80%, rgba(50,120,180,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 10% 60%, rgba(201,169,110,0.025) 0%, transparent 30%);
   --foreground: #EBEBEB;
   --foreground-bright: #ffffff;
   --foreground-secondary: #8C8C91;
@@ -1314,8 +1314,8 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
 .cosmic-bg .nebula {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.07;
+  filter: blur(80px);
+  opacity: 0.10;
   animation: nebula-pulse 20s ease-in-out infinite alternate;
 }
 
@@ -1344,13 +1344,13 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
   background: radial-gradient(circle, #B5542E 0%, rgba(181,84,46,0.2) 40%, transparent 70%);
   top: 60%; left: 30%;
   animation-delay: -15s;
-  opacity: 0.04;
+  opacity: 0.07;
 }
 
 @keyframes nebula-pulse {
-  0%   { opacity: 0.05; transform: scale(1); }
-  50%  { opacity: 0.09; transform: scale(1.08); }
-  100% { opacity: 0.06; transform: scale(0.95); }
+  0%   { opacity: 0.08; transform: scale(1); }
+  50%  { opacity: 0.15; transform: scale(1.08); }
+  100% { opacity: 0.10; transform: scale(0.95); }
 }
 
 /* Shooting star */
