@@ -20,9 +20,13 @@
 
   { "name": "연합뉴스 속보",       "feedUrl": "https://www.yna.co.kr/rss/news.xml",                                                     "category": "속보" },
   { "name": "뉴스핌 속보",         "feedUrl": "https://www.newspim.com/rss/breaking.xml",                                                "category": "속보" },
+  { "name": "이데일리 속보",       "feedUrl": "https://www.edaily.co.kr/rss/breaking.xml",                                              "category": "속보" },
+  { "name": "머니투데이 속보",     "feedUrl": "https://rss.mt.co.kr/mt/mtview/mt_fl/rss.xml",                                           "category": "속보" },
+  { "name": "Reuters Top News",    "feedUrl": "https://feeds.reuters.com/reuters/topNews",                                               "category": "속보" },
+  { "name": "CNBC Breaking",       "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839135",    "category": "속보" },
+
   { "name": "이데일리 경제",       "feedUrl": "https://www.edaily.co.kr/rss/economy.xml",                                                "category": "경제" },
   { "name": "머니투데이",          "feedUrl": "https://rss.mt.co.kr/mt/mtview/mt_all/rss.xml",                                           "category": "경제" },
-  { "name": "매일경제 증권 RSS",   "feedUrl": "https://www.mk.co.kr/rss/30100041/",                                                     "category": "증권" },
   { "name": "조선비즈",            "feedUrl": "https://biz.chosun.com/rss/all.xml",                                                      "category": "경제" },
   { "name": "서울경제 금융",       "feedUrl": "https://www.sedaily.com/RSS/Finance",                                                     "category": "금융" },
 

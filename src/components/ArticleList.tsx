@@ -282,7 +282,11 @@ export function ArticleList({
                       gap: 10,
                       transition: "background-color 0.1s",
                       backgroundColor: isSelected ? "rgba(201,169,110,0.06)" : "transparent",
-                      borderLeft: isSelected ? "2px solid #C9A96E" : "2px solid transparent",
+                      borderLeft: isSelected
+                        ? "2px solid #C9A96E"
+                        : article.tags.includes("속보") && isUnread
+                        ? "2px solid rgba(239,68,68,0.6)"
+                        : "2px solid transparent",
                       opacity: !isUnread && !isSelected ? 0.6 : 1,
                       boxSizing: "border-box",
                       overflow: "hidden",
@@ -310,6 +314,23 @@ export function ArticleList({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       {/* Title row with impact indicator */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        {article.tags.includes("속보") && (
+                          <span style={{
+                            fontSize: 8,
+                            fontWeight: 800,
+                            color: "#fff",
+                            background: "#ef4444",
+                            padding: "1px 5px",
+                            borderRadius: 1,
+                            letterSpacing: "0.04em",
+                            flexShrink: 0,
+                            lineHeight: 1.6,
+                            fontFamily: "var(--font-heading)",
+                            animation: "pulse-dot 2s ease-in-out infinite",
+                          }}>
+                            속보
+                          </span>
+                        )}
                         <p style={{
                           fontSize: 13,
                           fontWeight: isUnread ? 500 : 400,

@@ -33,6 +33,8 @@ interface PlatformNavProps {
   memoOpen?: boolean;
   onToggleAlertFeed?: () => void;
   alertFeedOpen?: boolean;
+  breakingCountdown?: number;
+  lastBreakingUpdate?: string | null;
 }
 
 const SEARCH_HISTORY_KEY = "ryzm-finance-search-history";
@@ -76,6 +78,8 @@ export function PlatformNav({
   memoOpen = false,
   onToggleAlertFeed,
   alertFeedOpen = false,
+  breakingCountdown = 0,
+  lastBreakingUpdate = null,
 }: PlatformNavProps) {
   const [now, setNow] = useState(Date.now());
   const [reportDropdownOpen, setReportDropdownOpen] = useState(false);
@@ -477,6 +481,39 @@ export function PlatformNav({
       </div>
 
       <div className="topbar-divider" />
+
+      {/* Breaking news LIVE indicator */}
+      {breakingCountdown > 0 && (
+        <div
+          className="flex items-center gap-1 shrink-0"
+          title={`속보 자동 수집: ${breakingCountdown}초 후${lastBreakingUpdate ? ` (마지막: ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })})` : ""}`}
+          style={{ cursor: "default" }}
+        >
+          <span style={{
+            fontSize: 7,
+            fontWeight: 800,
+            color: "#ef4444",
+            background: "rgba(239,68,68,0.12)",
+            border: "1px solid rgba(239,68,68,0.25)",
+            padding: "2px 5px",
+            borderRadius: 1,
+            letterSpacing: "0.06em",
+            lineHeight: 1.6,
+            fontFamily: "var(--font-heading)",
+          }}>
+            LIVE
+          </span>
+          <span style={{
+            fontSize: 9,
+            fontFamily: "var(--font-mono)",
+            fontVariantNumeric: "tabular-nums",
+            color: "#8C8C91",
+            letterSpacing: 0,
+          }}>
+            {breakingCountdown}s
+          </span>
+        </div>
+      )}
 
       {/* Refresh with countdown ring */}
       <div className="flex items-center gap-1.5 shrink-0">

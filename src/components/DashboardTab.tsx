@@ -1171,6 +1171,14 @@ export default function DashboardTab({
   const heroArticle = latestArticles[0];
   const secondaryArticles = latestArticles.slice(1, 7);
 
+  // ── Breaking News Stream ──
+  const breakingArticles = useMemo(() => {
+    return articles
+      .filter((a) => a.tags.includes("속보"))
+      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .slice(0, 10);
+  }, [articles]);
+
   // ── AI Recommendations ──
   const recommendations: Recommendation[] = useMemo(() => {
     if (articles.length === 0) return [];
@@ -1375,8 +1383,91 @@ export default function DashboardTab({
 
       {/* ── Two-column layout ── */}
       <div className="dash-two-col">
-        {/* ── Left Column: Top Stories + Activity ── */}
+        {/* ── Left Column: Breaking News Stream + Top Stories + Activity ── */}
         <div className="dash-left-col">
+          {/* ── Breaking News Stream ── */}
+          {breakingArticles.length > 0 && (
+            <div style={{ marginBottom: 0 }}>
+              <div className="dash-section-title" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{
+                  fontSize: 8,
+                  fontWeight: 800,
+                  color: "#fff",
+                  background: "#ef4444",
+                  padding: "2px 6px",
+                  borderRadius: 1,
+                  letterSpacing: "0.06em",
+                  animation: "pulse-dot 2s ease-in-out infinite",
+                }}>
+                  LIVE
+                </span>
+                속보 스트림
+              </div>
+              <div style={{
+                border: "1px solid rgba(239,68,68,0.2)",
+                borderLeft: "3px solid rgba(239,68,68,0.7)",
+                background: "rgba(239,68,68,0.03)",
+                marginBottom: 20,
+              }}>
+                {breakingArticles.map((a, i) => {
+                  const mins = Math.floor((Date.now() - new Date(a.publishedAt).getTime()) / 60000);
+                  const timeStr = mins < 1 ? "방금" : mins < 60 ? `${mins}분 전` : `${Math.floor(mins/60)}시간 전`;
+                  return (
+                    <button
+                      key={a.id}
+                      onClick={() => { onSelectArticle(a); onTabChange("news"); }}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "10px 16px",
+                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.1)" : "none",
+                        background: "none",
+                        border: "none",
+                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.1)" : "none",
+                        cursor: "pointer",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.05)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                    >
+                      <span style={{
+                        fontSize: 9,
+                        fontWeight: 600,
+                        color: "#ef4444",
+                        fontFamily: "var(--font-mono)",
+                        flexShrink: 0,
+                        paddingTop: 2,
+                        minWidth: 44,
+                      }}>
+                        {timeStr}
+                      </span>
+                      <span style={{
+                        fontSize: 12,
+                        fontWeight: !a.isRead ? 500 : 400,
+                        color: !a.isRead ? "#EBEBEB" : "#8C8C91",
+                        lineHeight: 1.4,
+                        flex: 1,
+                      }}>
+                        {a.title}
+                      </span>
+                      <span style={{
+                        fontSize: 9,
+                        color: "#8C8C91",
+                        flexShrink: 0,
+                        paddingTop: 2,
+                      }}>
+                        {a.sourceName}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {sections.topStories && (<>
           <div className="dash-section-title">TOP STORIES</div>
 

@@ -38,7 +38,8 @@ import { AlertFeed } from "@/components/AlertFeed";
 import { FinancialCalculators } from "@/components/FinancialCalculators";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const POLL_INTERVAL = 5 * 60;
+const POLL_INTERVAL = 5 * 60;         // full ingest: every 5 min
+const BREAKING_POLL_INTERVAL = 90;   // breaking only: every 90 sec
 
 function getMarketStatusForBar(): { open: boolean; label: string } {
   const now = new Date();
@@ -189,9 +190,12 @@ function HomeInner() {
   const [memoOpen, setMemoOpen] = useState(false);
   const [alertFeedOpen, setAlertFeedOpen] = useState(false);
   const [financialCalcOpen, setFinancialCalcOpen] = useState(false);
+  const [breakingCountdown, setBreakingCountdown] = useState(BREAKING_POLL_INTERVAL);
+  const [lastBreakingUpdate, setLastBreakingUpdate] = useState<string | null>(null);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const breakingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Persist active tab
   useEffect(() => {
@@ -289,6 +293,19 @@ function HomeInner() {
     } catch (err) { console.error("Ingest failed:", err); showToast("기사 수집 실패", "error"); }
     finally { setIngesting(false); }
   }, [fetchArticles, fetchSources, showToast]);
+
+  // Breaking news fast ingest (silent — no toast, just refetch articles if new items found)
+  const runBreakingIngest = useCallback(async () => {
+    try {
+      const res = await fetch("/api/ingest/breaking", { method: "POST" });
+      const result = await res.json();
+      if (result.added > 0) {
+        await fetchArticles();
+        setLastBreakingUpdate(result.lastUpdated);
+      }
+      setBreakingCountdown(BREAKING_POLL_INTERVAL);
+    } catch { /* silent */ }
+  }, [fetchArticles]);
 
   const handleAddSource = useCallback(async (data: { name: string; feedUrl: string; category: string }) => {
     try {
@@ -398,6 +415,26 @@ function HomeInner() {
     intervalRef.current = setInterval(() => { setCountdown(POLL_INTERVAL); runIngest(); }, POLL_INTERVAL * 1000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [runIngest]);
+
+  // Breaking news fast poll — every 90 seconds, parallel fetch of 속보 sources only
+  useEffect(() => {
+    // Run once immediately after a short delay, then every 90s
+    const initial = setTimeout(() => runBreakingIngest(), 5000);
+    breakingIntervalRef.current = setInterval(() => {
+      setBreakingCountdown(BREAKING_POLL_INTERVAL);
+      runBreakingIngest();
+    }, BREAKING_POLL_INTERVAL * 1000);
+    return () => {
+      clearTimeout(initial);
+      if (breakingIntervalRef.current) clearInterval(breakingIntervalRef.current);
+    };
+  }, [runBreakingIngest]);
+
+  // Breaking countdown ticker
+  useEffect(() => {
+    const t = setInterval(() => setBreakingCountdown((p) => (p > 0 ? p - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const handleTagClick = useCallback((tag: string) => {
     setSelectedTag((prev) => (prev === tag ? null : tag));
@@ -568,6 +605,8 @@ function HomeInner() {
         memoOpen={memoOpen}
         onToggleAlertFeed={() => setAlertFeedOpen((v) => !v)}
         alertFeedOpen={alertFeedOpen}
+        breakingCountdown={breakingCountdown}
+        lastBreakingUpdate={lastBreakingUpdate}
       />
 
       {/* Market Ticker — always visible */}
