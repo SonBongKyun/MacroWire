@@ -332,7 +332,7 @@ export function ArticleList({
                           </span>
                         )}
                         <p style={{
-                          fontSize: 13,
+                          fontSize: 14,
                           fontWeight: isUnread ? 500 : 400,
                           color: "#EBEBEB",
                           lineHeight: 1.4,

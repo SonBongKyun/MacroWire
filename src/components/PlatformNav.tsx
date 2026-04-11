@@ -202,7 +202,7 @@ export function PlatformNav({
               className="relative h-full flex items-center transition-colors font-heading"
               style={{
                 padding: "0 20px",
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: isActive ? 700 : 500,
                 color: isActive ? "var(--accent)" : "var(--muted)",
                 letterSpacing: "0.02em",
