@@ -482,22 +482,33 @@ export function PlatformNav({
 
       <div className="topbar-divider" />
 
-      {/* Breaking news LIVE indicator */}
+      {/* Breaking news LIVE indicator — pulsing red dot + countdown */}
       {breakingCountdown > 0 && (
         <div
-          className="flex items-center gap-1 shrink-0"
+          className="flex items-center gap-1.5 shrink-0"
           title={`속보 자동 수집: ${breakingCountdown}초 후${lastBreakingUpdate ? ` (마지막: ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })})` : ""}`}
           style={{ cursor: "default" }}
         >
+          <span
+            style={{
+              display: "inline-block",
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              backgroundColor: "#ef4444",
+              boxShadow: "0 0 8px rgba(239,68,68,0.65)",
+              animation: "pulse-dot 1.6s ease-in-out infinite",
+            }}
+          />
           <span style={{
             fontSize: 7,
             fontWeight: 800,
             color: "#ef4444",
             background: "rgba(239,68,68,0.12)",
-            border: "1px solid rgba(239,68,68,0.25)",
+            border: "1px solid rgba(239,68,68,0.28)",
             padding: "2px 5px",
             borderRadius: 1,
-            letterSpacing: "0.06em",
+            letterSpacing: "0.08em",
             lineHeight: 1.6,
             fontFamily: "var(--font-heading)",
           }}>
@@ -509,6 +520,8 @@ export function PlatformNav({
             fontVariantNumeric: "tabular-nums",
             color: "#8C8C91",
             letterSpacing: 0,
+            minWidth: 22,
+            textAlign: "right",
           }}>
             {breakingCountdown}s
           </span>

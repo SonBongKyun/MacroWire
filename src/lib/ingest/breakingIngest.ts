@@ -26,16 +26,24 @@ function canonicalizeUrl(raw: string): string {
   }
 }
 
-/** Ingest a single breaking source — resolves to number of articles added. */
+export interface NewBreakingArticle {
+  id: string;
+  title: string;
+  sourceName: string;
+  publishedAt: string;
+}
+
+/** Ingest a single breaking source — resolves to number of articles added + new article metadata. */
 async function ingestBreakingSource(source: {
   id: string;
   name: string;
   feedUrl: string;
   category: string;
-}): Promise<{ added: number; failed: boolean }> {
+}): Promise<{ added: number; failed: boolean; newArticles: NewBreakingArticle[] }> {
   try {
     const feed = await parser.parseURL(source.feedUrl);
     let added = 0;
+    const newArticles: NewBreakingArticle[] = [];
 
     // Only look at articles from the last 6 hours for breaking news
     const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
@@ -83,15 +91,21 @@ async function ingestBreakingSource(source: {
           },
         });
         added++;
+        newArticles.push({
+          id,
+          title,
+          sourceName: source.name,
+          publishedAt: publishedAt.toISOString(),
+        });
       } catch {
         // unique constraint — skip
       }
     }
 
-    return { added, failed: false };
+    return { added, failed: false, newArticles };
   } catch (err) {
     console.error(`[breaking-ingest] FAILED ${source.name}: ${err instanceof Error ? err.message : err}`);
-    return { added: 0, failed: true };
+    return { added: 0, failed: true, newArticles: [] };
   }
 }
 
@@ -99,6 +113,7 @@ export interface BreakingIngestResult {
   added: number;
   failedSources: number;
   lastUpdated: string;
+  newArticles: NewBreakingArticle[];
 }
 
 export async function runBreakingIngest(): Promise<BreakingIngestResult> {
@@ -109,7 +124,7 @@ export async function runBreakingIngest(): Promise<BreakingIngestResult> {
   });
 
   if (breakingSources.length === 0) {
-    return { added: 0, failedSources: 0, lastUpdated: new Date().toISOString() };
+    return { added: 0, failedSources: 0, lastUpdated: new Date().toISOString(), newArticles: [] };
   }
 
   console.log(`[breaking-ingest] fetching ${breakingSources.length} sources in parallel`);
@@ -123,6 +138,12 @@ export async function runBreakingIngest(): Promise<BreakingIngestResult> {
   const failedSources = results.filter((r) => r.failed).length;
   const lastUpdated = new Date().toISOString();
 
+  // Flatten all new articles, sort by publishedAt desc, return top 5
+  const newArticles = results
+    .flatMap((r) => r.newArticles)
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    .slice(0, 5);
+
   console.log(`[breaking-ingest] done. added=${added}, failed=${failedSources}`);
-  return { added, failedSources, lastUpdated };
+  return { added, failedSources, lastUpdated, newArticles };
 }

@@ -294,7 +294,7 @@ function HomeInner() {
     finally { setIngesting(false); }
   }, [fetchArticles, fetchSources, showToast]);
 
-  // Breaking news fast ingest (silent — no toast, just refetch articles if new items found)
+  // Breaking news fast ingest — silent until new 속보 arrives, then shows clickable toast
   const runBreakingIngest = useCallback(async () => {
     try {
       const res = await fetch("/api/ingest/breaking", { method: "POST" });
@@ -302,10 +302,41 @@ function HomeInner() {
       if (result.added > 0) {
         await fetchArticles();
         setLastBreakingUpdate(result.lastUpdated);
+
+        // Surface the top new breaking article as a clickable toast
+        const top = Array.isArray(result.newArticles) ? result.newArticles[0] : null;
+        if (top) {
+          const titleLabel = result.added > 1
+            ? `${top.sourceName} · +${result.added - 1}건`
+            : top.sourceName;
+          showToast(top.title, "breaking", {
+            title: titleLabel,
+            onAction: () => {
+              setActiveMainTab("news");
+              // Select the article if it's already in our list
+              setArticles((prev) => {
+                const found = prev.find((a) => a.id === top.id);
+                if (found) setSelectedArticle(found);
+                return prev;
+              });
+            },
+          });
+
+          // Browser push notification — when permission granted
+          if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+            try {
+              new Notification("Ryzm Finance · 속보", {
+                body: top.title,
+                icon: "/icon.svg",
+                tag: "ryzm-breaking",
+              });
+            } catch { /* silent */ }
+          }
+        }
       }
       setBreakingCountdown(BREAKING_POLL_INTERVAL);
     } catch { /* silent */ }
-  }, [fetchArticles]);
+  }, [fetchArticles, showToast]);
 
   const handleAddSource = useCallback(async (data: { name: string; feedUrl: string; category: string }) => {
     try {

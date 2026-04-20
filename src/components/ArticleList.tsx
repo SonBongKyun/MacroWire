@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import type { Article } from "@/types";
 import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleScoring } from "@/hooks/useArticleScoring";
+import { PeekPopover } from "@/components/PeekPopover";
 
 type ReadFilter = "all" | "unread" | "read";
 type ViewMode = "list" | "card";
@@ -88,6 +89,38 @@ export function ArticleList({
   // Context menu state
   const [ctxMenu, setCtxMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0, article: null });
   const ctxMenuRef = useRef<HTMLDivElement>(null);
+
+  // Hover peek state (shows description popover after a 450ms hover delay)
+  const [peek, setPeek] = useState<{ article: Article; x: number; y: number } | null>(null);
+  const peekTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleRowMouseEnter = useCallback((e: React.MouseEvent, article: Article) => {
+    if (peekTimerRef.current) clearTimeout(peekTimerRef.current);
+    const target = e.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = rect.right + 8;
+    const y = rect.top;
+    peekTimerRef.current = setTimeout(() => {
+      setPeek({ article, x, y });
+    }, 450);
+  }, []);
+
+  const handleRowMouseLeave = useCallback(() => {
+    if (peekTimerRef.current) clearTimeout(peekTimerRef.current);
+    setPeek(null);
+  }, []);
+
+  // Clear peek on scroll — stale positioning otherwise
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const clear = () => {
+      if (peekTimerRef.current) clearTimeout(peekTimerRef.current);
+      setPeek(null);
+    };
+    el.addEventListener("scroll", clear);
+    return () => el.removeEventListener("scroll", clear);
+  }, []);
 
   const handleContextMenu = useCallback((e: React.MouseEvent, article: Article) => {
     e.preventDefault();
@@ -280,22 +313,26 @@ export function ArticleList({
                       display: "flex",
                       alignItems: "flex-start",
                       gap: 10,
-                      transition: "background-color 0.1s",
-                      backgroundColor: isSelected ? "rgba(201,169,110,0.06)" : "transparent",
+                      transition: "background-color 0.15s ease, border-color 0.15s ease",
+                      background: isSelected
+                        ? "linear-gradient(90deg, rgba(201,169,110,0.12) 0%, rgba(201,169,110,0.04) 30%, transparent 100%)"
+                        : "transparent",
                       borderLeft: isSelected
                         ? "2px solid #C9A96E"
                         : article.tags.includes("속보") && isUnread
-                        ? "2px solid rgba(239,68,68,0.6)"
+                        ? "2px solid rgba(239,68,68,0.65)"
                         : "2px solid transparent",
                       opacity: !isUnread && !isSelected ? 0.6 : 1,
                       boxSizing: "border-box",
                       overflow: "hidden",
                     }}
                     onMouseEnter={(e) => {
-                      if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(235,235,235,0.03)";
+                      if (!isSelected) (e.currentTarget as HTMLElement).style.background = "rgba(235,235,235,0.04)";
+                      handleRowMouseEnter(e, article);
                     }}
                     onMouseLeave={(e) => {
-                      if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                      if (!isSelected) (e.currentTarget as HTMLElement).style.background = "transparent";
+                      handleRowMouseLeave();
                     }}
                   >
                     {/* Unread dot */}
@@ -305,7 +342,10 @@ export function ArticleList({
                           width: 5,
                           height: 5,
                           borderRadius: "50%",
-                          backgroundColor: "#C9A96E",
+                          backgroundColor: article.tags.includes("속보") ? "#ef4444" : "#C9A96E",
+                          boxShadow: article.tags.includes("속보")
+                            ? "0 0 6px rgba(239,68,68,0.55)"
+                            : "0 0 6px rgba(201,169,110,0.45)",
                         }} />
                       )}
                     </div>
@@ -445,6 +485,11 @@ export function ArticleList({
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
           </svg>
         </button>
+      )}
+
+      {/* Hover peek preview */}
+      {peek && (
+        <PeekPopover article={peek.article} position={{ x: peek.x, y: peek.y }} />
       )}
 
       {/* Context Menu */}
