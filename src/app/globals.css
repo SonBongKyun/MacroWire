@@ -262,7 +262,7 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
 /* Content sits above cosmic bg */
 .content-layer { position: relative; z-index: 1; }
 
-/* Gradient underline beneath the header (fades in/out from edges) */
+/* Prismatic gradient underline beneath the header — spectrum glows */
 .glass-header::after {
   content: '';
   position: absolute;
@@ -270,20 +270,33 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(201,169,110,0.35) 18%, rgba(201,169,110,0.55) 50%, rgba(201,169,110,0.35) 82%, transparent 100%);
-  opacity: 0.75;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139,92,246,0.4) 12%,
+    rgba(59,130,246,0.45) 28%,
+    rgba(6,182,212,0.45) 42%,
+    rgba(201,169,110,0.6) 55%,
+    rgba(245,158,11,0.5) 68%,
+    rgba(239,68,68,0.45) 82%,
+    transparent 100%
+  );
+  opacity: 0.7;
 }
 
-/* Ambient gold beam at the very top of the header */
+/* Ambient multicolor beam at the very top of the header */
 .glass-header::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  height: 100px;
   pointer-events: none;
-  background: radial-gradient(80% 60% at 50% -30%, rgba(201,169,110,0.14) 0%, rgba(201,169,110,0.04) 40%, transparent 70%);
+  background:
+    radial-gradient(50% 70% at 20% -30%, rgba(139,92,246,0.10) 0%, transparent 60%),
+    radial-gradient(50% 70% at 50% -30%, rgba(201,169,110,0.14) 0%, transparent 60%),
+    radial-gradient(50% 70% at 80% -30%, rgba(6,182,212,0.10) 0%, transparent 60%);
   z-index: -1;
 }
 

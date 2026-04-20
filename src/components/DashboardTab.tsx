@@ -15,8 +15,7 @@ import type { SourceRank } from "@/hooks/useSourceRanking";
 import type { DashboardSections, DashboardLayout } from "@/hooks/useDashboardLayout";
 import { getRecommendations } from "@/lib/ai/recommendations";
 import type { Recommendation } from "@/lib/ai/recommendations";
-// TAG_COLORS kept available for future use
-// import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
+import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
 
 function AnimatedNumber({ value, duration = 600 }: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);
@@ -1821,15 +1820,70 @@ export default function DashboardTab({
                       <span style={{ fontSize: 12, color: "#8C8C91" }}>태그 데이터 없음</span>
                     ) : (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {trendingTags.map(([tag, count]) => {
-                          const tagColors = ["#C9A96E", "#22c55e", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f59e0b", "#ec4899", "#10b981", "#8b5cf6"];
-                          const colorIdx = Math.abs(tag.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % tagColors.length;
-                          const color = tagColors[colorIdx];
+                        {trendingTags.map(([tag, count], idx) => {
+                          // Use the centralized TAG_COLORS system; fall back to a hash-based pick from the palette
+                          const fallbackPalette = ["#C9A96E", "#22c55e", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f59e0b", "#ec4899", "#10b981", "#8b5cf6"];
+                          const hashIdx = Math.abs(tag.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % fallbackPalette.length;
+                          const color = TAG_COLORS[tag] || fallbackPalette[hashIdx] || TAG_FALLBACK_COLOR;
+                          const maxCount = trendingTags[0]?.[1] ?? 1;
+                          const rank = idx + 1;
+                          // Size by popularity — top 3 larger
+                          const size = rank <= 3 ? "lg" : "sm";
+                          const ratio = count / maxCount;
                           return (
-                            <button key={tag} onClick={() => onTabChange("news")} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", fontSize: 10, fontWeight: 600, color, background: `${color}15`, border: `1px solid ${color}30`, cursor: "pointer", transition: "all 0.15s ease" }}
-                              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}25`; }}
-                              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}15`; }}>
-                              {tag}<span style={{ fontSize: 9, opacity: 0.7, fontFamily: "var(--font-mono)" }}>{count}</span>
+                            <button
+                              key={tag}
+                              onClick={() => onTabChange("news")}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 5,
+                                padding: size === "lg" ? "5px 11px" : "3px 9px",
+                                fontSize: size === "lg" ? 11 : 10,
+                                fontWeight: 700,
+                                color,
+                                background: `linear-gradient(135deg, ${color}${Math.round(ratio * 34).toString(16).padStart(2, "0")} 0%, ${color}10 100%)`,
+                                border: `1px solid ${color}${Math.round(ratio * 76).toString(16).padStart(2, "0")}`,
+                                borderRadius: 2,
+                                cursor: "pointer",
+                                transition: "all 0.15s ease",
+                                boxShadow: rank <= 3 ? `0 0 10px ${color}22` : "none",
+                              }}
+                              onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${color}40 0%, ${color}20 100%)`;
+                                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 14px ${color}44`;
+                                (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+                              }}
+                              onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${color}${Math.round(ratio * 34).toString(16).padStart(2, "0")} 0%, ${color}10 100%)`;
+                                (e.currentTarget as HTMLElement).style.boxShadow = rank <= 3 ? `0 0 10px ${color}22` : "none";
+                                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                              }}
+                            >
+                              {rank <= 3 && (
+                                <span style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: 8,
+                                  fontWeight: 800,
+                                  color: "#0D0D0F",
+                                  background: color,
+                                  borderRadius: 1,
+                                  padding: "1px 4px",
+                                  letterSpacing: 0,
+                                  minWidth: 12,
+                                }}>{rank}</span>
+                              )}
+                              {tag}
+                              <span style={{
+                                fontSize: 9,
+                                opacity: 0.75,
+                                fontFamily: "var(--font-mono)",
+                                fontVariantNumeric: "tabular-nums",
+                              }}>
+                                {count}
+                              </span>
                             </button>
                           );
                         })}
