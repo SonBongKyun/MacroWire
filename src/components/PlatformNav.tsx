@@ -221,10 +221,24 @@ export function PlatformNav({
                 </span>
               )}
               {isActive && (
-                <span
-                  className="absolute bottom-0 left-5 right-5"
-                  style={{ height: 2, background: "#C9A96E" }}
-                />
+                <>
+                  <span
+                    className="absolute bottom-0 left-5 right-5"
+                    style={{
+                      height: 2,
+                      background: "linear-gradient(90deg, transparent 0%, #C9A96E 25%, #D4B87E 50%, #C9A96E 75%, transparent 100%)",
+                      boxShadow: "0 0 10px rgba(201,169,110,0.5), 0 0 3px rgba(201,169,110,0.8)",
+                      borderRadius: 1,
+                    }}
+                  />
+                  <span
+                    className="absolute inset-x-4 bottom-0 pointer-events-none"
+                    style={{
+                      height: 18,
+                      background: "radial-gradient(50% 100% at 50% 100%, rgba(201,169,110,0.14) 0%, transparent 70%)",
+                    }}
+                  />
+                </>
               )}
             </button>
           );

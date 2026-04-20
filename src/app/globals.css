@@ -261,6 +261,8 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
 
 /* Content sits above cosmic bg */
 .content-layer { position: relative; z-index: 1; }
+
+/* Gradient underline beneath the header (fades in/out from edges) */
 .glass-header::after {
   content: '';
   position: absolute;
@@ -268,8 +270,21 @@ h1, h2, h3, h4 { font-family: var(--font-heading), "Space Grotesk", sans-serif; 
   left: 0;
   right: 0;
   height: 1px;
-  background: var(--accent);
-  opacity: 0.3;
+  background: linear-gradient(90deg, transparent 0%, rgba(201,169,110,0.35) 18%, rgba(201,169,110,0.55) 50%, rgba(201,169,110,0.35) 82%, transparent 100%);
+  opacity: 0.75;
+}
+
+/* Ambient gold beam at the very top of the header */
+.glass-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  pointer-events: none;
+  background: radial-gradient(80% 60% at 50% -30%, rgba(201,169,110,0.14) 0%, rgba(201,169,110,0.04) 40%, transparent 70%);
+  z-index: -1;
 }
 
 .glass-sidebar {
@@ -1965,21 +1980,28 @@ button:active { transform: scale(0.98); }
   font-weight: 700;
   color: #C9A96E;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(201, 169, 110, 0.15);
+  letter-spacing: 0.12em;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid transparent;
+  background-image: linear-gradient(90deg, rgba(201,169,110,0.35) 0%, rgba(201,169,110,0.1) 40%, transparent 100%);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  text-shadow: 0 0 12px rgba(201,169,110,0.18);
 }
 .dash-section-title::before {
   content: '';
   display: inline-block;
-  width: 16px;
+  width: 18px;
   height: 2px;
-  background: #C9A96E;
+  background: linear-gradient(90deg, #C9A96E 0%, rgba(201,169,110,0.2) 100%);
   flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(201,169,110,0.4);
+  border-radius: 1px;
 }
 
 .dash-row {
@@ -2015,14 +2037,29 @@ button:active { transform: scale(0.98); }
   flex-direction: column;
   gap: 4px;
   padding: 16px;
-  background: rgba(19,19,22,0.6);
-  backdrop-filter: blur(4px);
+  background: linear-gradient(180deg, rgba(24,24,28,0.85) 0%, rgba(15,15,18,0.7) 100%);
+  backdrop-filter: blur(6px);
   border: 1px solid #2D2D32;
   position: relative;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  overflow: hidden;
+}
+.market-strip-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(60% 50% at 50% 0%, rgba(201,169,110,0.06) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 .market-strip-item:hover {
-  box-shadow: 0 0 20px rgba(201, 169, 110, 0.08);
+  box-shadow: 0 0 24px rgba(201, 169, 110, 0.12), 0 2px 12px rgba(0,0,0,0.3);
+  border-color: rgba(201,169,110,0.25);
+  transform: translateY(-1px);
+}
+.market-strip-item:hover::after {
+  opacity: 1;
 }
 .market-strip-item:first-child {
   padding: 16px;

@@ -1404,14 +1404,18 @@ export default function DashboardTab({
                 속보 스트림
               </div>
               <div style={{
-                border: "1px solid rgba(239,68,68,0.2)",
-                borderLeft: "3px solid rgba(239,68,68,0.7)",
-                background: "rgba(239,68,68,0.03)",
+                border: "1px solid rgba(239,68,68,0.18)",
+                borderLeft: "2px solid rgba(239,68,68,0.55)",
+                borderRadius: 2,
+                background: "linear-gradient(180deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 40%, rgba(13,13,15,0) 100%)",
                 marginBottom: 20,
+                boxShadow: "inset 0 1px 0 rgba(239,68,68,0.12), 0 1px 0 rgba(0,0,0,0.3)",
+                overflow: "hidden",
               }}>
                 {breakingArticles.map((a, i) => {
                   const mins = Math.floor((Date.now() - new Date(a.publishedAt).getTime()) / 60000);
                   const timeStr = mins < 1 ? "방금" : mins < 60 ? `${mins}분 전` : `${Math.floor(mins/60)}시간 전`;
+                  const isFresh = mins < 5;
                   return (
                     <button
                       key={a.id}
@@ -1419,36 +1423,58 @@ export default function DashboardTab({
                       style={{
                         display: "flex",
                         alignItems: "flex-start",
-                        gap: 10,
+                        gap: 12,
                         width: "100%",
                         textAlign: "left",
-                        padding: "10px 16px",
-                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.1)" : "none",
-                        background: "none",
+                        padding: "11px 16px",
+                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.08)" : "none",
+                        background: "transparent",
                         border: "none",
-                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.1)" : "none",
+                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.08)" : "none",
                         cursor: "pointer",
-                        transition: "background 0.15s",
+                        transition: "background 0.18s ease, padding-left 0.18s ease",
+                        position: "relative",
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(239,68,68,0.05)")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "linear-gradient(90deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.02) 100%)";
+                        e.currentTarget.style.paddingLeft = "20px";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.paddingLeft = "16px";
+                      }}
                     >
+                      {isFresh && (
+                        <span style={{
+                          position: "absolute",
+                          left: 6,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          width: 4,
+                          height: 4,
+                          borderRadius: "50%",
+                          backgroundColor: "#ef4444",
+                          boxShadow: "0 0 6px rgba(239,68,68,0.7)",
+                          animation: "pulse-dot 1.6s ease-in-out infinite",
+                        }} />
+                      )}
                       <span style={{
                         fontSize: 9,
-                        fontWeight: 600,
-                        color: "#ef4444",
+                        fontWeight: 700,
+                        color: isFresh ? "#ef4444" : "rgba(239,68,68,0.7)",
                         fontFamily: "var(--font-mono)",
                         flexShrink: 0,
                         paddingTop: 2,
                         minWidth: 44,
+                        letterSpacing: "0.02em",
                       }}>
                         {timeStr}
                       </span>
                       <span style={{
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: !a.isRead ? 500 : 400,
                         color: !a.isRead ? "#EBEBEB" : "#8C8C91",
-                        lineHeight: 1.4,
+                        lineHeight: 1.45,
                         flex: 1,
                       }}>
                         {a.title}
@@ -1457,7 +1483,8 @@ export default function DashboardTab({
                         fontSize: 9,
                         color: "#8C8C91",
                         flexShrink: 0,
-                        paddingTop: 2,
+                        paddingTop: 3,
+                        letterSpacing: "0.02em",
                       }}>
                         {a.sourceName}
                       </span>
