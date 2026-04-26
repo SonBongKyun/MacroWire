@@ -154,7 +154,7 @@ function HomeInner() {
   const [showSaved, setShowSaved] = useState(false);
   const [readFilter, setReadFilter] = useState<"all" | "unread" | "read">("all");
   const [regionFilter, setRegionFilter] = useState<string>("전체");
-  const darkMode = true; // RYZM: dark only
+  const darkMode = true; // MacroWire: dark only
   const [countdown, setCountdown] = useState(POLL_INTERVAL);
   const [showHelp, setShowHelp] = useState(false);
   const [newArticleCount, setNewArticleCount] = useState(0);
@@ -202,7 +202,7 @@ function HomeInner() {
     localStorage.setItem("ryzm-finance-tab", activeMainTab);
   }, [activeMainTab]);
 
-  // Always dark mode (RYZM brand)
+  // Always dark mode (MacroWire brand)
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
@@ -261,9 +261,9 @@ function HomeInner() {
             if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
               const matched = newOnes.filter((a: Article) => notifications.checkArticle(a));
               if (matched.length > 0) {
-                notifications.sendNotification("Ryzm Finance 알림", matched.length === 1 ? matched[0].title : `관심 기사 ${matched.length}건: ${matched[0].title}`);
+                notifications.sendNotification("MacroWire 알림", matched.length === 1 ? matched[0].title : `관심 기사 ${matched.length}건: ${matched[0].title}`);
               } else {
-                new Notification("Ryzm Finance", { body: `새 기사 ${newOnes.length}건이 도착했습니다`, icon: "/icon.svg", tag: "ryzm-finance-new" });
+                new Notification("MacroWire", { body: `새 기사 ${newOnes.length}건이 도착했습니다`, icon: "/icon.svg", tag: "ryzm-finance-new" });
               }
             }
           }
@@ -325,7 +325,7 @@ function HomeInner() {
           // Browser push notification — when permission granted
           if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
             try {
-              new Notification("Ryzm Finance · 속보", {
+              new Notification("MacroWire · 속보", {
                 body: top.title,
                 icon: "/icon.svg",
                 tag: "ryzm-breaking",
@@ -390,12 +390,12 @@ function HomeInner() {
     const saved = articles.filter((a) => a.isSaved);
     if (saved.length === 0) return;
     const md = saved.map((a, i) => `### ${i + 1}. ${a.title}\n- **출처**: ${a.sourceName}\n- **시간**: ${new Date(a.publishedAt).toLocaleString("ko-KR")}\n- **태그**: ${a.tags.join(", ") || "없음"}\n- **URL**: ${a.url}\n` + (a.summary ? `- **요약**: ${a.summary}\n` : "")).join("\n---\n\n");
-    const header = `# Ryzm Finance — 저장된 기사\n\n> 내보내기: ${new Date().toLocaleString("ko-KR")}\n> 총 ${saved.length}건\n\n---\n\n`;
+    const header = `# MacroWire — 저장된 기사\n\n> 내보내기: ${new Date().toLocaleString("ko-KR")}\n> 총 ${saved.length}건\n\n---\n\n`;
     const blob = new Blob([header + md], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `ryzm-finance-saved-${new Date().toISOString().slice(0, 10)}.md`;
+    link.download = `macrowire-saved-${new Date().toISOString().slice(0, 10)}.md`;
     link.click();
     URL.revokeObjectURL(url);
     showToast("내보내기 완료");

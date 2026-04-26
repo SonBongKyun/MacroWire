@@ -97,7 +97,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
       linkedTitles.length > 0
         ? `\n\uAD00\uB828 \uAE30\uC0AC:\n${linkedTitles.map((t) => `  - ${t}`).join("\n")}`
         : "";
-    const full = `${memo.text}${tagStr}${linkedStr}\n\n${formatTimestamp(memo.createdAt)} via RYZM FINANCE`;
+    const full = `${memo.text}${tagStr}${linkedStr}\n\n${formatTimestamp(memo.createdAt)} via MacroWire`;
     navigator.clipboard.writeText(full).then(() => {
       setCopyToast(memo.id);
       setTimeout(() => setCopyToast(null), 1200);

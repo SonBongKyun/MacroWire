@@ -7,7 +7,7 @@ import { cleanupOldArticles } from "../cleanup/cleaner";
 const parser = new Parser({
   timeout: 15000,
   headers: {
-    "User-Agent": "ryzm-finance/1.0 (personal news aggregator)",
+    "User-Agent": "macrowire/1.0 (personal news aggregator)",
   },
 });
 

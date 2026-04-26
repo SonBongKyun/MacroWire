@@ -162,7 +162,7 @@ export function ArticleDetail({
 
   const shareArticle = useCallback(() => {
     if (!article) return;
-    const text = `${article.title}\n${article.url}\n\nvia RYZM FINANCE`;
+    const text = `${article.title}\n${article.url}\n\nvia MacroWire`;
     navigator.clipboard.writeText(text).then(() => {
       showToast("공유 텍스트가 복사되었습니다");
     });

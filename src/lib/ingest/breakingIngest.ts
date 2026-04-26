@@ -6,7 +6,7 @@ import { seedSources } from "../db/seed";
 
 const parser = new Parser({
   timeout: 10000,
-  headers: { "User-Agent": "ryzm-finance/1.0 (breaking news aggregator)" },
+  headers: { "User-Agent": "macrowire/1.0 (breaking news aggregator)" },
 });
 
 function hashUrl(url: string): string {

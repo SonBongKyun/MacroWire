@@ -46,7 +46,7 @@ export async function GET() {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <opml version="2.0">
   <head>
-    <title>Ryzm Finance Sources</title>
+    <title>MacroWire Sources</title>
   </head>
   <body>
 ${body}  </body>
@@ -56,7 +56,7 @@ ${body}  </body>
       status: 200,
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Content-Disposition": 'attachment; filename="ryzm-sources.opml"',
+        "Content-Disposition": 'attachment; filename="macrowire-sources.opml"',
       },
     });
   } catch (err) {

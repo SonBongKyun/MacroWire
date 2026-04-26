@@ -20,7 +20,7 @@ function generatePlainText(
   prices?: Array<{ symbol: string; label: string; price: number; change: number; changePct: number }>
 ): string {
   const date = formatDate();
-  let text = `RYZM FINANCE DAILY BRIEF\n${date}\n\n`;
+  let text = `MacroWire DAILY BRIEF\n${date}\n\n`;
   text += `━━━━━━━━━━━━━━━━━━━━\n\n`;
   text += `TOP STORIES\n\n`;
 
@@ -46,7 +46,7 @@ function generatePlainText(
   }
 
   text += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-  text += `Powered by RYZM FINANCE\n`;
+  text += `Powered by MacroWire\n`;
   return text;
 }
 
@@ -60,7 +60,7 @@ function generateNewsletterHTML(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RYZM FINANCE DAILY BRIEF</title>
+<title>MacroWire DAILY BRIEF</title>
 </head>
 <body style="margin:0;padding:0;background:#0D0D0F;font-family:Arial,Helvetica,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#0D0D0F;padding:20px 0;">
@@ -68,7 +68,7 @@ function generateNewsletterHTML(
 <table width="600" cellpadding="0" cellspacing="0" style="background:#0D0D0F;">
   <!-- Header -->
   <tr><td style="padding:32px 24px 16px;border-bottom:2px solid #C9A96E;">
-    <div style="font-size:22px;font-weight:700;color:#C9A96E;letter-spacing:0.08em;">RYZM FINANCE</div>
+    <div style="font-size:22px;font-weight:700;color:#C9A96E;letter-spacing:0.08em;">MacroWire</div>
     <div style="font-size:14px;color:#8C8C91;margin-top:4px;">DAILY BRIEF · ${date}</div>
   </td></tr>
 
@@ -110,7 +110,7 @@ function generateNewsletterHTML(
 
   <!-- Footer -->
   <tr><td style="padding:20px 24px;border-top:1px solid #2D2D32;text-align:center;">
-    <div style="font-size:11px;color:#8C8C91;">Powered by <span style="color:#C9A96E;font-weight:700;">RYZM FINANCE</span></div>
+    <div style="font-size:11px;color:#8C8C91;">Powered by <span style="color:#C9A96E;font-weight:700;">MacroWire</span></div>
   </td></tr>
 </table>
 </td></tr>
@@ -393,7 +393,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 {/* Newsletter Header */}
                 <div style={{ paddingBottom: 14, borderBottom: "2px solid #C9A96E", marginBottom: 20 }}>
                   <div style={{ fontSize: 20, fontWeight: 700, color: "#C9A96E", letterSpacing: "0.08em" }}>
-                    RYZM FINANCE
+                    MacroWire
                   </div>
                   <div style={{ fontSize: 13, color: "#8C8C91", marginTop: 4 }}>
                     DAILY BRIEF · {formatDate()}
@@ -480,7 +480,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 {/* Footer */}
                 <div style={{ marginTop: 24, paddingTop: 14, borderTop: "1px solid #2D2D32", textAlign: "center" }}>
                   <span style={{ fontSize: 11, color: "#8C8C91" }}>
-                    Powered by <span style={{ color: "#C9A96E", fontWeight: 700 }}>RYZM FINANCE</span>
+                    Powered by <span style={{ color: "#C9A96E", fontWeight: 700 }}>MacroWire</span>
                   </span>
                 </div>
               </div>

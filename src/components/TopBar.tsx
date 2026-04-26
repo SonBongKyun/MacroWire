@@ -102,18 +102,22 @@ export function TopBar({
   return (
     <header className="relative flex items-center gap-3 px-4 h-[54px] glass-header shrink-0 select-none z-20">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 mr-1 shrink-0">
-        <div className="logo-mark">
-          <span style={{ position: 'relative', zIndex: 1 }}>RF</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[13px] font-extrabold leading-none tracking-[-0.03em] text-[var(--foreground-bright)]">
-            Ryzm Finance
-          </span>
-          <span className="text-[8px] font-semibold tracking-[0.12em] text-[var(--muted)] uppercase leading-none mt-0.5">
-            Financial Intelligence
-          </span>
-        </div>
+      <div className="flex items-center mr-1 shrink-0">
+        <span
+          style={{
+            fontSize: 18,
+            fontWeight: 800,
+            letterSpacing: "-0.01em",
+            background: "linear-gradient(135deg, #D4B87E 0%, #C9A96E 50%, #B8945C 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            textShadow: "0 0 24px rgba(201,169,110,0.3)",
+            fontFamily: "var(--font-heading), 'Space Grotesk', sans-serif",
+          }}
+        >
+          MacroWire
+        </span>
       </div>
 
       <div className="topbar-divider" />

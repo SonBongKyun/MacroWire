@@ -1,5 +1,5 @@
 /**
- * Ryzm Finance v6 — Midnight Prism Color System
+ * MacroWire v6 — Midnight Prism Color System
  * Centralized tag colors with high saturation for vivid visual impact
  */
 

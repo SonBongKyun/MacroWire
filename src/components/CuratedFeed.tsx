@@ -39,7 +39,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
 
   const generateShareText = useCallback(() => {
     const lines: string[] = [
-      "RYZM FINANCE \u2014 \uD050\uB808\uC774\uC158 \uD53C\uB4DC",
+      "MacroWire \u2014 \uD050\uB808\uC774\uC158 \uD53C\uB4DC",
       "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
       "",
     ];
@@ -64,7 +64,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
 
   const generateMarkdown = useCallback(() => {
     const lines: string[] = [
-      "# RYZM FINANCE \u2014 \uD050\uB808\uC774\uC158 \uD53C\uB4DC",
+      "# MacroWire \u2014 \uD050\uB808\uC774\uC158 \uD53C\uB4DC",
       "",
       `> \uC0DD\uC131\uC77C: ${new Date().toLocaleDateString("ko-KR")}`,
       `> \uCD1D ${curatedItems.length}\uAC74`,
