@@ -5,6 +5,7 @@ import type { Article } from "@/types";
 import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleScoring } from "@/hooks/useArticleScoring";
 import { PeekPopover } from "@/components/PeekPopover";
+import { EmptyState } from "@/components/EmptyState";
 
 type ReadFilter = "all" | "unread" | "read";
 type ViewMode = "list" | "card";
@@ -275,22 +276,23 @@ export function ArticleList({
         )}
 
         {!loading && filteredArticles.length === 0 && (
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: 200,
-            color: "#8C8C91",
-            padding: "0 32px",
-          }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "#EBEBEB" }}>
-              {readFilter === "unread" ? "모두 읽었습니다" : readFilter === "read" ? "읽은 기사가 없습니다" : "기사가 없습니다"}
-            </p>
-            <p style={{ fontSize: 11, color: "#8C8C91", marginTop: 6 }}>
-              {readFilter === "unread" ? "모든 기사를 확인했습니다" : "새로고침하거나 필터를 변경해 보세요"}
-            </p>
-          </div>
+          <EmptyState
+            glyph={readFilter === "unread" ? "all-read" : "no-articles"}
+            title={
+              readFilter === "unread"
+                ? "모두 읽었습니다"
+                : readFilter === "read"
+                ? "읽은 기사가 없습니다"
+                : "표시할 기사가 없습니다"
+            }
+            description={
+              readFilter === "unread"
+                ? "이 범위의 모든 기사를 확인했습니다."
+                : readFilter === "read"
+                ? "기사를 열어보면 여기서 다시 만날 수 있습니다."
+                : "필터를 바꾸거나 잠시 후 다시 확인해 보세요."
+            }
+          />
         )}
 
         {/* Virtualized list view */}

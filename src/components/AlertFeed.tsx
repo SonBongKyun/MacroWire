@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import type { Article } from "@/types";
 import type { NotificationRule } from "@/hooks/useNotifications";
 import { checkNewArticlesForAlerts } from "@/hooks/useNotifications";
+import { EmptyState } from "@/components/EmptyState";
 
 const STORAGE_KEY = "ryzm-finance-alert-history";
 const MAX_ALERTS = 20;
@@ -216,16 +217,12 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
       {/* Alert List */}
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
         {history.length === 0 ? (
-          <div
-            style={{
-              padding: "40px 20px",
-              textAlign: "center",
-              color: "#8C8C91",
-              fontSize: 12,
-            }}
-          >
-            알림 규칙에 매칭되는 기사가 없습니다
-          </div>
+          <EmptyState
+            glyph="no-notifications"
+            title="알림 매칭 없음"
+            description="설정한 알림 규칙에 매칭되는 기사가 아직 없습니다."
+            compact
+          />
         ) : (
           history.map((item) => (
             <button

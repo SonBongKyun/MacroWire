@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import type { Article, Source } from "@/types";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
+import { EmptyState } from "@/components/EmptyState";
 import { SpikeAlert } from "@/components/SpikeAlert";
 import { NewsTimeline } from "@/components/NewsTimeline";
 
@@ -452,20 +453,18 @@ export function NewsTab({
             />
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center border-l border-[#2D2D32]" style={{ color: "#8C8C91" }}>
-            <div style={{ marginBottom: 16, opacity: 0.3 }}>
-              <svg style={{ width: 40, height: 40 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-              </svg>
-            </div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "#EBEBEB", marginBottom: 8 }}>기사를 선택하세요</p>
-            <p style={{ fontSize: 11, color: "#8C8C91", lineHeight: 1.6, textAlign: "center" }}>
-              왼쪽 목록에서 기사를 클릭하거나
-            </p>
-            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+          <div className="flex flex-col items-center justify-center border-l border-[#2D2D32]">
+            <EmptyState
+              glyph="no-selection"
+              title="기사를 선택하세요"
+              description="왼쪽 목록에서 클릭하거나 j / k 키로 이동할 수 있습니다."
+            />
+            <div style={{ display: "flex", gap: 6, marginTop: -12 }}>
               <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>j</kbd>
               <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>k</kbd>
-              <span style={{ fontSize: 10, color: "#8C8C91" }}>키로 이동</span>
+              <span style={{ fontSize: 10, color: "#8C8C91" }}>위/아래</span>
+              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>Enter</kbd>
+              <span style={{ fontSize: 10, color: "#8C8C91" }}>열기</span>
             </div>
           </div>
         )}

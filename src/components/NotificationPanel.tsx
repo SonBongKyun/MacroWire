@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { NotificationRule, NotificationStore } from "@/hooks/useNotifications";
+import { EmptyState } from "@/components/EmptyState";
 
 interface NotificationPanelProps {
   store: NotificationStore;
@@ -115,15 +116,12 @@ export function NotificationPanel({
 
         {/* Rules list */}
         {store.rules.length === 0 ? (
-          <div className="text-center py-6">
-            <div className="empty-state-icon mx-auto mb-3">
-              <svg className="w-6 h-6 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-            </div>
-            <p className="text-[10px] text-[var(--muted)]">알림 규칙이 없습니다</p>
-            <p className="text-[9px] text-[var(--muted)] mt-0.5">키워드, 태그, 소스별 알림을 추가하세요</p>
-          </div>
+          <EmptyState
+            glyph="no-notifications"
+            title="알림 규칙이 없습니다"
+            description="키워드 · 태그 · 소스별로 알림을 받아볼 수 있습니다."
+            compact
+          />
         ) : (
           <div className="space-y-1">
             {store.rules.map((rule) => (

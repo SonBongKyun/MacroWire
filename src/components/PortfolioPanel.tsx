@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { PortfolioPrice, PortfolioAsset } from "@/hooks/usePortfolio";
+import { EmptyState } from "@/components/EmptyState";
 
 interface PortfolioPanelProps {
   prices: PortfolioPrice[];
@@ -109,14 +110,12 @@ export function PortfolioPanel({ prices, assets, loading, onAddAsset, onRemoveAs
 
       <div className="flex-1 overflow-y-auto">
         {prices.length === 0 && !loading ? (
-          <div className="text-center py-8">
-            <div className="empty-state-icon mx-auto mb-3">
-              <svg className="w-6 h-6 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <p className="text-[10px] text-[var(--muted)]">가격 데이터를 불러오는 중...</p>
-          </div>
+          <EmptyState
+            glyph="no-portfolio"
+            title="가격 데이터를 불러오는 중"
+            description="잠시 후 자동으로 표시됩니다."
+            compact
+          />
         ) : (
           <div className="divide-y divide-[var(--border-subtle)]">
             {prices.map((item) => (
