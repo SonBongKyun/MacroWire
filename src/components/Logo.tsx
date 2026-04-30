@@ -101,6 +101,7 @@ export function Logo({
       </svg>
       {showWordmark && (
         <span
+          className="logo-wordmark"
           style={{
             fontFamily: "var(--font-display)",
             fontSize: dims.fontSize,

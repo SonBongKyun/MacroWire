@@ -185,8 +185,8 @@ export function PlatformNav({
 
       <div className="topbar-divider" />
 
-      {/* Tab Navigation */}
-      <nav className="flex items-center h-full shrink-0">
+      {/* Tab Navigation — horizontally scrollable on mobile */}
+      <nav className="platform-tabs flex items-center h-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -240,13 +240,13 @@ export function PlatformNav({
       </nav>
 
       {/* Spacer */}
-      <div className="flex-1" />
+      <div className="header-spacer flex-1" />
 
       {/* Alert Feed Toggle */}
       {onToggleAlertFeed && (
         <button
           onClick={onToggleAlertFeed}
-          className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
+          className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
           style={{
             borderRadius: 2,
             border: alertFeedOpen ? "1px solid #C9A96E" : "1px solid transparent",
@@ -269,7 +269,7 @@ export function PlatformNav({
       {activeTab === "news" && onToggleSplit && (
         <button
           onClick={onToggleSplit}
-          className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
+          className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
           style={{
             borderRadius: 2,
             border: splitView ? "1px solid #C9A96E" : "1px solid transparent",
@@ -291,7 +291,7 @@ export function PlatformNav({
       {onToggleCalculator && (
         <button
           onClick={onToggleCalculator}
-          className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
+          className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
           style={{
             borderRadius: 2,
             border: calculatorOpen ? "1px solid #C9A96E" : "1px solid transparent",
@@ -312,7 +312,7 @@ export function PlatformNav({
       {onToggleMemo && (
         <button
           onClick={onToggleMemo}
-          className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
+          className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
           style={{
             borderRadius: 2,
             border: memoOpen ? "1px solid #C9A96E" : "1px solid transparent",
@@ -333,7 +333,7 @@ export function PlatformNav({
 
       {/* Report / Newsletter */}
       {(onOpenWeeklyReport || onOpenNewsletter) && (
-        <div ref={reportDropdownRef} className="relative shrink-0">
+        <div ref={reportDropdownRef} className="secondary-action relative shrink-0">
           <button
             onClick={() => setReportDropdownOpen((v) => !v)}
             className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
@@ -401,7 +401,7 @@ export function PlatformNav({
       )}
 
       {/* Search */}
-      <div ref={searchContainerRef} className="relative shrink-0" style={{ width: 240 }}>
+      <div ref={searchContainerRef} className="header-search relative shrink-0" style={{ width: 240 }}>
         <svg
           className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--muted)]"
           fill="none"
@@ -493,7 +493,7 @@ export function PlatformNav({
       {/* Breaking news LIVE indicator — pulsing red dot + countdown */}
       {breakingCountdown > 0 && (
         <div
-          className="flex items-center gap-1.5 shrink-0"
+          className="live-indicator flex items-center gap-1.5 shrink-0"
           title={`속보 자동 수집: ${breakingCountdown}초 후${lastBreakingUpdate ? ` (마지막: ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })})` : ""}`}
           style={{ cursor: "default" }}
         >

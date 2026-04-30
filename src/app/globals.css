@@ -1603,8 +1603,20 @@ html { scroll-behavior: smooth; }
 }
 
 /* ══════════════════════════════════════
-   MOBILE
+   RESPONSIVE BREAKPOINTS
    ══════════════════════════════════════ */
+
+/* Platform tabs scroll horizontally on every viewport (graceful overflow) */
+.platform-tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.platform-tabs::-webkit-scrollbar { display: none; }
+.platform-tabs > button { flex-shrink: 0; }
 
 @media (max-width: 1200px) {
   .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1618,13 +1630,25 @@ html { scroll-behavior: smooth; }
   .news-sidebar { border-top: 1px solid var(--border); border-left: none; }
 }
 
+/* Tablet & below — hide secondary actions, keep search & primary actions */
+@media (max-width: 900px) {
+  .secondary-action { display: none !important; }
+  /* Visual breathing room: reduce header gap */
+  header.glass-header { gap: 8px; }
+}
+
+/* Mobile portrait — stack everything, hide search, allow tab scroll */
 @media (max-width: 768px) {
+  /* Tabs claim all extra horizontal space; spacer collapses */
+  .platform-tabs { flex: 1 1 0 !important; }
+  .header-spacer { flex: 0 0 0 !important; display: none !important; }
+  /* Hide LIVE indicator on mobile — power-user signal, low priority */
+  .live-indicator { display: none !important; }
+
   .dashboard-grid { grid-template-columns: 1fr; }
   .widget-span-2 { grid-column: span 1; }
   .widget-span-3 { grid-column: span 1; }
   .market-grid { grid-template-columns: 1fr; }
-  .platform-nav { padding: 0 8px; gap: 2px; }
-  .platform-nav-tab { padding: 0 8px; font-size: 11px; }
   .dashboard-container { padding: 12px; }
   .markets-container { padding: 12px; }
   .card-grid {
@@ -1647,30 +1671,58 @@ html { scroll-behavior: smooth; }
   /* News tab: stack list and detail vertically */
   .news-layout { grid-template-columns: 1fr !important; }
 
-  /* PlatformNav: hide search on small screens, compact tabs */
-  header.glass-header { height: 44px; padding: 0 8px; }
+  /* Header — compact, hide search, hide dividers */
+  header.glass-header { height: 48px; padding: 0 12px; }
   header .topbar-divider { display: none; }
+  .header-search { display: none !important; }
+
+  /* Tabs — slightly tighter padding so 7 tabs fit better, larger touch target */
+  .platform-tabs > button {
+    padding: 0 14px !important;
+    min-width: 56px;
+    font-size: 14px !important;
+  }
 
   /* Status bar: simpler on mobile */
   .status-bar { font-size: 9px; padding: 0 8px; }
 
-  /* Hide split view on mobile */
+  /* Hide split view on mobile — it requires a wide viewport to make sense */
   .split-view-panel { display: none; }
+
+  /* News tab: ensure single-column reading flow */
+  .news-grid-2col { grid-template-columns: 1fr !important; }
+
+  /* Right-side panel slides over instead of flexing */
+  .panel-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 50 !important;
+  }
 }
 
+/* Phone — ultra compact */
 @media (max-width: 480px) {
-  .platform-nav { height: 44px; }
-  .platform-nav-tab { font-size: 10px; padding: 0 6px; }
   .article-row {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
   .status-bar { display: none; }
 
-  /* Ultra compact for phones */
-  header.glass-header { height: 40px; }
+  header.glass-header { height: 44px; padding: 0 10px; }
   .market-strip { display: none; }
   .dash-section-title { font-size: 11px; letter-spacing: 0.12em; }
+
+  /* Tabs even tighter on phones, but at least 44px tall touch target */
+  .platform-tabs > button {
+    padding: 0 12px !important;
+    min-width: 52px;
+    font-size: 13px !important;
+  }
+
+  /* Phone: drop wordmark, keep just the Spike mark */
+  .logo-wordmark { display: none !important; }
+  /* Hide marketing nav links so only logo + CTA show */
+  .lp-link { display: none; }
 }
 
 /* ── Card Thumbnail ── */
