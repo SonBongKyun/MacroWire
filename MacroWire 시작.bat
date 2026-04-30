@@ -28,7 +28,7 @@ if exist ".next\BUILD_ID" (
     echo  [2/3] 프로덕션 모드로 시작합니다...
     echo.
     :: Open browser after 2.5 seconds (background)
-    start /b cmd /c "timeout /t 3 /nobreak > nul && start http://localhost:3000/app"
+    start /b cmd /c "timeout /t 3 /nobreak > nul && start http://localhost:3000"
     npm run start
 ) else (
     echo  [2/3] 첫 실행 - 빌드 생성 중... (약 30초 소요)
@@ -40,7 +40,7 @@ if exist ".next\BUILD_ID" (
     )
     echo  [3/3] 서버 시작 중...
     echo.
-    start /b cmd /c "timeout /t 4 /nobreak > nul && start http://localhost:3000/app"
+    start /b cmd /c "timeout /t 4 /nobreak > nul && start http://localhost:3000"
     npm run start
     goto end
 )
@@ -48,7 +48,7 @@ if exist ".next\BUILD_ID" (
 :devmode
 echo  [3/3] 개발 모드로 시작 중...
 echo.
-start /b cmd /c "timeout /t 5 /nobreak > nul && start http://localhost:3000/app"
+start /b cmd /c "timeout /t 5 /nobreak > nul && start http://localhost:3000"
 npm run dev
 
 :end
