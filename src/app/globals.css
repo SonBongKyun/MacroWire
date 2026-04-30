@@ -1297,6 +1297,21 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
 }
 
 /* ══════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════ */
+
+.lp-link {
+  position: relative;
+  transition: color 0.15s ease;
+}
+.lp-link:hover {
+  color: #EBEBEB;
+}
+
+/* Smooth in-page anchor jumps on the landing */
+html { scroll-behavior: smooth; }
+
+/* ══════════════════════════════════════
    AMBIENT LIGHT BACKGROUND
    A single soft gold radial in the upper-right corner — Apple/Linear
    tone. Replaces the previous cosmic-bg (stars, nebulas, shooting stars).
