@@ -1,5 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="108" fill="#1a171c"/>
-  <rect x="40" y="40" width="432" height="432" rx="80" fill="#b4637a" opacity="0.15"/>
-  <path d="M280 120L180 296h80v96l100-176h-80v-96z" fill="#b4637a" stroke="#b4637a" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Background — rounded square, deep dark -->
+  <rect width="512" height="512" rx="108" fill="#0D0D0F"/>
+
+  <!-- Subtle ambient inner glow -->
+  <defs>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.7">
+      <stop offset="0%" stop-color="#C9A96E" stop-opacity="0.18"/>
+      <stop offset="70%" stop-color="#C9A96E" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldStroke" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E5C896"/>
+      <stop offset="55%" stop-color="#C9A96E"/>
+      <stop offset="100%" stop-color="#A88752"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="108" fill="url(#halo)"/>
+
+  <!-- Spike: flat baseline pierced by a sudden upward event spike -->
+  <path
+    d="M64 298 L186 298 L237 138 L297 384 L342 298 L448 298"
+    fill="none"
+    stroke="url(#goldStroke)"
+    stroke-width="44"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Apex marker — emphasizes the "event" -->
+  <circle cx="237" cy="138" r="28" fill="url(#goldStroke)"/>
 </svg>

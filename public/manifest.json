@@ -1,11 +1,11 @@
 {
-  "name": "Ryzm Finance",
-  "short_name": "RyzmFinance",
+  "name": "MacroWire",
+  "short_name": "MacroWire",
   "description": "실시간 한국 매크로 경제 뉴스 와이어",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a171c",
-  "theme_color": "#b4637a",
+  "background_color": "#0D0D0F",
+  "theme_color": "#C9A96E",
   "icons": [
     {
       "src": "/icon.svg",

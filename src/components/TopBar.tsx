@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Logo } from "@/components/Logo";
 
 interface TopBarProps {
   searchQuery: string;
@@ -101,23 +102,9 @@ export function TopBar({
 
   return (
     <header className="relative flex items-center gap-3 px-4 h-[54px] glass-header shrink-0 select-none z-20">
-      {/* Logo */}
+      {/* Logo — Spike mark + MacroWire wordmark */}
       <div className="flex items-center mr-1 shrink-0">
-        <span
-          style={{
-            fontSize: 18,
-            fontWeight: 800,
-            letterSpacing: "-0.01em",
-            background: "linear-gradient(135deg, #D4B87E 0%, #C9A96E 50%, #B8945C 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            textShadow: "0 0 24px rgba(201,169,110,0.3)",
-            fontFamily: "var(--font-heading), 'Space Grotesk', sans-serif",
-          }}
-        >
-          MacroWire
-        </span>
+        <Logo size="sm" />
       </div>
 
       <div className="topbar-divider" />
