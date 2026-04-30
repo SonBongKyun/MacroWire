@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Outfit, Space_Mono } from "next/font/google";
+import { Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({ variable: "--font-heading", subsets: ["latin"] });
-const outfit = Outfit({ variable: "--font-body", subsets: ["latin"] });
+// Monospace — Space Mono is fine for tabular numerals/data
 const spaceMono = Space_Mono({ variable: "--font-mono", weight: "400", subsets: ["latin"] });
 
 export const viewport: Viewport = {
@@ -35,7 +34,26 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className="dark">
-      <body className={`${spaceGrotesk.variable} ${outfit.variable} ${spaceMono.variable} antialiased`}>
+      <head>
+        {/* Korean-optimised type system —
+            Pretendard Variable for body/UI, SUIT Variable for display headlines.
+            Both are open-source variable fonts; jsDelivr serves the dynamic-subset
+            (KO + Latin glyphs only) which keeps payload small. */}
+        <link
+          rel="preconnect"
+          href="https://cdn.jsdelivr.net"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css"
+        />
+      </head>
+      <body className={`${spaceMono.variable} antialiased`}>
         {children}
         <script
           dangerouslySetInnerHTML={{

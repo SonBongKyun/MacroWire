@@ -102,8 +102,7 @@ export function Logo({
       {showWordmark && (
         <span
           style={{
-            fontFamily:
-              "'Pretendard Variable', Pretendard, var(--font-heading), 'Space Grotesk', system-ui, sans-serif",
+            fontFamily: "var(--font-display)",
             fontSize: dims.fontSize,
             fontWeight: dims.weight,
             letterSpacing: dims.letterSpacing,
