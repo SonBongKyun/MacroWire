@@ -1,6 +1,10 @@
-const CACHE_NAME = "ryzm-finance-v2";
-const STATIC_ASSETS = ["/", "/manifest.json", "/icon.svg"];
-const API_CACHE = "ryzm-finance-api-v1";
+// ⚠ Bumping CACHE_NAME forces all clients to drop the previous cache
+// (which contained the old app shell at "/" before the landing/app split).
+const CACHE_NAME = "macrowire-v3";
+// Only pre-cache assets that won't change shape — never the HTML routes,
+// otherwise stale shell can outlive a deploy.
+const STATIC_ASSETS = ["/manifest.json", "/icon.svg"];
+const API_CACHE = "macrowire-api-v1";
 const MAX_API_CACHE_AGE = 24 * 60 * 60 * 1000; // 24 hours
 
 self.addEventListener("install", (event) => {
@@ -12,15 +16,17 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
+    (async () => {
+      // Drop every previous-version cache so the old "/" shell is gone
+      const keys = await caches.keys();
+      await Promise.all(
         keys
           .filter((key) => key !== CACHE_NAME && key !== API_CACHE)
           .map((key) => caches.delete(key))
-      )
-    )
+      );
+      await self.clients.claim();
+    })()
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
@@ -79,17 +85,20 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Network-first for HTML pages
+  // HTML / navigation requests — network only, no caching.
+  // Caching shells caused the landing/app split to ghost the old root.
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request).then((c) => c || caches.match("/")))
+    fetch(event.request).catch(
+      () =>
+        new Response(
+          "<!doctype html><meta charset='utf-8'><title>MacroWire — 오프라인</title>" +
+            "<body style='background:#0D0D0F;color:#EBEBEB;font-family:Pretendard,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center'>" +
+            "<div><div style='font-size:14px;color:#C9A96E;letter-spacing:.16em;margin-bottom:12px'>OFFLINE</div>" +
+            "<div style='font-size:18px'>네트워크에 연결되지 않았습니다.</div></div>" +
+            "</body>",
+          { headers: { "Content-Type": "text/html; charset=utf-8" }, status: 503 }
+        )
+    )
   );
 });
 
