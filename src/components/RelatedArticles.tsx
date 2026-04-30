@@ -43,10 +43,10 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
             style={{
               display: "block",
               padding: "8px 4px",
-              borderBottom: "1px solid #1e1e22",
+              borderBottom: "1px solid #1F2026",
               background: "transparent",
               border: "none",
-              borderBlockEnd: "1px solid #1e1e22",
+              borderBlockEnd: "1px solid #1F2026",
               cursor: "pointer",
               transition: "background 0.15s ease",
             }}
@@ -70,7 +70,7 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
               <div style={{
                 flex: 1,
                 height: 2,
-                background: "#2D2D32",
+                background: "#2C2D34",
                 borderRadius: 1,
                 overflow: "hidden",
               }}>

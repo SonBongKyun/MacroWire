@@ -92,7 +92,7 @@ export function EmptyState({
                 padding: "9px 16px",
                 fontSize: 12,
                 fontWeight: 700,
-                color: "#0D0D0F",
+                color: "#0D0E12",
                 background:
                   "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
                 border: "none",

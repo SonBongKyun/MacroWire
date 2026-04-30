@@ -134,7 +134,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
           gridTemplateColumns: "1fr 36px 1fr 48px 40px",
           gap: 8,
           paddingBottom: 6,
-          borderBottom: "1px solid #2D2D32",
+          borderBottom: "1px solid #2C2D34",
           marginBottom: 2,
         }}
       >
@@ -165,7 +165,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
               gridTemplateColumns: "1fr 36px 1fr 48px 40px",
               gap: 8,
               padding: "6px 0",
-              borderBottom: "1px solid rgba(45,45,50,0.5)",
+              borderBottom: "1px solid rgba(44,45,52,0.5)",
               alignItems: "center",
             }}
           >
@@ -235,7 +235,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
                 style={{
                   flex: 1,
                   height: 3,
-                  background: "#2D2D32",
+                  background: "#2C2D34",
                   borderRadius: 1,
                   overflow: "hidden",
                 }}

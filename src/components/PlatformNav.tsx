@@ -357,8 +357,8 @@ export function PlatformNav({
             <div
               className="absolute right-0 top-full mt-1 z-50"
               style={{
-                background: "#1A1A1E",
-                border: "1px solid #2D2D32",
+                background: "#1B1C22",
+                border: "1px solid #2C2D34",
                 minWidth: 160,
                 boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
               }}
@@ -549,7 +549,7 @@ export function PlatformNav({
           return (
             <div style={{ position: "relative", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="22" height="22" viewBox="0 0 22 22" style={{ transform: "rotate(-90deg)" }}>
-                <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#2D2D32" strokeWidth="2" />
+                <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#2C2D34" strokeWidth="2" />
                 <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#C9A96E" strokeWidth="2"
                   strokeDasharray={circumference} strokeDashoffset={dashOffset}
                   strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s linear" }} />

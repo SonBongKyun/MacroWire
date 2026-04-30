@@ -134,7 +134,7 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
           onWheel={handleWheel}
         >
           {/* Reference line at start price */}
-          <line x1={0} y1={startY} x2={chartW} y2={startY} stroke="#2D2D32" strokeWidth={1} strokeDasharray="3,3" />
+          <line x1={0} y1={startY} x2={chartW} y2={startY} stroke="#2C2D34" strokeWidth={1} strokeDasharray="3,3" />
 
           {/* Area fill */}
           <path d={areaPath} fill={fillColor} style={{ transition: "d 0.2s ease" }} />
@@ -182,8 +182,8 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
               left: hoverPoint.x,
               top: hoverPoint.y - 32,
               transform: "translateX(-50%)",
-              background: "#1A1A1F",
-              border: "1px solid #2D2D32",
+              background: "#1B1C22",
+              border: "1px solid #2C2D34",
               padding: "4px 8px",
               fontFamily: "'Space Mono', var(--font-mono), monospace",
               fontSize: 11,
@@ -213,16 +213,16 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
                   fontSize: 10,
                   fontWeight: 600,
                   fontFamily: "'Space Mono', var(--font-mono), monospace",
-                  color: isActive ? "#0D0D0F" : "#8C8C91",
+                  color: isActive ? "#0D0E12" : "#8C8C91",
                   background: isActive ? "#C9A96E" : "transparent",
-                  border: isActive ? "1px solid #C9A96E" : "1px solid #2D2D32",
+                  border: isActive ? "1px solid #C9A96E" : "1px solid #2C2D34",
                   cursor: "pointer",
                   transition: "all 0.15s ease",
                   letterSpacing: "0.04em",
                   lineHeight: 1.4,
                 }}
                 onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "#C9A96E"; }}
-                onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "#2D2D32"; }}
+                onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "#2C2D34"; }}
               >
                 {r.label}
               </button>

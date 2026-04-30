@@ -71,7 +71,7 @@ export default function LandingPage() {
     <main
       className="text-[#EBEBEB]"
       style={{
-        background: "#0D0D0F",
+        background: "#0D0E12",
         // Body uses `overflow: hidden` for the app shell; the landing creates
         // its own vertical scroll context here.
         height: "100vh",
@@ -117,7 +117,7 @@ function MarketingHeader() {
         top: 0,
         zIndex: 30,
         backdropFilter: "blur(20px) saturate(1.2)",
-        background: "rgba(13,13,15,0.65)",
+        background: "rgba(13,14,18,0.65)",
         borderBottom: "1px solid rgba(201,169,110,0.08)",
       }}
     >
@@ -153,7 +153,7 @@ function MarketingHeader() {
               borderRadius: 4,
               fontSize: 13,
               fontWeight: 700,
-              color: "#0D0D0F",
+              color: "#0D0E12",
               background:
                 "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
               boxShadow: "0 4px 14px rgba(201,169,110,0.25)",
@@ -269,7 +269,7 @@ function Hero() {
             borderRadius: 4,
             fontSize: 15,
             fontWeight: 700,
-            color: "#0D0D0F",
+            color: "#0D0E12",
             background:
               "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
             boxShadow: "0 8px 28px rgba(201,169,110,0.25)",
@@ -305,7 +305,7 @@ function Hero() {
           borderRadius: 12,
           border: "1px solid rgba(201,169,110,0.14)",
           background:
-            "linear-gradient(180deg, rgba(20,20,24,0.5) 0%, rgba(13,13,15,0.3) 100%)",
+            "linear-gradient(180deg, rgba(21,22,28,0.5) 0%, rgba(13,14,18,0.3) 100%)",
           boxShadow:
             "0 20px 60px -20px rgba(0,0,0,0.6), 0 0 100px -20px rgba(201,169,110,0.08)",
         }}
@@ -411,7 +411,7 @@ function FeatureCard({
       style={{
         padding: 28,
         borderRadius: 8,
-        background: "linear-gradient(180deg, rgba(20,20,24,0.6) 0%, rgba(15,15,18,0.4) 100%)",
+        background: "linear-gradient(180deg, rgba(21,22,28,0.6) 0%, rgba(15,16,22,0.4) 100%)",
         border: "1px solid rgba(255,255,255,0.06)",
         position: "relative",
         overflow: "hidden",
@@ -620,8 +620,8 @@ function PricingCard({
         padding: 32,
         borderRadius: 8,
         background: accent
-          ? "linear-gradient(180deg, rgba(201,169,110,0.06) 0%, rgba(20,20,24,0.6) 100%)"
-          : "linear-gradient(180deg, rgba(20,20,24,0.6) 0%, rgba(15,15,18,0.4) 100%)",
+          ? "linear-gradient(180deg, rgba(201,169,110,0.06) 0%, rgba(21,22,28,0.6) 100%)"
+          : "linear-gradient(180deg, rgba(21,22,28,0.6) 0%, rgba(15,16,22,0.4) 100%)",
         border: accent
           ? "1px solid rgba(201,169,110,0.30)"
           : "1px solid rgba(255,255,255,0.06)",
@@ -638,7 +638,7 @@ function PricingCard({
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: "0.12em",
-            color: "#0D0D0F",
+            color: "#0D0E12",
             background: "linear-gradient(135deg, #E5C896, #C9A96E)",
             padding: "4px 10px",
             borderRadius: 99,
@@ -721,7 +721,7 @@ function PricingCard({
           fontSize: 14,
           fontWeight: 700,
           letterSpacing: "-0.01em",
-          color: accent ? "#0D0D0F" : "#EBEBEB",
+          color: accent ? "#0D0E12" : "#EBEBEB",
           background: accent
             ? "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)"
             : "rgba(255,255,255,0.04)",
@@ -754,7 +754,7 @@ function FinalCTA() {
           borderRadius: 16,
           textAlign: "center",
           background:
-            "radial-gradient(80% 100% at 50% 0%, rgba(201,169,110,0.12) 0%, rgba(13,13,15,0.6) 60%)",
+            "radial-gradient(80% 100% at 50% 0%, rgba(201,169,110,0.12) 0%, rgba(13,14,18,0.6) 60%)",
           border: "1px solid rgba(201,169,110,0.20)",
           boxShadow: "0 24px 80px -24px rgba(201,169,110,0.18)",
         }}
@@ -791,7 +791,7 @@ function FinalCTA() {
             borderRadius: 4,
             fontSize: 16,
             fontWeight: 700,
-            color: "#0D0D0F",
+            color: "#0D0E12",
             background:
               "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
             boxShadow: "0 12px 36px rgba(201,169,110,0.30)",

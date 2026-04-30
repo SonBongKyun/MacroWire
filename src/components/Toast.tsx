@@ -49,7 +49,7 @@ function ToastMessage({ toast, onRemove }: { toast: ToastItem; onRemove: (id: st
   const bgColor = toast.type === "error"
     ? "var(--danger)"
     : isBreaking
-    ? "rgba(20,20,24,0.96)"
+    ? "rgba(21,22,28,0.96)"
     : toast.type === "info"
     ? "var(--surface-active)"
     : "var(--foreground-bright)";

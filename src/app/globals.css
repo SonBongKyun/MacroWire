@@ -10,7 +10,7 @@
   --background: #fafaf8;
   --background-mesh: none;
   --foreground: #18181b;
-  --foreground-bright: #0D0D0F;
+  --foreground-bright: #0D0E12;
   --foreground-secondary: #52525b;
 
   --accent: #C9A96E;
@@ -1240,7 +1240,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
    ══════════════════════════════════════ */
 
 .dark {
-  --background: #0D0D0F;
+  --background: #0D0E12;
   /* Background mesh removed — ambient-light layer handles the single gold light source.
      Keeping the variable as `none` so the body's background-image is a no-op. */
   --background-mesh: none;
@@ -1277,10 +1277,10 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   --shadow-accent: 0 4px 20px -3px rgba(201, 169, 110, 0.25);
   --shadow-gold: 0 4px 20px -3px rgba(201, 169, 110, 0.20);
 
-  --border: #2D2D32;
-  --border-subtle: #1e1e22;
+  --border: #2C2D34;
+  --border-subtle: #1F2026;
   --border-strong: #3f3f46;
-  --border-light: #1e1e22;
+  --border-light: #1F2026;
   --border-accent: rgba(201, 169, 110, 0.20);
 
   --muted: #8C8C91;
@@ -1296,13 +1296,13 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
 }
 
 .dark * {
-  scrollbar-color: #2D2D32 transparent;
+  scrollbar-color: #2C2D34 transparent;
 }
-.dark *::-webkit-scrollbar-thumb { background: #2D2D32; }
+.dark *::-webkit-scrollbar-thumb { background: #2C2D34; }
 .dark *::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
 .dark .skeleton {
-  background: linear-gradient(90deg, #1e1e22 25%, #2D2D32 50%, #1e1e22 75%);
+  background: linear-gradient(90deg, #1F2026 25%, #2C2D34 50%, #1F2026 75%);
   background-size: 200% 100%;
 }
 .dark .search-input:focus {
@@ -2021,7 +2021,7 @@ button:active { transform: scale(0.98); }
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
   padding: 20px 24px;
-  background: linear-gradient(180deg, rgba(20,20,24,0.7) 0%, rgba(13,13,15,0.6) 100%);
+  background: linear-gradient(180deg, rgba(21,22,28,0.7) 0%, rgba(13,14,18,0.6) 100%);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(8px);
 }
@@ -2030,9 +2030,9 @@ button:active { transform: scale(0.98); }
   flex-direction: column;
   gap: 4px;
   padding: 16px;
-  background: linear-gradient(180deg, rgba(24,24,28,0.85) 0%, rgba(15,15,18,0.7) 100%);
+  background: linear-gradient(180deg, rgba(24,24,28,0.85) 0%, rgba(15,16,22,0.7) 100%);
   backdrop-filter: blur(6px);
-  border: 1px solid #2D2D32;
+  border: 1px solid #2C2D34;
   position: relative;
   transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
   overflow: hidden;
@@ -2091,7 +2091,7 @@ button:active { transform: scale(0.98); }
 }
 .dash-stat-cell {
   background: #131316;
-  border: 1px solid #2D2D32;
+  border: 1px solid #2C2D34;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -2207,7 +2207,7 @@ button:active { transform: scale(0.98); }
 /* Consistent divider */
 .divider {
   height: 1px;
-  background: #2D2D32;
+  background: #2C2D34;
   border: none;
   margin: 16px 0;
 }
@@ -2248,7 +2248,7 @@ button:active { transform: scale(0.98); }
 
 .card-surface {
   background: #131316;
-  border: 1px solid #2D2D32;
+  border: 1px solid #2C2D34;
 }
 .card-surface:hover {
   border-color: #3D3D42;
@@ -2283,7 +2283,7 @@ button:active { transform: scale(0.98); }
 /* Stat card with colored accent */
 .stat-accent {
   background: #131316;
-  border: 1px solid #2D2D32;
+  border: 1px solid #2C2D34;
   padding: 16px;
   position: relative;
 }

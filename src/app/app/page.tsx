@@ -724,7 +724,7 @@ function HomeInner() {
             }}
           >
             {/* Left: Compact Article List */}
-            <div className="overflow-y-auto border-r border-[#2D2D32]">
+            <div className="overflow-y-auto border-r border-[#2C2D34]">
               <ArticleList
                 articles={filteredArticles}
                 loading={loading}
@@ -744,7 +744,7 @@ function HomeInner() {
             </div>
 
             {/* Center: Article Detail */}
-            <div className="overflow-y-auto border-r border-[#2D2D32]">
+            <div className="overflow-y-auto border-r border-[#2C2D34]">
               {selectedArticle ? (
                 <ArticleDetail
                   article={selectedArticle}

@@ -8,7 +8,7 @@ const spaceMono = Space_Mono({ variable: "--font-mono", weight: "400", subsets: 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0D0D0F",
+  themeColor: "#0D0E12",
   viewportFit: "cover",
 };
 

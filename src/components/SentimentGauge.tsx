@@ -72,7 +72,7 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
         <div
           style={{
             flex: stats.neutralPct,
-            background: "#2D2D32",
+            background: "#2C2D34",
             minWidth: stats.neutralPct > 0 ? 2 : 0,
             transition: "flex 0.5s ease",
           }}

@@ -138,7 +138,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
       <div
         className="glass-modal border shadow-2xl flex flex-col"
         style={{
-          borderColor: "#2D2D32",
+          borderColor: "#2C2D34",
           background: "#131316",
           maxHeight: "calc(100vh - 80px)",
         }}
@@ -146,7 +146,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3 border-b"
-          style={{ borderColor: "#2D2D32" }}
+          style={{ borderColor: "#2C2D34" }}
         >
           <h3
             className="font-heading font-bold text-[13px]"
@@ -169,13 +169,13 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={"\uC2DC\uC7A5 \uC778\uC0AC\uC774\uD2B8\uB97C \uAE30\uB85D\uD558\uC138\uC694..."}
-            className="w-full bg-[#1A1A1E] border px-3 py-2 text-[12px] text-[#EBEBEB] placeholder-[#8C8C91] focus:outline-none resize-none"
-            style={{ borderColor: "#2D2D32", fontSize: 12 }}
+            className="w-full bg-[#1B1C22] border px-3 py-2 text-[12px] text-[#EBEBEB] placeholder-[#8C8C91] focus:outline-none resize-none"
+            style={{ borderColor: "#2C2D34", fontSize: 12 }}
             onFocus={(e) => {
               (e.target as HTMLTextAreaElement).style.borderColor = "rgba(201,169,110,0.4)";
             }}
             onBlur={(e) => {
-              (e.target as HTMLTextAreaElement).style.borderColor = "#2D2D32";
+              (e.target as HTMLTextAreaElement).style.borderColor = "#2C2D34";
             }}
           />
 
@@ -256,7 +256,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                         maxWidth: 200,
                         color: "#EBEBEB",
                         background: "rgba(201,169,110,0.06)",
-                        border: "1px solid #2D2D32",
+                        border: "1px solid #2C2D34",
                       }}
                     >
                       {a.title.slice(0, 30)}...
@@ -279,8 +279,8 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                   value={articleSearch}
                   onChange={(e) => setArticleSearch(e.target.value)}
                   placeholder={"\uAE30\uC0AC \uAC80\uC0C9..."}
-                  className="w-full bg-[#1A1A1E] border px-2 py-1 text-[10px] text-[#EBEBEB] placeholder-[#8C8C91] focus:outline-none"
-                  style={{ borderColor: "#2D2D32" }}
+                  className="w-full bg-[#1B1C22] border px-2 py-1 text-[10px] text-[#EBEBEB] placeholder-[#8C8C91] focus:outline-none"
+                  style={{ borderColor: "#2C2D34" }}
                 />
                 <div
                   className="overflow-y-auto"
@@ -324,7 +324,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
             style={{
               background: text.trim() ? "rgba(201,169,110,0.15)" : "rgba(201,169,110,0.05)",
               color: text.trim() ? "#C9A96E" : "#8C8C91",
-              border: `1px solid ${text.trim() ? "rgba(201,169,110,0.3)" : "#2D2D32"}`,
+              border: `1px solid ${text.trim() ? "rgba(201,169,110,0.3)" : "#2C2D34"}`,
               cursor: text.trim() ? "pointer" : "default",
             }}
           >
@@ -336,7 +336,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
         {recentMemos.length > 0 && (
           <div
             className="border-t overflow-y-auto flex-1"
-            style={{ borderColor: "#2D2D32", maxHeight: 300 }}
+            style={{ borderColor: "#2C2D34", maxHeight: 300 }}
           >
             <div className="px-4 pt-2.5 pb-1">
               <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "#8C8C91" }}>
@@ -347,7 +347,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
               <div
                 key={memo.id}
                 className="px-4 py-2.5 border-b"
-                style={{ borderColor: "#2D2D32" }}
+                style={{ borderColor: "#2C2D34" }}
               >
                 <p className="text-[11px] leading-[1.6]" style={{ color: "#EBEBEB" }}>
                   {memo.text}

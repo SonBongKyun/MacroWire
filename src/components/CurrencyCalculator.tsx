@@ -259,7 +259,7 @@ export function CurrencyCalculator({ open, onClose }: CurrencyCalculatorProps) {
               }}
             >
               {CURRENCIES.map((c) => (
-                <option key={c} value={c} style={{ background: "#1A1A1F" }}>
+                <option key={c} value={c} style={{ background: "#1B1C22" }}>
                   {CURRENCY_LABELS[c]}
                 </option>
               ))}
@@ -356,7 +356,7 @@ export function CurrencyCalculator({ open, onClose }: CurrencyCalculatorProps) {
               }}
             >
               {CURRENCIES.map((c) => (
-                <option key={c} value={c} style={{ background: "#1A1A1F" }}>
+                <option key={c} value={c} style={{ background: "#1B1C22" }}>
                   {CURRENCY_LABELS[c]}
                 </option>
               ))}
@@ -400,7 +400,7 @@ export function CurrencyCalculator({ open, onClose }: CurrencyCalculatorProps) {
             fontFamily: "var(--font-heading)",
             letterSpacing: "0.04em",
             background: loading ? "var(--surface)" : "#C9A96E",
-            color: loading ? "var(--muted)" : "#0D0D0F",
+            color: loading ? "var(--muted)" : "#0D0E12",
             border: "none",
             borderRadius: 2,
             cursor: loading ? "wait" : "pointer",

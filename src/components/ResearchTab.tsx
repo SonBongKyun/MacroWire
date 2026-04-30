@@ -169,7 +169,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
       <div
         style={{
           padding: "20px 24px 16px",
-          borderBottom: "1px solid #2D2D32",
+          borderBottom: "1px solid #2C2D34",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
@@ -228,8 +228,8 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
               width: "100%",
               fontSize: 16,
               padding: "12px 16px 12px 42px",
-              background: "#1A1A1E",
-              border: "1px solid #2D2D32",
+              background: "#1B1C22",
+              border: "1px solid #2C2D34",
               color: "#EBEBEB",
               fontFamily: "var(--font-body)",
               outline: "none",
@@ -239,7 +239,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
               e.currentTarget.style.borderColor = "#C9A96E";
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = "#2D2D32";
+              e.currentTarget.style.borderColor = "#2C2D34";
             }}
           />
         </div>
@@ -258,7 +258,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
         {/* Left column: Research Results */}
         <div
           style={{
-            borderRight: "1px solid #2D2D32",
+            borderRight: "1px solid #2C2D34",
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
@@ -267,7 +267,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
           <div
             style={{
               padding: "12px 20px 8px",
-              borderBottom: "1px solid #2D2D32",
+              borderBottom: "1px solid #2C2D34",
             }}
           >
             <span
@@ -333,7 +333,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                     width: "100%",
                     textAlign: "left",
                     padding: "10px 20px",
-                    borderBottom: "1px solid #1A1A1E",
+                    borderBottom: "1px solid #1B1C22",
                     background: isSelected ? "rgba(201,169,110,0.06)" : "transparent",
                     borderLeft: isSelected ? "2px solid #C9A96E" : "2px solid transparent",
                     cursor: "pointer",
@@ -401,7 +401,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                             border: "1px solid",
                             borderColor: tag.toLowerCase().includes(activeQuery.toLowerCase())
                               ? "rgba(201,169,110,0.3)"
-                              : "#2D2D32",
+                              : "#2C2D34",
                           }}
                         >
                           {tag}
@@ -426,7 +426,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
           <div
             style={{
               padding: "12px 20px 8px",
-              borderBottom: "1px solid #2D2D32",
+              borderBottom: "1px solid #2C2D34",
             }}
           >
             <span
@@ -486,7 +486,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                           style={{
                             flex: 1,
                             height: 14,
-                            background: "#1A1A1E",
+                            background: "#1B1C22",
                             position: "relative",
                           }}
                         >
@@ -559,7 +559,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                           style={{
                             flex: 1,
                             height: 14,
-                            background: "#1A1A1E",
+                            background: "#1B1C22",
                             position: "relative",
                           }}
                         >
@@ -618,7 +618,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                         y1={y}
                         x2="280"
                         y2={y}
-                        stroke="#2D2D32"
+                        stroke="#2C2D34"
                         strokeWidth="0.5"
                       />
                     ))}
@@ -636,7 +636,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                             width={barWidth}
                             height={barHeight}
                             fill={day.count > 0 ? "rgba(201,169,110,0.4)" : "rgba(255,255,255,0.03)"}
-                            stroke={day.count > 0 ? "#C9A96E" : "#2D2D32"}
+                            stroke={day.count > 0 ? "#C9A96E" : "#2C2D34"}
                             strokeWidth="1"
                           />
                           <text
@@ -696,7 +696,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                             fontSize: 10,
                             padding: "3px 10px",
                             background: "rgba(255,255,255,0.04)",
-                            border: "1px solid #2D2D32",
+                            border: "1px solid #2C2D34",
                             color: "#EBEBEB",
                             display: "inline-flex",
                             alignItems: "center",

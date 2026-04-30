@@ -127,8 +127,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
       style={{
         width: 380,
         maxHeight: 520,
-        background: "#1A1A1E",
-        border: "1px solid #2D2D32",
+        background: "#1B1C22",
+        border: "1px solid #2C2D34",
         display: "flex",
         flexDirection: "column",
         boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
@@ -141,7 +141,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
           alignItems: "center",
           justifyContent: "space-between",
           padding: "10px 14px",
-          borderBottom: "1px solid #2D2D32",
+          borderBottom: "1px solid #2C2D34",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -161,7 +161,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
               style={{
                 fontSize: 9,
                 fontWeight: 700,
-                color: "#0D0D0F",
+                color: "#0D0E12",
                 background: "#C9A96E",
                 padding: "1px 6px",
                 borderRadius: 2,
@@ -178,7 +178,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
               onClick={markAllRead}
               style={{
                 background: "none",
-                border: "1px solid #2D2D32",
+                border: "1px solid #2C2D34",
                 color: "#8C8C91",
                 fontSize: 10,
                 padding: "3px 8px",
@@ -191,7 +191,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
               }}
               onMouseLeave={(e) => {
                 (e.target as HTMLElement).style.color = "#8C8C91";
-                (e.target as HTMLElement).style.borderColor = "#2D2D32";
+                (e.target as HTMLElement).style.borderColor = "#2C2D34";
               }}
             >
               모두 읽음
@@ -237,7 +237,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                 textAlign: "left",
                 background: item.read ? "transparent" : "rgba(201,169,110,0.04)",
                 border: "none",
-                borderBottom: "1px solid rgba(45,45,50,0.5)",
+                borderBottom: "1px solid rgba(44,45,52,0.5)",
                 cursor: "pointer",
                 borderLeft: item.read ? "2px solid transparent" : "2px solid #C9A96E",
                 transition: "background 0.15s ease",

@@ -195,7 +195,7 @@ export function EconomicCalendar() {
                     style={{
                       fontSize: 8,
                       fontWeight: 700,
-                      color: "#0D0D0F",
+                      color: "#0D0E12",
                       background: "#C9A96E",
                       padding: "1px 5px",
                       borderRadius: 2,

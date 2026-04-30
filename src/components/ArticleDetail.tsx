@@ -170,7 +170,7 @@ export function ArticleDetail({
 
   if (!article) {
     return (
-      <aside className="shrink-0 bg-[#0D0D0F] flex flex-col items-center justify-center gap-4 select-none" style={{ width: "100%", height: "100%" }}>
+      <aside className="shrink-0 bg-[#0D0E12] flex flex-col items-center justify-center gap-4 select-none" style={{ width: "100%", height: "100%" }}>
         <div style={{ opacity: 0.3 }}>
           <svg style={{ width: 40, height: 40, color: "#8C8C91" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
@@ -182,8 +182,8 @@ export function ArticleDetail({
             왼쪽 목록에서 기사를 클릭하거나
           </p>
           <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 8 }}>
-            <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>j</kbd>
-            <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>k</kbd>
+            <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>j</kbd>
+            <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>k</kbd>
             <span style={{ fontSize: 10, color: "#8C8C91" }}>키로 이동</span>
           </div>
         </div>
@@ -192,7 +192,7 @@ export function ArticleDetail({
   }
 
   return (
-    <aside key={article.id} className="shrink-0 bg-[#0D0D0F] flex flex-col overflow-hidden relative detail-enter" style={{ width: "100%", height: "100%", borderTop: "2px solid #C9A96E" }}>
+    <aside key={article.id} className="shrink-0 bg-[#0D0E12] flex flex-col overflow-hidden relative detail-enter" style={{ width: "100%", height: "100%", borderTop: "2px solid #C9A96E" }}>
       {/* Reading progress bar */}
       <div className="reading-progress" style={{ width: `${readProgress * 100}%` }} />
 
@@ -352,8 +352,8 @@ export function ArticleDetail({
                       fontWeight: 700,
                       letterSpacing: "0.06em",
                       padding: "2px 6px",
-                      color: smartSummary.impactLevel === "high" ? "#0D0D0F" : smartSummary.impactLevel === "medium" ? "#EBEBEB" : "#8C8C91",
-                      background: smartSummary.impactLevel === "high" ? "#C9A96E" : smartSummary.impactLevel === "medium" ? "#2D2D32" : "rgba(45,45,50,0.5)",
+                      color: smartSummary.impactLevel === "high" ? "#0D0E12" : smartSummary.impactLevel === "medium" ? "#EBEBEB" : "#8C8C91",
+                      background: smartSummary.impactLevel === "high" ? "#C9A96E" : smartSummary.impactLevel === "medium" ? "#2C2D34" : "rgba(44,45,52,0.5)",
                       textTransform: "uppercase" as const,
                     }}
                   >

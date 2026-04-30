@@ -136,7 +136,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
       }}
     >
       <div
-        className="glass-modal border border-[#2D2D32] shadow-2xl flex flex-col"
+        className="glass-modal border border-[#2C2D34] shadow-2xl flex flex-col"
         style={{
           width: 640,
           maxHeight: "80vh",
@@ -146,7 +146,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
         {/* Header */}
         <div
           className="flex items-center justify-between px-5 py-4 border-b"
-          style={{ borderColor: "#2D2D32" }}
+          style={{ borderColor: "#2C2D34" }}
         >
           <div>
             <h2
@@ -203,7 +203,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                   <div
                     key={article.id}
                     className="border-b pb-4"
-                    style={{ borderColor: "#2D2D32" }}
+                    style={{ borderColor: "#2C2D34" }}
                   >
                     {/* Title row */}
                     <div className="flex items-start gap-2">
@@ -227,13 +227,13 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                           <span className="text-[10px]" style={{ color: "#8C8C91" }}>
                             {article.sourceName}
                           </span>
-                          <span className="text-[8px]" style={{ color: "#2D2D32" }}>&middot;</span>
+                          <span className="text-[8px]" style={{ color: "#2C2D34" }}>&middot;</span>
                           <span className="text-[10px] tabular-nums" style={{ color: "#8C8C91" }}>
                             {formatDate(article.publishedAt)}
                           </span>
                           {article.tags.length > 0 && (
                             <>
-                              <span className="text-[8px]" style={{ color: "#2D2D32" }}>&middot;</span>
+                              <span className="text-[8px]" style={{ color: "#2C2D34" }}>&middot;</span>
                               <span className="text-[10px]" style={{ color: "#8C8C91" }}>
                                 {article.tags.slice(0, 3).join(", ")}
                               </span>
@@ -285,7 +285,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
         {/* Footer */}
         <div
           className="px-5 py-3 border-t flex items-center justify-between"
-          style={{ borderColor: "#2D2D32" }}
+          style={{ borderColor: "#2C2D34" }}
         >
           <span className="text-[10px]" style={{ color: "#8C8C91" }}>
             Shift+C {"\uB85C \uD1A0\uAE00"} &middot; ESC {"\uB2EB\uAE30"}

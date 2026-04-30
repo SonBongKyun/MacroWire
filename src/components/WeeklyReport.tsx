@@ -131,17 +131,17 @@ function generateHTML(
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #0D0D0F; color: #EBEBEB; font-family: 'Space Grotesk', sans-serif; padding: 40px 20px; }
+  body { background: #0D0E12; color: #EBEBEB; font-family: 'Space Grotesk', sans-serif; padding: 40px 20px; }
   .container { max-width: 800px; margin: 0 auto; }
   h1 { color: #C9A96E; font-size: 24px; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 4px; }
   .date-range { color: #8C8C91; font-family: 'Space Mono', monospace; font-size: 13px; margin-bottom: 32px; }
   .section { margin-bottom: 32px; }
-  .section-label { font-size: 11px; font-weight: 700; color: #8C8C91; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #2D2D32; padding-bottom: 8px; }
+  .section-label { font-size: 11px; font-weight: 700; color: #8C8C91; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #2C2D34; padding-bottom: 8px; }
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .stat-card { background: #1A1A1E; border: 1px solid #2D2D32; padding: 16px; }
+  .stat-card { background: #1B1C22; border: 1px solid #2C2D34; padding: 16px; }
   .stat-value { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: #C9A96E; }
   .stat-label { font-size: 11px; color: #8C8C91; margin-top: 4px; }
-  .story-item { padding: 12px 0; border-bottom: 1px solid #2D2D32; }
+  .story-item { padding: 12px 0; border-bottom: 1px solid #2C2D34; }
   .story-num { font-family: 'Space Mono', monospace; color: #C9A96E; font-size: 13px; font-weight: 700; }
   .story-title { font-size: 14px; font-weight: 600; margin-left: 8px; }
   .story-meta { font-size: 11px; color: #8C8C91; margin-top: 4px; margin-left: 24px; }
@@ -150,14 +150,14 @@ function generateHTML(
   .tag-bar { height: 16px; background: rgba(201,169,110,0.3); border-right: 2px solid #C9A96E; }
   .tag-count { font-family: 'Space Mono', monospace; font-size: 11px; color: #8C8C91; margin-left: 4px; }
   .keyword-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .keyword { background: #1A1A1E; border: 1px solid #2D2D32; padding: 4px 10px; font-size: 12px; }
+  .keyword { background: #1B1C22; border: 1px solid #2C2D34; padding: 4px 10px; font-size: 12px; }
   .keyword-count { font-family: 'Space Mono', monospace; color: #C9A96E; font-size: 10px; margin-left: 4px; }
-  .market-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2D2D32; font-size: 13px; }
+  .market-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2C2D34; font-size: 13px; }
   .market-symbol { color: #EBEBEB; font-weight: 600; }
   .market-price { font-family: 'Space Mono', monospace; }
   .market-change-up { color: #22C55E; }
   .market-change-down { color: #EF4444; }
-  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #2D2D32; font-size: 11px; color: #8C8C91; text-align: center; }
+  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #2C2D34; font-size: 11px; color: #8C8C91; text-align: center; }
   @media print { body { background: #fff; color: #1a1a1a; } .stat-card { border-color: #ddd; background: #f9f9f9; } .stat-value { color: #8B6914; } h1 { color: #8B6914; } .section-label { color: #666; border-color: #ddd; } .story-num { color: #8B6914; } .tag-bar { background: rgba(139,105,20,0.2); border-color: #8B6914; } .keyword { border-color: #ddd; background: #f9f9f9; } .keyword-count { color: #8B6914; } .market-row { border-color: #ddd; } .footer { border-color: #ddd; } }
 </style>
 </head>
@@ -341,15 +341,15 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
         className="w-full mb-8"
         style={{
           maxWidth: 800,
-          background: "#0D0D0F",
-          border: "1px solid #2D2D32",
+          background: "#0D0E12",
+          border: "1px solid #2C2D34",
           minHeight: 400,
         }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: "1px solid #2D2D32" }}
+          style={{ borderBottom: "1px solid #2C2D34" }}
         >
           <div>
             <h1
@@ -367,7 +367,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
               onClick={handleCopyMarkdown}
               className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
               style={{
-                border: "1px solid #2D2D32",
+                border: "1px solid #2C2D34",
                 background: copied ? "rgba(201,169,110,0.15)" : "transparent",
                 color: copied ? "#C9A96E" : "#8C8C91",
               }}
@@ -377,14 +377,14 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
             <button
               onClick={handleExportHTML}
               className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
-              style={{ border: "1px solid #2D2D32", background: "transparent", color: "#8C8C91" }}
+              style={{ border: "1px solid #2C2D34", background: "transparent", color: "#8C8C91" }}
             >
               HTML로 내보내기
             </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
-              style={{ border: "1px solid #2D2D32", background: "transparent", color: "#8C8C91" }}
+              style={{ border: "1px solid #2C2D34", background: "transparent", color: "#8C8C91" }}
             >
               인쇄
             </button>
@@ -413,7 +413,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                 textTransform: "uppercase" as const,
                 marginBottom: 10,
                 paddingBottom: 6,
-                borderBottom: "1px solid #2D2D32",
+                borderBottom: "1px solid #2C2D34",
               }}
             >
               OVERVIEW
@@ -427,7 +427,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
               ].map((s) => (
                 <div
                   key={s.label}
-                  style={{ background: "#1A1A1E", border: "1px solid #2D2D32", padding: "14px 16px" }}
+                  style={{ background: "#1B1C22", border: "1px solid #2C2D34", padding: "14px 16px" }}
                 >
                   <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 22, fontWeight: 700, color: "#C9A96E" }}>
                     {s.value}
@@ -454,13 +454,13 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2D2D32",
+                  borderBottom: "1px solid #2C2D34",
                 }}
               >
                 TOP STORIES
               </div>
               {topStories.map((a, i) => (
-                <div key={a.id} style={{ padding: "10px 0", borderBottom: "1px solid #2D2D32" }}>
+                <div key={a.id} style={{ padding: "10px 0", borderBottom: "1px solid #2C2D34" }}>
                   <span style={{ fontFamily: "'Space Mono', monospace", color: "#C9A96E", fontSize: 12, fontWeight: 700 }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
@@ -486,7 +486,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2D2D32",
+                  borderBottom: "1px solid #2C2D34",
                 }}
               >
                 TAG BREAKDOWN
@@ -522,7 +522,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2D2D32",
+                  borderBottom: "1px solid #2C2D34",
                 }}
               >
                 SOURCE ACTIVITY
@@ -560,7 +560,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2D2D32",
+                  borderBottom: "1px solid #2C2D34",
                 }}
               >
                 MARKET SUMMARY
@@ -571,7 +571,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                 return (
                   <div
                     key={p.symbol}
-                    style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #2D2D32", fontSize: 12 }}
+                    style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #2C2D34", fontSize: 12 }}
                   >
                     <span style={{ fontWeight: 600 }}>{p.symbol}</span>
                     <span style={{ fontFamily: "'Space Mono', monospace" }}>
@@ -597,7 +597,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2D2D32",
+                  borderBottom: "1px solid #2C2D34",
                 }}
               >
                 TRENDING KEYWORDS
@@ -607,8 +607,8 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   <span
                     key={k.word}
                     style={{
-                      background: "#1A1A1E",
-                      border: "1px solid #2D2D32",
+                      background: "#1B1C22",
+                      border: "1px solid #2C2D34",
                       padding: "4px 10px",
                       fontSize: 11,
                       color: "#EBEBEB",

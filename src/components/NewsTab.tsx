@@ -152,7 +152,7 @@ export function NewsTab({
     <div className="flex flex-col h-full">
       {/* ── Filter Bar: single 40px row ── */}
       <div
-        className="shrink-0 border-b border-[#2D2D32] bg-[#0D0D0F]"
+        className="shrink-0 border-b border-[#2C2D34] bg-[#0D0E12]"
         style={{ height: 40, borderTop: "1px solid rgba(201,169,110,0.2)" }}
       >
         <div className="flex items-center h-full px-4 gap-3">
@@ -172,7 +172,7 @@ export function NewsTab({
                   letterSpacing: "0.02em",
                   borderRadius: 3,
                   border: "1px solid transparent",
-                  color: range === r.value ? "#0D0D0F" : "#8C8C91",
+                  color: range === r.value ? "#0D0E12" : "#8C8C91",
                   backgroundColor: range === r.value ? "#C9A96E" : "transparent",
                   cursor: "pointer",
                 }}
@@ -193,7 +193,7 @@ export function NewsTab({
                 fontSize: 11,
                 fontWeight: 500,
                 background: "transparent",
-                border: "1px solid #2D2D32",
+                border: "1px solid #2C2D34",
                 borderRadius: 2,
                 padding: "2px 22px 2px 8px",
                 color: "#EBEBEB",
@@ -241,13 +241,13 @@ export function NewsTab({
           </div>
 
           {/* Divider */}
-          <span style={{ width: 1, height: 16, backgroundColor: "#2D2D32" }} />
+          <span style={{ width: 1, height: 16, backgroundColor: "#2C2D34" }} />
 
           {/* Read filter as text links */}
           <div className="flex items-center" style={{ fontSize: 11 }}>
             {READ_FILTERS.map((f, i) => (
               <span key={f.value} className="flex items-center">
-                {i > 0 && <span style={{ color: "#2D2D32", margin: "0 6px" }}>|</span>}
+                {i > 0 && <span style={{ color: "#2C2D34", margin: "0 6px" }}>|</span>}
                 <button
                   onClick={() => onReadFilterChange(f.value)}
                   style={{
@@ -302,7 +302,7 @@ export function NewsTab({
                 fontSize: 11,
                 fontWeight: 500,
                 background: "transparent",
-                border: "1px solid #2D2D32",
+                border: "1px solid #2C2D34",
                 borderRadius: 2,
                 padding: "2px 22px 2px 8px",
                 color: "#EBEBEB",
@@ -324,7 +324,7 @@ export function NewsTab({
 
       {/* Active filter chips (dismissable) */}
       {(activeFilters.length > 0 || searchQuery) && (
-        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-[#2D2D32] bg-[#0D0D0F]">
+        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-[#2C2D34] bg-[#0D0E12]">
           <span style={{ fontSize: 9, fontWeight: 600, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: 4 }}>필터</span>
           {activeFilters.map((f) => (
             <button
@@ -438,7 +438,7 @@ export function NewsTab({
 
         {/* Right column: Detail or empty state */}
         {selectedArticle ? (
-          <div className="overflow-y-auto border-l border-[#2D2D32]">
+          <div className="overflow-y-auto border-l border-[#2C2D34]">
             <ArticleDetail
               article={selectedArticle}
               onToggleRead={onToggleRead}
@@ -453,17 +453,17 @@ export function NewsTab({
             />
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center border-l border-[#2D2D32]">
+          <div className="flex flex-col items-center justify-center border-l border-[#2C2D34]">
             <EmptyState
               glyph="no-selection"
               title="기사를 선택하세요"
               description="왼쪽 목록에서 클릭하거나 j / k 키로 이동할 수 있습니다."
             />
             <div style={{ display: "flex", gap: 6, marginTop: -12 }}>
-              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>j</kbd>
-              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>k</kbd>
+              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>j</kbd>
+              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>k</kbd>
               <span style={{ fontSize: 10, color: "#8C8C91" }}>위/아래</span>
-              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2D2D32", borderRadius: 2, color: "#8C8C91" }}>Enter</kbd>
+              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>Enter</kbd>
               <span style={{ fontSize: 10, color: "#8C8C91" }}>열기</span>
             </div>
           </div>

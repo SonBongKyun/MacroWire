@@ -52,7 +52,7 @@ const REC_LABELS: Record<string, string> = {
 /* ── confidence bar ── */
 function ConfidenceBar({ value }: { value: number }) {
   return (
-    <div style={{ width: 60, height: 3, background: "#2D2D32", position: "relative" }}>
+    <div style={{ width: 60, height: 3, background: "#2C2D34", position: "relative" }}>
       <div
         style={{
           width: `${value}%`,
@@ -66,7 +66,7 @@ function ConfidenceBar({ value }: { value: number }) {
 
 /* ── section separator ── */
 function SectionSep() {
-  return <div style={{ borderTop: "1px solid #2D2D32", margin: "20px 0" }} />;
+  return <div style={{ borderTop: "1px solid #2C2D34", margin: "20px 0" }} />;
 }
 
 export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfolioPrices }: AiTabProps) {
@@ -260,11 +260,11 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         gridTemplateColumns: "60% 40%",
         height: "100%",
         overflow: "hidden",
-        background: "#0D0D0F",
+        background: "#0D0E12",
       }}
     >
       {/* ══════════ LEFT COLUMN ══════════ */}
-      <div style={{ overflowY: "auto", padding: "24px 28px", borderRight: "1px solid #2D2D32" }}>
+      <div style={{ overflowY: "auto", padding: "24px 28px", borderRight: "1px solid #2C2D34" }}>
 
         {/* ── AI MARKET BRIEF ── */}
         <div className="dash-section-title">AI MARKET BRIEF</div>
@@ -309,7 +309,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   style={{
                     fontSize: 10,
                     padding: "2px 8px",
-                    border: "1px solid #2D2D32",
+                    border: "1px solid #2C2D34",
                     color: "#C9A96E",
                     fontFamily: "'Space Mono', monospace",
                   }}
@@ -415,7 +415,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   fontSize: 8,
                   fontWeight: 700,
                   padding: "2px 5px",
-                  border: "1px solid #2D2D32",
+                  border: "1px solid #2C2D34",
                   color: rec.type === "breaking" ? "#ef4444" : "#C9A96E",
                   whiteSpace: "nowrap",
                   letterSpacing: "0.05em",
@@ -523,7 +523,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               >
                 {name}
               </span>
-              <div style={{ flex: 1, height: 3, background: "#2D2D32", position: "relative" }}>
+              <div style={{ flex: 1, height: 3, background: "#2C2D34", position: "relative" }}>
                 <div
                   style={{
                     width: `${(count / maxEntityFreq) * 100}%`,

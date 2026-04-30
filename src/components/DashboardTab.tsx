@@ -86,8 +86,8 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
         transform: "translateX(-50%)",
         marginTop: 6,
         zIndex: 50,
-        background: "#1A1A1F",
-        border: "1px solid #2D2D32",
+        background: "#1B1C22",
+        border: "1px solid #2C2D34",
         borderRadius: 2,
         boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
         maxWidth: 200,
@@ -144,7 +144,7 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
         </span>
       </div>
       {hasRange ? (
-        <div style={{ borderTop: "1px solid #2D2D32", paddingTop: 6 }}>
+        <div style={{ borderTop: "1px solid #2C2D34", paddingTop: 6 }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91" }}>
             <span>저가</span>
             <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
@@ -159,7 +159,7 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
           </div>
         </div>
       ) : item.open != null ? (
-        <div style={{ borderTop: "1px solid #2D2D32", paddingTop: 6 }}>
+        <div style={{ borderTop: "1px solid #2C2D34", paddingTop: 6 }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91" }}>
             <span>시가</span>
             <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
@@ -259,7 +259,7 @@ function LayoutDropdown({
         onClick={() => setOpen((v) => !v)}
         style={{
           background: open ? "rgba(201,169,110,0.1)" : "transparent",
-          border: open ? "1px solid #C9A96E" : "1px solid #2D2D32",
+          border: open ? "1px solid #C9A96E" : "1px solid #2C2D34",
           color: open ? "#C9A96E" : "#8C8C91",
           fontSize: 10,
           fontWeight: 600,
@@ -287,8 +287,8 @@ function LayoutDropdown({
             right: 0,
             top: "100%",
             marginTop: 4,
-            background: "#1A1A1E",
-            border: "1px solid #2D2D32",
+            background: "#1B1C22",
+            border: "1px solid #2C2D34",
             minWidth: 220,
             boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
             zIndex: 50,
@@ -298,7 +298,7 @@ function LayoutDropdown({
             <>
               {/* Saved layouts */}
               {layouts.length > 0 && (
-                <div style={{ padding: "6px 0", borderBottom: "1px solid #2D2D32" }}>
+                <div style={{ padding: "6px 0", borderBottom: "1px solid #2C2D34" }}>
                   <div style={{ padding: "4px 12px", fontSize: 9, color: "#8C8C91", fontWeight: 700, letterSpacing: "0.06em" }}>
                     저장된 레이아웃
                   </div>
@@ -363,7 +363,7 @@ function LayoutDropdown({
                     color: "#EBEBEB",
                     fontSize: 11,
                     cursor: "pointer",
-                    borderBottom: "1px solid #2D2D32",
+                    borderBottom: "1px solid #2C2D34",
                   }}
                   onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.08)"; }}
                   onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
@@ -374,7 +374,7 @@ function LayoutDropdown({
                   )}
                 </button>
               ) : (
-                <div style={{ padding: "8px 12px", borderBottom: "1px solid #2D2D32", display: "flex", gap: 6 }}>
+                <div style={{ padding: "8px 12px", borderBottom: "1px solid #2C2D34", display: "flex", gap: 6 }}>
                   <input
                     autoFocus
                     value={saveName}
@@ -390,8 +390,8 @@ function LayoutDropdown({
                     placeholder="레이아웃 이름"
                     style={{
                       flex: 1,
-                      background: "#0D0D0F",
-                      border: "1px solid #2D2D32",
+                      background: "#0D0E12",
+                      border: "1px solid #2C2D34",
                       color: "#EBEBEB",
                       fontSize: 11,
                       padding: "3px 8px",
@@ -409,7 +409,7 @@ function LayoutDropdown({
                     style={{
                       background: "#C9A96E",
                       border: "none",
-                      color: "#0D0D0F",
+                      color: "#0D0E12",
                       fontSize: 10,
                       fontWeight: 700,
                       padding: "3px 8px",
@@ -442,7 +442,7 @@ function LayoutDropdown({
             </>
           ) : (
             <>
-              <div style={{ padding: "8px 12px", borderBottom: "1px solid #2D2D32", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ padding: "8px 12px", borderBottom: "1px solid #2C2D34", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 10, fontWeight: 700, color: "#EBEBEB", letterSpacing: "0.04em" }}>섹션 편집</span>
                 <button
                   onClick={() => setEditing(false)}
@@ -769,8 +769,8 @@ function ReadingProgressSection({
               onChange={(e) => onSetGoal({ dailyTarget: Math.max(1, parseInt(e.target.value) || 1) })}
               style={{
                 width: 60,
-                background: "#0D0D0F",
-                border: "1px solid #2D2D32",
+                background: "#0D0E12",
+                border: "1px solid #2C2D34",
                 color: "#EBEBEB",
                 fontSize: 12,
                 fontFamily: "var(--font-mono)",
@@ -791,8 +791,8 @@ function ReadingProgressSection({
               onChange={(e) => onSetGoal({ weeklyTarget: Math.max(1, parseInt(e.target.value) || 1) })}
               style={{
                 width: 60,
-                background: "#0D0D0F",
-                border: "1px solid #2D2D32",
+                background: "#0D0E12",
+                border: "1px solid #2C2D34",
                 color: "#EBEBEB",
                 fontSize: 12,
                 fontFamily: "var(--font-mono)",
@@ -814,7 +814,7 @@ function ReadingProgressSection({
                 {progress.todayRead}/{goal.dailyTarget}
               </span>
             </div>
-            <div style={{ width: "100%", height: 4, background: "#2D2D32", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: 4, background: "#2C2D34", overflow: "hidden" }}>
               <div
                 style={{
                   width: `${dailyPct}%`,
@@ -834,7 +834,7 @@ function ReadingProgressSection({
                 {progress.weekRead}/{goal.weeklyTarget}
               </span>
             </div>
-            <div style={{ width: "100%", height: 4, background: "#2D2D32", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: 4, background: "#2C2D34", overflow: "hidden" }}>
               <div
                 style={{
                   width: `${weeklyPct}%`,
@@ -900,7 +900,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
               key={i}
               style={{
                 padding: "10px 0",
-                borderBottom: i < insights.length - 1 ? "1px solid #1e1e22" : "none",
+                borderBottom: i < insights.length - 1 ? "1px solid #1F2026" : "none",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -957,7 +957,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                     flex: 1,
                     maxWidth: 120,
                     height: 3,
-                    background: "#1e1e22",
+                    background: "#1F2026",
                     borderRadius: 1,
                     overflow: "hidden",
                   }}
@@ -1208,7 +1208,7 @@ export default function DashboardTab({
         {marketLoading ? (
           <>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} style={{ background: "#131316", border: "1px solid #2D2D32", padding: 16 }}>
+              <div key={i} style={{ background: "#131316", border: "1px solid #2C2D34", padding: 16 }}>
                 <div className="skeleton" style={{ height: 10, width: 48, marginBottom: 8 }} />
                 <div className="skeleton" style={{ height: 28, width: 100, marginBottom: 6 }} />
                 <div className="skeleton" style={{ height: 15, width: 70, marginBottom: 8 }} />
@@ -1406,7 +1406,7 @@ export default function DashboardTab({
                 border: "1px solid rgba(239,68,68,0.18)",
                 borderLeft: "2px solid rgba(239,68,68,0.55)",
                 borderRadius: 2,
-                background: "linear-gradient(180deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 40%, rgba(13,13,15,0) 100%)",
+                background: "linear-gradient(180deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 40%, rgba(13,14,18,0) 100%)",
                 marginBottom: 20,
                 boxShadow: "inset 0 1px 0 rgba(239,68,68,0.12), 0 1px 0 rgba(0,0,0,0.3)",
                 overflow: "hidden",
@@ -1505,8 +1505,8 @@ export default function DashboardTab({
                 display: "block",
                 textAlign: "left",
                 width: "100%",
-                background: "#141418",
-                border: "1px solid #2D2D32",
+                background: "#15161C",
+                border: "1px solid #2C2D34",
                 borderTop: "1px solid rgba(201,169,110,0.25)",
                 borderLeft: "3px solid #C9A96E",
                 padding: "24px 28px",
@@ -1561,7 +1561,7 @@ export default function DashboardTab({
               </div>
             </button>
           ) : (
-            <div style={{ borderLeft: "3px solid #2D2D32", paddingLeft: 24, marginBottom: 24, background: "#141418", padding: "24px 28px", border: "1px solid #2D2D32", borderTop: "1px solid rgba(201,169,110,0.15)" }}>
+            <div style={{ borderLeft: "3px solid #2C2D34", paddingLeft: 24, marginBottom: 24, background: "#15161C", padding: "24px 28px", border: "1px solid #2C2D34", borderTop: "1px solid rgba(201,169,110,0.15)" }}>
               <div className="skeleton" style={{ height: 24, width: "70%", marginBottom: 10 }} />
               <div className="skeleton" style={{ height: 14, width: "40%" }} />
             </div>
@@ -1578,7 +1578,7 @@ export default function DashboardTab({
                   style={{
                     textAlign: "left",
                     border: "none",
-                    borderBottom: "1px solid #1e1e22",
+                    borderBottom: "1px solid #1F2026",
                     width: "100%",
                     padding: "10px 8px",
                     cursor: "pointer",
@@ -1671,7 +1671,7 @@ export default function DashboardTab({
                         textAlign: "left",
                         background: "transparent",
                         border: "none",
-                        borderBottom: "1px solid #1e1e22",
+                        borderBottom: "1px solid #1F2026",
                         padding: "8px 4px",
                         cursor: "pointer",
                         transition: "background 0.15s ease",
@@ -1867,7 +1867,7 @@ export default function DashboardTab({
                                   justifyContent: "center",
                                   fontSize: 8,
                                   fontWeight: 800,
-                                  color: "#0D0D0F",
+                                  color: "#0D0E12",
                                   background: color,
                                   borderRadius: 1,
                                   padding: "1px 4px",

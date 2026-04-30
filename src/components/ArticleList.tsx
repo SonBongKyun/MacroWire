@@ -52,7 +52,7 @@ function timeAgo(dateStr: string): string {
 
 function SkeletonRow() {
   return (
-    <div style={{ padding: "10px 16px", borderBottom: "1px solid #2D2D32" }}>
+    <div style={{ padding: "10px 16px", borderBottom: "1px solid #2C2D34" }}>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <div className="skeleton" style={{ width: "70%", height: 14, borderRadius: 2 }} />
         <div className="skeleton" style={{ width: 40, height: 10, borderRadius: 2, marginLeft: "auto" }} />
@@ -263,7 +263,7 @@ export function ArticleList({
         className="flex-1 overflow-y-auto"
         ref={listRef}
         onScroll={handleListScroll}
-        style={{ backgroundColor: "#0D0D0F" }}
+        style={{ backgroundColor: "#0D0E12" }}
       >
         {loading && articles.length === 0 && (
           <>
@@ -311,7 +311,7 @@ export function ArticleList({
                     style={{
                       height: ROW_HEIGHT,
                       padding: "10px 16px",
-                      borderBottom: "1px solid #2D2D32",
+                      borderBottom: "1px solid #2C2D34",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "flex-start",
@@ -493,8 +493,8 @@ export function ArticleList({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#2D2D32",
-            border: "1px solid #2D2D32",
+            backgroundColor: "#2C2D34",
+            border: "1px solid #2C2D34",
             borderRadius: 2,
             color: "#EBEBEB",
             cursor: "pointer",

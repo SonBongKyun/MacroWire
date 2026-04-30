@@ -29,8 +29,8 @@ interface Rates {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "#1A1A1F",
-  border: "1px solid #2D2D32",
+  background: "#1B1C22",
+  border: "1px solid #2C2D34",
   color: "#EBEBEB",
   fontSize: 13,
   fontFamily: "var(--font-mono)",
@@ -115,7 +115,7 @@ function ReturnCalculator() {
       {result && (
         <div
           style={{
-            borderTop: "1px solid #2D2D32",
+            borderTop: "1px solid #2C2D34",
             paddingTop: 10,
             display: "flex",
             flexDirection: "column",
@@ -236,7 +236,7 @@ function CompoundCalculator() {
       {result && (
         <div
           style={{
-            borderTop: "1px solid #2D2D32",
+            borderTop: "1px solid #2C2D34",
             paddingTop: 10,
             display: "flex",
             flexDirection: "column",
@@ -427,7 +427,7 @@ function ExchangeCalculator() {
       {result !== null && (
         <div
           style={{
-            borderTop: "1px solid #2D2D32",
+            borderTop: "1px solid #2C2D34",
             paddingTop: 10,
             display: "flex",
             flexDirection: "column",
@@ -480,8 +480,8 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
         width: 360,
         maxHeight: "80vh",
         overflowY: "auto",
-        background: "#0D0D0F",
-        border: "1px solid #2D2D32",
+        background: "#0D0E12",
+        border: "1px solid #2C2D34",
         boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
       }}
     >
@@ -492,7 +492,7 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
           alignItems: "center",
           justifyContent: "space-between",
           padding: "10px 14px",
-          borderBottom: "1px solid #2D2D32",
+          borderBottom: "1px solid #2C2D34",
         }}
       >
         <span
@@ -526,7 +526,7 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
       <div
         style={{
           display: "flex",
-          borderBottom: "1px solid #2D2D32",
+          borderBottom: "1px solid #2C2D34",
         }}
       >
         {TABS.map((tab) => (

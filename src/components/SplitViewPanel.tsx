@@ -62,15 +62,15 @@ export function SplitViewPanel({
     <div
       className="h-full overflow-y-auto"
       style={{
-        borderLeft: "1px solid #2D2D32",
-        background: "#0D0D0F",
+        borderLeft: "1px solid #2C2D34",
+        background: "#0D0E12",
       }}
     >
       {/* Mode Toggle */}
       <div
         className="flex items-center shrink-0"
         style={{
-          borderBottom: "1px solid #2D2D32",
+          borderBottom: "1px solid #2C2D34",
           height: 32,
           padding: "0 12px",
           gap: 0,
@@ -145,7 +145,7 @@ export function SplitViewPanel({
                       alignItems: "center",
                       justifyContent: "space-between",
                       padding: "6px 0",
-                      borderBottom: "1px solid rgba(45,45,50,0.5)",
+                      borderBottom: "1px solid rgba(44,45,52,0.5)",
                     }}
                   >
                     <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -232,7 +232,7 @@ export function SplitViewPanel({
                   key={stat.label}
                   style={{
                     padding: "8px 10px",
-                    border: "1px solid #2D2D32",
+                    border: "1px solid #2C2D34",
                     borderRadius: 2,
                   }}
                 >
@@ -334,7 +334,7 @@ export function SplitViewPanel({
                         alignItems: "center",
                         justifyContent: "space-between",
                         padding: "5px 0",
-                        borderBottom: "1px solid rgba(45,45,50,0.5)",
+                        borderBottom: "1px solid rgba(44,45,52,0.5)",
                       }}
                     >
                       <span style={{ fontSize: 11, color: "#EBEBEB", fontWeight: 500 }}>

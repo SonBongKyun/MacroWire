@@ -65,7 +65,7 @@ const sectionHeaderStyle: React.CSSProperties = {
   color: "#8C8C91",
   textTransform: "uppercase",
   letterSpacing: "0.1em",
-  borderBottom: "1px solid #2D2D32",
+  borderBottom: "1px solid #2C2D34",
   paddingBottom: 8,
   marginBottom: 0,
   display: "flex",
@@ -80,14 +80,14 @@ const thStyle: React.CSSProperties = {
   textTransform: "uppercase",
   letterSpacing: "0.04em",
   padding: "10px 0",
-  borderBottom: "1px solid #2D2D32",
+  borderBottom: "1px solid #2C2D34",
 };
 
 const inputStyle: React.CSSProperties = {
   padding: "6px 10px",
   fontSize: 11,
   backgroundColor: "transparent",
-  border: "1px solid #2D2D32",
+  border: "1px solid #2C2D34",
   borderRadius: 2,
   color: "#EBEBEB",
   outline: "none",
@@ -98,7 +98,7 @@ const goldBtnStyle: React.CSSProperties = {
   fontSize: 10,
   fontWeight: 700,
   backgroundColor: "#C9A96E",
-  color: "#0D0D0F",
+  color: "#0D0E12",
   border: "none",
   borderRadius: 2,
   cursor: "pointer",
@@ -262,7 +262,7 @@ export function MarketsTab({
   const marketItems = marketData.length > 0 ? marketData : defaultMarketItems;
 
   return (
-    <div className="overflow-y-auto h-full" style={{ backgroundColor: "#0D0D0F" }}>
+    <div className="overflow-y-auto h-full" style={{ backgroundColor: "#0D0E12" }}>
       <div style={{ padding: "24px 24px 40px", maxWidth: 960, margin: "0 auto" }}>
 
         {/* ── Section 1: Market Indicators ── */}
@@ -272,7 +272,7 @@ export function MarketsTab({
                 <div
                   key={i}
                   style={{
-                    border: "1px solid #2D2D32",
+                    border: "1px solid #2C2D34",
                     borderRadius: 2,
                     padding: "14px 16px",
                   }}
@@ -288,7 +288,7 @@ export function MarketsTab({
                   <div
                     key={item.symbol}
                     style={{
-                      border: "1px solid #2D2D32",
+                      border: "1px solid #2C2D34",
                       borderRadius: 2,
                       padding: "14px 16px",
                     }}
@@ -346,7 +346,7 @@ export function MarketsTab({
               color: "#8C8C91",
               textTransform: "uppercase",
               letterSpacing: "0.1em",
-              borderBottom: "1px solid #2D2D32",
+              borderBottom: "1px solid #2C2D34",
               paddingBottom: 8,
               marginBottom: 12,
               fontFamily: "var(--font-mono)",
@@ -355,7 +355,7 @@ export function MarketsTab({
             </div>
 
             {/* Asset selector */}
-            <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid #2D2D32" }}>
+            <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid #2C2D34" }}>
               {portfolioPrices.map((p, idx) => (
                 <button
                   key={p.symbol}
@@ -418,7 +418,7 @@ export function MarketsTab({
                 <th style={{ ...thStyle, textAlign: "right" }}>현재가</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>변동</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>변동%</th>
-                <th style={{ width: 32, borderBottom: "1px solid #2D2D32" }} />
+                <th style={{ width: 32, borderBottom: "1px solid #2C2D34" }} />
               </tr>
             </thead>
             <tbody>
@@ -437,22 +437,22 @@ export function MarketsTab({
                         transition: "background-color 0.1s",
                       }}
                     >
-                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "#EBEBEB", borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
                         {p.label}
                       </td>
-                      <td style={{ padding: "8px 0", fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91", borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91", borderBottom: "1px solid #2C2D34" }}>
                         {p.symbol}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
                         {formatPrice(p.price, p.symbol)}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 500, color: changeColor, borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 500, color: changeColor, borderBottom: "1px solid #2C2D34" }}>
                         {isUp ? "+" : ""}{p.change.toFixed(2)}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 600, color: changeColor, borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 600, color: changeColor, borderBottom: "1px solid #2C2D34" }}>
                         {isUp ? "+" : ""}{p.changePct.toFixed(2)}%
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid #2D2D32", width: 32 }}>
+                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid #2C2D34", width: 32 }}>
                         <button
                           onClick={() => onRemoveAsset(p.symbol)}
                           style={{
@@ -547,7 +547,7 @@ export function MarketsTab({
                   <th style={{ ...thStyle, textAlign: "right" }}>목표가</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>방향</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>상태</th>
-                  <th style={{ width: 60, borderBottom: "1px solid #2D2D32" }} />
+                  <th style={{ width: 60, borderBottom: "1px solid #2C2D34" }} />
                 </tr>
               </thead>
               <tbody>
@@ -561,7 +561,7 @@ export function MarketsTab({
                         fontSize: 13,
                         fontWeight: 500,
                         color: rowColor,
-                        borderBottom: "1px solid #2D2D32",
+                        borderBottom: "1px solid #2C2D34",
                       }}>
                         {alert.label}
                         <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91" }}>
@@ -575,7 +575,7 @@ export function MarketsTab({
                         fontWeight: 600,
                         fontFamily: "var(--font-mono)",
                         color: rowColor,
-                        borderBottom: "1px solid #2D2D32",
+                        borderBottom: "1px solid #2C2D34",
                       }}>
                         {formatPrice(alert.targetPrice, alert.symbol)}
                       </td>
@@ -586,7 +586,7 @@ export function MarketsTab({
                         fontFamily: "var(--font-mono)",
                         fontWeight: 600,
                         color: alert.direction === "above" ? "#16a34a" : "#dc2626",
-                        borderBottom: "1px solid #2D2D32",
+                        borderBottom: "1px solid #2C2D34",
                       }}>
                         {alert.direction === "above" ? "▲" : "▼"}
                       </td>
@@ -598,11 +598,11 @@ export function MarketsTab({
                         textTransform: "uppercase",
                         letterSpacing: "0.04em",
                         color: isTriggered ? "#C9A96E" : alert.active ? "#16a34a" : "#8C8C91",
-                        borderBottom: "1px solid #2D2D32",
+                        borderBottom: "1px solid #2C2D34",
                       }}>
                         {isTriggered ? "TRIGGERED" : alert.active ? "ACTIVE" : "OFF"}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", borderBottom: "1px solid #2D2D32", width: 60, whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", borderBottom: "1px solid #2C2D34", width: 60, whiteSpace: "nowrap" }}>
                         {!isTriggered && (
                           <button
                             onClick={() => toggleAlert(alert.id)}
@@ -675,7 +675,7 @@ export function MarketsTab({
                 style={{ ...selectStyle, flex: 1 }}
               >
                 {portfolioAssets.map((a) => (
-                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#0D0D0F", color: "#EBEBEB" }}>
+                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#0D0E12", color: "#EBEBEB" }}>
                     {a.label}
                   </option>
                 ))}
@@ -693,8 +693,8 @@ export function MarketsTab({
                 onChange={(e) => setAlertDirection(e.target.value as "above" | "below")}
                 style={{ ...selectStyle, width: 80 }}
               >
-                <option value="above" style={{ backgroundColor: "#0D0D0F", color: "#EBEBEB" }}>▲ 이상</option>
-                <option value="below" style={{ backgroundColor: "#0D0D0F", color: "#EBEBEB" }}>▼ 이하</option>
+                <option value="above" style={{ backgroundColor: "#0D0E12", color: "#EBEBEB" }}>▲ 이상</option>
+                <option value="below" style={{ backgroundColor: "#0D0E12", color: "#EBEBEB" }}>▼ 이하</option>
               </select>
               <button onClick={handleAddAlert} style={goldBtnStyle}>추가</button>
               <button onClick={() => setShowAlertForm(false)} style={cancelBtnStyle}>취소</button>
@@ -729,7 +729,7 @@ export function MarketsTab({
                   <th style={{ ...thStyle, textAlign: "right" }}>현재가</th>
                   <th style={{ ...thStyle, textAlign: "right" }}>손익</th>
                   <th style={{ ...thStyle, textAlign: "right" }}>손익%</th>
-                  <th style={{ width: 32, borderBottom: "1px solid #2D2D32" }} />
+                  <th style={{ width: 32, borderBottom: "1px solid #2C2D34" }} />
                 </tr>
               </thead>
               <tbody>
@@ -737,28 +737,28 @@ export function MarketsTab({
                   const pnlColor = item.pnl >= 0 ? "#16a34a" : "#dc2626";
                   return (
                     <tr key={item.symbol}>
-                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "#EBEBEB", borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
                         {item.label}
                         <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91" }}>
                           {item.symbol}
                         </span>
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
                         {item.quantity.toLocaleString()}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "#8C8C91", borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "#8C8C91", borderBottom: "1px solid #2C2D34" }}>
                         {formatPrice(item.avgCost, item.symbol)}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
                         {item.currentPrice > 0 ? formatPrice(item.currentPrice, item.symbol) : "--"}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid #2C2D34" }}>
                         {formatPnL(item.pnl)}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid #2D2D32" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid #2C2D34" }}>
                         {item.pnl >= 0 ? "+" : ""}{item.pnlPct.toFixed(2)}%
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid #2D2D32", width: 32 }}>
+                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid #2C2D34", width: 32 }}>
                         <button
                           onClick={() => removePosition(item.symbol)}
                           style={{
@@ -780,14 +780,14 @@ export function MarketsTab({
                 })}
                 {/* Total row */}
                 <tr>
-                  <td style={{ padding: "10px 0", fontSize: 12, fontWeight: 700, color: "#EBEBEB", borderTop: "1px solid #2D2D32" }}>
+                  <td style={{ padding: "10px 0", fontSize: 12, fontWeight: 700, color: "#EBEBEB", borderTop: "1px solid #2C2D34" }}>
                     TOTAL
                   </td>
-                  <td style={{ borderTop: "1px solid #2D2D32" }} />
-                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontFamily: "var(--font-mono)", color: "#8C8C91", borderTop: "1px solid #2D2D32" }}>
+                  <td style={{ borderTop: "1px solid #2C2D34" }} />
+                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontFamily: "var(--font-mono)", color: "#8C8C91", borderTop: "1px solid #2C2D34" }}>
                     {pnlData.totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderTop: "1px solid #2D2D32" }}>
+                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderTop: "1px solid #2C2D34" }}>
                     {pnlData.totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td style={{
@@ -797,7 +797,7 @@ export function MarketsTab({
                     fontWeight: 700,
                     fontFamily: "var(--font-mono)",
                     color: pnlData.totalPnL >= 0 ? "#16a34a" : "#dc2626",
-                    borderTop: "1px solid #2D2D32",
+                    borderTop: "1px solid #2C2D34",
                   }}>
                     {formatPnL(pnlData.totalPnL)}
                   </td>
@@ -808,11 +808,11 @@ export function MarketsTab({
                     fontWeight: 700,
                     fontFamily: "var(--font-mono)",
                     color: pnlData.totalReturnPct >= 0 ? "#16a34a" : "#dc2626",
-                    borderTop: "1px solid #2D2D32",
+                    borderTop: "1px solid #2C2D34",
                   }}>
                     {pnlData.totalReturnPct >= 0 ? "+" : ""}{pnlData.totalReturnPct.toFixed(2)}%
                   </td>
-                  <td style={{ borderTop: "1px solid #2D2D32" }} />
+                  <td style={{ borderTop: "1px solid #2C2D34" }} />
                 </tr>
               </tbody>
             </table>
@@ -849,7 +849,7 @@ export function MarketsTab({
                 style={{ ...selectStyle, flex: 1 }}
               >
                 {portfolioAssets.map((a) => (
-                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#0D0D0F", color: "#EBEBEB" }}>
+                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#0D0E12", color: "#EBEBEB" }}>
                     {a.label}
                   </option>
                 ))}
@@ -883,7 +883,7 @@ export function MarketsTab({
             color: "#8C8C91",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
-            borderBottom: "1px solid #2D2D32",
+            borderBottom: "1px solid #2C2D34",
             paddingBottom: 8,
             marginBottom: 12,
           }}>
