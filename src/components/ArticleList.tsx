@@ -300,9 +300,7 @@ export function ArticleList({
               {visibleArticles.map((article) => {
                 const isSelected = selectedArticleId === article.id;
                 const isUnread = !article.isRead;
-                // Primary category tag (skip 속보 — that's a priority badge, not a category)
-                const primaryTag = article.tags.find((t) => t !== "속보" && TAG_COLORS[t]);
-                const primaryColor = primaryTag ? TAG_COLORS[primaryTag] : null;
+                const isBreaking = article.tags.includes("속보");
                 return (
                   <div
                     key={article.id}
@@ -322,10 +320,8 @@ export function ArticleList({
                         : "transparent",
                       borderLeft: isSelected
                         ? "2px solid #C9A96E"
-                        : article.tags.includes("속보") && isUnread
+                        : isBreaking && isUnread
                         ? "2px solid rgba(239,68,68,0.65)"
-                        : primaryColor && isUnread
-                        ? `2px solid ${primaryColor}80`
                         : "2px solid transparent",
                       opacity: !isUnread && !isSelected ? 0.6 : 1,
                       boxSizing: "border-box",
@@ -340,22 +336,19 @@ export function ArticleList({
                       handleRowMouseLeave();
                     }}
                   >
-                    {/* Unread dot — 속보 = red, else category color, fallback gold */}
+                    {/* Unread dot — red for 속보, gold otherwise */}
                     <div style={{ width: 5, paddingTop: 5, flexShrink: 0 }}>
-                      {isUnread && (() => {
-                        const dotColor = article.tags.includes("속보")
-                          ? "#ef4444"
-                          : primaryColor || "#C9A96E";
-                        return (
-                          <div style={{
-                            width: 5,
-                            height: 5,
-                            borderRadius: "50%",
-                            backgroundColor: dotColor,
-                            boxShadow: `0 0 6px ${dotColor}88`,
-                          }} />
-                        );
-                      })()}
+                      {isUnread && (
+                        <div style={{
+                          width: 5,
+                          height: 5,
+                          borderRadius: "50%",
+                          backgroundColor: isBreaking ? "#ef4444" : "#C9A96E",
+                          boxShadow: isBreaking
+                            ? "0 0 6px rgba(239,68,68,0.5)"
+                            : "0 0 6px rgba(201,169,110,0.4)",
+                        }} />
+                      )}
                     </div>
 
                     {/* Content */}
@@ -414,13 +407,13 @@ export function ArticleList({
                         })()}
                       </div>
 
-                      {/* Tags row — filled colored chips */}
+                      {/* Tags row — neutral by default, category color on hover/active */}
                       {article.tags.length > 0 && (
                         <div style={{ display: "flex", gap: 4, marginTop: 5, flexWrap: "wrap" }}>
                           {article.tags.slice(0, 3).map((tag) => {
-                            const color = TAG_COLORS[tag] || "#64748b";
-                            // Skip the "속보" tag here — it's already rendered as a prominent pill before the title
+                            // Skip "속보" — already rendered as the prominent red pill before the title
                             if (tag === "속보") return null;
+                            const color = TAG_COLORS[tag] || "#64748b";
                             return (
                               <button
                                 key={tag}
@@ -428,18 +421,28 @@ export function ArticleList({
                                 style={{
                                   fontSize: 9,
                                   fontWeight: 600,
-                                  color,
-                                  background: `${color}14`,
-                                  border: `1px solid ${color}30`,
+                                  color: "#8C8C91",
+                                  background: "transparent",
+                                  border: "1px solid rgba(255,255,255,0.06)",
                                   padding: "1px 6px",
                                   borderRadius: 2,
                                   cursor: "pointer",
                                   lineHeight: 1.5,
                                   letterSpacing: "0.01em",
-                                  transition: "background 0.15s ease",
+                                  transition: "color 0.15s ease, background 0.15s ease, border-color 0.15s ease",
                                 }}
-                                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}24`; }}
-                                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${color}14`; }}
+                                onMouseEnter={(e) => {
+                                  const el = e.currentTarget as HTMLElement;
+                                  el.style.color = color;
+                                  el.style.background = `${color}14`;
+                                  el.style.borderColor = `${color}30`;
+                                }}
+                                onMouseLeave={(e) => {
+                                  const el = e.currentTarget as HTMLElement;
+                                  el.style.color = "#8C8C91";
+                                  el.style.background = "transparent";
+                                  el.style.borderColor = "rgba(255,255,255,0.06)";
+                                }}
                               >
                                 {tag}
                               </button>

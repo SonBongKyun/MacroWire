@@ -1,5 +1,7 @@
 "use client";
 
+import { TAG_COLORS } from "@/lib/constants/colors";
+
 interface FilterBarProps {
   selectedSourceName?: string;
   selectedTag: string | null;
@@ -38,10 +40,17 @@ export function FilterBar({
   onClearReadFilter,
   onClearAll,
 }: FilterBarProps) {
-  const chips: { label: string; onClear: () => void }[] = [];
+  const chips: { label: string; onClear: () => void; color?: string }[] = [];
 
   if (selectedSourceName) chips.push({ label: `소스: ${selectedSourceName}`, onClear: onClearSource });
-  if (selectedTag) chips.push({ label: `태그: ${selectedTag}`, onClear: onClearTag });
+  if (selectedTag) {
+    chips.push({
+      label: `태그: ${selectedTag}`,
+      onClear: onClearTag,
+      // Tag color surfaces here — the moment a category becomes the active filter
+      color: TAG_COLORS[selectedTag],
+    });
+  }
   if (searchQuery) chips.push({ label: `검색: "${searchQuery}"`, onClear: onClearSearch });
   if (range !== "24h") chips.push({ label: `범위: ${RANGE_LABELS[range]}`, onClear: onClearRange });
   if (showSaved) chips.push({ label: "저장됨만", onClear: onClearSaved });
@@ -62,6 +71,13 @@ export function FilterBar({
             key={i}
             onClick={chip.onClear}
             className="filter-chip"
+            style={chip.color
+              ? {
+                  color: chip.color,
+                  background: `${chip.color}14`,
+                  borderColor: `${chip.color}40`,
+                }
+              : undefined}
           >
             {chip.label}
             <span className="chip-x">✕</span>

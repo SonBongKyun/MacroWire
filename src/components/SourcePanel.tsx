@@ -102,14 +102,18 @@ export function SourcePanel({
         </div>
         <div className="flex flex-wrap gap-1.5">
           {tags.map((tag) => {
-            const color = TAG_COLORS[tag] || "#475569";
+            const color = TAG_COLORS[tag] || "#64748b";
             const isActive = selectedTag === tag;
             return (
               <button
                 key={tag}
                 onClick={() => onSelectTag(tag)}
                 className="tag-pill"
-                style={isActive ? { color, backgroundColor: `${color}20`, borderColor: `${color}50` } : { color, opacity: 0.5 }}
+                style={
+                  isActive
+                    ? { color, backgroundColor: `${color}20`, borderColor: `${color}50` }
+                    : { color: "#8C8C91", backgroundColor: "transparent", borderColor: "rgba(255,255,255,0.06)" }
+                }
               >
                 {tag}
               </button>
