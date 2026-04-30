@@ -55,13 +55,20 @@ export default function RootLayout({
       </head>
       <body className={`${spaceMono.variable} antialiased`}>
         {children}
+        {/* Service worker — disabled. Unregister any leftover SW from a prior
+            version so cached "/" shells from before the landing/app split
+            stop ghosting the new landing page. Once the site has stable
+            offline support, this can be re-enabled. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js').catch(() => {});
+                navigator.serviceWorker.getRegistrations().then(regs => {
+                  regs.forEach(r => r.unregister());
                 });
+                if (window.caches) {
+                  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+                }
               }
             `,
           }}
