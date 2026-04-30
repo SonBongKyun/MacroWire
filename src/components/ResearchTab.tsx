@@ -337,7 +337,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                     background: isSelected ? "rgba(201,169,110,0.06)" : "transparent",
                     borderLeft: isSelected ? "2px solid #C9A96E" : "2px solid transparent",
                     cursor: "pointer",
-                    transition: "background 0.1s",
+                    transition: "background 0.15s",
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) e.currentTarget.style.background = "rgba(255,255,255,0.02)";

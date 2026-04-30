@@ -664,7 +664,7 @@ function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
                     width: `${rank.qualityScore}%`,
                     height: "100%",
                     background: scoreColor,
-                    transition: "width 0.4s ease",
+                    transition: "width 0.3s ease",
                   }}
                 />
               </div>
@@ -820,7 +820,7 @@ function ReadingProgressSection({
                   width: `${dailyPct}%`,
                   height: "100%",
                   background: "#C9A96E",
-                  transition: "width 0.4s ease",
+                  transition: "width 0.3s ease",
                 }}
               />
             </div>
@@ -840,7 +840,7 @@ function ReadingProgressSection({
                   width: `${weeklyPct}%`,
                   height: "100%",
                   background: "#C9A96E",
-                  transition: "width 0.4s ease",
+                  transition: "width 0.3s ease",
                 }}
               />
             </div>
@@ -1431,7 +1431,7 @@ export default function DashboardTab({
                         border: "none",
                         borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.08)" : "none",
                         cursor: "pointer",
-                        transition: "background 0.18s ease, padding-left 0.18s ease",
+                        transition: "background 0.2s ease, padding-left 0.2s ease",
                         position: "relative",
                       }}
                       onMouseEnter={(e) => {

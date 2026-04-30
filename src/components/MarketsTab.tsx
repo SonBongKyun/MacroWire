@@ -434,7 +434,7 @@ export function MarketsTab({
                       onMouseLeave={() => setHoveredRow(null)}
                       style={{
                         backgroundColor: isHovered ? "rgba(235,235,235,0.03)" : "transparent",
-                        transition: "background-color 0.1s",
+                        transition: "background-color 0.15s",
                       }}
                     >
                       <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
@@ -463,7 +463,7 @@ export function MarketsTab({
                             fontSize: 12,
                             fontFamily: "var(--font-mono)",
                             opacity: isHovered ? 1 : 0,
-                            transition: "opacity 0.1s",
+                            transition: "opacity 0.15s",
                             padding: "2px 4px",
                           }}
                           title="삭제"

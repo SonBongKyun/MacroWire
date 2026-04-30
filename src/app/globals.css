@@ -71,6 +71,20 @@
 }
 
 /* ──────────────────────────────────────
+   MOTION TOKENS — 3-tier interaction system
+   ────────────────────────────────────── */
+:root {
+  /* Durations */
+  --dur-hover: 0.15s;   /* small state changes — hover, color, opacity */
+  --dur-panel: 0.2s;    /* structural reveals — popovers, dropdowns, modals */
+  --dur-page:  0.3s;    /* layout-level transitions — section reveals */
+
+  /* Easing — Apple "ease-out expo": confident, settles smoothly */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ──────────────────────────────────────
    TYPE SYSTEM — Korean-first
    ────────────────────────────────────── */
 @theme {
@@ -218,7 +232,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
 }
-.detail-enter { animation: slide-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+.detail-enter { animation: slide-in-right 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
 
 @keyframes new-article-in {
   from { opacity: 0; transform: translateX(-6px); background-color: var(--gold-surface); }
@@ -232,7 +246,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   50% { transform: scale(1.25); }
   100% { transform: scale(1); }
 }
-.count-pop { animation: count-pop 0.25s ease-out; }
+.count-pop { animation: count-pop 0.2s ease-out; }
 
 @keyframes scroll-top-in {
   from { opacity: 0; transform: translateY(10px) scale(0.9); }
@@ -347,7 +361,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xs);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
 }
@@ -358,7 +372,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   height: 2px;
   background: var(--accent);
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.2s ease;
 }
 .glass-card:hover {
   border-color: var(--accent);
@@ -393,7 +407,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-xs);
-  transition: all 0.18s cubic-bezier(.4,0,.2,1);
+  transition: all 0.2s cubic-bezier(.4,0,.2,1);
 }
 .metal-btn:hover {
   border-color: var(--border-accent);
@@ -435,7 +449,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   border: none;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-accent);
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
@@ -455,7 +469,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   border: none;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-gold);
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 .btn-gold:hover {
   transform: translateY(-1px);
@@ -641,7 +655,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
 .cluster-content {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: grid-template-rows 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .cluster-content.expanded {
   grid-template-rows: 1fr;
@@ -715,7 +729,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
    ══════════════════════════════════════ */
 
 .sidebar-wrapper {
-  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
   overflow: hidden;
   position: relative;
 }
@@ -799,7 +813,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   from { opacity: 1; }
   to { opacity: 0; transform: translateY(-8px) scale(0.95); }
 }
-.toast-enter { animation: toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.toast-enter { animation: toast-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .toast-exit { animation: toast-out 0.15s ease-in forwards; }
 
 /* ══════════════════════════════════════
@@ -816,7 +830,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
 }
 .palette-enter { animation: palette-in 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
 .palette-backdrop { animation: palette-backdrop 0.15s ease-out; }
-.palette-item { transition: all 0.12s ease; border-left: 2px solid transparent; }
+.palette-item { transition: all 0.15s ease; border-left: 2px solid transparent; }
 .palette-item.active {
   background: var(--accent-surface);
   border-left-color: var(--accent);
@@ -1074,7 +1088,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
 /* Analytics features */
 .spike-alert-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
 .heatmap-cell {
-  transition: transform 0.12s ease;
+  transition: transform 0.15s ease;
   border-radius: 3px;
 }
 .heatmap-cell:hover {
@@ -1476,7 +1490,7 @@ html { scroll-behavior: smooth; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 .widget-card:hover {
@@ -1814,7 +1828,7 @@ html { scroll-behavior: smooth; }
   background: var(--surface);
   border: 1px solid var(--border);
   position: relative;
-  animation: fullscreen-slide-in 0.25s ease-out;
+  animation: fullscreen-slide-in 0.2s ease-out;
 }
 
 .fullscreen-close {
@@ -1876,7 +1890,7 @@ html { scroll-behavior: smooth; }
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl), 0 0 60px rgba(201, 169, 110, 0.05);
   padding: 4px 0;
-  animation: fade-in 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   backdrop-filter: blur(16px);
 }
 .ctx-menu-item {
@@ -1892,7 +1906,7 @@ html { scroll-behavior: smooth; }
   border: none;
   border-left: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: all 0.15s ease;
 }
 .ctx-menu-item:hover {
   background: var(--surface-hover);
@@ -2004,7 +2018,7 @@ button:active { transform: scale(0.98); }
   padding: 8px 0;
   border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
-  transition: background-color 0.1s ease;
+  transition: background-color 0.15s ease;
 }
 .dash-row:hover {
   background: var(--surface-hover);
@@ -2034,7 +2048,7 @@ button:active { transform: scale(0.98); }
   backdrop-filter: blur(6px);
   border: 1px solid #2C2D34;
   position: relative;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   overflow: hidden;
 }
 .market-strip-item::after {
@@ -2137,12 +2151,12 @@ button:active { transform: scale(0.98); }
 .list-stagger > *:nth-child(2) { animation-delay: 0.03s; }
 .list-stagger > *:nth-child(3) { animation-delay: 0.06s; }
 .list-stagger > *:nth-child(4) { animation-delay: 0.09s; }
-.list-stagger > *:nth-child(5) { animation-delay: 0.12s; }
+.list-stagger > *:nth-child(5) { animation-delay: 0.15s; }
 .list-stagger > *:nth-child(6) { animation-delay: 0.15s; }
-.list-stagger > *:nth-child(7) { animation-delay: 0.18s; }
+.list-stagger > *:nth-child(7) { animation-delay: 0.2s; }
 .list-stagger > *:nth-child(8) { animation-delay: 0.21s; }
 .list-stagger > *:nth-child(9) { animation-delay: 0.24s; }
-.list-stagger > *:nth-child(10) { animation-delay: 0.27s; }
+.list-stagger > *:nth-child(10) { animation-delay: 0.3s; }
 
 /* ══════════════════════════════════════
    LOADING TRANSITIONS
@@ -2160,7 +2174,7 @@ button:active { transform: scale(0.98); }
   to { opacity: 1; }
 }
 .content-loaded {
-  animation: content-appear 0.4s ease;
+  animation: content-appear 0.3s ease;
 }
 
 /* Price update flash */
@@ -2184,7 +2198,7 @@ button:active { transform: scale(0.98); }
 .section-reveal { animation: section-reveal 0.3s ease forwards; }
 .section-reveal:nth-child(1) { animation-delay: 0s; }
 .section-reveal:nth-child(2) { animation-delay: 0.05s; }
-.section-reveal:nth-child(3) { animation-delay: 0.1s; }
+.section-reveal:nth-child(3) { animation-delay: 0.15s; }
 .section-reveal:nth-child(4) { animation-delay: 0.15s; }
 
 /* Smooth number transition for prices */

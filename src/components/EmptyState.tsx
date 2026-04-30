@@ -100,7 +100,7 @@ export function EmptyState({
                 cursor: "pointer",
                 letterSpacing: "-0.008em",
                 boxShadow: "0 4px 14px rgba(201,169,110,0.20)",
-                transition: "transform 0.12s ease, box-shadow 0.12s ease",
+                transition: "transform 0.15s ease, box-shadow 0.15s ease",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
@@ -129,7 +129,7 @@ export function EmptyState({
                 borderRadius: 3,
                 cursor: "pointer",
                 letterSpacing: "-0.008em",
-                transition: "background 0.12s ease",
+                transition: "background 0.15s ease",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";

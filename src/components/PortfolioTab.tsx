@@ -516,7 +516,7 @@ export function PortfolioTab({
                       key={row.symbol}
                       style={{
                         borderBottom: "1px solid #1B1C22",
-                        transition: "background 0.1s",
+                        transition: "background 0.15s",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = "rgba(255,255,255,0.02)";

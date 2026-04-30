@@ -250,7 +250,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
                         : src.qualityScore > 30
                           ? "#8C8C91"
                           : "#ef4444",
-                    transition: "width 0.4s ease",
+                    transition: "width 0.3s ease",
                   }}
                 />
               </div>
