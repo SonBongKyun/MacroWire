@@ -2,84 +2,43 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 
 /* ════════════════════════════════════════════════════════════════
-   MacroWire — Marketing landing page (public-facing /)
-   The actual application lives at /app.
+   MacroWire — BULLETIN edition landing page
+   Reference language: Reuters Wire / AP Bulletin / FT.com / NYT teletype
    ════════════════════════════════════════════════════════════════ */
 
-const FEATURES = [
-  {
-    eyebrow: "00",
-    title: "90초마다 자동 갱신",
-    blurb:
-      "30개 이상의 신뢰 소스에서 90초마다 속보를 가져옵니다. 연합뉴스, 매일경제, 한국경제, Reuters, CNBC가 같은 화면에서 동시에 흘러갑니다.",
-    visual: "spike",
-  },
-  {
-    eyebrow: "01",
-    title: "로컬 AI 요약·감성",
-    blurb:
-      "외부 API 비용 없이 기기 안에서 동작합니다. 호재·악재·중립을 실시간으로 라벨링하고 비슷한 기사는 자동으로 묶어 노출합니다.",
-    visual: "sentiment",
-  },
-  {
-    eyebrow: "02",
-    title: "시장과 뉴스, 한 화면",
-    blurb:
-      "KOSPI · USD/KRW · S&P · WTI · BTC 가격이 헤더에서 흐르고, 워치리스트와 포트폴리오 P/L을 같은 대시보드에서 추적합니다.",
-    visual: "market",
-  },
-] as const;
+const PALETTE = {
+  obsidian: "#08090B",
+  ink: "#0E0F12",
+  paper: "#F5F0E1",
+  paperDim: "#C9C4B6",
+  amber: "#FFB000",
+  rule: "rgba(245,240,225,0.10)",
+  ruleStrong: "rgba(245,240,225,0.18)",
+} as const;
 
-const PRICING = [
-  {
-    name: "Free",
-    price: "₩0",
-    period: "영구 무료",
-    desc: "개인 모니터링용 핵심 기능 전부.",
-    features: [
-      "기본 30개 신뢰 소스",
-      "24시간 분석 범위",
-      "워치리스트 5종목",
-      "기본 시장 데이터 (5분 지연)",
-      "AI 요약 일 50건",
-    ],
-    cta: "지금 시작",
-    href: "/app",
-    accent: false,
-  },
-  {
-    name: "Pro",
-    price: "₩9,900",
-    period: "월간",
-    desc: "전문 트레이더·매크로 리서처용.",
-    features: [
-      "전체 60+ 소스 + 속보 우선 큐",
-      "무제한 분석 + 7일·30일 추세",
-      "워치리스트·포트폴리오 무제한",
-      "실시간 시장 데이터",
-      "AI 무제한 + 주간 리포트",
-      "푸시·이메일 속보 알림",
-    ],
-    cta: "Pro 시작",
-    href: "/app",
-    accent: true,
-  },
-] as const;
+function dispatchToday(): string {
+  const d = new Date();
+  const start = new Date(d.getFullYear(), 0, 0);
+  return String(Math.floor((d.getTime() - start.getTime()) / 86_400_000)).padStart(3, "0");
+}
+
+function dateline(): string {
+  const d = new Date();
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")} · KST`;
+}
 
 export default function LandingPage() {
   return (
     <main
-      className="text-[#EBEBEB]"
       style={{
-        background: "#0D0E12",
-        // Body uses `overflow: hidden` for the app shell; the landing creates
-        // its own vertical scroll context here.
+        background: PALETTE.obsidian,
+        color: PALETTE.paper,
         height: "100vh",
         overflowY: "auto",
         overflowX: "hidden",
       }}
     >
-      {/* Single ambient gold light source — same language as the app */}
+      {/* Subtle paper-grain noise overlay — replaces the gold radial halo */}
       <div
         aria-hidden="true"
         style={{
@@ -87,718 +46,714 @@ export default function LandingPage() {
           inset: 0,
           pointerEvents: "none",
           zIndex: 0,
-          background:
-            "radial-gradient(60% 50% at 88% 0%, rgba(201,169,110,0.10) 0%, rgba(201,169,110,0.04) 35%, transparent 65%), radial-gradient(50% 40% at 8% 100%, rgba(201,169,110,0.04) 0%, rgba(201,169,110,0.015) 40%, transparent 70%)",
+          opacity: 0.04,
+          backgroundImage:
+            "url(\"data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")",
         }}
       />
 
       <div style={{ position: "relative", zIndex: 1 }}>
-        <MarketingHeader />
-        <Hero />
-        <FeatureGrid />
-        <BigPullquote />
-        <Pricing />
-        <FinalCTA />
-        <Footer />
+        <Masthead />
+        <HeroDispatch />
+        <Bylines />
+        <FilingsGrid />
+        <PullQuote />
+        <Schedule />
+        <CallSheet />
+        <Colophon />
       </div>
     </main>
   );
 }
 
 /* ──────────────────────────────────────
-   HEADER
+   MASTHEAD — newspaper-style top bar
    ────────────────────────────────────── */
 
-function MarketingHeader() {
+function Masthead() {
   return (
     <header
       style={{
         position: "sticky",
         top: 0,
         zIndex: 30,
-        backdropFilter: "blur(20px) saturate(1.2)",
-        background: "rgba(13,14,18,0.65)",
-        borderBottom: "1px solid rgba(201,169,110,0.08)",
+        background: "rgba(8,9,11,0.85)",
+        backdropFilter: "blur(12px)",
+        borderBottom: `1px solid ${PALETTE.ruleStrong}`,
       }}
     >
       <div
         style={{
-          maxWidth: 1200,
+          maxWidth: 1280,
           margin: "0 auto",
           padding: "16px 32px",
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: "auto 1fr auto",
           alignItems: "center",
           gap: 32,
         }}
       >
-        <Logo size="sm" />
+        <Logo size="sm" caption />
 
         <nav
           style={{
-            marginLeft: "auto",
             display: "flex",
-            alignItems: "center",
             gap: 28,
-            fontSize: 14,
-            fontWeight: 500,
-            color: "#8C8C91",
+            justifyContent: "center",
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: PALETTE.paperDim,
           }}
         >
-          <a href="#features" className="lp-link">기능</a>
-          <a href="#pricing" className="lp-link">요금제</a>
-          <Link
-            href="/app"
-            style={{
-              padding: "8px 18px",
-              borderRadius: 4,
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#0D0E12",
-              background:
-                "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
-              boxShadow: "0 4px 14px rgba(201,169,110,0.25)",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            앱 열기 →
-          </Link>
+          <a href="#filings" className="bul-link">FILINGS</a>
+          <a href="#schedule" className="bul-link">SCHEDULE</a>
+          <a href="#callsheet" className="bul-link">SUBSCRIBE</a>
         </nav>
+
+        <Link
+          href="/app"
+          style={{
+            padding: "10px 22px",
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: PALETTE.obsidian,
+            background: PALETTE.amber,
+            borderRadius: 0,
+          }}
+        >
+          ENTER TERMINAL →
+        </Link>
       </div>
     </header>
   );
 }
 
 /* ──────────────────────────────────────
-   HERO
+   HERO DISPATCH — full-bleed editorial headline
    ────────────────────────────────────── */
 
-function Hero() {
+function HeroDispatch() {
   return (
     <section
       style={{
-        maxWidth: 1200,
+        maxWidth: 1280,
         margin: "0 auto",
-        padding: "96px 32px 80px",
-        textAlign: "center",
+        padding: "80px 32px 48px",
       }}
     >
-      <div
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "#C9A96E",
-          padding: "8px 14px",
-          borderRadius: 99,
-          background: "rgba(201,169,110,0.08)",
-          border: "1px solid rgba(201,169,110,0.20)",
-          marginBottom: 32,
-        }}
-      >
-        <span
-          style={{
-            display: "inline-block",
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            backgroundColor: "#C9A96E",
-            boxShadow: "0 0 8px rgba(201,169,110,0.6)",
-            animation: "pulse-dot 1.6s ease-in-out infinite",
-          }}
-        />
-        실시간 매크로 와이어 · BETA
-      </div>
-
-      <h1
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(40px, 7vw, 88px)",
-          fontWeight: 800,
-          lineHeight: 1.05,
-          letterSpacing: "-0.028em",
-          color: "#EBEBEB",
-          marginBottom: 24,
-        }}
-      >
-        분 단위로 도착하는<br />
-        <span
-          style={{
-            background:
-              "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-          }}
-        >
-          매크로 경제 와이어
-        </span>
-        .
-      </h1>
-
-      <p
-        style={{
-          fontSize: 18,
-          lineHeight: 1.6,
-          color: "#A1A1A6",
-          maxWidth: 640,
-          margin: "0 auto 44px",
-          letterSpacing: "-0.008em",
-        }}
-      >
-        30개 이상의 신뢰 소스에서 90초마다 속보를 가져옵니다.
-        AI가 정리하는 진짜 실시간 피드 — X/Twitter 속보 계정을 더 이상 새로고침할 필요가 없습니다.
-      </p>
-
+      {/* Top dateline — wire-service stamp */}
       <div
         style={{
           display: "flex",
-          gap: 12,
-          justifyContent: "center",
-          flexWrap: "wrap",
-          marginBottom: 80,
+          alignItems: "center",
+          gap: 16,
+          paddingBottom: 16,
+          marginBottom: 48,
+          borderBottom: `1px solid ${PALETTE.rule}`,
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: PALETTE.paperDim,
         }}
       >
+        <span style={{ color: PALETTE.amber }}>● LIVE</span>
+        <Sep />
+        <span>{dateline()}</span>
+        <Sep />
+        <span>SEOUL</span>
+        <Sep />
+        <span>WIRE №{dispatchToday()}</span>
+        <span style={{ marginLeft: "auto", color: PALETTE.paperDim }}>EST. 2026</span>
+      </div>
+
+      {/* Headline — Anton condensed, paper-cream, left-aligned */}
+      <h1
+        style={{
+          fontFamily: "var(--font-display-condensed), 'Anton', 'Pretendard Variable', sans-serif",
+          fontSize: "clamp(72px, 10vw, 156px)",
+          fontWeight: 900, // Pretendard 900 for Korean; Anton ignores (single-weight)
+          lineHeight: 0.92,
+          letterSpacing: "-0.01em",
+          color: PALETTE.paper,
+          textTransform: "uppercase",
+          margin: "0 0 32px",
+          textWrap: "balance",
+        }}
+      >
+        매크로 경제,<br />
+        <span style={{ color: PALETTE.amber }}>분 단위</span> 와이어로.
+      </h1>
+
+      {/* Subhead — serif editorial deck */}
+      <p
+        style={{
+          fontFamily: "var(--font-serif), 'Crimson Pro', serif",
+          fontSize: "clamp(18px, 2vw, 22px)",
+          fontWeight: 400,
+          fontStyle: "italic",
+          lineHeight: 1.5,
+          color: PALETTE.paperDim,
+          maxWidth: 720,
+          marginBottom: 48,
+          letterSpacing: "0",
+        }}
+      >
+        30개 신뢰 소스를 90초마다 갱신하는 단일 디스패치. 텔레그램·X 속보 계정을 더 이상 새로고침하지 않아도 되는, 한 줄짜리 와이어 피드.
+      </p>
+
+      {/* Dual CTA — solid amber + outlined paper */}
+      <div style={{ display: "flex", gap: 0, flexWrap: "wrap", alignItems: "center" }}>
         <Link
           href="/app"
           style={{
-            padding: "16px 28px",
-            borderRadius: 4,
-            fontSize: 15,
+            padding: "18px 28px",
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
             fontWeight: 700,
-            color: "#0D0E12",
-            background:
-              "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
-            boxShadow: "0 8px 28px rgba(201,169,110,0.25)",
-            letterSpacing: "-0.01em",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: PALETTE.obsidian,
+            background: PALETTE.amber,
+            borderRadius: 0,
           }}
         >
-          무료로 시작하기 →
+          무료로 시작 →
         </Link>
         <a
-          href="#features"
+          href="#filings"
           style={{
-            padding: "16px 28px",
-            borderRadius: 4,
-            fontSize: 15,
+            padding: "18px 28px",
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
             fontWeight: 600,
-            color: "#EBEBEB",
-            background: "transparent",
-            border: "1px solid rgba(255,255,255,0.10)",
-            letterSpacing: "-0.01em",
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: PALETTE.paper,
+            border: `1px solid ${PALETTE.ruleStrong}`,
+            borderLeft: "none",
+            borderRadius: 0,
           }}
         >
           기능 둘러보기
         </a>
       </div>
-
-      {/* Hero visual — Spike mark XL with surrounding gold halo */}
-      <div
-        style={{
-          position: "relative",
-          margin: "0 auto",
-          maxWidth: 760,
-          padding: "60px 32px",
-          borderRadius: 12,
-          border: "1px solid rgba(201,169,110,0.14)",
-          background:
-            "linear-gradient(180deg, rgba(21,22,28,0.5) 0%, rgba(13,14,18,0.3) 100%)",
-          boxShadow:
-            "0 20px 60px -20px rgba(0,0,0,0.6), 0 0 100px -20px rgba(201,169,110,0.08)",
-        }}
-      >
-        <Logo size="xl" />
-        <div
-          style={{
-            marginTop: 28,
-            display: "flex",
-            justifyContent: "center",
-            gap: 32,
-            fontSize: 13,
-            color: "#8C8C91",
-            fontFamily: "var(--font-mono)",
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
-          <Stat label="소스" value="30+" />
-          <Divider />
-          <Stat label="갱신 주기" value="90s" />
-          <Divider />
-          <Stat label="AI 비용" value="₩0" />
-        </div>
-      </div>
     </section>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-      <span style={{ fontSize: 22, fontWeight: 700, color: "#C9A96E", letterSpacing: "-0.02em" }}>
-        {value}
-      </span>
-      <span style={{ fontSize: 10, color: "#8C8C91", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function Divider() {
-  return <span style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />;
+function Sep() {
+  return <span style={{ color: PALETTE.ruleStrong }}>—</span>;
 }
 
 /* ──────────────────────────────────────
-   FEATURE GRID
+   BYLINES — three KPI numerals as wire stats
    ────────────────────────────────────── */
 
-function FeatureGrid() {
+function Bylines() {
+  const stats: [string, string, string][] = [
+    ["30+", "신뢰 소스", "Reuters · 연합 · WSJ · 매경 · 한경 외"],
+    ["90초", "갱신 주기", "속보 카테고리 별도 fast-poll"],
+    ["₩0", "AI 비용", "기기 안에서 동작하는 로컬 모델"],
+  ];
   return (
     <section
-      id="features"
       style={{
-        maxWidth: 1200,
+        maxWidth: 1280,
         margin: "0 auto",
-        padding: "100px 32px",
+        padding: "0 32px 96px",
       }}
     >
-      <SectionEyebrow>핵심 기능</SectionEyebrow>
-      <SectionHeadline>매크로 경제, 가장 빠르게.</SectionHeadline>
-      <p
-        style={{
-          fontSize: 16,
-          color: "#8C8C91",
-          maxWidth: 540,
-          marginBottom: 64,
-          lineHeight: 1.6,
-        }}
-      >
-        하나의 단순한 화면에서 속보·시장·포트폴리오를 한 번에 모니터링합니다.
-        외부 의존 없이 로컬에서 동작하는 AI가 모든 흐름을 정리합니다.
-      </p>
-
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 20,
+          gridTemplateColumns: "repeat(3, 1fr)",
+          borderTop: `1px solid ${PALETTE.ruleStrong}`,
+          borderBottom: `1px solid ${PALETTE.ruleStrong}`,
         }}
       >
-        {FEATURES.map((f) => (
-          <FeatureCard key={f.eyebrow} {...f} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function FeatureCard({
-  eyebrow,
-  title,
-  blurb,
-  visual,
-}: {
-  eyebrow: string;
-  title: string;
-  blurb: string;
-  visual: "spike" | "sentiment" | "market";
-}) {
-  return (
-    <article
-      style={{
-        padding: 28,
-        borderRadius: 8,
-        background: "linear-gradient(180deg, rgba(21,22,28,0.6) 0%, rgba(15,16,22,0.4) 100%)",
-        border: "1px solid rgba(255,255,255,0.06)",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <div style={{ height: 96, marginBottom: 24, display: "flex", alignItems: "center" }}>
-        <FeatureVisual variant={visual} />
-      </div>
-      <div
-        style={{
-          fontSize: 10,
-          color: "#C9A96E",
-          letterSpacing: "0.16em",
-          fontFamily: "var(--font-mono)",
-          marginBottom: 8,
-        }}
-      >
-        {eyebrow}
-      </div>
-      <h3
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: 20,
-          fontWeight: 700,
-          color: "#EBEBEB",
-          letterSpacing: "-0.018em",
-          marginBottom: 10,
-          lineHeight: 1.3,
-        }}
-      >
-        {title}
-      </h3>
-      <p style={{ fontSize: 14, lineHeight: 1.65, color: "#A1A1A6" }}>{blurb}</p>
-    </article>
-  );
-}
-
-function FeatureVisual({ variant }: { variant: "spike" | "sentiment" | "market" }) {
-  if (variant === "spike") {
-    return (
-      <svg width="100%" height="80" viewBox="0 0 280 80" fill="none">
-        <defs>
-          <linearGradient id="lp-spike" x1="0" y1="0" x2="280" y2="0">
-            <stop offset="0%" stopColor="#C9A96E" stopOpacity="0" />
-            <stop offset="50%" stopColor="#C9A96E" stopOpacity="1" />
-            <stop offset="100%" stopColor="#C9A96E" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M0 50 L80 50 L100 18 L120 62 L140 50 L280 50"
-          stroke="url(#lp-spike)"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="100" cy="18" r="3.5" fill="#C9A96E" />
-      </svg>
-    );
-  }
-  if (variant === "sentiment") {
-    return (
-      <div style={{ display: "flex", gap: 10, alignItems: "flex-end", width: "100%" }}>
-        {[0.6, 0.85, 0.4, 0.95, 0.55, 0.7, 0.3].map((h, i) => {
-          const colors = ["#22c55e", "#22c55e", "#ef4444", "#22c55e", "#8C8C91", "#22c55e", "#ef4444"];
-          return (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                height: `${h * 80}px`,
-                background: colors[i],
-                borderRadius: 2,
-                opacity: 0.7,
-              }}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-  // market
-  return (
-    <svg width="100%" height="80" viewBox="0 0 280 80" fill="none">
-      <path
-        d="M0 60 L40 50 L80 55 L120 30 L160 35 L200 20 L240 25 L280 12"
-        stroke="#22c55e"
-        strokeWidth="2"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <path
-        d="M0 60 L40 50 L80 55 L120 30 L160 35 L200 20 L240 25 L280 12 L280 80 L0 80 Z"
-        fill="url(#lp-market-fill)"
-        opacity="0.15"
-      />
-      <defs>
-        <linearGradient id="lp-market-fill" x1="0" y1="0" x2="0" y2="80">
-          <stop offset="0%" stopColor="#22c55e" />
-          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
-
-/* ──────────────────────────────────────
-   PULL-QUOTE / DIFFERENTIATOR
-   ────────────────────────────────────── */
-
-function BigPullquote() {
-  return (
-    <section
-      style={{
-        maxWidth: 1000,
-        margin: "0 auto",
-        padding: "80px 32px",
-        textAlign: "center",
-      }}
-    >
-      <p
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(26px, 4vw, 42px)",
-          fontWeight: 700,
-          lineHeight: 1.35,
-          letterSpacing: "-0.02em",
-          color: "#EBEBEB",
-          maxWidth: 880,
-          margin: "0 auto",
-        }}
-      >
-        블룸버그 터미널의 정보 밀도를 <br />
-        <span style={{ color: "#C9A96E" }}>X 속보 계정의 속도</span>로,{" "}
-        <span style={{ color: "#8C8C91" }}>무료로</span>.
-      </p>
-    </section>
-  );
-}
-
-/* ──────────────────────────────────────
-   PRICING
-   ────────────────────────────────────── */
-
-function Pricing() {
-  return (
-    <section
-      id="pricing"
-      style={{
-        maxWidth: 1100,
-        margin: "0 auto",
-        padding: "100px 32px",
-      }}
-    >
-      <SectionEyebrow>요금제</SectionEyebrow>
-      <SectionHeadline>지금은 모든 기능 무료.</SectionHeadline>
-      <p
-        style={{
-          fontSize: 16,
-          color: "#8C8C91",
-          maxWidth: 540,
-          marginBottom: 56,
-          lineHeight: 1.6,
-        }}
-      >
-        BETA 기간 동안 모든 기능을 제한 없이 사용할 수 있습니다.
-        정식 출시 후엔 아래 요금제가 적용됩니다.
-      </p>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 20,
-        }}
-      >
-        {PRICING.map((p) => (
-          <PricingCard key={p.name} {...p} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function PricingCard({
-  name,
-  price,
-  period,
-  desc,
-  features,
-  cta,
-  href,
-  accent,
-}: {
-  name: string;
-  price: string;
-  period: string;
-  desc: string;
-  features: readonly string[];
-  cta: string;
-  href: string;
-  accent: boolean;
-}) {
-  return (
-    <article
-      style={{
-        padding: 32,
-        borderRadius: 8,
-        background: accent
-          ? "linear-gradient(180deg, rgba(201,169,110,0.06) 0%, rgba(21,22,28,0.6) 100%)"
-          : "linear-gradient(180deg, rgba(21,22,28,0.6) 0%, rgba(15,16,22,0.4) 100%)",
-        border: accent
-          ? "1px solid rgba(201,169,110,0.30)"
-          : "1px solid rgba(255,255,255,0.06)",
-        boxShadow: accent ? "0 12px 48px -12px rgba(201,169,110,0.20)" : "none",
-        position: "relative",
-      }}
-    >
-      {accent && (
-        <span
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 20,
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: "0.12em",
-            color: "#0D0E12",
-            background: "linear-gradient(135deg, #E5C896, #C9A96E)",
-            padding: "4px 10px",
-            borderRadius: 99,
-          }}
-        >
-          POPULAR
-        </span>
-      )}
-      <div
-        style={{
-          fontSize: 12,
-          fontWeight: 700,
-          color: accent ? "#C9A96E" : "#8C8C91",
-          letterSpacing: "0.16em",
-          textTransform: "uppercase",
-          marginBottom: 12,
-        }}
-      >
-        {name}
-      </div>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 6 }}>
-        <span
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 40,
-            fontWeight: 800,
-            color: "#EBEBEB",
-            letterSpacing: "-0.022em",
-          }}
-        >
-          {price}
-        </span>
-        <span style={{ fontSize: 13, color: "#8C8C91" }}>/ {period}</span>
-      </div>
-      <p style={{ fontSize: 13, color: "#A1A1A6", marginBottom: 20, lineHeight: 1.5 }}>{desc}</p>
-
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-          margin: "0 0 28px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}
-      >
-        {features.map((feat) => (
-          <li
-            key={feat}
+        {stats.map(([value, label, blurb], i) => (
+          <div
+            key={label}
             style={{
-              fontSize: 13,
-              color: "#EBEBEB",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 10,
-              lineHeight: 1.5,
+              padding: "32px 28px",
+              borderLeft: i === 0 ? "none" : `1px solid ${PALETTE.rule}`,
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, marginTop: 4 }}>
-              <path
-                d="M3 7.5L5.5 10L11 4"
-                stroke={accent ? "#C9A96E" : "#22c55e"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span>{feat}</span>
-          </li>
+            <div
+              style={{
+                fontFamily: "var(--font-display-condensed), sans-serif",
+                fontSize: "clamp(44px, 5vw, 72px)",
+                fontWeight: 400,
+                lineHeight: 0.95,
+                letterSpacing: "-0.02em",
+                color: PALETTE.amber,
+                marginBottom: 12,
+              }}
+            >
+              {value}
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: PALETTE.paperDim,
+                marginBottom: 8,
+              }}
+            >
+              ─ {label}
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-serif), serif",
+                fontSize: 14,
+                lineHeight: 1.55,
+                color: PALETTE.paper,
+                fontStyle: "italic",
+              }}
+            >
+              {blurb}
+            </div>
+          </div>
         ))}
-      </ul>
-
-      <Link
-        href={href}
-        style={{
-          display: "block",
-          padding: "13px",
-          borderRadius: 4,
-          textAlign: "center",
-          fontSize: 14,
-          fontWeight: 700,
-          letterSpacing: "-0.01em",
-          color: accent ? "#0D0E12" : "#EBEBEB",
-          background: accent
-            ? "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)"
-            : "rgba(255,255,255,0.04)",
-          border: accent ? "none" : "1px solid rgba(255,255,255,0.10)",
-          boxShadow: accent ? "0 6px 20px rgba(201,169,110,0.22)" : "none",
-        }}
-      >
-        {cta} →
-      </Link>
-    </article>
+      </div>
+    </section>
   );
 }
 
 /* ──────────────────────────────────────
-   FINAL CTA
+   FILINGS GRID — three editorial cards in a wire-bulletin grid
    ────────────────────────────────────── */
 
-function FinalCTA() {
+function FilingsGrid() {
+  const filings = [
+    {
+      no: "01",
+      label: "REAL-TIME WIRE",
+      title: "90초 자동 갱신",
+      kicker: "속보가 도착하기 전, 새로고침은 우리가 합니다.",
+      body: "연합뉴스 · 매일경제 · 한국경제 · Reuters · CNBC가 한 화면에서 동시에 흐릅니다. 속보 카테고리는 90초 fast-poll, 일반 피드는 5분 폴링. 별도 알림 설정 없이 토스트 + 브라우저 푸시.",
+    },
+    {
+      no: "02",
+      label: "ON-DEVICE A.I.",
+      title: "로컬 요약 · 감성",
+      kicker: "외부 API 비용 없이, 기사가 도착하는 그 순간 분류.",
+      body: "TF-IDF + Jaccard 유사도로 비슷한 기사를 자동 묶음. 키워드 기반 감성 분석으로 호재 · 악재 · 중립을 즉석 라벨링. 서버 비용 0원, 데이터 외부 송출 0건.",
+    },
+    {
+      no: "03",
+      label: "ONE TERMINAL",
+      title: "시장과 뉴스, 한 화면",
+      kicker: "탭 사이를 오가지 않고 모든 흐름을 모니터링.",
+      body: "헤더에서 KOSPI · USD/KRW · S&P · WTI · BTC 가격이 흐르고, 워치리스트 · 포트폴리오 P/L · 경제캘린더가 동일한 대시보드. 7일 · 30일 추세 분석 + 주간 리포트 자동 생성.",
+    },
+  ];
+  return (
+    <section
+      id="filings"
+      style={{
+        maxWidth: 1280,
+        margin: "0 auto",
+        padding: "0 32px 96px",
+      }}
+    >
+      <SectionHeader no="A" label="DAILY FILINGS" subtitle="이 와이어가 다른 와이어와 다른 세 가지" />
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: 0,
+          borderTop: `1px solid ${PALETTE.ruleStrong}`,
+        }}
+      >
+        {filings.map((f, i) => (
+          <article
+            key={f.no}
+            style={{
+              padding: "40px 32px",
+              borderRight: i < filings.length - 1 ? `1px solid ${PALETTE.rule}` : "none",
+              borderBottom: `1px solid ${PALETTE.ruleStrong}`,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 12,
+                marginBottom: 24,
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: PALETTE.amber,
+              }}
+            >
+              <span style={{ fontSize: 36, fontFamily: "var(--font-display-condensed)", color: PALETTE.amber, letterSpacing: "-0.02em", lineHeight: 1 }}>
+                №{f.no}
+              </span>
+              <span style={{ color: PALETTE.paperDim }}>{f.label}</span>
+            </div>
+
+            <h3
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: 26,
+                fontWeight: 700,
+                lineHeight: 1.2,
+                letterSpacing: "-0.018em",
+                color: PALETTE.paper,
+                marginBottom: 12,
+              }}
+            >
+              {f.title}
+            </h3>
+
+            <p
+              style={{
+                fontFamily: "var(--font-serif), serif",
+                fontStyle: "italic",
+                fontSize: 16,
+                lineHeight: 1.5,
+                color: PALETTE.amber,
+                marginBottom: 16,
+              }}
+            >
+              {f.kicker}
+            </p>
+
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: PALETTE.paperDim }}>{f.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────────────────────
+   PULL QUOTE — editorial italic statement
+   ────────────────────────────────────── */
+
+function PullQuote() {
   return (
     <section
       style={{
-        maxWidth: 1100,
+        maxWidth: 980,
         margin: "0 auto",
-        padding: "100px 32px 80px",
+        padding: "96px 32px",
+        textAlign: "left",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: PALETTE.amber,
+          marginBottom: 24,
+        }}
+      >
+        ─ EDITOR&apos;S NOTE
+      </div>
+      <blockquote
+        style={{
+          fontFamily: "var(--font-serif), serif",
+          fontSize: "clamp(28px, 3.6vw, 44px)",
+          fontWeight: 400,
+          fontStyle: "italic",
+          lineHeight: 1.3,
+          color: PALETTE.paper,
+          margin: 0,
+          letterSpacing: "-0.01em",
+        }}
+      >
+        &ldquo;블룸버그 터미널의 정보 밀도를{" "}
+        <span style={{ color: PALETTE.amber, fontStyle: "normal", fontFamily: "var(--font-display-condensed)", textTransform: "uppercase" }}>
+          X 속보 계정의 속도
+        </span>
+        로, 무료로.&rdquo;
+      </blockquote>
+      <div
+        style={{
+          marginTop: 32,
+          paddingTop: 16,
+          borderTop: `1px solid ${PALETTE.rule}`,
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          color: PALETTE.paperDim,
+          letterSpacing: "0.08em",
+        }}
+      >
+        — MACROWIRE EDITORIAL
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────────────────────
+   SCHEDULE — pricing presented as a publishing schedule
+   ────────────────────────────────────── */
+
+function Schedule() {
+  const tiers = [
+    {
+      name: "FREE",
+      price: "₩0",
+      period: "PER MONTH",
+      desc: "개인 모니터링용 핵심 기능 전부",
+      features: ["기본 30개 신뢰 소스", "24시간 분석 범위", "워치리스트 5종목", "기본 시장 데이터 (5분 지연)", "AI 요약 일 50건"],
+      cta: "지금 시작",
+      flagship: false,
+    },
+    {
+      name: "PRO",
+      price: "₩9,900",
+      period: "PER MONTH",
+      desc: "전문 트레이더 · 매크로 리서처용",
+      features: ["전체 60+ 소스 + 속보 우선 큐", "무제한 분석 + 7일 · 30일 추세", "워치리스트 · 포트폴리오 무제한", "실시간 시장 데이터", "AI 무제한 + 주간 리포트", "푸시 · 이메일 속보 알림"],
+      cta: "PRO 구독",
+      flagship: true,
+    },
+  ];
+  return (
+    <section
+      id="schedule"
+      style={{
+        maxWidth: 1280,
+        margin: "0 auto",
+        padding: "0 32px 96px",
+      }}
+    >
+      <SectionHeader no="B" label="SUBSCRIPTION SCHEDULE" subtitle="BETA 기간 모든 기능 무료. 정식 출시 후 아래 적용." />
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+          gap: 0,
+          borderTop: `1px solid ${PALETTE.ruleStrong}`,
+        }}
+      >
+        {tiers.map((t, i) => (
+          <article
+            key={t.name}
+            style={{
+              padding: "40px 32px",
+              borderRight: i === 0 ? `1px solid ${PALETTE.rule}` : "none",
+              borderBottom: `1px solid ${PALETTE.ruleStrong}`,
+              background: t.flagship ? `linear-gradient(180deg, ${PALETTE.ink} 0%, transparent 100%)` : "transparent",
+              position: "relative",
+            }}
+          >
+            {t.flagship && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  padding: "6px 12px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: PALETTE.obsidian,
+                  background: PALETTE.amber,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                }}
+              >
+                ★ FLAGSHIP
+              </div>
+            )}
+
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.20em",
+                textTransform: "uppercase",
+                color: t.flagship ? PALETTE.amber : PALETTE.paperDim,
+                marginBottom: 28,
+              }}
+            >
+              {t.name}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 8,
+                marginBottom: 6,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-display-condensed), sans-serif",
+                  fontSize: 64,
+                  fontWeight: 400,
+                  letterSpacing: "-0.02em",
+                  color: PALETTE.paper,
+                  lineHeight: 1,
+                }}
+              >
+                {t.price}
+              </span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: PALETTE.paperDim, letterSpacing: "0.16em" }}>
+                {t.period}
+              </span>
+            </div>
+
+            <p
+              style={{
+                fontFamily: "var(--font-serif), serif",
+                fontStyle: "italic",
+                fontSize: 14,
+                color: PALETTE.paperDim,
+                marginBottom: 32,
+              }}
+            >
+              {t.desc}
+            </p>
+
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 36px" }}>
+              {t.features.map((f) => (
+                <li
+                  key={f}
+                  style={{
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    color: PALETTE.paper,
+                    padding: "8px 0",
+                    borderBottom: `1px dashed ${PALETTE.rule}`,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 12,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      color: t.flagship ? PALETTE.amber : PALETTE.paperDim,
+                      fontSize: 11,
+                      flexShrink: 0,
+                      paddingTop: 2,
+                    }}
+                  >
+                    {t.flagship ? "✓" : "·"}
+                  </span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <Link
+              href="/app"
+              style={{
+                display: "block",
+                padding: "14px 0",
+                textAlign: "center",
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: t.flagship ? PALETTE.obsidian : PALETTE.paper,
+                background: t.flagship ? PALETTE.amber : "transparent",
+                border: t.flagship ? "none" : `1px solid ${PALETTE.ruleStrong}`,
+                borderRadius: 0,
+              }}
+            >
+              {t.cta} →
+            </Link>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────────────────────
+   CALL SHEET — final amber CTA card
+   ────────────────────────────────────── */
+
+function CallSheet() {
+  return (
+    <section
+      id="callsheet"
+      style={{
+        maxWidth: 1280,
+        margin: "0 auto",
+        padding: "0 32px 96px",
       }}
     >
       <div
         style={{
           padding: "80px 48px",
-          borderRadius: 16,
-          textAlign: "center",
-          background:
-            "radial-gradient(80% 100% at 50% 0%, rgba(201,169,110,0.12) 0%, rgba(13,14,18,0.6) 60%)",
-          border: "1px solid rgba(201,169,110,0.20)",
-          boxShadow: "0 24px 80px -24px rgba(201,169,110,0.18)",
+          background: PALETTE.ink,
+          borderTop: `2px solid ${PALETTE.amber}`,
+          borderBottom: `1px solid ${PALETTE.ruleStrong}`,
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          alignItems: "end",
+          gap: 48,
         }}
       >
-        <h2
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(28px, 4.5vw, 48px)",
-            fontWeight: 800,
-            lineHeight: 1.15,
-            letterSpacing: "-0.022em",
-            color: "#EBEBEB",
-            marginBottom: 16,
-          }}
-        >
-          매크로 모니터링이 이렇게 단순할 수 있습니다.
-        </h2>
-        <p
-          style={{
-            fontSize: 16,
-            color: "#A1A1A6",
-            maxWidth: 500,
-            margin: "0 auto 36px",
-            lineHeight: 1.6,
-          }}
-        >
-          가입 없이 바로 시작 — 수집·분석·시장 데이터까지 모두 무료.
-        </p>
+        <div>
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: PALETTE.amber,
+              marginBottom: 20,
+            }}
+          >
+            ─ CALL SHEET № {dispatchToday()}
+          </div>
+          <h2
+            style={{
+              fontFamily: "var(--font-display-condensed), 'Anton', 'Pretendard Variable', sans-serif",
+              fontSize: "clamp(40px, 5vw, 72px)",
+              fontWeight: 900,
+              lineHeight: 0.95,
+              letterSpacing: "-0.01em",
+              color: PALETTE.paper,
+              textTransform: "uppercase",
+              margin: 0,
+            }}
+          >
+            가입 없이<br />
+            바로 시작.
+          </h2>
+        </div>
         <Link
           href="/app"
           style={{
             display: "inline-block",
-            padding: "18px 36px",
-            borderRadius: 4,
-            fontSize: 16,
+            padding: "20px 36px",
+            fontFamily: "var(--font-mono)",
+            fontSize: 13,
             fontWeight: 700,
-            color: "#0D0E12",
-            background:
-              "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
-            boxShadow: "0 12px 36px rgba(201,169,110,0.30)",
-            letterSpacing: "-0.012em",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: PALETTE.obsidian,
+            background: PALETTE.amber,
+            borderRadius: 0,
+            whiteSpace: "nowrap",
           }}
         >
-          MacroWire 시작 →
+          ENTER TERMINAL →
         </Link>
       </div>
     </section>
@@ -806,34 +761,37 @@ function FinalCTA() {
 }
 
 /* ──────────────────────────────────────
-   FOOTER
+   COLOPHON — newspaper-style footer
    ────────────────────────────────────── */
 
-function Footer() {
+function Colophon() {
   return (
     <footer
       style={{
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-        padding: "48px 32px 32px",
+        borderTop: `1px solid ${PALETTE.ruleStrong}`,
+        padding: "32px 32px 48px",
       }}
     >
       <div
         style={{
-          maxWidth: 1200,
+          maxWidth: 1280,
           margin: "0 auto",
-          display: "flex",
-          gap: 24,
+          display: "grid",
+          gridTemplateColumns: "auto 1fr auto",
           alignItems: "center",
-          flexWrap: "wrap",
+          gap: 24,
+          fontFamily: "var(--font-mono)",
+          fontSize: 10,
+          letterSpacing: "0.10em",
+          textTransform: "uppercase",
+          color: PALETTE.paperDim,
         }}
       >
         <Logo size="xs" />
-        <span style={{ fontSize: 12, color: "#8C8C91" }}>
-          © {new Date().getFullYear()} MacroWire. 모든 권리 보유.
-        </span>
-        <span style={{ fontSize: 11, color: "#8C8C91", marginLeft: "auto" }}>
+        <span style={{ textAlign: "center", fontSize: 9, letterSpacing: "0.06em", textTransform: "none", fontFamily: "var(--font-serif), serif", fontStyle: "italic" }}>
           본 서비스의 정보는 투자 권유가 아니며, 모든 투자 판단의 책임은 사용자에게 있습니다.
         </span>
+        <span>© {new Date().getFullYear()} MACROWIRE</span>
       </div>
     </footer>
   );
@@ -843,39 +801,55 @@ function Footer() {
    SHARED PRIMITIVES
    ────────────────────────────────────── */
 
-function SectionEyebrow({ children }: { children: React.ReactNode }) {
+function SectionHeader({ no, label, subtitle }: { no: string; label: string; subtitle?: string }) {
   return (
     <div
       style={{
-        fontSize: 11,
-        fontWeight: 700,
-        color: "#C9A96E",
-        letterSpacing: "0.16em",
-        textTransform: "uppercase",
-        marginBottom: 16,
-        fontFamily: "var(--font-mono)",
+        display: "flex",
+        alignItems: "baseline",
+        gap: 24,
+        paddingBottom: 28,
+        marginBottom: 0,
       }}
     >
-      — {children}
+      <span
+        style={{
+          fontFamily: "var(--font-display-condensed), sans-serif",
+          fontSize: 56,
+          color: PALETTE.amber,
+          letterSpacing: "-0.02em",
+          lineHeight: 1,
+        }}
+      >
+        {no}.
+      </span>
+      <div style={{ flex: 1 }}>
+        <div
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: PALETTE.paper,
+            marginBottom: 8,
+          }}
+        >
+          {label}
+        </div>
+        {subtitle && (
+          <div
+            style={{
+              fontFamily: "var(--font-serif), serif",
+              fontStyle: "italic",
+              fontSize: 16,
+              color: PALETTE.paperDim,
+              maxWidth: 540,
+            }}
+          >
+            {subtitle}
+          </div>
+        )}
+      </div>
     </div>
-  );
-}
-
-function SectionHeadline({ children }: { children: React.ReactNode }) {
-  return (
-    <h2
-      style={{
-        fontFamily: "var(--font-display)",
-        fontSize: "clamp(28px, 4vw, 44px)",
-        fontWeight: 800,
-        lineHeight: 1.15,
-        letterSpacing: "-0.024em",
-        color: "#EBEBEB",
-        marginBottom: 12,
-        maxWidth: 720,
-      }}
-    >
-      {children}
-    </h2>
   );
 }

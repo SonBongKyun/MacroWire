@@ -71,6 +71,22 @@
 }
 
 /* ──────────────────────────────────────
+   BULLETIN — Wire-service design tokens v2
+   Reference: Reuters Wire / AP Bulletin / FT.com / NYT Cooking
+   ────────────────────────────────────── */
+:root {
+  /* Bulletin signal palette — flat, no gradients */
+  --bulletin-obsidian: #08090B;       /* deepest background */
+  --bulletin-ink: #0E0F12;            /* slightly raised ink panel */
+  --bulletin-paper: #F5F0E1;          /* warm cream — for editorial headlines */
+  --bulletin-paper-dim: #C9C4B6;      /* dimmed cream — body on dark */
+  --bulletin-amber: #FFB000;          /* cathode amber — single signal color */
+  --bulletin-amber-soft: rgba(255,176,0,0.12);
+  --bulletin-rule: rgba(245,240,225,0.10);
+  --bulletin-rule-strong: rgba(245,240,225,0.18);
+}
+
+/* ──────────────────────────────────────
    MOTION TOKENS — 3-tier interaction system
    ────────────────────────────────────── */
 :root {
@@ -88,11 +104,13 @@
    TYPE SYSTEM — Korean-first
    ────────────────────────────────────── */
 @theme {
-  --font-display: "SUIT Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* Bulletin: condensed-display Anton for English headlines, Pretendard 900 fallback for Korean */
+  --font-display: var(--font-display-condensed), "SUIT Variable", "Pretendard Variable", Pretendard, sans-serif;
   --font-heading: "Pretendard Variable", Pretendard, "SUIT Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-body:    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-sans:    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --default-font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* Editorial serif (datelines, pull-quotes) is wired via --font-serif from Next.js next/font */
 }
 
 @theme inline {
@@ -1333,6 +1351,18 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
 }
 .lp-link:hover {
   color: #EBEBEB;
+}
+
+/* Bulletin masthead nav links */
+.bul-link {
+  position: relative;
+  transition: color 0.15s ease;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+}
+.bul-link:hover {
+  color: #FFB000;
+  border-bottom-color: #FFB000;
 }
 
 /* Smooth in-page anchor jumps on the landing */

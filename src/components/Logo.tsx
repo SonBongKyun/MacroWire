@@ -1,64 +1,56 @@
 "use client";
 
 /**
- * MacroWire brand logo.
+ * MacroWire wordmark — Bulletin edition.
  *
- * Concept — "Spike": a flat baseline interrupted by a sudden upward spike,
- * representing the moment a piece of macro news breaks. Doubles as a
- * candlestick / signal pulse / wire transmission glyph.
+ * Wire-service masthead: a heavy condensed all-caps wordmark sat next to
+ * a tiny meta caption ("DISPATCH №…") in the manner of a 1970s teletype
+ * banner. No more gradient text, no Spike SVG mark — typography alone.
  *
- * Usage:
- *   <Logo />                              // mark + wordmark, default size
- *   <Logo size="lg" showWordmark={false}/> // mark only
- *   <Logo size="xl" />                    // landing-hero scale
+ *   <Logo />                          // masthead with caption
+ *   <Logo size="xl" caption={false}/> // wordmark only, hero scale
  */
 
 interface LogoProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
-  showWordmark?: boolean;
-  /** Override the mark color. Default uses the gold gradient. */
-  color?: "gold" | "white" | "current";
+  /** Show the small "DISPATCH №…" caption next to the wordmark */
+  caption?: boolean;
+  /** Override the wordmark color */
+  color?: "paper" | "amber" | "current";
+  /** Optional explicit dispatch number; default uses today */
+  dispatchNo?: string;
   className?: string;
 }
 
 const SIZE_MAP = {
-  xs: { mark: 14, gap: 6,  fontSize: 13, letterSpacing: "-0.012em", weight: 800 },
-  sm: { mark: 18, gap: 8,  fontSize: 16, letterSpacing: "-0.014em", weight: 800 },
-  md: { mark: 22, gap: 9,  fontSize: 19, letterSpacing: "-0.016em", weight: 800 },
-  lg: { mark: 32, gap: 12, fontSize: 28, letterSpacing: "-0.02em",  weight: 800 },
-  xl: { mark: 56, gap: 18, fontSize: 52, letterSpacing: "-0.025em", weight: 800 },
+  xs: { fontSize: 14, capSize: 7,  gap: 6,  letterSpacing: "0.04em" },
+  sm: { fontSize: 18, capSize: 8,  gap: 8,  letterSpacing: "0.04em" },
+  md: { fontSize: 24, capSize: 9,  gap: 10, letterSpacing: "0.05em" },
+  lg: { fontSize: 36, capSize: 10, gap: 14, letterSpacing: "0.05em" },
+  xl: { fontSize: 64, capSize: 12, gap: 18, letterSpacing: "0.06em" },
 } as const;
+
+function defaultDispatch(): string {
+  const d = new Date();
+  // Day-of-year approximation as the "dispatch number" — feels like a wire bulletin
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = d.getTime() - start.getTime();
+  const dayOfYear = Math.floor(diff / 86_400_000);
+  return String(dayOfYear).padStart(3, "0");
+}
 
 export function Logo({
   size = "sm",
-  showWordmark = true,
-  color = "gold",
+  caption = false,
+  color = "paper",
+  dispatchNo,
   className,
 }: LogoProps) {
   const dims = SIZE_MAP[size];
-  const gradId = `mw-mark-grad-${size}`;
+  const wordmarkColor =
+    color === "amber" ? "#FFB000" : color === "current" ? "currentColor" : "#F5F0E1";
 
-  // Wordmark fill — gold gradient text via background-clip
-  const wordmarkStyle =
-    color === "white"
-      ? { color: "#EBEBEB" }
-      : color === "current"
-      ? { color: "currentColor" }
-      : {
-          backgroundImage:
-            "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #A88752 100%)",
-          WebkitBackgroundClip: "text" as const,
-          WebkitTextFillColor: "transparent" as const,
-          backgroundClip: "text" as const,
-        };
-
-  // Mark stroke color
-  const strokeUrl =
-    color === "white"
-      ? "#EBEBEB"
-      : color === "current"
-      ? "currentColor"
-      : `url(#${gradId})`;
+  const dispatch = dispatchNo ?? defaultDispatch();
 
   return (
     <div
@@ -71,46 +63,36 @@ export function Logo({
         lineHeight: 1,
       }}
     >
-      <svg
-        width={dims.mark}
-        height={dims.mark}
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-        style={{ flexShrink: 0 }}
+      <span
+        style={{
+          fontFamily: "var(--font-display-condensed), 'Anton', 'Pretendard Variable', sans-serif",
+          fontSize: dims.fontSize,
+          fontWeight: 400, // Anton ships at 400
+          color: wordmarkColor,
+          textTransform: "uppercase",
+          letterSpacing: dims.letterSpacing,
+        }}
       >
-        {color === "gold" && (
-          <defs>
-            <linearGradient id={gradId} x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#E5C896" />
-              <stop offset="55%" stopColor="#C9A96E" />
-              <stop offset="100%" stopColor="#A88752" />
-            </linearGradient>
-          </defs>
-        )}
-        {/* The "Spike" — flat baseline interrupted by a sharp upward event */}
-        <path
-          d="M2.5 14 L8.2 14 L10.6 6.5 L13.4 18 L15.5 14 L21.5 14"
-          stroke={strokeUrl}
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Subtle dot at the spike apex — emphasizes the "event" */}
-        <circle cx="10.6" cy="6.5" r="1.4" fill={strokeUrl} />
-      </svg>
-      {showWordmark && (
+        MACROWIRE
+      </span>
+      {caption && (
         <span
-          className="logo-wordmark"
           style={{
-            fontFamily: "var(--font-display)",
-            fontSize: dims.fontSize,
-            fontWeight: dims.weight,
-            letterSpacing: dims.letterSpacing,
-            ...wordmarkStyle,
+            display: "inline-flex",
+            flexDirection: "column",
+            gap: 2,
+            paddingLeft: dims.gap,
+            borderLeft: "1px solid rgba(245,240,225,0.18)",
+            fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+            fontSize: dims.capSize,
+            color: "#C9C4B6",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            lineHeight: 1.3,
           }}
         >
-          MacroWire
+          <span>DISPATCH</span>
+          <span style={{ color: "#FFB000" }}>№ {dispatch}</span>
         </span>
       )}
     </div>
