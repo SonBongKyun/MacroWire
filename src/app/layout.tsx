@@ -25,7 +25,7 @@ const crimsonPro = Crimson_Pro({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0D0E12",
+  themeColor: "#08090B",
   viewportFit: "cover",
 };
 

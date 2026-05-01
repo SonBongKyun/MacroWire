@@ -62,13 +62,13 @@ function generateNewsletterHTML(
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MacroWire DAILY BRIEF</title>
 </head>
-<body style="margin:0;padding:0;background:#0D0E12;font-family:Arial,Helvetica,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#0D0E12;padding:20px 0;">
+<body style="margin:0;padding:0;background:#08090B;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#08090B;padding:20px 0;">
 <tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#0D0E12;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#08090B;">
   <!-- Header -->
-  <tr><td style="padding:32px 24px 16px;border-bottom:2px solid #C9A96E;">
-    <div style="font-size:22px;font-weight:700;color:#C9A96E;letter-spacing:0.08em;">MacroWire</div>
+  <tr><td style="padding:32px 24px 16px;border-bottom:2px solid #FFB000;">
+    <div style="font-size:22px;font-weight:700;color:#FFB000;letter-spacing:0.08em;">MacroWire</div>
     <div style="font-size:14px;color:#8C8C91;margin-top:4px;">DAILY BRIEF · ${date}</div>
   </td></tr>
 
@@ -81,7 +81,7 @@ function generateNewsletterHTML(
       return `
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;border-bottom:1px solid #2C2D34;padding-bottom:16px;">
     <tr><td>
-      <div style="font-size:13px;color:#C9A96E;font-weight:700;margin-bottom:4px;">${String(i + 1).padStart(2, "0")}</div>
+      <div style="font-size:13px;color:#FFB000;font-weight:700;margin-bottom:4px;">${String(i + 1).padStart(2, "0")}</div>
       <a href="${a.url}" style="font-size:15px;color:#EBEBEB;font-weight:600;text-decoration:none;line-height:1.4;">${a.title}</a>
       <div style="font-size:12px;color:#8C8C91;margin-top:6px;">${a.sourceName} · ${time}</div>
       ${preview ? `<div style="font-size:13px;color:#8C8C91;margin-top:8px;line-height:1.5;">${preview}</div>` : ""}
@@ -110,7 +110,7 @@ function generateNewsletterHTML(
 
   <!-- Footer -->
   <tr><td style="padding:20px 24px;border-top:1px solid #2C2D34;text-align:center;">
-    <div style="font-size:11px;color:#8C8C91;">Powered by <span style="color:#C9A96E;font-weight:700;">MacroWire</span></div>
+    <div style="font-size:11px;color:#8C8C91;">Powered by <span style="color:#FFB000;font-weight:700;">MacroWire</span></div>
   </td></tr>
 </table>
 </td></tr>
@@ -191,7 +191,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
         className="w-full mb-8"
         style={{
           maxWidth: 900,
-          background: "#0D0E12",
+          background: "#08090B",
           border: "1px solid #2C2D34",
           display: "grid",
           gridTemplateColumns: "340px 1fr",
@@ -209,7 +209,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
             <div>
               <h2
                 className="font-heading"
-                style={{ color: "#C9A96E", fontSize: 14, letterSpacing: "0.06em", fontWeight: 700 }}
+                style={{ color: "#FFB000", fontSize: 14, letterSpacing: "0.06em", fontWeight: 700 }}
               >
                 NEWSLETTER
               </h2>
@@ -250,7 +250,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                   style={{
                     padding: "10px 14px",
                     borderBottom: "1px solid #2C2D34",
-                    background: isSelected ? "rgba(201,169,110,0.06)" : "transparent",
+                    background: isSelected ? "rgba(255,176,0,0.06)" : "transparent",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
@@ -258,8 +258,8 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                       style={{
                         width: 16,
                         height: 16,
-                        border: `1px solid ${isSelected ? "#C9A96E" : "#2C2D34"}`,
-                        background: isSelected ? "rgba(201,169,110,0.2)" : "transparent",
+                        border: `1px solid ${isSelected ? "#FFB000" : "#2C2D34"}`,
+                        background: isSelected ? "rgba(255,176,0,0.2)" : "transparent",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -268,7 +268,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                       }}
                     >
                       {isSelected && (
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#C9A96E" strokeWidth="1.5">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#FFB000" strokeWidth="1.5">
                           <path d="M2 5l2 2 4-4" />
                         </svg>
                       )}
@@ -289,7 +289,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                       </div>
                       <div style={{ fontSize: 10, color: "#8C8C91", marginTop: 2 }}>
                         {a.sourceName} · {time}
-                        {a.isSaved && <span style={{ color: "#C9A96E", marginLeft: 6 }}>★</span>}
+                        {a.isSaved && <span style={{ color: "#FFB000", marginLeft: 6 }}>★</span>}
                       </div>
                     </div>
                   </div>
@@ -318,8 +318,8 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 style={{
                   padding: "3px 8px",
                   border: "1px solid #2C2D34",
-                  background: previewMode === "preview" ? "rgba(201,169,110,0.15)" : "transparent",
-                  color: previewMode === "preview" ? "#C9A96E" : "#8C8C91",
+                  background: previewMode === "preview" ? "rgba(255,176,0,0.15)" : "transparent",
+                  color: previewMode === "preview" ? "#FFB000" : "#8C8C91",
                 }}
               >
                 미리보기
@@ -330,8 +330,8 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 style={{
                   padding: "3px 8px",
                   border: "1px solid #2C2D34",
-                  background: previewMode === "text" ? "rgba(201,169,110,0.15)" : "transparent",
-                  color: previewMode === "text" ? "#C9A96E" : "#8C8C91",
+                  background: previewMode === "text" ? "rgba(255,176,0,0.15)" : "transparent",
+                  color: previewMode === "text" ? "#FFB000" : "#8C8C91",
                 }}
               >
                 텍스트
@@ -343,8 +343,8 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
                 style={{
                   border: "1px solid #2C2D34",
-                  background: copied ? "rgba(201,169,110,0.15)" : "transparent",
-                  color: copied ? "#C9A96E" : "#8C8C91",
+                  background: copied ? "rgba(255,176,0,0.15)" : "transparent",
+                  color: copied ? "#FFB000" : "#8C8C91",
                 }}
               >
                 {copied ? "복사됨" : "클립보드 복사"}
@@ -391,8 +391,8 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
               /* Formatted preview */
               <div style={{ maxWidth: 560, margin: "0 auto" }}>
                 {/* Newsletter Header */}
-                <div style={{ paddingBottom: 14, borderBottom: "2px solid #C9A96E", marginBottom: 20 }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: "#C9A96E", letterSpacing: "0.08em" }}>
+                <div style={{ paddingBottom: 14, borderBottom: "2px solid #FFB000", marginBottom: 20 }}>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: "#FFB000", letterSpacing: "0.08em" }}>
                     MacroWire
                   </div>
                   <div style={{ fontSize: 13, color: "#8C8C91", marginTop: 4 }}>
@@ -425,7 +425,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                       key={a.id}
                       style={{ marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid #2C2D34" }}
                     >
-                      <div style={{ fontSize: 12, color: "#C9A96E", fontWeight: 700, marginBottom: 4 }}>
+                      <div style={{ fontSize: 12, color: "#FFB000", fontWeight: 700, marginBottom: 4 }}>
                         {String(i + 1).padStart(2, "0")}
                       </div>
                       <div style={{ fontSize: 14, fontWeight: 600, color: "#EBEBEB", lineHeight: 1.4 }}>
@@ -480,7 +480,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 {/* Footer */}
                 <div style={{ marginTop: 24, paddingTop: 14, borderTop: "1px solid #2C2D34", textAlign: "center" }}>
                   <span style={{ fontSize: 11, color: "#8C8C91" }}>
-                    Powered by <span style={{ color: "#C9A96E", fontWeight: 700 }}>MacroWire</span>
+                    Powered by <span style={{ color: "#FFB000", fontWeight: 700 }}>MacroWire</span>
                   </span>
                 </div>
               </div>

@@ -145,7 +145,7 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
                       style={{
                         width: cellSize,
                         height: cellSize,
-                        background: `rgba(201, 169, 110, ${opacity})`,
+                        background: `rgba(255, 176, 0, ${opacity})`,
                         border: "1px solid rgba(45, 45, 50, 0.5)",
                         cursor: isDiag ? "default" : "pointer",
                         transition: "background 0.15s ease",

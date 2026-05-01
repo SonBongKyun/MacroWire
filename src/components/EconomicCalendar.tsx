@@ -34,8 +34,8 @@ const REGION_LABELS: Record<string, string> = {
 };
 
 const REGION_COLORS: Record<string, string> = {
-  KR: "#C9A96E",
-  US: "#C9A96E",
+  KR: "#FFB000",
+  US: "#FFB000",
   JP: "#8C8C91",
   CN: "#8C8C91",
   EU: "#8C8C91",
@@ -121,12 +121,12 @@ export function EconomicCalendar() {
             gap: 8,
             padding: "8px 10px",
             marginBottom: 10,
-            background: "rgba(201,169,110,0.06)",
-            border: "1px solid rgba(201,169,110,0.15)",
+            background: "rgba(255,176,0,0.06)",
+            border: "1px solid rgba(255,176,0,0.15)",
             borderRadius: 2,
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFB000" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
           </svg>
@@ -135,7 +135,7 @@ export function EconomicCalendar() {
               style={{
                 fontSize: 10,
                 fontWeight: 600,
-                color: "#C9A96E",
+                color: "#FFB000",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -155,7 +155,7 @@ export function EconomicCalendar() {
                 style={{
                   fontFamily: "var(--font-mono)",
                   fontVariantNumeric: "tabular-nums",
-                  color: "#C9A96E",
+                  color: "#FFB000",
                   fontWeight: 700,
                 }}
               >
@@ -181,7 +181,7 @@ export function EconomicCalendar() {
                   fontWeight: 700,
                   fontFamily: "var(--font-mono)",
                   fontVariantNumeric: "tabular-nums",
-                  color: isToday ? "#C9A96E" : isPast ? "var(--muted)" : "var(--foreground-secondary)",
+                  color: isToday ? "#FFB000" : isPast ? "var(--muted)" : "var(--foreground-secondary)",
                   padding: "10px 0 4px",
                   letterSpacing: "0.02em",
                   display: "flex",
@@ -195,8 +195,8 @@ export function EconomicCalendar() {
                     style={{
                       fontSize: 8,
                       fontWeight: 700,
-                      color: "#0D0E12",
-                      background: "#C9A96E",
+                      color: "#08090B",
+                      background: "#FFB000",
                       padding: "1px 5px",
                       borderRadius: 2,
                       letterSpacing: "0.04em",
@@ -223,7 +223,7 @@ export function EconomicCalendar() {
                       padding: "7px 0 7px 8px",
                       borderBottom: idx < group.events.length - 1 ? "1px solid var(--border-subtle)" : "none",
                       borderLeft: isToday
-                        ? "3px solid #C9A96E"
+                        ? "3px solid #FFB000"
                         : "3px solid transparent",
                       opacity: evPast ? 0.45 : 1,
                       transition: "opacity 0.2s",
@@ -235,7 +235,7 @@ export function EconomicCalendar() {
                         width: 5,
                         height: 5,
                         borderRadius: "50%",
-                        background: ev.importance === "high" ? "#C9A96E" : "#8C8C91",
+                        background: ev.importance === "high" ? "#FFB000" : "#8C8C91",
                         flexShrink: 0,
                         opacity: ev.importance === "high" ? 1 : 0.5,
                       }}

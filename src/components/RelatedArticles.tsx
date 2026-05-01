@@ -50,7 +50,7 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
               cursor: "pointer",
               transition: "background 0.15s ease",
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.04)"; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,176,0,0.04)"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <p style={{
@@ -77,14 +77,14 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
                 <div style={{
                   width: `${Math.round(s.score * 100)}%`,
                   height: "100%",
-                  background: "#C9A96E",
+                  background: "#FFB000",
                   borderRadius: 1,
                   transition: "width 0.3s ease",
                 }} />
               </div>
               <span style={{
                 fontSize: 9,
-                color: "#C9A96E",
+                color: "#FFB000",
                 fontFamily: "var(--font-mono)",
                 fontVariantNumeric: "tabular-nums",
                 flexShrink: 0,
@@ -103,7 +103,7 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
             )}
 
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
-              <span style={{ fontSize: 9, color: "#C9A96E", fontWeight: 500 }}>{s.article.sourceName}</span>
+              <span style={{ fontSize: 9, color: "#FFB000", fontWeight: 500 }}>{s.article.sourceName}</span>
               <span style={{ fontSize: 9, color: "#8C8C91" }}>{timeAgo(s.article.publishedAt)}</span>
             </div>
           </button>

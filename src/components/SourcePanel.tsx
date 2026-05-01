@@ -27,10 +27,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_ICONS: Record<string, { label: string; color: string }> = {
-  policy: { label: "P", color: "#C9A96E" },
+  policy: { label: "P", color: "#FFB000" },
   macro: { label: "M", color: "#8C8C91" },
-  global: { label: "G", color: "#C9A96E" },
-  fx: { label: "F", color: "#C9A96E" },
+  global: { label: "G", color: "#FFB000" },
+  fx: { label: "F", color: "#FFB000" },
   semicon: { label: "S", color: "#8C8C91" },
   other: { label: "O", color: "#8C8C91" },
 };

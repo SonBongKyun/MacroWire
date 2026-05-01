@@ -152,8 +152,8 @@ export function NewsTab({
     <div className="flex flex-col h-full">
       {/* ── Filter Bar: single 40px row ── */}
       <div
-        className="shrink-0 border-b border-[#2C2D34] bg-[#0D0E12]"
-        style={{ height: 40, borderTop: "1px solid rgba(201,169,110,0.2)" }}
+        className="shrink-0 border-b border-[#2C2D34] bg-[#08090B]"
+        style={{ height: 40, borderTop: "1px solid rgba(255,176,0,0.2)" }}
       >
         <div className="flex items-center h-full px-4 gap-3">
 
@@ -172,8 +172,8 @@ export function NewsTab({
                   letterSpacing: "0.02em",
                   borderRadius: 3,
                   border: "1px solid transparent",
-                  color: range === r.value ? "#0D0E12" : "#8C8C91",
-                  backgroundColor: range === r.value ? "#C9A96E" : "transparent",
+                  color: range === r.value ? "#08090B" : "#8C8C91",
+                  backgroundColor: range === r.value ? "#FFB000" : "transparent",
                   cursor: "pointer",
                 }}
               >
@@ -226,12 +226,12 @@ export function NewsTab({
                     padding: "2px 8px",
                     fontSize: 11,
                     fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "#C9A96E" : "#8C8C91",
+                    color: isActive ? "#FFB000" : "#8C8C91",
                     background: "transparent",
                     border: "none",
                     cursor: "pointer",
                     position: "relative",
-                    borderBottom: isActive ? "2px solid #C9A96E" : "2px solid transparent",
+                    borderBottom: isActive ? "2px solid #FFB000" : "2px solid transparent",
                   }}
                 >
                   {r.label}
@@ -282,7 +282,7 @@ export function NewsTab({
               border: "none",
               cursor: "pointer",
               fontSize: 14,
-              color: showSaved ? "#C9A96E" : "#8C8C91",
+              color: showSaved ? "#FFB000" : "#8C8C91",
               padding: "0 2px",
               lineHeight: 1,
             }}
@@ -324,7 +324,7 @@ export function NewsTab({
 
       {/* Active filter chips (dismissable) */}
       {(activeFilters.length > 0 || searchQuery) && (
-        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-[#2C2D34] bg-[#0D0E12]">
+        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-[#2C2D34] bg-[#08090B]">
           <span style={{ fontSize: 9, fontWeight: 600, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: 4 }}>필터</span>
           {activeFilters.map((f) => (
             <button
@@ -337,9 +337,9 @@ export function NewsTab({
                 padding: "1px 8px",
                 fontSize: 10,
                 fontWeight: 600,
-                color: "#C9A96E",
-                background: "rgba(201,169,110,0.15)",
-                border: "1px solid rgba(201,169,110,0.3)",
+                color: "#FFB000",
+                background: "rgba(255,176,0,0.15)",
+                border: "1px solid rgba(255,176,0,0.3)",
                 borderRadius: 2,
                 cursor: "pointer",
               }}
@@ -377,7 +377,7 @@ export function NewsTab({
         }}
       >
         {/* Left column: article list */}
-        <div className={`overflow-y-auto transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`} style={{ borderLeft: "1px solid rgba(201,169,110,0.12)" }}>
+        <div className={`overflow-y-auto transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`} style={{ borderLeft: "1px solid rgba(255,176,0,0.12)" }}>
           <SpikeAlert articles={sortedArticles} onTagClick={onTagClick} />
 
           {sortedArticles.length === 0 && !loading ? (
@@ -398,9 +398,9 @@ export function NewsTab({
                       padding: "6px 16px",
                       fontSize: 11,
                       fontWeight: 600,
-                      color: "#C9A96E",
-                      background: "rgba(201,169,110,0.08)",
-                      border: "1px solid #C9A96E",
+                      color: "#FFB000",
+                      background: "rgba(255,176,0,0.08)",
+                      border: "1px solid #FFB000",
                       borderRadius: 2,
                       cursor: "pointer",
                     }}

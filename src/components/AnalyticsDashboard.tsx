@@ -33,8 +33,8 @@ const ECON_EVENTS = [
 ];
 
 const REGION_COLORS: Record<string, string> = {
-  미국: "#C9A96E",
-  한국: "#C9A96E",
+  미국: "#FFB000",
+  한국: "#FFB000",
   유럽: "#8C8C91",
   일본: "#8C8C91",
 };

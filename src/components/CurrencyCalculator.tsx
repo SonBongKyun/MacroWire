@@ -236,7 +236,7 @@ export function CurrencyCalculator({ open, onClose }: CurrencyCalculatorProps) {
             style={{
               display: "flex",
               gap: 6,
-              border: `1px solid ${activeInput === "from" ? "#C9A96E" : "var(--border)"}`,
+              border: `1px solid ${activeInput === "from" ? "#FFB000" : "var(--border)"}`,
               borderRadius: 2,
               padding: "6px 8px",
               background: "var(--surface-active)",
@@ -309,8 +309,8 @@ export function CurrencyCalculator({ open, onClose }: CurrencyCalculatorProps) {
               transition: "all 0.15s",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#C9A96E";
-              e.currentTarget.style.borderColor = "#C9A96E";
+              e.currentTarget.style.color = "#FFB000";
+              e.currentTarget.style.borderColor = "#FFB000";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = "var(--muted)";
@@ -333,7 +333,7 @@ export function CurrencyCalculator({ open, onClose }: CurrencyCalculatorProps) {
             style={{
               display: "flex",
               gap: 6,
-              border: `1px solid ${activeInput === "to" ? "#C9A96E" : "var(--border)"}`,
+              border: `1px solid ${activeInput === "to" ? "#FFB000" : "var(--border)"}`,
               borderRadius: 2,
               padding: "6px 8px",
               background: "var(--surface-active)",
@@ -399,8 +399,8 @@ export function CurrencyCalculator({ open, onClose }: CurrencyCalculatorProps) {
             fontWeight: 700,
             fontFamily: "var(--font-heading)",
             letterSpacing: "0.04em",
-            background: loading ? "var(--surface)" : "#C9A96E",
-            color: loading ? "var(--muted)" : "#0D0E12",
+            background: loading ? "var(--surface)" : "#FFB000",
+            color: loading ? "var(--muted)" : "#08090B",
             border: "none",
             borderRadius: 2,
             cursor: loading ? "wait" : "pointer",

@@ -29,7 +29,7 @@ function timeAgo(dateStr: string): string {
 }
 
 const INSIGHT_COLORS: Record<string, string> = {
-  trend: "#C9A96E",
+  trend: "#FFB000",
   risk: "#ef4444",
   opportunity: "#3b82f6",
   alert: "#f97316",
@@ -57,7 +57,7 @@ function ConfidenceBar({ value }: { value: number }) {
         style={{
           width: `${value}%`,
           height: "100%",
-          background: value > 70 ? "#C9A96E" : "#8C8C91",
+          background: value > 70 ? "#FFB000" : "#8C8C91",
         }}
       />
     </div>
@@ -125,7 +125,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
     let moodColor: string;
     if (pos > neg * 1.5) { mood = "긍정"; moodColor = "#22c55e"; }
     else if (neg > pos * 1.5) { mood = "부정"; moodColor = "#ef4444"; }
-    else { mood = "혼조"; moodColor = "#C9A96E"; }
+    else { mood = "혼조"; moodColor = "#FFB000"; }
 
     return { todayCount: todayArticles.length, pos, neg, neu, breakingCount, topTags, mood, moodColor };
   }, [articles, summaries]);
@@ -260,7 +260,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         gridTemplateColumns: "60% 40%",
         height: "100%",
         overflow: "hidden",
-        background: "#0D0E12",
+        background: "#08090B",
       }}
     >
       {/* ══════════ LEFT COLUMN ══════════ */}
@@ -310,7 +310,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                     fontSize: 10,
                     padding: "2px 8px",
                     border: "1px solid #2C2D34",
-                    color: "#C9A96E",
+                    color: "#FFB000",
                     fontFamily: "'Space Mono', monospace",
                   }}
                 >
@@ -372,7 +372,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                           padding: "1px 0",
                         }}
                         onClick={() => match && onSelectArticle(match)}
-                        onMouseEnter={(e) => { if (match) (e.currentTarget.style.color = "#C9A96E"); }}
+                        onMouseEnter={(e) => { if (match) (e.currentTarget.style.color = "#FFB000"); }}
                         onMouseLeave={(e) => { if (match) (e.currentTarget.style.color = "#8C8C91"); }}
                       >
                         {match ? ">" : "-"} {title.length > 60 ? title.slice(0, 60) + "..." : title}
@@ -403,7 +403,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               }}
               onMouseEnter={(e) => {
                 const titleEl = e.currentTarget.querySelector("[data-title]") as HTMLElement;
-                if (titleEl) titleEl.style.color = "#C9A96E";
+                if (titleEl) titleEl.style.color = "#FFB000";
               }}
               onMouseLeave={(e) => {
                 const titleEl = e.currentTarget.querySelector("[data-title]") as HTMLElement;
@@ -416,7 +416,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   fontWeight: 700,
                   padding: "2px 5px",
                   border: "1px solid #2C2D34",
-                  color: rec.type === "breaking" ? "#ef4444" : "#C9A96E",
+                  color: rec.type === "breaking" ? "#ef4444" : "#FFB000",
                   whiteSpace: "nowrap",
                   letterSpacing: "0.05em",
                   flexShrink: 0,
@@ -466,7 +466,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   key={article.id}
                   style={{ fontSize: 10, color: "#EBEBEB", padding: "3px 0", cursor: "pointer", lineHeight: 1.4 }}
                   onClick={() => onSelectArticle(article)}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#C9A96E"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#FFB000"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#EBEBEB"; }}
                 >
                   {article.title.length > 50 ? article.title.slice(0, 50) + "..." : article.title}
@@ -484,7 +484,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   key={article.id}
                   style={{ fontSize: 10, color: "#EBEBEB", padding: "3px 0", cursor: "pointer", lineHeight: 1.4 }}
                   onClick={() => onSelectArticle(article)}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#C9A96E"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#FFB000"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#EBEBEB"; }}
                 >
                   {article.title.length > 50 ? article.title.slice(0, 50) + "..." : article.title}
@@ -513,7 +513,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                 style={{
                   fontSize: 11,
                   fontWeight: count >= 5 ? 700 : 400,
-                  color: count >= 5 ? "#C9A96E" : "#EBEBEB",
+                  color: count >= 5 ? "#FFB000" : "#EBEBEB",
                   width: 120,
                   flexShrink: 0,
                   overflow: "hidden",
@@ -528,7 +528,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   style={{
                     width: `${(count / maxEntityFreq) * 100}%`,
                     height: "100%",
-                    background: count >= 5 ? "#C9A96E" : "#8C8C91",
+                    background: count >= 5 ? "#FFB000" : "#8C8C91",
                   }}
                 />
               </div>
@@ -549,9 +549,9 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
           )}
           {topicNetwork.map(({ tagA, tagB, count }, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}>
-              <span style={{ color: "#C9A96E", fontWeight: 600 }}>{tagA}</span>
+              <span style={{ color: "#FFB000", fontWeight: 600 }}>{tagA}</span>
               <span style={{ color: "#8C8C91", fontSize: 10 }}>&harr;</span>
-              <span style={{ color: "#C9A96E", fontWeight: 600 }}>{tagB}</span>
+              <span style={{ color: "#FFB000", fontWeight: 600 }}>{tagB}</span>
               <span style={{ color: "#8C8C91", fontFamily: "'Space Mono', monospace", fontSize: 10, marginLeft: "auto" }}>
                 {count}건
               </span>
@@ -609,7 +609,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               onClick={() => onSelectArticle(article)}
               onMouseEnter={(e) => {
                 const t = e.currentTarget.querySelector("[data-rank-title]") as HTMLElement;
-                if (t) t.style.color = "#C9A96E";
+                if (t) t.style.color = "#FFB000";
               }}
               onMouseLeave={(e) => {
                 const t = e.currentTarget.querySelector("[data-rank-title]") as HTMLElement;
@@ -642,8 +642,8 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                       fontWeight: 700,
                       padding: "1px 4px",
                       border: "1px solid",
-                      borderColor: summary.impactLevel === "high" ? "#ef4444" : "#C9A96E",
-                      color: summary.impactLevel === "high" ? "#ef4444" : "#C9A96E",
+                      borderColor: summary.impactLevel === "high" ? "#ef4444" : "#FFB000",
+                      color: summary.impactLevel === "high" ? "#ef4444" : "#FFB000",
                       letterSpacing: "0.05em",
                     }}
                   >

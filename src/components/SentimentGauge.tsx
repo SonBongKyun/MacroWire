@@ -97,9 +97,9 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
             transform: "translateX(-50%)",
             width: 3,
             height: 14,
-            background: "#C9A96E",
+            background: "#FFB000",
             borderRadius: 1,
-            boxShadow: "0 0 6px rgba(201,169,110,0.5)",
+            boxShadow: "0 0 6px rgba(255,176,0,0.5)",
             transition: "left 0.5s ease",
           }}
         />

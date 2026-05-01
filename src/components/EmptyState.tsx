@@ -92,25 +92,25 @@ export function EmptyState({
                 padding: "9px 16px",
                 fontSize: 12,
                 fontWeight: 700,
-                color: "#0D0E12",
+                color: "#08090B",
                 background:
-                  "linear-gradient(135deg, #E5C896 0%, #C9A96E 50%, #B8945C 100%)",
+                  "#FFB000",
                 border: "none",
                 borderRadius: 3,
                 cursor: "pointer",
                 letterSpacing: "-0.008em",
-                boxShadow: "0 4px 14px rgba(201,169,110,0.20)",
+                boxShadow: "0 4px 14px rgba(255,176,0,0.20)",
                 transition: "transform 0.15s ease, box-shadow 0.15s ease",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
                 (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 6px 18px rgba(201,169,110,0.30)";
+                  "0 6px 18px rgba(255,176,0,0.30)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
                 (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 4px 14px rgba(201,169,110,0.20)";
+                  "0 4px 14px rgba(255,176,0,0.20)";
               }}
             >
               {action.label}
@@ -160,7 +160,7 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
         position: "absolute",
         inset: 0,
         background:
-          "radial-gradient(50% 50% at 50% 50%, rgba(201,169,110,0.08) 0%, transparent 70%)",
+          "radial-gradient(50% 50% at 50% 50%, rgba(255,176,0,0.08) 0%, transparent 70%)",
         pointerEvents: "none",
       }}
     />
@@ -175,9 +175,9 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     justifyContent: "center",
   };
 
-  const stroke = "#C9A96E";
-  const dim = "rgba(201,169,110,0.4)";
-  const veryDim = "rgba(201,169,110,0.15)";
+  const stroke = "#FFB000";
+  const dim = "rgba(255,176,0,0.4)";
+  const veryDim = "rgba(255,176,0,0.15)";
 
   switch (name) {
     case "no-articles":

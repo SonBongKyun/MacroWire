@@ -70,8 +70,8 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
   const visibleData = zoomLevel > 0 ? data.slice(Math.max(data.length - Math.max(data.length - zoomLevel, 6))) : data;
 
   const isPositive = change !== undefined ? change >= 0 : visibleData[visibleData.length - 1] >= visibleData[0];
-  const lineColor = isPositive ? "#C9A96E" : "#ef4444";
-  const fillColor = isPositive ? "rgba(201,169,110,0.1)" : "rgba(239,68,68,0.1)";
+  const lineColor = isPositive ? "#FFB000" : "#ef4444";
+  const fillColor = isPositive ? "rgba(255,176,0,0.1)" : "rgba(239,68,68,0.1)";
 
   const padRight = 52;
   const padTop = 6;
@@ -169,7 +169,7 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
           {hoverPoint && (
             <>
               <line x1={hoverPoint.x} y1={padTop} x2={hoverPoint.x} y2={padTop + chartH} stroke="#8C8C91" strokeWidth={1} strokeDasharray="3,3" pointerEvents="none" />
-              <circle cx={hoverPoint.x} cy={hoverPoint.y} r={4} fill="#C9A96E" pointerEvents="none" />
+              <circle cx={hoverPoint.x} cy={hoverPoint.y} r={4} fill="#FFB000" pointerEvents="none" />
             </>
           )}
         </svg>
@@ -213,15 +213,15 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
                   fontSize: 10,
                   fontWeight: 600,
                   fontFamily: "'Space Mono', var(--font-mono), monospace",
-                  color: isActive ? "#0D0E12" : "#8C8C91",
-                  background: isActive ? "#C9A96E" : "transparent",
-                  border: isActive ? "1px solid #C9A96E" : "1px solid #2C2D34",
+                  color: isActive ? "#08090B" : "#8C8C91",
+                  background: isActive ? "#FFB000" : "transparent",
+                  border: isActive ? "1px solid #FFB000" : "1px solid #2C2D34",
                   cursor: "pointer",
                   transition: "all 0.15s ease",
                   letterSpacing: "0.04em",
                   lineHeight: 1.4,
                 }}
-                onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "#C9A96E"; }}
+                onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "#FFB000"; }}
                 onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "#2C2D34"; }}
               >
                 {r.label}
@@ -250,8 +250,8 @@ export function MiniSparkline({
   if (!data || data.length < 2) return null;
 
   const isPositive = change !== undefined ? change >= 0 : data[data.length - 1] >= data[0];
-  const lineColor = isPositive ? "#C9A96E" : "#ef4444";
-  const fillColor = isPositive ? "rgba(201,169,110,0.08)" : "rgba(239,68,68,0.08)";
+  const lineColor = isPositive ? "#FFB000" : "#ef4444";
+  const fillColor = isPositive ? "rgba(255,176,0,0.08)" : "rgba(239,68,68,0.08)";
 
   const pad = 1;
   const min = Math.min(...data);

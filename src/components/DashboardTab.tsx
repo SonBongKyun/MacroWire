@@ -176,7 +176,7 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
           )}
         </div>
       ) : null}
-      <div style={{ marginTop: 6, fontSize: 9, color: "#C9A96E" }}>
+      <div style={{ marginTop: 6, fontSize: 9, color: "#FFB000" }}>
         시장 탭에서 자세히 보기
       </div>
     </div>
@@ -258,9 +258,9 @@ function LayoutDropdown({
       <button
         onClick={() => setOpen((v) => !v)}
         style={{
-          background: open ? "rgba(201,169,110,0.1)" : "transparent",
-          border: open ? "1px solid #C9A96E" : "1px solid #2C2D34",
-          color: open ? "#C9A96E" : "#8C8C91",
+          background: open ? "rgba(255,176,0,0.1)" : "transparent",
+          border: open ? "1px solid #FFB000" : "1px solid #2C2D34",
+          color: open ? "#FFB000" : "#8C8C91",
           fontSize: 10,
           fontWeight: 600,
           padding: "4px 10px",
@@ -318,7 +318,7 @@ function LayoutDropdown({
                           flex: 1,
                           background: "none",
                           border: "none",
-                          color: layout.id === activeLayoutId ? "#C9A96E" : "#EBEBEB",
+                          color: layout.id === activeLayoutId ? "#FFB000" : "#EBEBEB",
                           fontSize: 11,
                           fontWeight: layout.id === activeLayoutId ? 700 : 400,
                           textAlign: "left",
@@ -328,7 +328,7 @@ function LayoutDropdown({
                       >
                         {layout.name}
                         {layout.id === activeLayoutId && (
-                          <span style={{ marginLeft: 6, fontSize: 9, color: "#C9A96E" }}>&#10003;</span>
+                          <span style={{ marginLeft: 6, fontSize: 9, color: "#FFB000" }}>&#10003;</span>
                         )}
                       </button>
                       <button
@@ -365,7 +365,7 @@ function LayoutDropdown({
                     cursor: "pointer",
                     borderBottom: "1px solid #2C2D34",
                   }}
-                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.08)"; }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,176,0,0.08)"; }}
                   onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
                 >
                   현재 레이아웃 저장
@@ -390,7 +390,7 @@ function LayoutDropdown({
                     placeholder="레이아웃 이름"
                     style={{
                       flex: 1,
-                      background: "#0D0E12",
+                      background: "#08090B",
                       border: "1px solid #2C2D34",
                       color: "#EBEBEB",
                       fontSize: 11,
@@ -407,9 +407,9 @@ function LayoutDropdown({
                       }
                     }}
                     style={{
-                      background: "#C9A96E",
+                      background: "#FFB000",
                       border: "none",
-                      color: "#0D0E12",
+                      color: "#08090B",
                       fontSize: 10,
                       fontWeight: 700,
                       padding: "3px 8px",
@@ -434,7 +434,7 @@ function LayoutDropdown({
                   fontSize: 11,
                   cursor: "pointer",
                 }}
-                onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.08)"; }}
+                onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,176,0,0.08)"; }}
                 onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
               >
                 섹션 편집
@@ -469,7 +469,7 @@ function LayoutDropdown({
                     checked={sections[key]}
                     onChange={() => onToggleSection(key)}
                     style={{
-                      accentColor: "#C9A96E",
+                      accentColor: "#FFB000",
                       width: 13,
                       height: 13,
                     }}
@@ -567,7 +567,7 @@ function ArticleVolumeChart({ articles }: { articles: Article[] }) {
                 y={y}
                 width={barWidth}
                 height={Math.max(barH, 1)}
-                fill={isCurrent ? "#D4B878" : "#C9A96E"}
+                fill={isCurrent ? "#D4B878" : "#FFB000"}
                 opacity={isCurrent ? 1 : 0.7}
                 rx={1}
               >
@@ -608,7 +608,7 @@ function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
 
   const FRESHNESS_LABELS: Record<string, { text: string; color: string }> = {
     active: { text: "ACTIVE", color: "#22c55e" },
-    slow: { text: "SLOW", color: "#C9A96E" },
+    slow: { text: "SLOW", color: "#FFB000" },
     stale: { text: "STALE", color: "#ef4444" },
   };
 
@@ -618,7 +618,7 @@ function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {top5.map((rank, idx) => {
           const scoreColor =
-            rank.qualityScore > 70 ? "#C9A96E" : rank.qualityScore >= 40 ? "#8C8C91" : "#ef4444";
+            rank.qualityScore > 70 ? "#FFB000" : rank.qualityScore >= 40 ? "#8C8C91" : "#ef4444";
           const freshness = FRESHNESS_LABELS[rank.freshness] || FRESHNESS_LABELS.stale;
 
           return (
@@ -769,7 +769,7 @@ function ReadingProgressSection({
               onChange={(e) => onSetGoal({ dailyTarget: Math.max(1, parseInt(e.target.value) || 1) })}
               style={{
                 width: 60,
-                background: "#0D0E12",
+                background: "#08090B",
                 border: "1px solid #2C2D34",
                 color: "#EBEBEB",
                 fontSize: 12,
@@ -791,7 +791,7 @@ function ReadingProgressSection({
               onChange={(e) => onSetGoal({ weeklyTarget: Math.max(1, parseInt(e.target.value) || 1) })}
               style={{
                 width: 60,
-                background: "#0D0E12",
+                background: "#08090B",
                 border: "1px solid #2C2D34",
                 color: "#EBEBEB",
                 fontSize: 12,
@@ -810,7 +810,7 @@ function ReadingProgressSection({
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
               <span style={{ fontSize: 11, color: "#EBEBEB", fontWeight: 500 }}>오늘</span>
-              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: dailyPct >= 100 ? "#C9A96E" : "#EBEBEB", fontWeight: 700 }}>
+              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: dailyPct >= 100 ? "#FFB000" : "#EBEBEB", fontWeight: 700 }}>
                 {progress.todayRead}/{goal.dailyTarget}
               </span>
             </div>
@@ -819,7 +819,7 @@ function ReadingProgressSection({
                 style={{
                   width: `${dailyPct}%`,
                   height: "100%",
-                  background: "#C9A96E",
+                  background: "#FFB000",
                   transition: "width 0.3s ease",
                 }}
               />
@@ -830,7 +830,7 @@ function ReadingProgressSection({
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
               <span style={{ fontSize: 11, color: "#EBEBEB", fontWeight: 500 }}>이번 주</span>
-              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: weeklyPct >= 100 ? "#C9A96E" : "#EBEBEB", fontWeight: 700 }}>
+              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: weeklyPct >= 100 ? "#FFB000" : "#EBEBEB", fontWeight: 700 }}>
                 {progress.weekRead}/{goal.weeklyTarget}
               </span>
             </div>
@@ -839,7 +839,7 @@ function ReadingProgressSection({
                 style={{
                   width: `${weeklyPct}%`,
                   height: "100%",
-                  background: "#C9A96E",
+                  background: "#FFB000",
                   transition: "width 0.3s ease",
                 }}
               />
@@ -853,7 +853,7 @@ function ReadingProgressSection({
                 style={{
                   fontSize: 12,
                   fontWeight: 700,
-                  color: "#C9A96E",
+                  color: "#FFB000",
                   fontFamily: "var(--font-mono)",
                 }}
               >
@@ -887,7 +887,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
         className="dash-section-title"
         style={{ display: "flex", alignItems: "center", gap: 8 }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFB000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
         </svg>
         AI INSIGHTS
@@ -966,7 +966,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                     style={{
                       width: `${insight.confidence}%`,
                       height: "100%",
-                      background: insight.confidence >= 70 ? "#C9A96E" : "#8C8C91",
+                      background: insight.confidence >= 70 ? "#FFB000" : "#8C8C91",
                       borderRadius: 1,
                       transition: "width 0.5s ease",
                     }}
@@ -976,7 +976,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                   style={{
                     fontSize: 9,
                     fontFamily: "var(--font-mono)",
-                    color: insight.confidence >= 70 ? "#C9A96E" : "#8C8C91",
+                    color: insight.confidence >= 70 ? "#FFB000" : "#8C8C91",
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
@@ -1262,7 +1262,7 @@ export default function DashboardTab({
                   display: "flex",
                   alignItems: "baseline",
                   gap: 6,
-                  textShadow: "0 0 20px rgba(201,169,110,0.15)",
+                  textShadow: "0 0 20px rgba(255,176,0,0.15)",
                 }}>
                   {formatPrice(item.price)}
                   {!isMarketOpen && (
@@ -1318,8 +1318,8 @@ export default function DashboardTab({
           <div style={{
             width: 56, height: 56,
             borderRadius: 4,
-            border: "1px solid rgba(201,169,110,0.2)",
-            background: "rgba(201,169,110,0.05)",
+            border: "1px solid rgba(255,176,0,0.2)",
+            background: "rgba(255,176,0,0.05)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1328,17 +1328,17 @@ export default function DashboardTab({
             overflow: "hidden",
           }}>
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(201,169,110,0.4)" />
-              <rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(201,169,110,0.6)" />
-              <rect x="15" y="7" width="4" height="18" rx="1" fill="rgba(201,169,110,0.8)" />
-              <rect x="21" y="3" width="4" height="22" rx="1" fill="#C9A96E" />
+              <rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,176,0,0.4)" />
+              <rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,176,0,0.6)" />
+              <rect x="15" y="7" width="4" height="18" rx="1" fill="rgba(255,176,0,0.8)" />
+              <rect x="21" y="3" width="4" height="22" rx="1" fill="#FFB000" />
             </svg>
             <div style={{
               position: "absolute",
               top: 0, left: "-30%",
               width: "50%",
               height: "100%",
-              background: "linear-gradient(90deg, transparent, rgba(201,169,110,0.15), transparent)",
+              background: "linear-gradient(90deg, transparent, rgba(255,176,0,0.15), transparent)",
               animation: "card-shimmer 2s ease-in-out infinite",
             }} />
           </div>
@@ -1371,7 +1371,7 @@ export default function DashboardTab({
               <div key={i} style={{
                 width: 5, height: 5,
                 borderRadius: "50%",
-                background: "#C9A96E",
+                background: "#FFB000",
                 opacity: 0.4,
                 animation: `pulse-dot 1.5s ease-in-out ${i * 0.3}s infinite`,
               }} />
@@ -1406,7 +1406,7 @@ export default function DashboardTab({
                 border: "1px solid rgba(239,68,68,0.18)",
                 borderLeft: "2px solid rgba(239,68,68,0.55)",
                 borderRadius: 2,
-                background: "linear-gradient(180deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 40%, rgba(13,14,18,0) 100%)",
+                background: "linear-gradient(180deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 40%, rgba(8,9,11,0) 100%)",
                 marginBottom: 20,
                 boxShadow: "inset 0 1px 0 rgba(239,68,68,0.12), 0 1px 0 rgba(0,0,0,0.3)",
                 overflow: "hidden",
@@ -1507,14 +1507,14 @@ export default function DashboardTab({
                 width: "100%",
                 background: "#15161C",
                 border: "1px solid #2C2D34",
-                borderTop: "1px solid rgba(201,169,110,0.25)",
-                borderLeft: "3px solid #C9A96E",
+                borderTop: "1px solid rgba(255,176,0,0.25)",
+                borderLeft: "3px solid #FFB000",
                 padding: "24px 28px",
                 cursor: "pointer",
                 marginBottom: 24,
                 transition: "box-shadow 0.2s ease, border-color 0.2s ease",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 24px rgba(201,169,110,0.1)"; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 24px rgba(255,176,0,0.1)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
             >
               <h2 style={{
@@ -1551,17 +1551,17 @@ export default function DashboardTab({
                   marginTop: 12,
                 }}
               >
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#C9A96E" }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#FFB000" }}>
                   {heroArticle.sourceName}
                 </span>
-                <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#C9A96E", opacity: 0.5 }} />
-                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#C9A96E", opacity: 0.7 }}>
+                <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#FFB000", opacity: 0.5 }} />
+                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#FFB000", opacity: 0.7 }}>
                   {timeAgo(heroArticle.publishedAt)}
                 </span>
               </div>
             </button>
           ) : (
-            <div style={{ borderLeft: "3px solid #2C2D34", paddingLeft: 24, marginBottom: 24, background: "#15161C", padding: "24px 28px", border: "1px solid #2C2D34", borderTop: "1px solid rgba(201,169,110,0.15)" }}>
+            <div style={{ borderLeft: "3px solid #2C2D34", paddingLeft: 24, marginBottom: 24, background: "#15161C", padding: "24px 28px", border: "1px solid #2C2D34", borderTop: "1px solid rgba(255,176,0,0.15)" }}>
               <div className="skeleton" style={{ height: 24, width: "70%", marginBottom: 10 }} />
               <div className="skeleton" style={{ height: 14, width: "40%" }} />
             </div>
@@ -1594,9 +1594,9 @@ export default function DashboardTab({
                         width: 6,
                         height: 6,
                         borderRadius: "50%",
-                        background: "#C9A96E",
+                        background: "#FFB000",
                         flexShrink: 0,
-                        boxShadow: "0 0 6px rgba(201,169,110,0.4)",
+                        boxShadow: "0 0 6px rgba(255,176,0,0.4)",
                       }}
                     />
                   ) : (
@@ -1642,11 +1642,11 @@ export default function DashboardTab({
           {recommendations.length > 0 && (
             <div style={{ marginTop: 20 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFB000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: "#C9A96E", fontFamily: "var(--font-heading)" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: "#FFB000", fontFamily: "var(--font-heading)" }}>
                   FOR YOU
                 </span>
               </div>
@@ -1657,7 +1657,7 @@ export default function DashboardTab({
               <div>
                 {recommendations.map((rec) => {
                   const dotColor =
-                    rec.type === "trending" ? "#C9A96E" :
+                    rec.type === "trending" ? "#FFB000" :
                     rec.type === "personalized" ? "#60a5fa" :
                     rec.type === "breaking" ? "#ef4444" :
                     "#22c55e";
@@ -1676,7 +1676,7 @@ export default function DashboardTab({
                         cursor: "pointer",
                         transition: "background 0.15s ease",
                       }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.04)"; }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,176,0,0.04)"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1756,7 +1756,7 @@ export default function DashboardTab({
               onDragLeave: handleDragLeave,
               onDrop: (e: DragEvent<HTMLDivElement>) => handleDrop(e, sectionId),
               style: {
-                border: isDragOver ? "1px dashed #C9A96E" : "1px solid transparent",
+                border: isDragOver ? "1px dashed #FFB000" : "1px solid transparent",
                 borderRadius: 2,
                 padding: isDragOver ? "8px" : "0px",
                 transition: "border 0.15s ease, padding 0.15s ease",
@@ -1822,7 +1822,7 @@ export default function DashboardTab({
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {trendingTags.map(([tag, count], idx) => {
                           // Use the centralized TAG_COLORS system; fall back to a hash-based pick from the palette
-                          const fallbackPalette = ["#C9A96E", "#22c55e", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f59e0b", "#ec4899", "#10b981", "#8b5cf6"];
+                          const fallbackPalette = ["#FFB000", "#22c55e", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f59e0b", "#ec4899", "#10b981", "#8b5cf6"];
                           const hashIdx = Math.abs(tag.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % fallbackPalette.length;
                           const color = TAG_COLORS[tag] || fallbackPalette[hashIdx] || TAG_FALLBACK_COLOR;
                           const maxCount = trendingTags[0]?.[1] ?? 1;
@@ -1867,7 +1867,7 @@ export default function DashboardTab({
                                   justifyContent: "center",
                                   fontSize: 8,
                                   fontWeight: 800,
-                                  color: "#0D0E12",
+                                  color: "#08090B",
                                   background: color,
                                   borderRadius: 1,
                                   padding: "1px 4px",

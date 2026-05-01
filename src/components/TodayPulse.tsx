@@ -70,7 +70,7 @@ function useClock(): string {
   return time;
 }
 
-const STAT_COLORS = ["#C9A96E", "#8C8C91", "#C9A96E", "#8C8C91"];
+const STAT_COLORS = ["#FFB000", "#8C8C91", "#FFB000", "#8C8C91"];
 
 export function TodayPulse({ articles }: TodayPulseProps) {
   const pulse = useMemo(() => computePulse(articles), [articles]);

@@ -246,7 +246,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
                     height: "100%",
                     background:
                       src.qualityScore > 60
-                        ? "#C9A96E"
+                        ? "#FFB000"
                         : src.qualityScore > 30
                           ? "#8C8C91"
                           : "#ef4444",

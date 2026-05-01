@@ -264,12 +264,12 @@ function CompoundCalculator() {
                   <>
                     <defs>
                       <linearGradient id="compound-grad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#C9A96E" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#C9A96E" stopOpacity={0.02} />
+                        <stop offset="0%" stopColor="#FFB000" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="#FFB000" stopOpacity={0.02} />
                       </linearGradient>
                     </defs>
                     <path d={areaD} fill="url(#compound-grad)" />
-                    <path d={pathD} fill="none" stroke="#C9A96E" strokeWidth={1.5} />
+                    <path d={pathD} fill="none" stroke="#FFB000" strokeWidth={1.5} />
                   </>
                 );
               })()}
@@ -278,7 +278,7 @@ function CompoundCalculator() {
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={resultLabelStyle}>최종 금액</span>
-            <span style={{ ...resultValueStyle, color: "#C9A96E" }}>
+            <span style={{ ...resultValueStyle, color: "#FFB000" }}>
               {result.finalAmount.toLocaleString("ko-KR", { maximumFractionDigits: 0 })}
             </span>
           </div>
@@ -436,7 +436,7 @@ function ExchangeCalculator() {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={resultLabelStyle}>변환 결과</span>
-            <span style={{ ...resultValueStyle, color: "#C9A96E", fontSize: 16 }}>
+            <span style={{ ...resultValueStyle, color: "#FFB000", fontSize: 16 }}>
               {result.toLocaleString("ko-KR", {
                 maximumFractionDigits: toCurrency === "JPY" || toCurrency === "KRW" ? 0 : 2,
               })}{" "}
@@ -480,7 +480,7 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
         width: 360,
         maxHeight: "80vh",
         overflowY: "auto",
-        background: "#0D0E12",
+        background: "#08090B",
         border: "1px solid #2C2D34",
         boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
       }}
@@ -499,7 +499,7 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
           style={{
             fontSize: 11,
             fontWeight: 700,
-            color: "#C9A96E",
+            color: "#FFB000",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
           }}
@@ -537,8 +537,8 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
               flex: 1,
               background: "none",
               border: "none",
-              borderBottom: activeTab === tab.id ? "2px solid #C9A96E" : "2px solid transparent",
-              color: activeTab === tab.id ? "#C9A96E" : "#8C8C91",
+              borderBottom: activeTab === tab.id ? "2px solid #FFB000" : "2px solid transparent",
+              color: activeTab === tab.id ? "#FFB000" : "#8C8C91",
               fontSize: 11,
               fontWeight: 600,
               padding: "8px 0",

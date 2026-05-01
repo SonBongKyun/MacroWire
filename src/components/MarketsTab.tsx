@@ -97,8 +97,8 @@ const goldBtnStyle: React.CSSProperties = {
   padding: "6px 14px",
   fontSize: 10,
   fontWeight: 700,
-  backgroundColor: "#C9A96E",
-  color: "#0D0E12",
+  backgroundColor: "#FFB000",
+  color: "#08090B",
   border: "none",
   borderRadius: 2,
   cursor: "pointer",
@@ -262,7 +262,7 @@ export function MarketsTab({
   const marketItems = marketData.length > 0 ? marketData : defaultMarketItems;
 
   return (
-    <div className="overflow-y-auto h-full" style={{ backgroundColor: "#0D0E12" }}>
+    <div className="overflow-y-auto h-full" style={{ backgroundColor: "#08090B" }}>
       <div style={{ padding: "24px 24px 40px", maxWidth: 960, margin: "0 auto" }}>
 
         {/* ── Section 1: Market Indicators ── */}
@@ -368,8 +368,8 @@ export function MarketsTab({
                     fontSize: 10,
                     fontWeight: 600,
                     fontFamily: "var(--font-mono)",
-                    color: idx === selectedChartIdx ? "#C9A96E" : "#8C8C91",
-                    borderBottom: idx === selectedChartIdx ? "2px solid #C9A96E" : "2px solid transparent",
+                    color: idx === selectedChartIdx ? "#FFB000" : "#8C8C91",
+                    borderBottom: idx === selectedChartIdx ? "2px solid #FFB000" : "2px solid transparent",
                     textTransform: "uppercase",
                     letterSpacing: "0.04em",
                     marginBottom: -1,
@@ -500,7 +500,7 @@ export function MarketsTab({
                 cursor: "pointer",
                 fontSize: 12,
                 fontWeight: 500,
-                color: "#C9A96E",
+                color: "#FFB000",
                 padding: "10px 0",
                 display: "block",
               }}
@@ -553,7 +553,7 @@ export function MarketsTab({
               <tbody>
                 {alerts.map((alert) => {
                   const isTriggered = !!alert.triggeredAt;
-                  const rowColor = isTriggered ? "#C9A96E" : alert.active ? "#EBEBEB" : "#8C8C91";
+                  const rowColor = isTriggered ? "#FFB000" : alert.active ? "#EBEBEB" : "#8C8C91";
                   return (
                     <tr key={alert.id}>
                       <td style={{
@@ -597,7 +597,7 @@ export function MarketsTab({
                         fontWeight: 600,
                         textTransform: "uppercase",
                         letterSpacing: "0.04em",
-                        color: isTriggered ? "#C9A96E" : alert.active ? "#16a34a" : "#8C8C91",
+                        color: isTriggered ? "#FFB000" : alert.active ? "#16a34a" : "#8C8C91",
                         borderBottom: "1px solid #2C2D34",
                       }}>
                         {isTriggered ? "TRIGGERED" : alert.active ? "ACTIVE" : "OFF"}
@@ -660,7 +660,7 @@ export function MarketsTab({
                 cursor: "pointer",
                 fontSize: 12,
                 fontWeight: 500,
-                color: "#C9A96E",
+                color: "#FFB000",
                 padding: "10px 0",
                 display: "block",
               }}
@@ -675,7 +675,7 @@ export function MarketsTab({
                 style={{ ...selectStyle, flex: 1 }}
               >
                 {portfolioAssets.map((a) => (
-                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#0D0E12", color: "#EBEBEB" }}>
+                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#08090B", color: "#EBEBEB" }}>
                     {a.label}
                   </option>
                 ))}
@@ -693,8 +693,8 @@ export function MarketsTab({
                 onChange={(e) => setAlertDirection(e.target.value as "above" | "below")}
                 style={{ ...selectStyle, width: 80 }}
               >
-                <option value="above" style={{ backgroundColor: "#0D0E12", color: "#EBEBEB" }}>▲ 이상</option>
-                <option value="below" style={{ backgroundColor: "#0D0E12", color: "#EBEBEB" }}>▼ 이하</option>
+                <option value="above" style={{ backgroundColor: "#08090B", color: "#EBEBEB" }}>▲ 이상</option>
+                <option value="below" style={{ backgroundColor: "#08090B", color: "#EBEBEB" }}>▼ 이하</option>
               </select>
               <button onClick={handleAddAlert} style={goldBtnStyle}>추가</button>
               <button onClick={() => setShowAlertForm(false)} style={cancelBtnStyle}>취소</button>
@@ -834,7 +834,7 @@ export function MarketsTab({
                 cursor: "pointer",
                 fontSize: 12,
                 fontWeight: 500,
-                color: "#C9A96E",
+                color: "#FFB000",
                 padding: "10px 0",
                 display: "block",
               }}
@@ -849,7 +849,7 @@ export function MarketsTab({
                 style={{ ...selectStyle, flex: 1 }}
               >
                 {portfolioAssets.map((a) => (
-                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#0D0E12", color: "#EBEBEB" }}>
+                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#08090B", color: "#EBEBEB" }}>
                     {a.label}
                   </option>
                 ))}

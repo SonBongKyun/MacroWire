@@ -199,7 +199,7 @@ export function PortfolioTab({
       .sort((a, b) => b.pct - a.pct);
   }, [rows, totalValue, portfolioPrices]);
 
-  const pieColors = ["#C9A96E", "#8B7A4E", "#5E5332", "#A0C4FF", "#6B8FAD", "#4A6375", "#FF8C8C", "#AD6B6B"];
+  const pieColors = ["#FFB000", "#8B7A4E", "#5E5332", "#A0C4FF", "#6B8FAD", "#4A6375", "#FF8C8C", "#AD6B6B"];
 
   // Holdings edit
   const [editingSymbol, setEditingSymbol] = useState<string | null>(null);
@@ -273,7 +273,7 @@ export function PortfolioTab({
   const sortArrow = (key: SortKey) => {
     if (sortKey !== key) return null;
     return (
-      <span style={{ marginLeft: 2, fontSize: 8, color: "#C9A96E" }}>
+      <span style={{ marginLeft: 2, fontSize: 8, color: "#FFB000" }}>
         {sortDir === "asc" ? "\u25B2" : "\u25BC"}
       </span>
     );
@@ -282,7 +282,7 @@ export function PortfolioTab({
   const colHeaderStyle = (key: SortKey): React.CSSProperties => ({
     fontSize: 9,
     fontWeight: 700,
-    color: sortKey === key ? "#C9A96E" : "#8C8C91",
+    color: sortKey === key ? "#FFB000" : "#8C8C91",
     letterSpacing: "0.06em",
     cursor: "pointer",
     userSelect: "none",
@@ -316,7 +316,7 @@ export function PortfolioTab({
           </div>
           <div
             className="font-mono"
-            style={{ fontSize: 28, fontWeight: 700, color: "#C9A96E", lineHeight: 1 }}
+            style={{ fontSize: 28, fontWeight: 700, color: "#FFB000", lineHeight: 1 }}
           >
             {totalValue > 0 ? formatNumber(totalValue) : "--"}
           </div>
@@ -403,9 +403,9 @@ export function PortfolioTab({
             padding: "6px 14px",
             fontSize: 10,
             fontWeight: 600,
-            color: loading ? "#8C8C91" : "#C9A96E",
+            color: loading ? "#8C8C91" : "#FFB000",
             border: "1px solid",
-            borderColor: loading ? "#2C2D34" : "#C9A96E",
+            borderColor: loading ? "#2C2D34" : "#FFB000",
             background: "transparent",
             cursor: loading ? "wait" : "pointer",
             fontFamily: "var(--font-heading)",
@@ -542,7 +542,7 @@ export function PortfolioTab({
                               fontSize: 10,
                               padding: "2px 4px",
                               background: "#1B1C22",
-                              border: "1px solid #C9A96E",
+                              border: "1px solid #FFB000",
                               color: "#EBEBEB",
                               textAlign: "right",
                               fontFamily: "var(--font-mono)",
@@ -565,7 +565,7 @@ export function PortfolioTab({
                               fontSize: 10,
                               padding: "2px 4px",
                               background: "#1B1C22",
-                              border: "1px solid #C9A96E",
+                              border: "1px solid #FFB000",
                               color: "#EBEBEB",
                               textAlign: "right",
                               fontFamily: "var(--font-mono)",
@@ -624,7 +624,7 @@ export function PortfolioTab({
                             onClick={saveEdit}
                             style={{
                               fontSize: 9,
-                              color: "#C9A96E",
+                              color: "#FFB000",
                               background: "none",
                               border: "none",
                               cursor: "pointer",
@@ -666,14 +666,14 @@ export function PortfolioTab({
                   <tr
                     style={{
                       borderTop: "2px solid #2C2D34",
-                      background: "rgba(201,169,110,0.03)",
+                      background: "rgba(255,176,0,0.03)",
                     }}
                   >
                     <td
                       style={{
                         padding: "10px 12px",
                         fontWeight: 700,
-                        color: "#C9A96E",
+                        color: "#FFB000",
                         fontSize: 11,
                       }}
                     >
@@ -686,7 +686,7 @@ export function PortfolioTab({
                         padding: "10px 8px",
                         textAlign: "right",
                         fontWeight: 700,
-                        color: "#C9A96E",
+                        color: "#FFB000",
                       }}
                     >
                       {totalValue > 0 ? formatNumber(totalValue) : "--"}
@@ -720,7 +720,7 @@ export function PortfolioTab({
                       style={{
                         padding: "10px 12px",
                         textAlign: "right",
-                        color: "#C9A96E",
+                        color: "#FFB000",
                         fontWeight: 700,
                       }}
                     >
@@ -793,7 +793,7 @@ export function PortfolioTab({
                       );
                     });
                   })()}
-                  <circle cx="50" cy="50" r="22" fill="#0D0E12" />
+                  <circle cx="50" cy="50" r="22" fill="#08090B" />
                 </svg>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
                   {allocation.slice(0, 6).map((item, i) => (
@@ -957,9 +957,9 @@ export function PortfolioTab({
                   style={{
                     fontSize: 9,
                     padding: "3px 8px",
-                    background: "rgba(201,169,110,0.1)",
-                    border: "1px solid #C9A96E",
-                    color: "#C9A96E",
+                    background: "rgba(255,176,0,0.1)",
+                    border: "1px solid #FFB000",
+                    color: "#FFB000",
                     cursor: "pointer",
                     fontWeight: 700,
                   }}
@@ -1019,7 +1019,7 @@ export function PortfolioTab({
                         outline: "none",
                       }}
                       onFocus={(e) => {
-                        e.currentTarget.style.borderColor = "#C9A96E";
+                        e.currentTarget.style.borderColor = "#FFB000";
                       }}
                       onBlur={(e) => {
                         e.currentTarget.style.borderColor = "#2C2D34";

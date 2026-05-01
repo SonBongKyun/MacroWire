@@ -107,7 +107,7 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
       {activeFilterCount > 0 && (
         <>
           {sep}
-          <span className="text-[10px] tabular-nums font-semibold" style={{ background: "rgba(201,169,110,0.15)", color: "#C9A96E", padding: "1px 6px", borderRadius: 2, fontSize: 9 }}>{activeFilterCount} 필터</span>
+          <span className="text-[10px] tabular-nums font-semibold" style={{ background: "rgba(255,176,0,0.15)", color: "#FFB000", padding: "1px 6px", borderRadius: 2, fontSize: 9 }}>{activeFilterCount} 필터</span>
         </>
       )}
       {sep}

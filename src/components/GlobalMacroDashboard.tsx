@@ -72,7 +72,7 @@ export function GlobalMacroDashboard() {
             style={{
               fontSize: 10,
               fontWeight: 700,
-              color: "#C9A96E",
+              color: "#FFB000",
               letterSpacing: "0.06em",
               marginBottom: 6,
               textTransform: "uppercase",
@@ -91,7 +91,7 @@ export function GlobalMacroDashboard() {
             style={{
               fontSize: 10,
               fontWeight: 700,
-              color: "#C9A96E",
+              color: "#FFB000",
               letterSpacing: "0.06em",
               marginBottom: 6,
               textTransform: "uppercase",

@@ -153,8 +153,8 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
               onClick={() => setActiveTab(tab.id)}
               className="flex-1 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider transition-colors"
               style={{
-                color: activeTab === tab.id ? "#C9A96E" : "#8C8C91",
-                borderBottom: activeTab === tab.id ? "2px solid #C9A96E" : "2px solid transparent",
+                color: activeTab === tab.id ? "#FFB000" : "#8C8C91",
+                borderBottom: activeTab === tab.id ? "2px solid #FFB000" : "2px solid transparent",
                 background: "none",
                 cursor: "pointer",
               }}
@@ -259,7 +259,7 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
                   </div>
                   {opmlResult.skipped > 0 && (
                     <div className="flex items-center gap-2 text-[12px]">
-                      <span style={{ color: "#C9A96E", fontWeight: 600 }}>{opmlResult.skipped}</span>
+                      <span style={{ color: "#FFB000", fontWeight: 600 }}>{opmlResult.skipped}</span>
                       <span style={{ color: "var(--muted)" }}>개 건너뜀 (이미 존재)</span>
                     </div>
                   )}

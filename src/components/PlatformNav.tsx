@@ -41,13 +41,13 @@ interface PlatformNavProps {
 const SEARCH_HISTORY_KEY = "ryzm-finance-search-history";
 
 const tabs: { key: MainTab; label: string }[] = [
-  { key: "dashboard", label: "\uD648" },
-  { key: "news", label: "\uB274\uC2A4" },
-  { key: "markets", label: "\uC2DC\uC7A5" },
-  { key: "analytics", label: "\uBD84\uC11D" },
+  { key: "dashboard", label: "DESK" },
+  { key: "news", label: "WIRE" },
+  { key: "markets", label: "MARKETS" },
+  { key: "analytics", label: "ANALYTICS" },
   { key: "ai", label: "AI" },
-  { key: "research", label: "\uB9AC\uC11C\uCE58" },
-  { key: "portfolio", label: "\uD3EC\uD2B8\uD3F4\uB9AC\uC624" },
+  { key: "research", label: "RESEARCH" },
+  { key: "portfolio", label: "PORTFOLIO" },
 ];
 
 export function PlatformNav({
@@ -193,13 +193,15 @@ export function PlatformNav({
             <button
               key={tab.key}
               onClick={() => onTabChange(tab.key)}
-              className="relative h-full flex items-center transition-colors font-heading"
+              className="relative h-full flex items-center transition-colors"
               style={{
-                padding: "0 20px",
-                fontSize: 14,
+                padding: "0 18px",
+                fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                fontSize: 11,
                 fontWeight: isActive ? 700 : 500,
-                color: isActive ? "var(--accent)" : "var(--muted)",
-                letterSpacing: "0.02em",
+                color: isActive ? "#F5F0E1" : "#8C8C91",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
               }}
             >
               {tab.label}
@@ -210,29 +212,19 @@ export function PlatformNav({
               )}
               {tab.key === "news" && newArticleCount === 0 && unreadCount > 0 && (
                 <span className="ml-1.5 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-bold leading-none"
-                  style={{ borderRadius: 2, background: "rgba(201,169,110,0.15)", color: "#C9A96E" }}>
+                  style={{ borderRadius: 2, background: "rgba(255,176,0,0.15)", color: "#FFB000" }}>
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
               {isActive && (
-                <>
-                  <span
-                    className="absolute bottom-0 left-5 right-5"
-                    style={{
-                      height: 2,
-                      background: "linear-gradient(90deg, transparent 0%, #C9A96E 25%, #D4B87E 50%, #C9A96E 75%, transparent 100%)",
-                      boxShadow: "0 0 10px rgba(201,169,110,0.5), 0 0 3px rgba(201,169,110,0.8)",
-                      borderRadius: 1,
-                    }}
-                  />
-                  <span
-                    className="absolute inset-x-4 bottom-0 pointer-events-none"
-                    style={{
-                      height: 18,
-                      background: "radial-gradient(50% 100% at 50% 100%, rgba(201,169,110,0.14) 0%, transparent 70%)",
-                    }}
-                  />
-                </>
+                <span
+                  className="absolute bottom-0 left-0 right-0"
+                  style={{
+                    height: 2,
+                    background: "#FFB000",
+                    borderRadius: 0,
+                  }}
+                />
               )}
             </button>
           );
@@ -249,9 +241,9 @@ export function PlatformNav({
           className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
           style={{
             borderRadius: 2,
-            border: alertFeedOpen ? "1px solid #C9A96E" : "1px solid transparent",
-            background: alertFeedOpen ? "rgba(201,169,110,0.1)" : "transparent",
-            color: alertFeedOpen ? "#C9A96E" : "#8C8C91",
+            border: alertFeedOpen ? "1px solid #FFB000" : "1px solid transparent",
+            background: alertFeedOpen ? "rgba(255,176,0,0.1)" : "transparent",
+            color: alertFeedOpen ? "#FFB000" : "#8C8C91",
             cursor: "pointer",
           }}
           title="알림 피드 (Shift+A)"
@@ -272,9 +264,9 @@ export function PlatformNav({
           className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
           style={{
             borderRadius: 2,
-            border: splitView ? "1px solid #C9A96E" : "1px solid transparent",
-            background: splitView ? "rgba(201,169,110,0.1)" : "transparent",
-            color: splitView ? "#C9A96E" : "#8C8C91",
+            border: splitView ? "1px solid #FFB000" : "1px solid transparent",
+            background: splitView ? "rgba(255,176,0,0.1)" : "transparent",
+            color: splitView ? "#FFB000" : "#8C8C91",
             cursor: "pointer",
           }}
           title="분할 뷰 (Ctrl+Shift+S)"
@@ -294,9 +286,9 @@ export function PlatformNav({
           className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
           style={{
             borderRadius: 2,
-            border: calculatorOpen ? "1px solid #C9A96E" : "1px solid transparent",
-            background: calculatorOpen ? "rgba(201,169,110,0.1)" : "transparent",
-            color: calculatorOpen ? "#C9A96E" : "#8C8C91",
+            border: calculatorOpen ? "1px solid #FFB000" : "1px solid transparent",
+            background: calculatorOpen ? "rgba(255,176,0,0.1)" : "transparent",
+            color: calculatorOpen ? "#FFB000" : "#8C8C91",
             cursor: "pointer",
             fontFamily: "var(--font-mono)",
             fontSize: 13,
@@ -315,9 +307,9 @@ export function PlatformNav({
           className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
           style={{
             borderRadius: 2,
-            border: memoOpen ? "1px solid #C9A96E" : "1px solid transparent",
-            background: memoOpen ? "rgba(201,169,110,0.1)" : "transparent",
-            color: memoOpen ? "#C9A96E" : "#8C8C91",
+            border: memoOpen ? "1px solid #FFB000" : "1px solid transparent",
+            background: memoOpen ? "rgba(255,176,0,0.1)" : "transparent",
+            color: memoOpen ? "#FFB000" : "#8C8C91",
             cursor: "pointer",
           }}
           title={"\uC778\uC0AC\uC774\uD2B8 \uBA54\uBAA8 (Shift+M)"}
@@ -339,9 +331,9 @@ export function PlatformNav({
             className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
             style={{
               borderRadius: 2,
-              border: reportDropdownOpen ? "1px solid #C9A96E" : "1px solid transparent",
-              background: reportDropdownOpen ? "rgba(201,169,110,0.1)" : "transparent",
-              color: reportDropdownOpen ? "#C9A96E" : "#8C8C91",
+              border: reportDropdownOpen ? "1px solid #FFB000" : "1px solid transparent",
+              background: reportDropdownOpen ? "rgba(255,176,0,0.1)" : "transparent",
+              color: reportDropdownOpen ? "#FFB000" : "#8C8C91",
               cursor: "pointer",
             }}
             title="리포트"
@@ -368,7 +360,7 @@ export function PlatformNav({
                   onClick={() => { setReportDropdownOpen(false); onOpenWeeklyReport(); }}
                   className="w-full text-left px-3 py-2 text-[11px] transition-colors flex items-center gap-2"
                   style={{ color: "#EBEBEB" }}
-                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.1)"; }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,176,0,0.1)"; }}
                   onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#8C8C91" strokeWidth="1.2">
@@ -385,7 +377,7 @@ export function PlatformNav({
                   onClick={() => { setReportDropdownOpen(false); onOpenNewsletter(); }}
                   className="w-full text-left px-3 py-2 text-[11px] transition-colors flex items-center gap-2"
                   style={{ color: "#EBEBEB" }}
-                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(201,169,110,0.1)"; }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,176,0,0.1)"; }}
                   onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#8C8C91" strokeWidth="1.2">
@@ -550,7 +542,7 @@ export function PlatformNav({
             <div style={{ position: "relative", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="22" height="22" viewBox="0 0 22 22" style={{ transform: "rotate(-90deg)" }}>
                 <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#2C2D34" strokeWidth="2" />
-                <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#C9A96E" strokeWidth="2"
+                <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#FFB000" strokeWidth="2"
                   strokeDasharray={circumference} strokeDashoffset={dashOffset}
                   strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s linear" }} />
               </svg>

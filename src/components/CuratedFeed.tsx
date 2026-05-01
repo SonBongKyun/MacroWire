@@ -163,7 +163,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
             <button
               onClick={handleShareText}
               className="px-3 py-1.5 text-[11px] font-semibold metal-btn transition-colors"
-              style={{ color: "#C9A96E", borderColor: "rgba(201,169,110,0.3)" }}
+              style={{ color: "#FFB000", borderColor: "rgba(255,176,0,0.3)" }}
             >
               {"\uD53C\uB4DC \uACF5\uC720"}
             </button>
@@ -209,7 +209,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                     <div className="flex items-start gap-2">
                       <span
                         className="text-[10px] font-bold tabular-nums shrink-0 mt-0.5"
-                        style={{ color: "#C9A96E", minWidth: 18 }}
+                        style={{ color: "#FFB000", minWidth: 18 }}
                       >
                         {i + 1}.
                       </span>
@@ -247,8 +247,8 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                             className="mt-2 px-2.5 py-1.5 text-[11px] leading-[1.6]"
                             style={{
                               color: "#EBEBEB",
-                              background: "rgba(201,169,110,0.06)",
-                              borderLeft: "2px solid rgba(201,169,110,0.3)",
+                              background: "rgba(255,176,0,0.06)",
+                              borderLeft: "2px solid rgba(255,176,0,0.3)",
                             }}
                           >
                             {note.text}
@@ -264,7 +264,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                                 className="pl-3 py-1 text-[11px] leading-[1.6]"
                                 style={{
                                   color: "var(--foreground-secondary, #B0B0B5)",
-                                  borderLeft: "2px solid #C9A96E",
+                                  borderLeft: "2px solid #FFB000",
                                   fontStyle: "italic",
                                 }}
                               >
@@ -291,7 +291,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
             Shift+C {"\uB85C \uD1A0\uAE00"} &middot; ESC {"\uB2EB\uAE30"}
           </span>
           {copyToast && (
-            <span className="text-[10px] font-semibold" style={{ color: "#C9A96E" }}>
+            <span className="text-[10px] font-semibold" style={{ color: "#FFB000" }}>
               {"\uD074\uB9BD\uBCF4\uB4DC\uC5D0 \uBCF5\uC0AC\uB428!"}
             </span>
           )}

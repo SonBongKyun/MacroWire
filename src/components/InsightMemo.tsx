@@ -172,7 +172,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
             className="w-full bg-[#1B1C22] border px-3 py-2 text-[12px] text-[#EBEBEB] placeholder-[#8C8C91] focus:outline-none resize-none"
             style={{ borderColor: "#2C2D34", fontSize: 12 }}
             onFocus={(e) => {
-              (e.target as HTMLTextAreaElement).style.borderColor = "rgba(201,169,110,0.4)";
+              (e.target as HTMLTextAreaElement).style.borderColor = "rgba(255,176,0,0.4)";
             }}
             onBlur={(e) => {
               (e.target as HTMLTextAreaElement).style.borderColor = "#2C2D34";
@@ -190,9 +190,9 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                   key={tag}
                   className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px]"
                   style={{
-                    color: "#C9A96E",
-                    background: "rgba(201,169,110,0.1)",
-                    border: "1px solid rgba(201,169,110,0.2)",
+                    color: "#FFB000",
+                    background: "rgba(255,176,0,0.1)",
+                    border: "1px solid rgba(255,176,0,0.2)",
                   }}
                 >
                   {tag}
@@ -236,7 +236,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
               {linkedArticleIds.length > 0 && (
-                <span className="text-[9px] font-semibold" style={{ color: "#C9A96E" }}>
+                <span className="text-[9px] font-semibold" style={{ color: "#FFB000" }}>
                   {linkedArticleIds.length}
                 </span>
               )}
@@ -255,7 +255,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                       style={{
                         maxWidth: 200,
                         color: "#EBEBEB",
-                        background: "rgba(201,169,110,0.06)",
+                        background: "rgba(255,176,0,0.06)",
                         border: "1px solid #2C2D34",
                       }}
                     >
@@ -294,8 +294,8 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                         onClick={() => toggleLinkedArticle(a.id)}
                         className="w-full text-left px-2 py-1 text-[10px] truncate transition-colors flex items-center gap-1.5"
                         style={{
-                          color: isLinked ? "#C9A96E" : "#EBEBEB",
-                          background: isLinked ? "rgba(201,169,110,0.08)" : "transparent",
+                          color: isLinked ? "#FFB000" : "#EBEBEB",
+                          background: isLinked ? "rgba(255,176,0,0.08)" : "transparent",
                         }}
                         onMouseEnter={(e) => {
                           if (!isLinked) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
@@ -322,9 +322,9 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
             disabled={!text.trim()}
             className="w-full py-2 text-[11px] font-bold transition-colors"
             style={{
-              background: text.trim() ? "rgba(201,169,110,0.15)" : "rgba(201,169,110,0.05)",
-              color: text.trim() ? "#C9A96E" : "#8C8C91",
-              border: `1px solid ${text.trim() ? "rgba(201,169,110,0.3)" : "#2C2D34"}`,
+              background: text.trim() ? "rgba(255,176,0,0.15)" : "rgba(255,176,0,0.05)",
+              color: text.trim() ? "#FFB000" : "#8C8C91",
+              border: `1px solid ${text.trim() ? "rgba(255,176,0,0.3)" : "#2C2D34"}`,
               cursor: text.trim() ? "pointer" : "default",
             }}
           >
@@ -358,7 +358,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                       <span
                         key={tag}
                         className="text-[9px] px-1 py-0"
-                        style={{ color: "#C9A96E", background: "rgba(201,169,110,0.08)" }}
+                        style={{ color: "#FFB000", background: "rgba(255,176,0,0.08)" }}
                       >
                         #{tag}
                       </span>
@@ -385,7 +385,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                   <button
                     onClick={() => copyMemo(memo)}
                     className="text-[9px] font-semibold transition-colors"
-                    style={{ color: copyToast === memo.id ? "#C9A96E" : "#8C8C91" }}
+                    style={{ color: copyToast === memo.id ? "#FFB000" : "#8C8C91" }}
                   >
                     {copyToast === memo.id ? "\uBCF5\uC0AC\uB428!" : "\uBCF5\uC0AC"}
                   </button>

@@ -161,8 +161,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
               style={{
                 fontSize: 9,
                 fontWeight: 700,
-                color: "#0D0E12",
-                background: "#C9A96E",
+                color: "#08090B",
+                background: "#FFB000",
                 padding: "1px 6px",
                 borderRadius: 2,
                 fontFamily: "var(--font-mono)",
@@ -186,8 +186,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                 fontWeight: 600,
               }}
               onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.color = "#C9A96E";
-                (e.target as HTMLElement).style.borderColor = "#C9A96E";
+                (e.target as HTMLElement).style.color = "#FFB000";
+                (e.target as HTMLElement).style.borderColor = "#FFB000";
               }}
               onMouseLeave={(e) => {
                 (e.target as HTMLElement).style.color = "#8C8C91";
@@ -235,20 +235,20 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                 padding: "10px 14px",
                 width: "100%",
                 textAlign: "left",
-                background: item.read ? "transparent" : "rgba(201,169,110,0.04)",
+                background: item.read ? "transparent" : "rgba(255,176,0,0.04)",
                 border: "none",
                 borderBottom: "1px solid rgba(44,45,52,0.5)",
                 cursor: "pointer",
-                borderLeft: item.read ? "2px solid transparent" : "2px solid #C9A96E",
+                borderLeft: item.read ? "2px solid transparent" : "2px solid #FFB000",
                 transition: "background 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.08)";
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,176,0,0.08)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background = item.read
                   ? "transparent"
-                  : "rgba(201,169,110,0.04)";
+                  : "rgba(255,176,0,0.04)";
               }}
             >
               {/* Rule type icon */}
@@ -262,8 +262,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                   fontSize: 10,
                   fontWeight: 700,
                   fontFamily: "var(--font-mono)",
-                  color: item.read ? "#8C8C91" : "#C9A96E",
-                  background: item.read ? "rgba(140,140,145,0.1)" : "rgba(201,169,110,0.15)",
+                  color: item.read ? "#8C8C91" : "#FFB000",
+                  background: item.read ? "rgba(140,140,145,0.1)" : "rgba(255,176,0,0.15)",
                   flexShrink: 0,
                   borderRadius: 2,
                 }}
@@ -311,8 +311,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                     style={{
                       fontSize: 9,
                       fontWeight: 600,
-                      color: item.read ? "#8C8C91" : "#C9A96E",
-                      background: item.read ? "rgba(140,140,145,0.08)" : "rgba(201,169,110,0.12)",
+                      color: item.read ? "#8C8C91" : "#FFB000",
+                      background: item.read ? "rgba(140,140,145,0.08)" : "rgba(255,176,0,0.12)",
                       padding: "1px 5px",
                       borderRadius: 2,
                     }}

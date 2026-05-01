@@ -16,7 +16,7 @@ function highlightKeyword(text: string, keyword: string): React.ReactElement {
     <>
       {parts.map((part, i) =>
         regex.test(part) ? (
-          <span key={i} style={{ color: "#C9A96E", fontWeight: 700 }}>{part}</span>
+          <span key={i} style={{ color: "#FFB000", fontWeight: 700 }}>{part}</span>
         ) : (
           <span key={i}>{part}</span>
         )
@@ -178,7 +178,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
             style={{
               fontSize: 11,
               fontWeight: 700,
-              color: "#C9A96E",
+              color: "#FFB000",
               letterSpacing: "0.08em",
             }}
           >
@@ -236,7 +236,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
               transition: "border-color 0.15s",
             }}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#C9A96E";
+              e.currentTarget.style.borderColor = "#FFB000";
             }}
             onBlur={(e) => {
               e.currentTarget.style.borderColor = "#2C2D34";
@@ -334,8 +334,8 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                     textAlign: "left",
                     padding: "10px 20px",
                     borderBottom: "1px solid #1B1C22",
-                    background: isSelected ? "rgba(201,169,110,0.06)" : "transparent",
-                    borderLeft: isSelected ? "2px solid #C9A96E" : "2px solid transparent",
+                    background: isSelected ? "rgba(255,176,0,0.06)" : "transparent",
+                    borderLeft: isSelected ? "2px solid #FFB000" : "2px solid transparent",
                     cursor: "pointer",
                     transition: "background 0.15s",
                   }}
@@ -393,14 +393,14 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                             fontSize: 9,
                             padding: "1px 6px",
                             background: tag.toLowerCase().includes(activeQuery.toLowerCase())
-                              ? "rgba(201,169,110,0.15)"
+                              ? "rgba(255,176,0,0.15)"
                               : "rgba(255,255,255,0.04)",
                             color: tag.toLowerCase().includes(activeQuery.toLowerCase())
-                              ? "#C9A96E"
+                              ? "#FFB000"
                               : "#8C8C91",
                             border: "1px solid",
                             borderColor: tag.toLowerCase().includes(activeQuery.toLowerCase())
-                              ? "rgba(201,169,110,0.3)"
+                              ? "rgba(255,176,0,0.3)"
                               : "#2C2D34",
                           }}
                         >
@@ -494,8 +494,8 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                             style={{
                               height: "100%",
                               width: `${(count / maxTagFreq) * 100}%`,
-                              background: "rgba(201,169,110,0.3)",
-                              borderRight: "2px solid #C9A96E",
+                              background: "rgba(255,176,0,0.3)",
+                              borderRight: "2px solid #FFB000",
                               transition: "width 0.3s ease",
                             }}
                           />
@@ -504,7 +504,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                           className="font-mono"
                           style={{
                             fontSize: 10,
-                            color: "#C9A96E",
+                            color: "#FFB000",
                             width: 24,
                             textAlign: "right",
                             flexShrink: 0,
@@ -567,8 +567,8 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                             style={{
                               height: "100%",
                               width: `${(count / maxSourceFreq) * 100}%`,
-                              background: "rgba(201,169,110,0.15)",
-                              borderRight: "2px solid rgba(201,169,110,0.5)",
+                              background: "rgba(255,176,0,0.15)",
+                              borderRight: "2px solid rgba(255,176,0,0.5)",
                               transition: "width 0.3s ease",
                             }}
                           />
@@ -635,8 +635,8 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                             y={75 - barHeight}
                             width={barWidth}
                             height={barHeight}
-                            fill={day.count > 0 ? "rgba(201,169,110,0.4)" : "rgba(255,255,255,0.03)"}
-                            stroke={day.count > 0 ? "#C9A96E" : "#2C2D34"}
+                            fill={day.count > 0 ? "rgba(255,176,0,0.4)" : "rgba(255,255,255,0.03)"}
+                            stroke={day.count > 0 ? "#FFB000" : "#2C2D34"}
                             strokeWidth="1"
                           />
                           <text
@@ -654,7 +654,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                               x={x + barWidth / 2}
                               y={75 - barHeight - 4}
                               textAnchor="middle"
-                              fill="#C9A96E"
+                              fill="#FFB000"
                               fontSize="8"
                               fontFamily="var(--font-mono)"
                             >

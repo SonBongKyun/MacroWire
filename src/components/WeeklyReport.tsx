@@ -131,27 +131,27 @@ function generateHTML(
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #0D0E12; color: #EBEBEB; font-family: 'Space Grotesk', sans-serif; padding: 40px 20px; }
+  body { background: #08090B; color: #EBEBEB; font-family: 'Space Grotesk', sans-serif; padding: 40px 20px; }
   .container { max-width: 800px; margin: 0 auto; }
-  h1 { color: #C9A96E; font-size: 24px; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 4px; }
+  h1 { color: #FFB000; font-size: 24px; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 4px; }
   .date-range { color: #8C8C91; font-family: 'Space Mono', monospace; font-size: 13px; margin-bottom: 32px; }
   .section { margin-bottom: 32px; }
   .section-label { font-size: 11px; font-weight: 700; color: #8C8C91; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #2C2D34; padding-bottom: 8px; }
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   .stat-card { background: #1B1C22; border: 1px solid #2C2D34; padding: 16px; }
-  .stat-value { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: #C9A96E; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: #FFB000; }
   .stat-label { font-size: 11px; color: #8C8C91; margin-top: 4px; }
   .story-item { padding: 12px 0; border-bottom: 1px solid #2C2D34; }
-  .story-num { font-family: 'Space Mono', monospace; color: #C9A96E; font-size: 13px; font-weight: 700; }
+  .story-num { font-family: 'Space Mono', monospace; color: #FFB000; font-size: 13px; font-weight: 700; }
   .story-title { font-size: 14px; font-weight: 600; margin-left: 8px; }
   .story-meta { font-size: 11px; color: #8C8C91; margin-top: 4px; margin-left: 24px; }
   .tag-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .tag-name { font-size: 12px; width: 80px; text-align: right; color: #8C8C91; }
-  .tag-bar { height: 16px; background: rgba(201,169,110,0.3); border-right: 2px solid #C9A96E; }
+  .tag-bar { height: 16px; background: rgba(255,176,0,0.3); border-right: 2px solid #FFB000; }
   .tag-count { font-family: 'Space Mono', monospace; font-size: 11px; color: #8C8C91; margin-left: 4px; }
   .keyword-list { display: flex; flex-wrap: wrap; gap: 8px; }
   .keyword { background: #1B1C22; border: 1px solid #2C2D34; padding: 4px 10px; font-size: 12px; }
-  .keyword-count { font-family: 'Space Mono', monospace; color: #C9A96E; font-size: 10px; margin-left: 4px; }
+  .keyword-count { font-family: 'Space Mono', monospace; color: #FFB000; font-size: 10px; margin-left: 4px; }
   .market-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2C2D34; font-size: 13px; }
   .market-symbol { color: #EBEBEB; font-weight: 600; }
   .market-price { font-family: 'Space Mono', monospace; }
@@ -341,7 +341,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
         className="w-full mb-8"
         style={{
           maxWidth: 800,
-          background: "#0D0E12",
+          background: "#08090B",
           border: "1px solid #2C2D34",
           minHeight: 400,
         }}
@@ -354,7 +354,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
           <div>
             <h1
               className="font-heading"
-              style={{ color: "#C9A96E", fontSize: 20, letterSpacing: "0.08em", fontWeight: 700 }}
+              style={{ color: "#FFB000", fontSize: 20, letterSpacing: "0.08em", fontWeight: 700 }}
             >
               MacroWire WEEKLY REPORT
             </h1>
@@ -368,8 +368,8 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
               className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
               style={{
                 border: "1px solid #2C2D34",
-                background: copied ? "rgba(201,169,110,0.15)" : "transparent",
-                color: copied ? "#C9A96E" : "#8C8C91",
+                background: copied ? "rgba(255,176,0,0.15)" : "transparent",
+                color: copied ? "#FFB000" : "#8C8C91",
               }}
             >
               {copied ? "복사됨" : "Markdown로 복사"}
@@ -429,7 +429,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   key={s.label}
                   style={{ background: "#1B1C22", border: "1px solid #2C2D34", padding: "14px 16px" }}
                 >
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 22, fontWeight: 700, color: "#C9A96E" }}>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 22, fontWeight: 700, color: "#FFB000" }}>
                     {s.value}
                   </div>
                   <div style={{ fontSize: 11, color: "#8C8C91", marginTop: 2 }}>{s.label}</div>
@@ -461,7 +461,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
               </div>
               {topStories.map((a, i) => (
                 <div key={a.id} style={{ padding: "10px 0", borderBottom: "1px solid #2C2D34" }}>
-                  <span style={{ fontFamily: "'Space Mono', monospace", color: "#C9A96E", fontSize: 12, fontWeight: 700 }}>
+                  <span style={{ fontFamily: "'Space Mono', monospace", color: "#FFB000", fontSize: 12, fontWeight: 700 }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span style={{ fontSize: 13, fontWeight: 600, marginLeft: 8, color: "#EBEBEB" }}>{a.title}</span>
@@ -497,8 +497,8 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   <div
                     style={{
                       height: 14,
-                      background: "rgba(201,169,110,0.25)",
-                      borderRight: "2px solid #C9A96E",
+                      background: "rgba(255,176,0,0.25)",
+                      borderRight: "2px solid #FFB000",
                       width: Math.max(4, (t.count / tagMax) * 300),
                       transition: "width 0.3s",
                     }}
@@ -535,8 +535,8 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   <div
                     style={{
                       height: 14,
-                      background: "rgba(201,169,110,0.25)",
-                      borderRight: "2px solid #C9A96E",
+                      background: "rgba(255,176,0,0.25)",
+                      borderRight: "2px solid #FFB000",
                       width: Math.max(4, (s.count / (sourceCounts[0]?.count || 1)) * 250),
                       transition: "width 0.3s",
                     }}
@@ -615,7 +615,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                     }}
                   >
                     {k.word}
-                    <span style={{ fontFamily: "'Space Mono', monospace", color: "#C9A96E", fontSize: 10, marginLeft: 4 }}>
+                    <span style={{ fontFamily: "'Space Mono', monospace", color: "#FFB000", fontSize: 10, marginLeft: 4 }}>
                       {k.count}
                     </span>
                   </span>

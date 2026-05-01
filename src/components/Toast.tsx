@@ -56,7 +56,7 @@ function ToastMessage({ toast, onRemove }: { toast: ToastItem; onRemove: (id: st
 
   const textColor = (toast.type === "info" || isBreaking) ? "var(--foreground-bright)" : "#fff";
 
-  const accentColor = isBreaking ? "#ef4444" : "#C9A96E";
+  const accentColor = isBreaking ? "#ef4444" : "#FFB000";
 
   const handleClick = () => {
     if (toast.onAction) {

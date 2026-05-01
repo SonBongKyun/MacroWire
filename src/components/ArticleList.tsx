@@ -263,7 +263,7 @@ export function ArticleList({
         className="flex-1 overflow-y-auto"
         ref={listRef}
         onScroll={handleListScroll}
-        style={{ backgroundColor: "#0D0E12" }}
+        style={{ backgroundColor: "#08090B" }}
       >
         {loading && articles.length === 0 && (
           <>
@@ -318,10 +318,10 @@ export function ArticleList({
                       gap: 10,
                       transition: "background-color 0.15s ease, border-color 0.15s ease",
                       background: isSelected
-                        ? "linear-gradient(90deg, rgba(201,169,110,0.12) 0%, rgba(201,169,110,0.04) 30%, transparent 100%)"
+                        ? "linear-gradient(90deg, rgba(255,176,0,0.12) 0%, rgba(255,176,0,0.04) 30%, transparent 100%)"
                         : "transparent",
                       borderLeft: isSelected
-                        ? "2px solid #C9A96E"
+                        ? "2px solid #FFB000"
                         : isBreaking && isUnread
                         ? "2px solid rgba(239,68,68,0.65)"
                         : "2px solid transparent",
@@ -345,10 +345,10 @@ export function ArticleList({
                           width: 5,
                           height: 5,
                           borderRadius: "50%",
-                          backgroundColor: isBreaking ? "#ef4444" : "#C9A96E",
+                          backgroundColor: isBreaking ? "#ef4444" : "#FFB000",
                           boxShadow: isBreaking
                             ? "0 0 6px rgba(239,68,68,0.5)"
-                            : "0 0 6px rgba(201,169,110,0.4)",
+                            : "0 0 6px rgba(255,176,0,0.4)",
                         }} />
                       )}
                     </div>
@@ -400,7 +400,7 @@ export function ArticleList({
                                 height: 12,
                                 flexShrink: 0,
                                 borderRadius: 1,
-                                backgroundColor: isHigh ? "#C9A96E" : "#8C8C91",
+                                backgroundColor: isHigh ? "#FFB000" : "#8C8C91",
                                 opacity: isHigh ? 1 : 0.4 + (score.impactScore / 100) * 0.6,
                                 transition: "opacity 0.3s ease",
                               }}
@@ -472,7 +472,7 @@ export function ArticleList({
 
         {loading && articles.length > 0 && (
           <div style={{ display: "flex", justifyContent: "center", padding: 24 }}>
-            <svg style={{ width: 20, height: 20, color: "#C9A96E" }} className="animate-spin" fill="none" viewBox="0 0 24 24">
+            <svg style={{ width: 20, height: 20, color: "#FFB000" }} className="animate-spin" fill="none" viewBox="0 0 24 24">
               <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
             </svg>

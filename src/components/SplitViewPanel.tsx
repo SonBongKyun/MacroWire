@@ -63,7 +63,7 @@ export function SplitViewPanel({
       className="h-full overflow-y-auto"
       style={{
         borderLeft: "1px solid #2C2D34",
-        background: "#0D0E12",
+        background: "#08090B",
       }}
     >
       {/* Mode Toggle */}
@@ -88,7 +88,7 @@ export function SplitViewPanel({
                 cursor: "pointer",
                 fontSize: 10,
                 fontWeight: isActive ? 700 : 500,
-                color: isActive ? "#C9A96E" : "#8C8C91",
+                color: isActive ? "#FFB000" : "#8C8C91",
                 padding: "0 10px",
                 height: 32,
                 position: "relative",
@@ -106,7 +106,7 @@ export function SplitViewPanel({
                     left: 10,
                     right: 10,
                     height: 2,
-                    background: "#C9A96E",
+                    background: "#FFB000",
                   }}
                 />
               )}
@@ -240,7 +240,7 @@ export function SplitViewPanel({
                     style={{
                       fontSize: 20,
                       fontWeight: 800,
-                      color: "#C9A96E",
+                      color: "#FFB000",
                       fontFamily: "var(--font-mono)",
                       fontVariantNumeric: "tabular-nums",
                       lineHeight: 1,
@@ -287,10 +287,10 @@ export function SplitViewPanel({
                         fontSize: 10,
                         fontWeight: 600,
                         padding: "2px 8px",
-                        border: "1px solid rgba(201,169,110,0.2)",
+                        border: "1px solid rgba(255,176,0,0.2)",
                         borderRadius: 2,
-                        color: "#C9A96E",
-                        background: "rgba(201,169,110,0.05)",
+                        color: "#FFB000",
+                        background: "rgba(255,176,0,0.05)",
                       }}
                     >
                       {tag}
