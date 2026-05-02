@@ -359,19 +359,20 @@ export function ArticleList({
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         {article.tags.includes("속보") && (
                           <span style={{
-                            fontSize: 8,
-                            fontWeight: 800,
-                            color: "#fff",
-                            background: "#ef4444",
-                            padding: "1px 5px",
-                            borderRadius: 1,
-                            letterSpacing: "0.04em",
+                            fontSize: 9,
+                            fontWeight: 700,
+                            color: "#ef4444",
+                            background: "transparent",
+                            border: "1px solid #ef4444",
+                            padding: "0 5px",
+                            borderRadius: 0,
+                            letterSpacing: "0.14em",
                             flexShrink: 0,
-                            lineHeight: 1.6,
-                            fontFamily: "var(--font-heading)",
-                            animation: "pulse-dot 2s ease-in-out infinite",
+                            lineHeight: 1.5,
+                            fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                            textTransform: "uppercase",
                           }}>
-                            속보
+                            BREAKING
                           </span>
                         )}
                         <p style={{

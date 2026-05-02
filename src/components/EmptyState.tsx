@@ -60,12 +60,12 @@ export function EmptyState({
       <h3
         style={{
           fontFamily: "var(--font-heading)",
-          fontSize: compact ? 13 : 15,
-          fontWeight: 600,
-          color: "#EBEBEB",
+          fontSize: compact ? 13 : 16,
+          fontWeight: 700,
+          color: "#F5F0E1",
           letterSpacing: "-0.014em",
           marginTop: compact ? 14 : 20,
-          marginBottom: 6,
+          marginBottom: 8,
         }}
       >
         {title}
@@ -73,11 +73,13 @@ export function EmptyState({
       {description && (
         <p
           style={{
-            fontSize: compact ? 11 : 12,
-            color: "#8C8C91",
-            lineHeight: 1.6,
+            fontFamily: "var(--font-serif), 'Crimson Pro', serif",
+            fontStyle: "italic",
+            fontSize: compact ? 12 : 14,
+            color: "#C9C4B6",
+            lineHeight: 1.55,
             maxWidth: 320,
-            marginBottom: action || secondaryAction ? 18 : 0,
+            marginBottom: action || secondaryAction ? 20 : 0,
           }}
         >
           {description}
@@ -89,53 +91,53 @@ export function EmptyState({
             <button
               onClick={action.onClick}
               style={{
-                padding: "9px 16px",
-                fontSize: 12,
+                padding: "11px 20px",
+                fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                fontSize: 11,
                 fontWeight: 700,
                 color: "#08090B",
-                background:
-                  "#FFB000",
+                background: "#FFB000",
                 border: "none",
-                borderRadius: 3,
+                borderRadius: 0,
                 cursor: "pointer",
-                letterSpacing: "-0.008em",
-                boxShadow: "0 4px 14px rgba(255,176,0,0.20)",
-                transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                transition: "background 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 6px 18px rgba(255,176,0,0.30)";
+                (e.currentTarget as HTMLElement).style.background = "#FFC640";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "0 4px 14px rgba(255,176,0,0.20)";
+                (e.currentTarget as HTMLElement).style.background = "#FFB000";
               }}
             >
-              {action.label}
+              {action.label} →
             </button>
           )}
           {secondaryAction && (
             <button
               onClick={secondaryAction.onClick}
               style={{
-                padding: "9px 16px",
-                fontSize: 12,
+                padding: "11px 20px",
+                fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                fontSize: 11,
                 fontWeight: 600,
-                color: "#EBEBEB",
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                borderRadius: 3,
+                color: "#F5F0E1",
+                background: "transparent",
+                border: "1px solid rgba(245,240,225,0.18)",
+                borderRadius: 0,
                 cursor: "pointer",
-                letterSpacing: "-0.008em",
-                transition: "background 0.15s ease",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                transition: "border-color 0.15s ease, color 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
+                (e.currentTarget as HTMLElement).style.borderColor = "#FFB000";
+                (e.currentTarget as HTMLElement).style.color = "#FFB000";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,240,225,0.18)";
+                (e.currentTarget as HTMLElement).style.color = "#F5F0E1";
               }}
             >
               {secondaryAction.label}

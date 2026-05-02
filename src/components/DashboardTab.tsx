@@ -1245,28 +1245,27 @@ export default function DashboardTab({
                   fontSize: 10,
                   fontWeight: 700,
                   textTransform: "uppercase" as const,
-                  letterSpacing: "0.06em",
+                  letterSpacing: "0.16em",
                   color: "#8C8C91",
-                  fontFamily: "var(--font-heading)",
+                  fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
                 }}>
-                  {item.label}
+                  ─ {item.label}
                 </span>
                 <span style={{
-                  fontSize: 28,
-                  fontWeight: 700,
-                  fontFamily: "var(--font-mono)",
+                  fontSize: 36,
+                  fontWeight: 400,
+                  fontFamily: "var(--font-display-condensed), 'Anton', sans-serif",
                   fontVariantNumeric: "tabular-nums" as const,
-                  color: "#EBEBEB",
-                  lineHeight: 1,
+                  color: "#F5F0E1",
+                  lineHeight: 0.95,
                   letterSpacing: "-0.02em",
                   display: "flex",
                   alignItems: "baseline",
                   gap: 6,
-                  textShadow: "0 0 20px rgba(255,176,0,0.15)",
                 }}>
                   {formatPrice(item.price)}
                   {!isMarketOpen && (
-                    <span style={{ fontSize: 9, fontWeight: 500, color: "#8C8C91" }}>마감</span>
+                    <span style={{ fontSize: 9, fontWeight: 500, color: "#8C8C91", fontFamily: "var(--font-mono)", letterSpacing: "0.12em" }}>CLOSED</span>
                   )}
                 </span>
                 <span style={{
@@ -1387,28 +1386,34 @@ export default function DashboardTab({
           {/* ── Breaking News Stream ── */}
           {breakingArticles.length > 0 && (
             <div style={{ marginBottom: 0 }}>
-              <div className="dash-section-title" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div className="dash-section-title" style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
                 <span style={{
-                  fontSize: 8,
-                  fontWeight: 800,
-                  color: "#fff",
-                  background: "#ef4444",
-                  padding: "2px 6px",
-                  borderRadius: 1,
-                  letterSpacing: "0.06em",
-                  animation: "pulse-dot 2s ease-in-out infinite",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: "#ef4444",
+                  background: "transparent",
+                  fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                  letterSpacing: "0.18em",
                 }}>
-                  LIVE
+                  <span style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    backgroundColor: "#ef4444",
+                    animation: "pulse-dot 1.6s ease-in-out infinite",
+                  }} />
+                  BREAKING
                 </span>
-                속보 스트림
+                <span style={{ color: "#F5F0E1" }}>속보 디스패치</span>
               </div>
               <div style={{
-                border: "1px solid rgba(239,68,68,0.18)",
-                borderLeft: "2px solid rgba(239,68,68,0.55)",
-                borderRadius: 2,
-                background: "linear-gradient(180deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 40%, rgba(8,9,11,0) 100%)",
+                borderTop: "1px solid rgba(239,68,68,0.45)",
+                borderBottom: "1px solid rgba(245,240,225,0.10)",
+                background: "transparent",
                 marginBottom: 20,
-                boxShadow: "inset 0 1px 0 rgba(239,68,68,0.12), 0 1px 0 rgba(0,0,0,0.3)",
                 overflow: "hidden",
               }}>
                 {breakingArticles.map((a, i) => {
