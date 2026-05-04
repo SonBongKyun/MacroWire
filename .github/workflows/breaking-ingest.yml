@@ -1,0 +1,23 @@
+name: breaking-ingest
+
+on:
+  schedule:
+    # GitHub Actions minimum is 5 min. In practice runs are queued
+    # so actual cadence is ~5-10 min.
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: breaking-ingest
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Hit breaking ingest endpoint
+        run: |
+          curl -fsS --max-time 60 \
+            "https://macro-wire-psi.vercel.app/api/ingest/breaking" \
+            | head -c 2000

@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { runBreakingIngest } from "@/lib/ingest/breakingIngest";
 
-/**
- * Fast-poll endpoint: only fetches "속보" category sources in parallel.
- * Called every 90 seconds from the client for near real-time breaking news.
- */
-export async function POST() {
+export const maxDuration = 30;
+export const dynamic = "force-dynamic";
+
+async function handle() {
   try {
     const result = await runBreakingIngest();
     return NextResponse.json(result);
@@ -17,3 +16,6 @@ export async function POST() {
     );
   }
 }
+
+export const GET = handle;
+export const POST = handle;
