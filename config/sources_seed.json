@@ -19,6 +19,10 @@
 
   { "name": "연합뉴스 속보",       "feedUrl": "https://www.yna.co.kr/rss/news.xml",                                                     "category": "속보" },
   { "name": "CNBC Breaking",       "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839135",    "category": "속보" },
+  { "name": "Hacker News",         "feedUrl": "https://hnrss.org/frontpage",                                                            "category": "속보" },
+  { "name": "r/wallstreetbets",    "feedUrl": "https://old.reddit.com/r/wallstreetbets/.rss",                                            "category": "속보" },
+  { "name": "r/CryptoCurrency",    "feedUrl": "https://old.reddit.com/r/CryptoCurrency/.rss",                                            "category": "속보" },
+  { "name": "r/StockMarket",       "feedUrl": "https://old.reddit.com/r/StockMarket/.rss",                                               "category": "속보" },
 
   { "name": "서울경제 금융",       "feedUrl": "https://www.sedaily.com/RSS/Finance",                                                     "category": "금융" },
 
