@@ -38,15 +38,9 @@ function titleSimilarity(a: string, b: string): number {
   return overlap / Math.max(kwA.size, kwB.size);
 }
 
-async function isDuplicateByTitle(title: string, publishedAt: Date): Promise<boolean> {
-  const window = new Date(publishedAt.getTime() - 24 * 60 * 60 * 1000);
-  const recent = await prisma.article.findMany({
-    where: { publishedAt: { gte: window } },
-    select: { title: true },
-    take: 200,
-  });
-  for (const existing of recent) {
-    if (titleSimilarity(title, existing.title) > 0.7) return true;
+function isDuplicateByTitleAgainst(title: string, recentTitles: string[]): boolean {
+  for (const existing of recentTitles) {
+    if (titleSimilarity(title, existing) > 0.7) return true;
   }
   return false;
 }
@@ -91,6 +85,23 @@ export interface IngestResult {
   lastUpdated: string;
 }
 
+type FeedItem = { title: string; url: string; summary?: string; publishedAt?: Date };
+
+async function fetchFeed(source: { feedUrl: string }): Promise<FeedItem[]> {
+  const customParser = customParsers.find((p) => p.canHandle(source.feedUrl));
+  if (customParser) {
+    const result = await customParser.parse(source.feedUrl);
+    return result.items;
+  }
+  const feed = await parser.parseURL(source.feedUrl);
+  return feed.items.map((item) => ({
+    title: item.title?.trim() ?? "Untitled",
+    url: item.link ?? "",
+    summary: item.contentSnippet?.slice(0, 500) ?? item.content?.slice(0, 500) ?? undefined,
+    publishedAt: item.pubDate ? new Date(item.pubDate) : item.isoDate ? new Date(item.isoDate) : new Date(),
+  }));
+}
+
 export async function runIngest(): Promise<IngestResult> {
   const startTime = new Date();
   console.log(`[ingest] started at ${startTime.toISOString()}`);
@@ -99,108 +110,89 @@ export async function runIngest(): Promise<IngestResult> {
     where: { enabled: true },
   });
 
+  // Phase 1: fetch all feeds in parallel (network-bound)
+  const fetchResults = await Promise.allSettled(
+    sources.map((s) => fetchFeed(s).then((items) => ({ source: s, items })))
+  );
+
+  // Phase 2: load recent titles ONCE for dedup (last 24h)
+  const dedupWindow = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recent = await prisma.article.findMany({
+    where: { publishedAt: { gte: dedupWindow } },
+    select: { title: true },
+    take: 1000,
+  });
+  const recentTitles = recent.map((r) => r.title);
+
   let totalAdded = 0;
   let totalSkipped = 0;
   const failedSources: string[] = [];
 
-  for (const source of sources) {
-    try {
-      console.log(`[ingest] fetching: ${source.name} (${source.feedUrl})`);
+  // Phase 3: write to DB, source by source
+  for (let i = 0; i < fetchResults.length; i++) {
+    const result = fetchResults[i];
+    const source = sources[i];
 
-      // Check for custom parser (#23)
-      const customParser = customParsers.find((p) => p.canHandle(source.feedUrl));
-      let feedItems: { title: string; url: string; summary?: string; publishedAt?: Date }[];
-
-      if (customParser) {
-        const result = await customParser.parse(source.feedUrl);
-        feedItems = result.items;
-      } else {
-        const feed = await parser.parseURL(source.feedUrl);
-        feedItems = feed.items.map((item) => ({
-          title: item.title?.trim() ?? "Untitled",
-          url: item.link ?? "",
-          summary: item.contentSnippet?.slice(0, 500) ?? item.content?.slice(0, 500) ?? undefined,
-          publishedAt: item.pubDate ? new Date(item.pubDate) : item.isoDate ? new Date(item.isoDate) : new Date(),
-        }));
-      }
-
-      let sourceAdded = 0;
-      let sourceSkipped = 0;
-
-      for (const item of feedItems) {
-        const rawUrl = item.url;
-        if (!rawUrl) {
-          sourceSkipped++;
-          continue;
-        }
-
-        const url = canonicalizeUrl(rawUrl);
-        const id = hashUrl(url);
-        const title = item.title?.trim() ?? "Untitled";
-        const summary = item.summary?.slice(0, 500) ?? null;
-        const publishedAt = item.publishedAt ?? new Date();
-
-        // Duplicate check by URL
-        const exists = await prisma.article.findUnique({
-          where: { url },
-          select: { id: true },
-        });
-        if (exists) {
-          sourceSkipped++;
-          continue;
-        }
-
-        // Enhanced duplicate check by title similarity (#24)
-        if (await isDuplicateByTitle(title, publishedAt)) {
-          sourceSkipped++;
-          console.log(`[ingest] title-dedup skip: ${title.slice(0, 50)}…`);
-          continue;
-        }
-
-        const tags = applyTags(title, summary);
-
-        try {
-          await prisma.article.create({
-            data: {
-              id,
-              sourceId: source.id,
-              sourceName: source.name,
-              title,
-              url,
-              publishedAt,
-              summary,
-              tags: JSON.stringify(tags),
-              isRead: false,
-              isSaved: false,
-            },
-          });
-          sourceAdded++;
-        } catch (err: unknown) {
-          // unique constraint violation – skip
-          if (
-            err instanceof Error &&
-            err.message.includes("Unique constraint")
-          ) {
-            sourceSkipped++;
-          } else {
-            throw err;
-          }
-        }
-      }
-
-      totalAdded += sourceAdded;
-      totalSkipped += sourceSkipped;
-      console.log(
-        `[ingest] ${source.name}: +${sourceAdded} added, ${sourceSkipped} skipped`
-      );
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[ingest] FAILED ${source.name}: ${msg}`);
+    if (result.status === "rejected") {
+      console.error(`[ingest] FAILED ${source.name}: ${result.reason}`);
       failedSources.push(source.name);
+      continue;
     }
+
+    const { items } = result.value;
+    let sourceAdded = 0;
+    let sourceSkipped = 0;
+
+    for (const item of items) {
+      if (!item.url) {
+        sourceSkipped++;
+        continue;
+      }
+      const url = canonicalizeUrl(item.url);
+      const id = hashUrl(url);
+      const title = item.title?.trim() ?? "Untitled";
+      const summary = item.summary?.slice(0, 500) ?? null;
+      const publishedAt = item.publishedAt ?? new Date();
+
+      if (isDuplicateByTitleAgainst(title, recentTitles)) {
+        sourceSkipped++;
+        continue;
+      }
+
+      const tags = applyTags(title, summary);
+
+      try {
+        await prisma.article.create({
+          data: {
+            id,
+            sourceId: source.id,
+            sourceName: source.name,
+            title,
+            url,
+            publishedAt,
+            summary,
+            tags: JSON.stringify(tags),
+            isRead: false,
+            isSaved: false,
+          },
+        });
+        sourceAdded++;
+        recentTitles.push(title); // include in subsequent dedup checks within this run
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message.includes("Unique constraint")) {
+          sourceSkipped++;
+        } else {
+          console.error(`[ingest] write error ${source.name}: ${err}`);
+          sourceSkipped++;
+        }
+      }
+    }
+
+    totalAdded += sourceAdded;
+    totalSkipped += sourceSkipped;
+    console.log(`[ingest] ${source.name}: +${sourceAdded} added, ${sourceSkipped} skipped`);
   }
 
-  // Run cleanup after ingest
   try {
     await cleanupOldArticles();
   } catch (err) {
