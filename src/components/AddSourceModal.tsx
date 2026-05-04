@@ -109,7 +109,7 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "ryzm-sources.opml";
+      a.download = "macro-wire-sources.opml";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

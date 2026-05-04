@@ -22,7 +22,7 @@ export interface PositionPnL {
   totalCost: number;
 }
 
-const STORAGE_KEY = "ryzm-finance-positions";
+const STORAGE_KEY = "macro-wire-positions";
 
 function loadPositions(): PortfolioPosition[] {
   if (typeof window === "undefined") return [];

@@ -11,7 +11,7 @@ export interface WatchlistStore {
   items: WatchlistItem[];
 }
 
-const STORAGE_KEY = "ryzm-finance-watchlist";
+const STORAGE_KEY = "macro-wire-watchlist";
 
 function load(): WatchlistStore {
   if (typeof window === "undefined") return { items: [] };

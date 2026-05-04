@@ -13,7 +13,7 @@ interface NotesStore {
   [articleId: string]: ArticleNote;
 }
 
-const STORAGE_KEY = "ryzm-finance-notes";
+const STORAGE_KEY = "macro-wire-notes";
 
 function loadStore(): NotesStore {
   if (typeof window === "undefined") return {};
@@ -38,8 +38,8 @@ export function useArticleNotes() {
     let changed = false;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith("ryzm-finance-notes-") && key !== STORAGE_KEY) {
-        const articleId = key.replace("ryzm-finance-notes-", "");
+      if (key && key.startsWith("macro-wire-notes-") && key !== STORAGE_KEY) {
+        const articleId = key.replace("macro-wire-notes-", "");
         const text = localStorage.getItem(key) || "";
         if (text && !migrated[articleId]) {
           migrated[articleId] = {

@@ -1041,7 +1041,7 @@ export default function DashboardTab({
   const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem("ryzm-finance-section-order");
+        const stored = localStorage.getItem("macro-wire-section-order");
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length === DEFAULT_SECTION_ORDER.length) return parsed;
@@ -1092,7 +1092,7 @@ export default function DashboardTab({
         if (fromIdx === -1 || toIdx === -1) return prev;
         newOrder.splice(fromIdx, 1);
         newOrder.splice(toIdx, 0, sourceId);
-        localStorage.setItem("ryzm-finance-section-order", JSON.stringify(newOrder));
+        localStorage.setItem("macro-wire-section-order", JSON.stringify(newOrder));
         return newOrder;
       });
     }

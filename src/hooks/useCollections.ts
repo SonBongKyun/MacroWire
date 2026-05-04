@@ -9,7 +9,7 @@ export interface CollectionStore {
   names: string[];
 }
 
-const STORAGE_KEY = "ryzm-finance-collections";
+const STORAGE_KEY = "macro-wire-collections";
 
 function load(): CollectionStore {
   if (typeof window === "undefined") return { assignments: {}, names: [] };

@@ -172,7 +172,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `ryzm-newsletter-${new Date().toISOString().slice(0, 10)}.html`;
+    link.download = `macro-wire-newsletter-${new Date().toISOString().slice(0, 10)}.html`;
     link.click();
     URL.revokeObjectURL(url);
   }, [selectedArticles, portfolioPrices]);

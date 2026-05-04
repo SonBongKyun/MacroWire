@@ -18,7 +18,7 @@ interface SourceOverrides {
   hidden: string[]; // sourceIds
 }
 
-const STORAGE_KEY = "ryzm-source-overrides";
+const STORAGE_KEY = "macro-wire-source-overrides";
 
 function loadOverrides(): SourceOverrides {
   try {

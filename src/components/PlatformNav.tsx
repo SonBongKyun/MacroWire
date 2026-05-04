@@ -38,7 +38,7 @@ interface PlatformNavProps {
   lastBreakingUpdate?: string | null;
 }
 
-const SEARCH_HISTORY_KEY = "ryzm-finance-search-history";
+const SEARCH_HISTORY_KEY = "macro-wire-search-history";
 
 const tabs: { key: MainTab; label: string }[] = [
   { key: "dashboard", label: "DESK" },

@@ -16,9 +16,9 @@ type SortKey = "label" | "price" | "change" | "changePct" | "value" | "weight";
 type SortDir = "asc" | "desc";
 
 // Local storage keys for portfolio-specific data
-const HOLDINGS_KEY = "ryzm-portfolio-holdings";
-const ALERTS_KEY = "ryzm-portfolio-alerts";
-const NOTES_KEY = "ryzm-portfolio-notes";
+const HOLDINGS_KEY = "macro-wire-portfolio-holdings";
+const ALERTS_KEY = "macro-wire-portfolio-alerts";
+const NOTES_KEY = "macro-wire-portfolio-notes";
 
 interface Holding {
   symbol: string;

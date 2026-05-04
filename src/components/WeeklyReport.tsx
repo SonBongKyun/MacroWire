@@ -320,7 +320,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `ryzm-weekly-report-${new Date().toISOString().slice(0, 10)}.html`;
+    link.download = `macro-wire-weekly-report-${new Date().toISOString().slice(0, 10)}.html`;
     link.click();
     URL.revokeObjectURL(url);
   }, [week, totalArticles, sourceCounts, mostActiveDay, readRate, savedRate, topStories, tagBreakdown, keywords, portfolioPrices]);

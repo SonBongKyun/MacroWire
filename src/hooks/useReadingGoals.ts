@@ -14,7 +14,7 @@ export interface ReadingProgress {
   lastReadDate: string;
 }
 
-const STORAGE_KEY = "ryzm-finance-reading-progress";
+const STORAGE_KEY = "macro-wire-reading-progress";
 
 interface StoredData {
   goal: ReadingGoal;

@@ -15,7 +15,7 @@ interface MemoStore {
   memos: Memo[];
 }
 
-const STORAGE_KEY = "ryzm-finance-memos";
+const STORAGE_KEY = "macro-wire-memos";
 
 function loadStore(): MemoStore {
   if (typeof window === "undefined") return { memos: [] };

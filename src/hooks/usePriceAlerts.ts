@@ -13,7 +13,7 @@ export interface PriceAlert {
   triggeredAt?: string;
 }
 
-const STORAGE_KEY = "ryzm-finance-price-alerts";
+const STORAGE_KEY = "macro-wire-price-alerts";
 
 function loadAlerts(): PriceAlert[] {
   if (typeof window === "undefined") return [];

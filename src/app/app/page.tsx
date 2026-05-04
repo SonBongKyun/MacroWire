@@ -177,7 +177,7 @@ function HomeInner() {
   // Platform tab
   const [activeMainTab, setActiveMainTab] = useState<MainTab>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("ryzm-finance-tab") as MainTab) || "dashboard";
+      return (localStorage.getItem("macro-wire-tab") as MainTab) || "dashboard";
     }
     return "dashboard";
   });
@@ -235,7 +235,7 @@ function HomeInner() {
 
   // Persist active tab
   useEffect(() => {
-    localStorage.setItem("ryzm-finance-tab", activeMainTab);
+    localStorage.setItem("macro-wire-tab", activeMainTab);
   }, [activeMainTab]);
 
   // Always dark mode (MacroWire brand)
@@ -299,7 +299,7 @@ function HomeInner() {
               if (matched.length > 0) {
                 notifications.sendNotification("MacroWire 알림", matched.length === 1 ? matched[0].title : `관심 기사 ${matched.length}건: ${matched[0].title}`);
               } else {
-                new Notification("MacroWire", { body: `새 기사 ${newOnes.length}건이 도착했습니다`, icon: "/icon.svg", tag: "ryzm-finance-new" });
+                new Notification("MacroWire", { body: `새 기사 ${newOnes.length}건이 도착했습니다`, icon: "/icon.svg", tag: "macro-wire-new" });
               }
             }
           }
@@ -364,7 +364,7 @@ function HomeInner() {
               new Notification("MacroWire · 속보", {
                 body: top.title,
                 icon: "/icon.svg",
-                tag: "ryzm-breaking",
+                tag: "macro-wire-breaking",
               });
             } catch { /* silent */ }
           }

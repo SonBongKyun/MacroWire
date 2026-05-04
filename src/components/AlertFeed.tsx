@@ -6,7 +6,7 @@ import type { NotificationRule } from "@/hooks/useNotifications";
 import { checkNewArticlesForAlerts } from "@/hooks/useNotifications";
 import { EmptyState } from "@/components/EmptyState";
 
-const STORAGE_KEY = "ryzm-finance-alert-history";
+const STORAGE_KEY = "macro-wire-alert-history";
 const MAX_ALERTS = 20;
 
 export interface AlertHistoryItem {

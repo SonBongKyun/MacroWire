@@ -16,7 +16,7 @@ export interface NotificationStore {
   soundEnabled: boolean;
 }
 
-const STORAGE_KEY = "ryzm-finance-notifications";
+const STORAGE_KEY = "macro-wire-notifications";
 
 function load(): NotificationStore {
   if (typeof window === "undefined") return { rules: [], enabled: true, soundEnabled: false };
@@ -125,7 +125,7 @@ export function useNotifications() {
       new Notification(title, {
         body,
         icon: "/icon.svg",
-        tag: `ryzm-finance-alert-${Date.now()}`,
+        tag: `macro-wire-alert-${Date.now()}`,
       });
 
       if (store.soundEnabled) {

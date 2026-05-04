@@ -15,7 +15,7 @@ export interface MultiViewStore {
   activeTabId: string;
 }
 
-const STORAGE_KEY = "ryzm-finance-multiview";
+const STORAGE_KEY = "macro-wire-multiview";
 
 const DEFAULT_TABS: ViewTab[] = [
   { id: "all", label: "전체", type: "all", value: "", color: "var(--accent)" },

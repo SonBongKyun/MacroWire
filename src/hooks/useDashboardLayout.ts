@@ -23,8 +23,8 @@ export interface DashboardLayout {
   createdAt: string;
 }
 
-const STORAGE_KEY = "ryzm-finance-layouts";
-const ACTIVE_KEY = "ryzm-finance-active-layout";
+const STORAGE_KEY = "macro-wire-layouts";
+const ACTIVE_KEY = "macro-wire-active-layout";
 const MAX_LAYOUTS = 5;
 
 const DEFAULT_SECTIONS: DashboardSections = {
