@@ -14,20 +14,12 @@
   { "name": "전자신문 AI",      "feedUrl": "https://rss.etnews.com/Section904.xml",             "category": "semicon" },
   { "name": "Federal Reserve",  "feedUrl": "https://www.federalreserve.gov/feeds/press_all.xml","category": "policy" },
   { "name": "ECB Press",        "feedUrl": "https://www.ecb.europa.eu/rss/press.html",         "category": "policy" },
-  { "name": "Reuters Business", "feedUrl": "https://feeds.reuters.com/reuters/businessNews",    "category": "global" },
   { "name": "CNBC Economy",     "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258", "category": "macro" },
   { "name": "Investing.com",    "feedUrl": "https://www.investing.com/rss/news.rss",           "category": "fx" },
 
   { "name": "연합뉴스 속보",       "feedUrl": "https://www.yna.co.kr/rss/news.xml",                                                     "category": "속보" },
-  { "name": "뉴스핌 속보",         "feedUrl": "https://www.newspim.com/rss/breaking.xml",                                                "category": "속보" },
-  { "name": "이데일리 속보",       "feedUrl": "https://www.edaily.co.kr/rss/breaking.xml",                                              "category": "속보" },
-  { "name": "머니투데이 속보",     "feedUrl": "https://rss.mt.co.kr/mt/mtview/mt_fl/rss.xml",                                           "category": "속보" },
-  { "name": "Reuters Top News",    "feedUrl": "https://feeds.reuters.com/reuters/topNews",                                               "category": "속보" },
   { "name": "CNBC Breaking",       "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839135",    "category": "속보" },
 
-  { "name": "이데일리 경제",       "feedUrl": "https://www.edaily.co.kr/rss/economy.xml",                                                "category": "경제" },
-  { "name": "머니투데이",          "feedUrl": "https://rss.mt.co.kr/mt/mtview/mt_all/rss.xml",                                           "category": "경제" },
-  { "name": "조선비즈",            "feedUrl": "https://biz.chosun.com/rss/all.xml",                                                      "category": "경제" },
   { "name": "서울경제 금융",       "feedUrl": "https://www.sedaily.com/RSS/Finance",                                                     "category": "금융" },
 
   { "name": "CNBC Top News",       "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114",    "category": "글로벌" },
@@ -36,11 +28,6 @@
   { "name": "Financial Times",     "feedUrl": "https://www.ft.com/rss/home",                                                             "category": "글로벌" },
   { "name": "WSJ Markets",         "feedUrl": "https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",                            "category": "글로벌" },
   { "name": "Bloomberg Markets",   "feedUrl": "https://feeds.bloomberg.com/markets/news.rss",                                            "category": "글로벌" },
-  { "name": "Reuters World",       "feedUrl": "https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best",                 "category": "글로벌" },
 
-  { "name": "CoinDesk",            "feedUrl": "https://www.coindesk.com/arc/outboundfeeds/rss/",                                         "category": "크립토" },
-  { "name": "코인텔레그래프 KR",   "feedUrl": "https://kr.cointelegraph.com/rss",                                                        "category": "크립토" },
-
-  { "name": "한국은행 보도자료",   "feedUrl": "https://www.bok.or.kr/portal/bbs/B0000245/rss.do",                                        "category": "정책" },
-  { "name": "Fed Reserve News",    "feedUrl": "https://www.federalreserve.gov/feeds/press_all.xml",                                      "category": "정책" }
+  { "name": "CoinDesk",            "feedUrl": "https://www.coindesk.com/arc/outboundfeeds/rss/",                                         "category": "크립토" }
 ]
