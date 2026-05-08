@@ -72,9 +72,11 @@ export function TopBar({
     { key: "30d", label: "30D" },
   ];
 
-  const [now, setNow] = useState(Date.now());
+  // Deterministic 0 on first render (server + client match), populated after mount.
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(t);
   }, []);

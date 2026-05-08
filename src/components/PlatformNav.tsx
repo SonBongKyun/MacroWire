@@ -82,7 +82,9 @@ export function PlatformNav({
   breakingCountdown = 0,
   lastBreakingUpdate = null,
 }: PlatformNavProps) {
-  const [now, setNow] = useState(Date.now());
+  // Deterministic 0 on first render (server + client match), populated after mount.
+  const [now, setNow] = useState(0);
+  useEffect(() => { setNow(Date.now()); }, []);
   const [reportDropdownOpen, setReportDropdownOpen] = useState(false);
   const reportDropdownRef = useRef<HTMLDivElement>(null);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
