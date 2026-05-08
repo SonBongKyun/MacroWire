@@ -58,13 +58,14 @@ function Sparkline({ data, color, width = 64, height = 24 }: { data: number[]; c
   );
 }
 
-/* Live clock */
+/* Live clock — placeholder until mounted to keep SSR and first client
+   render identical (avoids hydration mismatch). */
 function useClock(): string {
-  const [time, setTime] = useState(() => new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+  const [time, setTime] = useState("--:--:--");
   useEffect(() => {
-    const id = setInterval(() => {
-      setTime(new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
-    }, 1000);
+    const fmt = () => new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    setTime(fmt());
+    const id = setInterval(() => setTime(fmt()), 1000);
     return () => clearInterval(id);
   }, []);
   return time;

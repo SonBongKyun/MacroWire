@@ -174,13 +174,14 @@ function HomeInner() {
   const [ingesting, setIngesting] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
-  // Platform tab
-  const [activeMainTab, setActiveMainTab] = useState<MainTab>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("macro-wire-tab") as MainTab) || "dashboard";
-    }
-    return "dashboard";
-  });
+  // Platform tab — read from localStorage AFTER mount to avoid SSR/CSR
+  // hydration mismatch (server has no localStorage and would render the
+  // default tab while the client hydrates with a different tab).
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>("dashboard");
+  useEffect(() => {
+    const saved = localStorage.getItem("macro-wire-tab") as MainTab | null;
+    if (saved) setActiveMainTab(saved);
+  }, []);
 
   // Filters
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);

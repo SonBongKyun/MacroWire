@@ -1038,18 +1038,19 @@ export default function DashboardTab({
 
   // ── Drag & Drop section reordering ──
   const DEFAULT_SECTION_ORDER = ["market", "stats", "trending", "source-quality", "macro", "calendar", "reading"];
-  const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("macro-wire-section-order");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length === DEFAULT_SECTION_ORDER.length) return parsed;
-        }
-      } catch { /* ignore */ }
-    }
-    return DEFAULT_SECTION_ORDER;
-  });
+  const [sectionOrder, setSectionOrder] = useState<string[]>(DEFAULT_SECTION_ORDER);
+  // Read persisted order AFTER mount to avoid SSR/CSR hydration mismatch.
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("macro-wire-section-order");
+      if (!stored) return;
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length === DEFAULT_SECTION_ORDER.length) {
+        setSectionOrder(parsed);
+      }
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [draggedSection, setDraggedSection] = useState<string | null>(null);
   const [dragOverSection, setDragOverSection] = useState<string | null>(null);
 

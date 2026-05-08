@@ -56,9 +56,12 @@ function getEventDateTime(ev: EconEvent): Date {
 }
 
 export function EconomicCalendar() {
-  const [now, setNow] = useState(() => new Date());
+  // Use a deterministic epoch placeholder for the SSR/first-render pass so
+  // server and client agree (real "now" comes after mount).
+  const [now, setNow] = useState<Date>(() => new Date(0));
 
   useEffect(() => {
+    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
