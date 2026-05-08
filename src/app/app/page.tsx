@@ -58,7 +58,9 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
 }) {
   const [clock, setClock] = useState("");
   const [dispatchNo, setDispatchNo] = useState("");
-  const [marketStatus, setMarketStatus] = useState(getMarketStatusForBar);
+  // Deterministic default — server and first client render must agree.
+  // Real status is computed inside the useEffect below.
+  const [marketStatus, setMarketStatus] = useState<{ open: boolean; label: string }>({ open: false, label: "마감" });
 
   useEffect(() => {
     const tick = () => {
