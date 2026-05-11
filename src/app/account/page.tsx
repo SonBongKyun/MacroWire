@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/prisma";
 import { planFromTier } from "@/lib/billing/plans";
 import { ManageSubscriptionButton } from "./ManageSubscriptionButton";
+import { ReferralCard } from "@/components/ReferralCard";
+import { siteUrl } from "@/lib/billing/stripe";
 
 export const dynamic = "force-dynamic";
 
@@ -116,9 +118,13 @@ export default async function AccountPage() {
         </section>
 
         <section style={card}>
-          <div style={label}>REFERRAL CODE</div>
-          <div style={{ ...value, fontFamily: "var(--font-mono)" }}>{user.referralCode}</div>
-          <div style={subValue}>친구가 이 코드로 가입하면 1개월 무료 (양쪽 모두).</div>
+          <div style={label}>REFERRAL</div>
+          {user.referralBonusUntil && user.referralBonusUntil.getTime() > Date.now() && (
+            <div style={{ ...subValue, color: "#22c55e", marginBottom: 10 }}>
+              ✓ 추천 보너스 활성 — {fmtDate(user.referralBonusUntil)}까지 PRO 자동 적용
+            </div>
+          )}
+          <ReferralCard code={user.referralCode} siteUrl={siteUrl()} />
         </section>
       </div>
     </main>

@@ -11,12 +11,8 @@ export const stripe = new Stripe(key ?? "sk_test_placeholder", {
 });
 
 export function siteUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.startsWith("http")
-      ? process.env.VERCEL_PROJECT_PRODUCTION_URL!
-      : process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : "https://macro-wire-psi.vercel.app"
-  );
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercel) return vercel.startsWith("http") ? vercel : `https://${vercel}`;
+  return "https://macro-wire-psi.vercel.app";
 }

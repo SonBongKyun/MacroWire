@@ -9,6 +9,16 @@ export interface GateResult {
   plan: Plan;
 }
 
+/**
+ * Effective tier: if the user has a referral bonus window that hasn't expired,
+ * promote FREE accounts to PRO for its duration.
+ */
+export function effectiveTier(user: User): Tier {
+  if (user.tier !== "FREE") return user.tier;
+  if (user.referralBonusUntil && user.referralBonusUntil.getTime() > Date.now()) return "PRO";
+  return "FREE";
+}
+
 /** Reject with 401 if anonymous; 403 if tier below `minTier`. */
 export async function requireTier(minTier: Tier = "FREE"): Promise<GateResult | NextResponse> {
   const { userId } = await auth();
@@ -17,13 +27,15 @@ export async function requireTier(minTier: Tier = "FREE"): Promise<GateResult | 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
 
-  if (!tierAtLeast(user.tier, minTier)) {
+  const eff = effectiveTier(user);
+  if (!tierAtLeast(eff, minTier)) {
     return NextResponse.json(
-      { error: "UPGRADE_REQUIRED", required: minTier, current: user.tier },
+      { error: "UPGRADE_REQUIRED", required: minTier, current: eff },
       { status: 403 }
     );
   }
-  return { user, plan: planFromTier(user.tier) };
+  // Surface effective tier on the returned user so downstream code applies bonuses.
+  return { user: { ...user, tier: eff }, plan: planFromTier(eff) };
 }
 
 export function tierAtLeast(actual: Tier, min: Tier): boolean {

@@ -1,0 +1,78 @@
+import type { Messages } from "./ko";
+
+export const en: Messages = {
+  nav: {
+    desk: "Desk",
+    wire: "Wire",
+    markets: "Markets",
+    analytics: "Analytics",
+    ai: "AI",
+    research: "Research",
+    portfolio: "Portfolio",
+    signIn: "Sign in",
+    signUp: "Sign up",
+    goPro: "Go Pro",
+    account: "Account",
+    pricing: "Pricing",
+  },
+  landing: {
+    hero: {
+      eyebrow: "MACRO INTELLIGENCE WIRE",
+      headline: "One desk for every macro trader.",
+      sub: "Global macro news pulled, summarised, and connected every 5 minutes. The only wire that tells you why each story matters.",
+      ctaPrimary: "Start free",
+      ctaSecondary: "See pricing",
+    },
+    why: {
+      title: "Why MacroWire",
+      a: { t: "Claude AI insights", d: "Not just a feed — Claude tells you why each story matters, and which assets / sectors are exposed." },
+      b: { t: "5-minute breaking pipeline", d: "30+ RSS sources refreshed every 5 minutes; breaking category runs on a priority queue." },
+      c: { t: "Personalized briefing", d: "Every 12 hours, a briefing tailored to your watchlist and portfolio." },
+    },
+    pricing: {
+      title: "Pricing",
+      note: "All features free during beta. Plans below apply after launch.",
+      perMonth: "/ month",
+    },
+    footer: {
+      built: "Made with care for macro traders",
+    },
+  },
+  recap: {
+    title: "Today in Macro",
+    headline: "One-line summary",
+    topStories: "Top 3 stories",
+    themes: "Themes",
+    why: "Why it matters",
+    tradeImplication: "Trade implication",
+    refresh: "Regenerate",
+    generating: "AI is analyzing...",
+    empty: "Today's recap hasn't been generated yet.",
+  },
+  briefing: {
+    title: "Your briefing",
+    intro: "Based on your watchlist & portfolio",
+    relevance: "Why it matters for you",
+    action: "Action item",
+    empty: "Add to your watchlist or portfolio first.",
+    upgrade: "Available on PRO.",
+  },
+  account: {
+    title: "Account",
+    plan: "Plan",
+    usage: "Today's usage",
+    upgrade: "Upgrade to PRO",
+    manage: "Manage subscription",
+    referral: "Referral code",
+    referralHint: "When a friend signs up, you both get one month free.",
+  },
+  common: {
+    save: "Save",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    loading: "Loading…",
+    error: "Something went wrong",
+    upgradeRequired: "Upgrade required",
+    quotaExceeded: "Daily limit reached",
+  },
+};

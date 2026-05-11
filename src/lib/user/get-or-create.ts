@@ -1,10 +1,13 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/prisma";
+import { applyReferralCookie } from "@/lib/referrals";
 import type { User } from "@prisma/client";
 
 /**
  * Resolve the current request's Clerk identity into our local User row,
  * creating it on first sight. Returns null when the request is anonymous.
+ *
+ * On first creation, also credits any pending referral cookie.
  */
 export async function getOrCreateUser(): Promise<User | null> {
   const { userId } = await auth();
@@ -23,11 +26,19 @@ export async function getOrCreateUser(): Promise<User | null> {
   const name =
     [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ").trim() || null;
 
-  return prisma.user.upsert({
+  const created = await prisma.user.upsert({
     where: { clerkId: userId },
     update: {},
     create: { clerkId: userId, email, name },
   });
+
+  // Best-effort referral credit; never block user creation on this.
+  try {
+    await applyReferralCookie(created);
+  } catch (err) {
+    console.error("[referrals] apply failed:", err);
+  }
+  return prisma.user.findUnique({ where: { id: created.id } });
 }
 
 export async function requireUser(): Promise<User> {
