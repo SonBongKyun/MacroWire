@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Anton, Crimson_Pro } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 // Wire-bulletin type system —
@@ -50,6 +51,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#FFB000",
+          colorBackground: "#08090B",
+          colorText: "#F5F0E1",
+          colorInputBackground: "#15151A",
+          colorInputText: "#F5F0E1",
+        },
+      }}
+    >
     <html lang="ko" className="dark">
       <head>
         {/* Korean-optimised type system —
@@ -92,5 +104,6 @@ export default function RootLayout({
         />
       </body>
     </html>
+    </ClerkProvider>
   );
 }

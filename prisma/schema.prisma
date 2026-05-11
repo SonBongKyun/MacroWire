@@ -8,6 +8,145 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// =========================================================
+// Identity & subscriptions
+// =========================================================
+
+enum Tier {
+  FREE
+  PRO
+  ELITE
+}
+
+enum SubStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+model User {
+  id              String         @id @default(cuid())
+  clerkId         String         @unique
+  email           String         @unique
+  name            String?
+  tier            Tier           @default(FREE)
+  locale          String         @default("ko") // "ko" | "en"
+  referralCode    String         @unique @default(cuid())
+  referredBy      String?        // clerkId of referrer
+  referralBonusUntil DateTime?   // free month bonus expiry
+  watchlist       Json?          // { items: [{ keyword, createdAt }] }
+  portfolio       Json?          // { assets: [{ symbol, name, qty? }] }
+  digestEmail     Boolean        @default(true)
+  digestHour      Int            @default(8)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  subscription    Subscription?
+  insightUsage    InsightUsage[]
+  readStates      ReadState[]
+  savedArticles   SavedArticle[]
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  stripeCustomerId     String    @unique
+  stripeSubscriptionId String    @unique
+  stripePriceId        String
+  status               SubStatus
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// =========================================================
+// AI insights (was on pensive-visvesvaraya branch, now in main on Postgres)
+// =========================================================
+
+enum InsightKind {
+  ARTICLE
+  CLUSTER
+  CONNECTIONS
+  DAILY_RECAP
+  PERSONAL_BRIEFING
+}
+
+model Insight {
+  id        String      @id @default(cuid())
+  kind      InsightKind
+  cacheKey  String      @unique // hash of inputs (articleIds, userTier, locale)
+  locale    String      @default("ko")
+  payload   Json
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+
+  @@index([cacheKey])
+  @@index([expiresAt])
+  @@index([kind])
+}
+
+model InsightUsage {
+  id        String      @id @default(cuid())
+  userId    String
+  kind      InsightKind
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, kind, createdAt])
+}
+
+// =========================================================
+// Per-user article state — moves off global isRead/isSaved on Article
+// (existing fields kept for back-compat; new tables are authoritative)
+// =========================================================
+
+model ReadState {
+  userId    String
+  articleId String
+  readAt    DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@index([userId, readAt])
+}
+
+model SavedArticle {
+  userId    String
+  articleId String
+  savedAt   DateTime @default(now())
+  note      String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@index([userId, savedAt])
+}
+
+// =========================================================
+// Daily recap / SEO landing content
+// =========================================================
+
+model DailyRecap {
+  id         String   @id @default(cuid())
+  date       String   @unique // "YYYY-MM-DD" KST
+  locale     String
+  headline   String
+  summary    String   // markdown
+  topStories Json     // [{ articleId, title, url, why }]
+  createdAt  DateTime @default(now())
+
+  @@unique([date, locale])
+  @@index([date])
+}
+
+// =========================================================
+// Existing models (unchanged shape, just declared after the new ones)
+// =========================================================
+
 model Source {
   id        String    @id @default(cuid())
   name      String
