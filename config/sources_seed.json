@@ -34,7 +34,6 @@
   { "name": "WSJ Markets",         "feedUrl": "https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",                            "category": "글로벌" },
   { "name": "Bloomberg Markets",   "feedUrl": "https://feeds.bloomberg.com/markets/news.rss",                                            "category": "글로벌" },
   { "name": "BBC Business",        "feedUrl": "http://feeds.bbci.co.uk/news/business/rss.xml",                                           "category": "글로벌" },
-  { "name": "Reuters Markets",     "feedUrl": "https://www.reutersagency.com/feed/?best-topics=markets&post_type=best",                  "category": "글로벌" },
   { "name": "The Economist",       "feedUrl": "https://www.economist.com/finance-and-economics/rss.xml",                                  "category": "글로벌" },
   { "name": "South China Morning Post", "feedUrl": "https://www.scmp.com/rss/91/feed",                                                    "category": "글로벌" },
   { "name": "Nikkei Asia",         "feedUrl": "https://asia.nikkei.com/rss/feed/nar",                                                    "category": "글로벌" },

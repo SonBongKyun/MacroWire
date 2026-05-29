@@ -1,20 +1,18 @@
-name: breaking-ingest
+name: full-ingest
 
 on:
   schedule:
-    # GitHub Actions minimum is 5 min. In practice runs are queued
-    # so actual cadence is ~5-10 min.
-    - cron: "*/5 * * * *"
+    - cron: "12 * * * *"
   workflow_dispatch: {}
 
 concurrency:
-  group: breaking-ingest
+  group: full-ingest
   cancel-in-progress: false
 
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -29,5 +27,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run breaking ingest directly against Neon
-        run: npx tsx scripts/breaking-once.ts
+      - name: Run full ingest directly against Neon
+        run: npx tsx scripts/ingest-once.ts
