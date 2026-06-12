@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import type { PlanKey } from "@/lib/billing/plans";
 
 export function PricingCheckoutButton({
@@ -32,13 +32,26 @@ export function PricingCheckoutButton({
     ? { ...baseStyle, background: "#FFB000", color: "#08090B", border: "1px solid #FFB000" }
     : { ...baseStyle, background: "transparent", color: "#F5F0E1", border: "1px solid rgba(245,240,225,0.30)" };
 
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    return (
+      <button
+        style={onPrimary}
+        onClick={() => {
+          window.location.href = "/app";
+        }}
+      >
+        {plan === "free" ? label : "BETA"}
+      </button>
+    );
+  }
+
   if (plan === "free") {
     return (
-      <SignedOut>
+      <Show when="signed-out">
         <SignInButton mode="modal">
           <button style={onPrimary}>{label}</button>
         </SignInButton>
-      </SignedOut>
+      </Show>
     );
   }
 
@@ -66,16 +79,16 @@ export function PricingCheckoutButton({
 
   return (
     <>
-      <SignedOut>
+      <Show when="signed-out">
         <SignInButton mode="modal" forceRedirectUrl={`/?plan=${plan}#pricing`}>
           <button style={onPrimary}>{label}</button>
         </SignInButton>
-      </SignedOut>
-      <SignedIn>
+      </Show>
+      <Show when="signed-in">
         <button style={onPrimary} disabled={loading} onClick={start}>
           {loading ? "이동 중…" : label}
         </button>
-      </SignedIn>
+      </Show>
       {err && (
         <div style={{ marginTop: 8, fontSize: 11, color: "#ff6b6b", fontFamily: "var(--font-mono)" }}>
           {err}

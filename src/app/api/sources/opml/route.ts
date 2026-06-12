@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { requireAdmin } from "@/lib/security/api-auth";
+import { parsePublicHttpUrl } from "@/lib/security/outbound-url";
 
 // GET /api/sources/opml — Export all sources as OPML XML
 export async function GET() {
@@ -71,6 +73,9 @@ ${body}  </body>
 // POST /api/sources/opml — Import sources from OPML XML
 export async function POST(request: NextRequest) {
   try {
+    const admin = await requireAdmin();
+    if (admin instanceof NextResponse) return admin;
+
     const xmlText = await request.text();
 
     if (!xmlText.trim()) {
@@ -130,7 +135,7 @@ export async function POST(request: NextRequest) {
 
       // Validate URL
       try {
-        new URL(xmlUrl);
+        parsePublicHttpUrl(xmlUrl);
       } catch {
         errors.push(`Invalid URL for "${text}": ${xmlUrl}`);
         continue;

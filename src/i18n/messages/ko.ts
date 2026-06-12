@@ -21,14 +21,14 @@ export const ko = {
     hero: {
       eyebrow: "MACRO INTELLIGENCE WIRE",
       headline: "매크로 트레이더를 위한 단 하나의 데스크",
-      sub: "전 세계 매크로 뉴스를 5분마다 수집·요약·연결합니다. AI가 \"왜 중요한지\"까지 알려주는 유일한 와이어.",
+      sub: "전 세계 매크로 뉴스를 지속적으로 수집·요약·연결합니다. AI가 \"왜 중요한지\"까지 알려주는 와이어.",
       ctaPrimary: "무료로 시작",
       ctaSecondary: "요금제 보기",
     },
     why: {
       title: "왜 MacroWire인가",
       a: { t: "Claude AI 인사이트", d: "기사 모음이 아닌 \"왜 중요한가\"를 정리합니다. 종목·섹터 영향까지." },
-      b: { t: "5분 속보 파이프라인", d: "RSS 30+ 소스를 5분마다 갱신, 속보는 카테고리 우선 큐로 분리." },
+      b: { t: "상시 속보 파이프라인", d: "RSS 30+ 소스를 지속 감시하고, 고신호 속보 피드를 우선 처리합니다." },
       c: { t: "개인화 브리핑", d: "워치리스트·포트폴리오에 맞춰 12시간 단위 매크로 브리핑." },
     },
     pricing: {
@@ -79,4 +79,8 @@ export const ko = {
   },
 } as const;
 
-export type Messages = typeof ko;
+type WidenMessages<T> = {
+  [K in keyof T]: T[K] extends string ? string : WidenMessages<T[K]>;
+};
+
+export type Messages = WidenMessages<typeof ko>;

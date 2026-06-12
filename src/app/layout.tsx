@@ -50,18 +50,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <ClerkProvider
-      appearance={{
-        variables: {
-          colorPrimary: "#FFB000",
-          colorBackground: "#08090B",
-          colorText: "#F5F0E1",
-          colorInputBackground: "#15151A",
-          colorInputText: "#F5F0E1",
-        },
-      }}
-    >
+  const document = (
     <html lang="ko" className="dark">
       <head>
         {/* Korean-optimised type system —
@@ -104,6 +93,19 @@ export default function RootLayout({
         />
       </body>
     </html>
+  );
+
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) return document;
+  return (
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#FFB000",
+          colorBackground: "#08090B",
+        },
+      }}
+    >
+      {document}
     </ClerkProvider>
   );
 }

@@ -1,5 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // Routes that ALWAYS require sign-in.
 const isProtected = createRouteMatcher([
@@ -7,17 +7,23 @@ const isProtected = createRouteMatcher([
   "/api/account(.*)",
   "/api/billing(.*)",
   "/api/insights(.*)",
+  "/api/articles/:id/read",
   "/api/articles/:id/save",
+  "/api/articles/batch-read",
   "/api/articles/batch-save",
+  "/api/webhook",
 ]);
 
 // Routes that bypass Clerk entirely (cron, webhooks).
 const isCronOrWebhook = createRouteMatcher([
   "/api/ingest(.*)",
+  "/api/insights/daily-recap/cron",
+  "/api/email/digest",
   "/api/stripe/webhook",
+  "/api/clerk/webhook",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+const clerkHandler = clerkMiddleware(async (auth, req) => {
   if (isCronOrWebhook(req)) return NextResponse.next();
 
   if (isProtected(req)) {
@@ -35,6 +41,26 @@ export default clerkMiddleware(async (auth, req) => {
 
   return NextResponse.next();
 });
+
+const clerkConfigured = Boolean(
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY
+);
+
+export default clerkConfigured
+  ? clerkHandler
+  : function authenticationDisabled(req: NextRequest) {
+      if (isCronOrWebhook(req)) return NextResponse.next();
+      if (isProtected(req)) {
+        if (req.nextUrl.pathname.startsWith("/api/")) {
+          return NextResponse.json(
+            { error: "Authentication is not configured" },
+            { status: 503 }
+          );
+        }
+        return NextResponse.redirect(new URL("/app", req.url));
+      }
+      return NextResponse.next();
+    };
 
 export const config = {
   matcher: [

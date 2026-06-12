@@ -19,14 +19,14 @@ export const en: Messages = {
     hero: {
       eyebrow: "MACRO INTELLIGENCE WIRE",
       headline: "One desk for every macro trader.",
-      sub: "Global macro news pulled, summarised, and connected every 5 minutes. The only wire that tells you why each story matters.",
+      sub: "Global macro news continuously collected, summarized, and connected. The wire that tells you why each story matters.",
       ctaPrimary: "Start free",
       ctaSecondary: "See pricing",
     },
     why: {
       title: "Why MacroWire",
       a: { t: "Claude AI insights", d: "Not just a feed — Claude tells you why each story matters, and which assets / sectors are exposed." },
-      b: { t: "5-minute breaking pipeline", d: "30+ RSS sources refreshed every 5 minutes; breaking category runs on a priority queue." },
+      b: { t: "Rolling breaking pipeline", d: "30+ RSS sources monitored continuously, with high-signal breaking feeds prioritized." },
       c: { t: "Personalized briefing", d: "Every 12 hours, a briefing tailored to your watchlist and portfolio." },
     },
     pricing: {

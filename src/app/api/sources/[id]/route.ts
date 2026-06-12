@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { requireAdmin } from "@/lib/security/api-auth";
+import { parsePublicHttpUrl } from "@/lib/security/outbound-url";
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const admin = await requireAdmin();
+    if (admin instanceof NextResponse) return admin;
+
     const { id } = await params;
     const body = await request.json();
 
@@ -13,6 +18,8 @@ export async function PATCH(
     if (!source) {
       return NextResponse.json({ error: "Source not found" }, { status: 404 });
     }
+
+    if (body.feedUrl) parsePublicHttpUrl(body.feedUrl);
 
     const updated = await prisma.source.update({
       where: { id },
@@ -36,6 +43,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const admin = await requireAdmin();
+    if (admin instanceof NextResponse) return admin;
+
     const { id } = await params;
 
     const source = await prisma.source.findUnique({ where: { id } });
@@ -43,9 +53,17 @@ export async function DELETE(
       return NextResponse.json({ error: "Source not found" }, { status: 404 });
     }
 
-    // Delete associated articles first
-    await prisma.article.deleteMany({ where: { sourceId: id } });
-    await prisma.source.delete({ where: { id } });
+    const articles = await prisma.article.findMany({
+      where: { sourceId: id },
+      select: { id: true },
+    });
+    const articleIds = articles.map((article) => article.id);
+    await prisma.$transaction([
+      prisma.readState.deleteMany({ where: { articleId: { in: articleIds } } }),
+      prisma.savedArticle.deleteMany({ where: { articleId: { in: articleIds } } }),
+      prisma.article.deleteMany({ where: { sourceId: id } }),
+      prisma.source.delete({ where: { id } }),
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (err) {

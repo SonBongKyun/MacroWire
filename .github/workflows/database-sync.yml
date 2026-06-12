@@ -1,0 +1,29 @@
+name: database-sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "prisma/schema.prisma"
+  workflow_dispatch: {}
+
+concurrency:
+  group: database-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DATABASE_URL: ${{ secrets.DIRECT_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Apply additive Prisma schema changes
+        run: npx prisma db push --skip-generate

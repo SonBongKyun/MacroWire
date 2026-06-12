@@ -1,0 +1,21 @@
+name: email-digest
+
+on:
+  schedule:
+    - cron: "5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Trigger hourly digest
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$CRON_SECRET"
+          curl --fail-with-body --retry 2 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            https://macro-wire-psi.vercel.app/api/email/digest
+

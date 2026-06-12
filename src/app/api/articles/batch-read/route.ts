@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { getOrCreateUser } from "@/lib/user/get-or-create";
 
 // POST /api/articles/batch-read — mark multiple articles as read
 export async function POST(request: NextRequest) {
   try {
+    const user = await getOrCreateUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const body = await request.json();
     const { articleIds } = body as { articleIds?: string[] };
 
@@ -11,9 +15,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "articleIds required" }, { status: 400 });
     }
 
-    const result = await prisma.article.updateMany({
-      where: { id: { in: articleIds } },
-      data: { isRead: true },
+    const ids = [...new Set(articleIds)].slice(0, 200);
+    const existingArticles = await prisma.article.findMany({
+      where: { id: { in: ids } },
+      select: { id: true },
+    });
+    const result = await prisma.readState.createMany({
+      data: existingArticles.map((article) => ({ userId: user.id, articleId: article.id })),
+      skipDuplicates: true,
     });
 
     return NextResponse.json({ updated: result.count });

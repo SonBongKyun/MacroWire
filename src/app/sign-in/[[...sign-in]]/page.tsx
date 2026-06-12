@@ -1,6 +1,10 @@
 import { SignIn } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default function Page() {
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    return <AuthUnavailable />;
+  }
   return (
     <main
       style={{
@@ -33,6 +37,18 @@ export default function Page() {
             },
           }}
         />
+      </div>
+    </main>
+  );
+}
+
+function AuthUnavailable() {
+  return (
+    <main style={{ minHeight: "100dvh", display: "grid", placeItems: "center", background: "#08090B", color: "#F5F0E1" }}>
+      <div style={{ textAlign: "center" }}>
+        <h1 style={{ color: "#FFB000" }}>MACROWIRE</h1>
+        <p>Authentication is not configured.</p>
+        <Link href="/app" style={{ color: "#FFB000" }}>OPEN APP</Link>
       </div>
     </main>
   );

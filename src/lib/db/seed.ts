@@ -10,6 +10,10 @@ export async function seedSources() {
       where: { feedUrl: src.feedUrl },
     });
     if (exists) {
+      await prisma.source.update({
+        where: { id: exists.id },
+        data: { name: src.name, category: src.category },
+      });
       skipped++;
       continue;
     }

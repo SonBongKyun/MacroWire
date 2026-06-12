@@ -1,10 +1,5 @@
-// @ts-nocheck
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

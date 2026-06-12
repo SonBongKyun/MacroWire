@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { requireAdmin } from "@/lib/security/api-auth";
+import { parsePublicHttpUrl } from "@/lib/security/outbound-url";
 
 // POST /api/sources — Add a new custom RSS source
 export async function POST(request: NextRequest) {
   try {
+    const admin = await requireAdmin();
+    if (admin instanceof NextResponse) return admin;
+
     const body = await request.json();
     const { name, feedUrl, category } = body as { name?: string; feedUrl?: string; category?: string };
 
@@ -13,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // Validate URL
     try {
-      new URL(feedUrl);
+      parsePublicHttpUrl(feedUrl);
     } catch {
       return NextResponse.json({ error: "Invalid URL format" }, { status: 400 });
     }

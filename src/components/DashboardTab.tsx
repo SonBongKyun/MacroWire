@@ -1432,7 +1432,6 @@ export default function DashboardTab({
                         width: "100%",
                         textAlign: "left",
                         padding: "11px 16px",
-                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.08)" : "none",
                         background: "transparent",
                         border: "none",
                         borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.08)" : "none",

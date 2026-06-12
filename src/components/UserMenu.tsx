@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
+import { Show, UserButton, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 
 /**
@@ -9,9 +9,11 @@ import Link from "next/link";
  * - Authenticated: Clerk avatar dropdown + plan badge slot
  */
 export function UserMenu({ tier }: { tier?: "FREE" | "PRO" | "ELITE" }) {
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) return null;
+
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <SignedOut>
+      <Show when="signed-out">
         <SignInButton mode="modal">
           <button
             style={{
@@ -45,8 +47,8 @@ export function UserMenu({ tier }: { tier?: "FREE" | "PRO" | "ELITE" }) {
         >
           GO PRO
         </Link>
-      </SignedOut>
-      <SignedIn>
+      </Show>
+      <Show when="signed-in">
         {tier && tier !== "FREE" && (
           <span
             style={{
@@ -64,11 +66,8 @@ export function UserMenu({ tier }: { tier?: "FREE" | "PRO" | "ELITE" }) {
             {tier}
           </span>
         )}
-        <UserButton
-          afterSignOutUrl="/"
-          appearance={{ elements: { avatarBox: { width: 28, height: 28 } } }}
-        />
-      </SignedIn>
+        <UserButton appearance={{ elements: { avatarBox: { width: 28, height: 28 } } }} />
+      </Show>
     </div>
   );
 }
