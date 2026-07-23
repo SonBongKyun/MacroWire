@@ -1253,13 +1253,13 @@ export default function DashboardTab({
                   ─ {item.label}
                 </span>
                 <span style={{
-                  fontSize: 36,
-                  fontWeight: 400,
-                  fontFamily: "var(--font-display-condensed), 'Anton', sans-serif",
+                  fontSize: 30,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
                   fontVariantNumeric: "tabular-nums" as const,
                   color: "#F5F0E1",
-                  lineHeight: 0.95,
-                  letterSpacing: "-0.02em",
+                  lineHeight: 1,
+                  letterSpacing: 0,
                   display: "flex",
                   alignItems: "baseline",
                   gap: 6,
@@ -1432,7 +1432,6 @@ export default function DashboardTab({
                         width: "100%",
                         textAlign: "left",
                         padding: "11px 16px",
-                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.08)" : "none",
                         background: "transparent",
                         border: "none",
                         borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.08)" : "none",

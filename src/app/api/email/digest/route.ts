@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { resend, fromAddress } from "@/lib/email/resend";
 import { renderDigestHTML } from "@/lib/email/digest-template";
+import { authorizeCron } from "@/lib/security/cron";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -13,14 +14,8 @@ export const maxDuration = 60;
  * to spread sends across the day.
  */
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = req.headers.get("authorization");
-    const isVercelCron = req.headers.get("x-vercel-cron");
-    if (auth !== `Bearer ${secret}` && !isVercelCron) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const denied = authorizeCron(req);
+  if (denied) return denied;
 
   // KST hour
   const now = new Date();

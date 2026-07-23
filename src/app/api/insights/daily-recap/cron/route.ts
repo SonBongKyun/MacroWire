@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { dailyRecap } from "@/lib/ai/claude";
+import { authorizeCron } from "@/lib/security/cron";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -26,17 +27,8 @@ const HIGH_SIGNAL_SOURCES = [
  * Builds both ko + en recaps so SEO landing pages have content ready.
  */
 export async function GET(req: NextRequest) {
-  // Vercel cron adds Authorization: Bearer ${CRON_SECRET}; reject random pings.
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const auth = req.headers.get("authorization");
-    if (auth !== `Bearer ${cronSecret}`) {
-      // Allow Vercel's own internal cron header too.
-      if (!req.headers.get("x-vercel-cron")) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
-  }
+  const denied = authorizeCron(req);
+  if (denied) return denied;
 
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const all = await prisma.article.findMany({

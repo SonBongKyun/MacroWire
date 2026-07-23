@@ -1,22 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { safePublicFetch } from "@/lib/security/outbound-url";
 
 // Client-side extractive summarization endpoint
 // No external AI API needed — uses simple extraction from RSS summary + title
 
 export async function POST(req: NextRequest) {
   try {
-    const { title, summary, url } = await req.json();
+    const { url } = await req.json();
 
-    if (!title) {
-      return NextResponse.json({ error: "Missing title" }, { status: 400 });
+    if (!url) {
+      return NextResponse.json({ error: "Missing URL" }, { status: 400 });
     }
+
+    const article = await prisma.article.findUnique({
+      where: { url },
+      select: { title: true, summary: true, url: true },
+    });
+    if (!article) return NextResponse.json({ error: "Unknown article" }, { status: 404 });
+    const { title, summary } = article;
 
     // Attempt to fetch article page for more context (with timeout)
     let pageText = "";
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
-      const res = await fetch(url, {
+      const res = await safePublicFetch(article.url, {
         signal: controller.signal,
         headers: { "User-Agent": "Mozilla/5.0 (compatible; MacroWire/1.0)" },
       });

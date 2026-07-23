@@ -27,25 +27,25 @@ enum SubStatus {
 }
 
 model User {
-  id              String         @id @default(cuid())
-  clerkId         String         @unique
-  email           String         @unique
-  name            String?
-  tier            Tier           @default(FREE)
-  locale          String         @default("ko") // "ko" | "en"
-  referralCode    String         @unique @default(cuid())
-  referredBy      String?        // clerkId of referrer
-  referralBonusUntil DateTime?   // free month bonus expiry
-  watchlist       Json?          // { items: [{ keyword, createdAt }] }
-  portfolio       Json?          // { assets: [{ symbol, name, qty? }] }
-  digestEmail     Boolean        @default(true)
-  digestHour      Int            @default(8)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  subscription    Subscription?
-  insightUsage    InsightUsage[]
-  readStates      ReadState[]
-  savedArticles   SavedArticle[]
+  id                 String         @id @default(cuid())
+  clerkId            String         @unique
+  email              String         @unique
+  name               String?
+  tier               Tier           @default(FREE)
+  locale             String         @default("ko") // "ko" | "en"
+  referralCode       String         @unique @default(cuid())
+  referredBy         String? // clerkId of referrer
+  referralBonusUntil DateTime? // free month bonus expiry
+  watchlist          Json? // { items: [{ keyword, createdAt }] }
+  portfolio          Json? // { assets: [{ symbol, name, qty? }] }
+  digestEmail        Boolean        @default(true)
+  digestHour         Int            @default(8)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  subscription       Subscription?
+  insightUsage       InsightUsage[]
+  readStates         ReadState[]
+  savedArticles      SavedArticle[]
 }
 
 model Subscription {
@@ -132,11 +132,11 @@ model SavedArticle {
 
 model DailyRecap {
   id         String   @id @default(cuid())
-  date       String   @unique // "YYYY-MM-DD" KST
+  date       String // "YYYY-MM-DD" KST
   locale     String
   headline   String
-  summary    String   // markdown
-  topStories Json     // [{ articleId, title, url, why }]
+  summary    String // markdown
+  topStories Json // [{ articleId, title, url, why }]
   createdAt  DateTime @default(now())
 
   @@unique([date, locale])

@@ -113,7 +113,7 @@ export default async function MacroLandingEn() {
             The desk every macro trader needs.
           </h2>
           <p style={{ fontSize: 14, color: "#C9C4B6", marginBottom: 20 }}>
-            Global macro wire, refreshed every 5 minutes. Claude tells you why each story matters.
+            A continuously collected global macro wire. Claude tells you why each story matters.
           </p>
           <Link href="/sign-up" style={{ display: "inline-block", padding: "10px 18px", background: "#FFB000", color: "#08090B", fontWeight: 700, fontSize: 12, letterSpacing: "0.10em", textDecoration: "none" }}>
             START FREE

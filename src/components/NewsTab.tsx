@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { ArrowLeft, Rows3, Star } from "lucide-react";
 import type { Article, Source } from "@/types";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
 import { EmptyState } from "@/components/EmptyState";
 import { SpikeAlert } from "@/components/SpikeAlert";
 import { NewsTimeline } from "@/components/NewsTimeline";
+import { useArticleScoring } from "@/hooks/useArticleScoring";
 
-type SortMode = "newest" | "oldest" | "source";
+type SortMode = "newest" | "impact" | "oldest" | "source";
+export type DensityMode = "compact" | "comfortable";
 
 interface NewsTabProps {
   articles: Article[];
@@ -28,6 +31,7 @@ interface NewsTabProps {
   newArticleIds: string[];
   // Handlers
   onSelectArticle: (article: Article) => void;
+  onCloseArticle: () => void;
   onSelectSource: (id: string | null) => void;
   onSelectTag: (tag: string | null) => void;
   onRangeChange: (r: "24h" | "7d" | "30d") => void;
@@ -85,6 +89,7 @@ export function NewsTab({
   timelineMode,
   newArticleIds,
   onSelectArticle,
+  onCloseArticle,
   onSelectSource,
   onSelectTag,
   onRangeChange,
@@ -104,7 +109,21 @@ export function NewsTab({
   onCreateCollection,
 }: NewsTabProps) {
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [density, setDensity] = useState<DensityMode>("comfortable");
   const [regionFading, setRegionFading] = useState(false);
+  const { getScore } = useArticleScoring(articles);
+
+  useEffect(() => {
+    const savedDensity = localStorage.getItem("macro-wire-news-density");
+    if (savedDensity === "compact" || savedDensity === "comfortable") {
+      setDensity(savedDensity);
+    }
+  }, []);
+
+  const changeDensity = useCallback((nextDensity: DensityMode) => {
+    setDensity(nextDensity);
+    localStorage.setItem("macro-wire-news-density", nextDensity);
+  }, []);
 
   const handleRegionChange = useCallback((value: string) => {
     setRegionFading(true);
@@ -117,6 +136,8 @@ export function NewsTab({
     switch (sortMode) {
       case "newest":
         return list.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+      case "impact":
+        return list.sort((a, b) => (getScore(b.id)?.impactScore ?? 0) - (getScore(a.id)?.impactScore ?? 0));
       case "oldest":
         return list.sort((a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime());
       case "source":
@@ -128,7 +149,7 @@ export function NewsTab({
       default:
         return list;
     }
-  }, [articles, sortMode]);
+  }, [articles, sortMode, getScore]);
 
   /* Collect active filter chips for dismissable display */
   const activeFilters: Array<{ key: string; label: string; onClear: () => void }> = [];
@@ -149,16 +170,15 @@ export function NewsTab({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="news-tab flex flex-col h-full">
       {/* ── Filter Bar: single 40px row ── */}
       <div
-        className="shrink-0 border-b border-[#2C2D34] bg-[#08090B]"
-        style={{ height: 40, borderTop: "1px solid rgba(255,176,0,0.2)" }}
+        className="news-filterbar shrink-0"
       >
-        <div className="flex items-center h-full px-4 gap-3">
+        <div className="news-filter-row">
 
           {/* Range toggle pills */}
-          <div className="flex items-center gap-0.5">
+          <div className="news-segment" aria-label="기사 기간">
             {RANGES.map((r) => (
               <button
                 key={r.value}
@@ -183,7 +203,7 @@ export function NewsTab({
           </div>
 
           {/* Source dropdown */}
-          <div className="relative">
+          <div className="news-source-select">
             <select
               value={selectedSourceId || ""}
               onChange={(e) => onSelectSource(e.target.value || null)}
@@ -215,7 +235,7 @@ export function NewsTab({
           </div>
 
           {/* Region text buttons */}
-          <div className="flex items-center gap-0.5">
+          <div className="news-regions">
             {REGIONS.map((r) => {
               const isActive = regionFilter === r.value;
               return (
@@ -244,7 +264,7 @@ export function NewsTab({
           <span style={{ width: 1, height: 16, backgroundColor: "#2C2D34" }} />
 
           {/* Read filter as text links */}
-          <div className="flex items-center" style={{ fontSize: 11 }}>
+          <div className="news-read-filters">
             {READ_FILTERS.map((f, i) => (
               <span key={f.value} className="flex items-center">
                 {i > 0 && <span style={{ color: "#2C2D34", margin: "0 6px" }}>|</span>}
@@ -267,32 +287,26 @@ export function NewsTab({
           </div>
 
           {/* Spacer */}
-          <div className="flex-1" />
+          <div className="news-filter-spacer" />
 
           {/* Article count */}
-          <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91", fontWeight: 500 }}>
-            {sortedArticles.length}건
+          <span className="news-result-count">
+            {sortedArticles.length}<small>건</small>
           </span>
 
           {/* Saved star toggle */}
           <button
             onClick={onToggleSaved}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 14,
-              color: showSaved ? "#FFB000" : "#8C8C91",
-              padding: "0 2px",
-              lineHeight: 1,
-            }}
+            className={`news-icon-button ${showSaved ? "is-active" : ""}`}
             title="저장된 기사만"
+            aria-label="저장된 기사만 보기"
+            aria-pressed={showSaved}
           >
-            {showSaved ? "\u2605" : "\u2606"}
+            <Star size={15} fill={showSaved ? "currentColor" : "none"} />
           </button>
 
           {/* Sort dropdown */}
-          <div className="relative">
+          <div className="news-sort-select">
             <select
               value={sortMode}
               onChange={(e) => setSortMode(e.target.value as SortMode)}
@@ -312,12 +326,34 @@ export function NewsTab({
               }}
             >
               <option value="newest">최신순</option>
+              <option value="impact">중요도순</option>
               <option value="oldest">오래된순</option>
               <option value="source">소스별</option>
             </select>
             <svg className="absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 pointer-events-none" style={{ color: "#8C8C91" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
+          </div>
+
+          <div className="news-density" role="group" aria-label="기사 목록 밀도">
+            <button
+              type="button"
+              className={density === "compact" ? "is-active" : ""}
+              onClick={() => changeDensity("compact")}
+              aria-pressed={density === "compact"}
+              title="압축형 목록"
+            >
+              <Rows3 size={14} />
+            </button>
+            <button
+              type="button"
+              className={density === "comfortable" ? "is-active" : ""}
+              onClick={() => changeDensity("comfortable")}
+              aria-pressed={density === "comfortable"}
+              title="편안한 목록"
+            >
+              <Rows3 size={17} />
+            </button>
           </div>
         </div>
       </div>
@@ -370,14 +406,10 @@ export function NewsTab({
 
       {/* ── Main content: 2-column, right panel flexible ── */}
       <div
-        className="flex-1 min-h-0"
-        style={{
-          display: "grid",
-          gridTemplateColumns: selectedArticle ? "380px 1fr" : "1fr",
-        }}
+        className={`news-workspace flex-1 min-h-0 ${selectedArticle ? "has-selection" : ""}`}
       >
         {/* Left column: article list */}
-        <div className={`overflow-y-auto transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`} style={{ borderLeft: "1px solid rgba(255,176,0,0.12)" }}>
+        <div className={`news-list-pane overflow-y-auto transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`}>
           <SpikeAlert articles={sortedArticles} onTagClick={onTagClick} />
 
           {sortedArticles.length === 0 && !loading ? (
@@ -432,13 +464,23 @@ export function NewsTab({
               newArticleIds={newArticleIds}
               viewMode="list"
               onViewModeChange={onViewModeChange}
+              density={density}
             />
           )}
         </div>
 
         {/* Right column: Detail or empty state */}
         {selectedArticle ? (
-          <div className="overflow-y-auto border-l border-[#2C2D34]">
+          <div className="news-detail-pane overflow-y-auto">
+            <button
+              type="button"
+              className="news-mobile-back"
+              onClick={onCloseArticle}
+              aria-label="기사 목록으로 돌아가기"
+            >
+              <ArrowLeft size={18} />
+              기사 목록
+            </button>
             <ArticleDetail
               article={selectedArticle}
               onToggleRead={onToggleRead}
@@ -453,7 +495,7 @@ export function NewsTab({
             />
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center border-l border-[#2C2D34]">
+          <div className="news-empty-pane flex flex-col items-center justify-center">
             <EmptyState
               glyph="no-selection"
               title="기사를 선택하세요"

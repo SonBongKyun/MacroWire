@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/prisma";
 import { applyReferralCookie } from "@/lib/referrals";
 import type { User } from "@prisma/client";
+import { isClerkServerEnabled } from "@/lib/auth/config";
 
 /**
  * Resolve the current request's Clerk identity into our local User row,
@@ -10,6 +11,7 @@ import type { User } from "@prisma/client";
  * On first creation, also credits any pending referral cookie.
  */
 export async function getOrCreateUser(): Promise<User | null> {
+  if (!isClerkServerEnabled()) return null;
   const { userId } = await auth();
   if (!userId) return null;
 

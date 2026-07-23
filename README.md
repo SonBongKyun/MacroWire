@@ -1,13 +1,13 @@
 # MacroWire
 
-개인용 매크로 뉴스 와이어 웹앱. 공개 RSS 피드를 5분 주기로 수집하여 메타데이터 기반으로 기사를 저장하고, 터미널형 UI로 빠르게 탐색할 수 있습니다.
+개인용 매크로 뉴스 와이어 웹앱. 공개 RSS 피드를 GitHub Actions로 수집해 Neon에 저장하고, 터미널형 UI에서 빠르게 탐색할 수 있습니다.
 
 ## 기술 스택
 
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
 - **Styling**: TailwindCSS
-- **Database**: SQLite (Prisma ORM)
+- **Database**: Neon PostgreSQL (Prisma ORM)
 - **RSS Parser**: rss-parser
 
 ## 실행 방법
@@ -18,10 +18,10 @@
 npm install
 ```
 
-### 2. 데이터베이스 초기화
+### 2. 환경 변수와 데이터베이스
 
 ```bash
-npx prisma migrate dev --name init
+npx prisma db push
 npx prisma generate
 ```
 
@@ -35,14 +35,14 @@ npm run dev
 
 ### 4. 첫 인제스트 실행
 
-- UI 상단의 **"Ingest now"** 버튼 클릭
-- 또는 API 직접 호출: `POST http://localhost:3000/api/ingest`
+- `DATABASE_URL`과 `DIRECT_URL`을 설정한 뒤 `npx tsx scripts/ingest-once.ts` 실행
+- 배포 환경에서는 GitHub Actions의 `full-ingest`와 `breaking-ingest`가 Neon에 직접 기록
 
 ## 주요 기능
 
 | 기능 | 설명 |
 |------|------|
-| RSS 인제스트 | 20개 공개 RSS 피드에서 5분 주기로 기사 수집 |
+| RSS 인제스트 | 30개 이상 공개 RSS 피드를 정기 수집하고 고신호 속보를 우선 처리 |
 | 태깅 | 규칙 기반 자동 태깅 (rates, inflation, fed, fx, oil, geopolitics, equities, credit, crypto, ai) |
 | 필터 | 소스, 태그, 검색, 기간(24h/7d/30d) 필터링 |
 | 읽음/저장 | 기사 읽음 상태 및 저장 토글 |

@@ -113,9 +113,12 @@ Vercel Dashboard → 프로젝트 → Settings → **Environment Variables** 에
 ```
 NEXT_PUBLIC_SITE_URL=https://macro-wire-psi.vercel.app
 CRON_SECRET=<openssl rand -hex 32 결과 같은 긴 랜덤 문자열>
+ADMIN_CLERK_IDS=<본인 Clerk user ID, 여러 명이면 쉼표 구분>
 ```
 
 저장 → **Deployments → 최근 배포 ··· → Redeploy** 클릭 (env 새로 잡기 위함).
+
+같은 `CRON_SECRET`을 GitHub 저장소의 **Settings → Secrets and variables → Actions**에도 등록해야 시간별 이메일 다이제스트가 실행됩니다.
 
 ---
 
@@ -147,7 +150,7 @@ CRON_SECRET=<openssl rand -hex 32 결과 같은 긴 랜덤 문자열>
 
 ## 8. 출시 전 한 번 더 점검
 
-- **랜딩페이지 카피 검증**: 더 이상 거짓말이 없는지. 예: "30개 소스 90초 갱신" 같은 옛 문구가 남아있으면 다시 쓰기 (실제: ~40개 소스, 5분 갱신, AI 인사이트 있음).
+- **랜딩페이지 카피 검증**: 보장할 수 없는 고정 갱신 주기나 X 직접 수집 표현을 사용하지 않습니다. 현재는 공개 RSS 중심 수집입니다.
 - **PRO 약속**: 현재 코드에서 정의된 plan.bullets는 모두 실제 작동. 그래도 한 번 직접 PRO로 가입해서 한 줄씩 확인하기.
 - **법적 표기**: 푸터에 사업자번호, 약관, 개인정보처리방침 링크 (한국 결제 받으려면 필수). 토스페이먼츠도 검토해볼만 — Stripe보다 한국 카드 호환성 좋음.
 - **GTM**: Google Search Console + Google Analytics 추가 (`/macro` 페이지가 SEO 핵심).

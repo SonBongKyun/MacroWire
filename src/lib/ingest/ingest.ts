@@ -122,6 +122,7 @@ export async function runIngest(): Promise<IngestResult> {
 
   // Phase 2: load recent titles ONCE for dedup (last 24h)
   const dedupWindow = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const retentionCutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const recent = await prisma.article.findMany({
     where: { publishedAt: { gte: dedupWindow } },
     select: { title: true },
@@ -158,6 +159,11 @@ export async function runIngest(): Promise<IngestResult> {
       const title = item.title?.trim() ?? "Untitled";
       const summary = item.summary?.slice(0, 500) ?? null;
       const publishedAt = item.publishedAt ?? new Date();
+
+      if (Number.isNaN(publishedAt.getTime()) || publishedAt < retentionCutoff) {
+        sourceSkipped++;
+        continue;
+      }
 
       if (isDuplicateByTitleAgainst(title, recentTitles)) {
         sourceSkipped++;

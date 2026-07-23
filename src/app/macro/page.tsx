@@ -223,7 +223,7 @@ export default async function MacroLanding() {
             매크로 트레이더를 위한 단 하나의 데스크
           </h2>
           <p style={{ fontSize: 14, color: "#C9C4B6", marginBottom: 20 }}>
-            5분마다 갱신되는 글로벌 매크로 와이어. AI가 \"왜 중요한지\"까지 정리합니다.
+            지속적으로 수집되는 글로벌 매크로 와이어. AI가 \"왜 중요한지\"까지 정리합니다.
           </p>
           <Link
             href="/sign-up"

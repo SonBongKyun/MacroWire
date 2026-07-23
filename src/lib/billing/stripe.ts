@@ -6,7 +6,6 @@ if (!key && process.env.NODE_ENV === "production") {
 }
 
 export const stripe = new Stripe(key ?? "sk_test_placeholder", {
-  apiVersion: "2025-09-30.clover" as Stripe.LatestApiVersion,
   typescript: true,
 });
 

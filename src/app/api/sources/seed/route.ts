@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { requireAdmin } from "@/lib/security/api-auth";
 
 const SOURCES = [
   // --- Korean Breaking News / Macro ---
@@ -33,6 +34,9 @@ const SOURCES = [
 
 export async function POST() {
   try {
+    const admin = await requireAdmin();
+    if (admin instanceof NextResponse) return admin;
+
     let added = 0;
     let skipped = 0;
 

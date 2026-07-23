@@ -80,6 +80,7 @@ async function ingestBreakingSource(source: {
 
       // Get base tags + always add "속보" for breaking category sources
       const baseTags = applyTags(title, summary);
+      if (baseTags.length === 0) continue;
       const tags = baseTags.includes("속보") ? baseTags : ["속보", ...baseTags];
 
       try {
@@ -119,6 +120,7 @@ async function ingestBreakingSource(source: {
 export interface BreakingIngestResult {
   added: number;
   failedSources: number;
+  sourceCount: number;
   lastUpdated: string;
   newArticles: NewBreakingArticle[];
 }
@@ -131,7 +133,7 @@ export async function runBreakingIngest(): Promise<BreakingIngestResult> {
   });
 
   if (breakingSources.length === 0) {
-    return { added: 0, failedSources: 0, lastUpdated: new Date().toISOString(), newArticles: [] };
+    return { added: 0, failedSources: 0, sourceCount: 0, lastUpdated: new Date().toISOString(), newArticles: [] };
   }
 
   console.log(`[breaking-ingest] fetching ${breakingSources.length} sources in parallel`);
@@ -152,5 +154,5 @@ export async function runBreakingIngest(): Promise<BreakingIngestResult> {
     .slice(0, 5);
 
   console.log(`[breaking-ingest] done. added=${added}, failed=${failedSources}`);
-  return { added, failedSources, lastUpdated, newArticles };
+  return { added, failedSources, sourceCount: breakingSources.length, lastUpdated, newArticles };
 }

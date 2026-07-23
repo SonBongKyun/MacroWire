@@ -32,9 +32,11 @@ interface ArticleListProps {
   newArticleIds?: string[];
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
+  density?: "compact" | "comfortable";
 }
 
-const ROW_HEIGHT = 56;
+const ROW_HEIGHT_COMPACT = 56;
+const ROW_HEIGHT_COMFORTABLE = 72;
 const BUFFER_COUNT = 10;
 
 function timeAgo(dateStr: string): string {
@@ -80,6 +82,7 @@ export function ArticleList({
   newArticleIds = [],
   viewMode = "list",
   onViewModeChange,
+  density = "comfortable",
 }: ArticleListProps) {
   const { getScore } = useArticleScoring(articles);
   const listRef = useRef<HTMLDivElement>(null);
@@ -173,6 +176,7 @@ export function ArticleList({
         : articles.filter((a) => a.isRead);
 
   const newIds = useMemo(() => new Set(newArticleIds), [newArticleIds]);
+  const rowHeight = density === "compact" ? ROW_HEIGHT_COMPACT : ROW_HEIGHT_COMFORTABLE;
 
   // Measure container height on mount and resize
   useEffect(() => {
@@ -186,12 +190,12 @@ export function ArticleList({
   }, []);
 
   // Virtual scrolling calculations
-  const totalHeight = filteredArticles.length * ROW_HEIGHT;
-  const startIndex = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - BUFFER_COUNT);
-  const visibleCount = Math.ceil(containerHeight / ROW_HEIGHT) + 2 * BUFFER_COUNT;
+  const totalHeight = filteredArticles.length * rowHeight;
+  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - BUFFER_COUNT);
+  const visibleCount = Math.ceil(containerHeight / rowHeight) + 2 * BUFFER_COUNT;
   const endIndex = Math.min(filteredArticles.length, startIndex + visibleCount);
   const visibleArticles = filteredArticles.slice(startIndex, endIndex);
-  const offsetY = startIndex * ROW_HEIGHT;
+  const offsetY = startIndex * rowHeight;
 
   // Infinite scroll: trigger load more when near the bottom
   useEffect(() => {
@@ -222,26 +226,26 @@ export function ArticleList({
         const next = Math.min(idx + 1, filteredArticles.length - 1);
         onSelectArticle(filteredArticles[next]);
         // Scroll selected item into view
-        const itemTop = next * ROW_HEIGHT;
+        const itemTop = next * rowHeight;
         const el = listRef.current;
         if (el) {
           if (itemTop < el.scrollTop) {
             el.scrollTop = itemTop;
-          } else if (itemTop + ROW_HEIGHT > el.scrollTop + el.clientHeight) {
-            el.scrollTop = itemTop + ROW_HEIGHT - el.clientHeight;
+          } else if (itemTop + rowHeight > el.scrollTop + el.clientHeight) {
+            el.scrollTop = itemTop + rowHeight - el.clientHeight;
           }
         }
       } else if (e.key === "ArrowUp" || e.key === "k") {
         e.preventDefault();
         const prev = Math.max(idx - 1, 0);
         onSelectArticle(filteredArticles[prev]);
-        const itemTop = prev * ROW_HEIGHT;
+        const itemTop = prev * rowHeight;
         const el = listRef.current;
         if (el) {
           if (itemTop < el.scrollTop) {
             el.scrollTop = itemTop;
-          } else if (itemTop + ROW_HEIGHT > el.scrollTop + el.clientHeight) {
-            el.scrollTop = itemTop + ROW_HEIGHT - el.clientHeight;
+          } else if (itemTop + rowHeight > el.scrollTop + el.clientHeight) {
+            el.scrollTop = itemTop + rowHeight - el.clientHeight;
           }
         }
       } else if (e.key === "s" && idx >= 0) {
@@ -249,7 +253,7 @@ export function ArticleList({
         onToggleSave(filteredArticles[idx]);
       }
     },
-    [filteredArticles, selectedArticleId, onSelectArticle, onToggleSave]
+    [filteredArticles, selectedArticleId, onSelectArticle, onToggleSave, rowHeight]
   );
 
   return (
@@ -306,20 +310,19 @@ export function ArticleList({
                 return (
                   <div
                     key={article.id}
+                    className={`article-row article-row-${density}`}
                     onClick={() => onSelectArticle(article)}
                     onContextMenu={(e) => handleContextMenu(e, article)}
                     style={{
-                      height: ROW_HEIGHT,
-                      padding: "10px 16px",
+                      height: rowHeight,
+                      padding: density === "compact" ? "8px 14px" : "11px 16px",
                       borderBottom: "1px solid #2C2D34",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "flex-start",
                       gap: 10,
                       transition: "background-color 0.15s ease, border-color 0.15s ease",
-                      background: isSelected
-                        ? "linear-gradient(90deg, rgba(255,176,0,0.12) 0%, rgba(255,176,0,0.04) 30%, transparent 100%)"
-                        : "transparent",
+                      background: isSelected ? "rgba(231,180,79,0.09)" : "transparent",
                       borderLeft: isSelected
                         ? "2px solid #FFB000"
                         : isBreaking && isUnread
@@ -411,8 +414,8 @@ export function ArticleList({
                       </div>
 
                       {/* Tags row — neutral by default, category color on hover/active */}
-                      {article.tags.length > 0 && (
-                        <div style={{ display: "flex", gap: 4, marginTop: 5, flexWrap: "wrap" }}>
+                      {density === "comfortable" && article.tags.length > 0 && (
+                        <div className="article-row-tags" style={{ display: "flex", gap: 4, marginTop: 6, flexWrap: "wrap" }}>
                           {article.tags.slice(0, 3).map((tag) => {
                             // Skip "속보" — already rendered as the prominent red pill before the title
                             if (tag === "속보") return null;
@@ -456,7 +459,7 @@ export function ArticleList({
                     </div>
 
                     {/* Right: source + time */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
+                    <div className="article-row-meta" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
                       <span style={{ fontSize: 10, color: "#8C8C91", fontWeight: 400, whiteSpace: "nowrap" }}>
                         {article.sourceName}
                       </span>

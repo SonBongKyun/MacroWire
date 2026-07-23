@@ -204,7 +204,7 @@ function HeroDispatch() {
           letterSpacing: "0",
         }}
       >
-        30개 신뢰 소스를 90초마다 갱신하는 단일 디스패치. 텔레그램·X 속보 계정을 더 이상 새로고침하지 않아도 되는, 한 줄짜리 와이어 피드.
+        30개 이상의 공개 RSS 소스를 한 화면에 모으는 매크로 디스패치. 정책·시장·기업 뉴스를 빠르게 훑고 중요한 흐름에 집중하는 와이어 피드.
       </p>
 
       {/* Dual CTA — solid amber + outlined paper */}
@@ -257,8 +257,8 @@ function Sep() {
 
 function Bylines() {
   const stats: [string, string, string][] = [
-    ["30+", "신뢰 소스", "Reuters · 연합 · WSJ · 매경 · 한경 외"],
-    ["90초", "갱신 주기", "속보 카테고리 별도 fast-poll"],
+    ["30+", "공개 소스", "연합 · WSJ · CNBC · 매경 · 한경 외"],
+    ["상시", "수집 상태", "고신호 우선 큐 + 정기 전체 갱신"],
     ["₩0", "AI 비용", "기기 안에서 동작하는 로컬 모델"],
   ];
   return (
@@ -337,9 +337,9 @@ function FilingsGrid() {
     {
       no: "01",
       label: "REAL-TIME WIRE",
-      title: "90초 자동 갱신",
+      title: "상시 자동 수집",
       kicker: "속보가 도착하기 전, 새로고침은 우리가 합니다.",
-      body: "연합뉴스 · 매일경제 · 한국경제 · Reuters · CNBC가 한 화면에서 동시에 흐릅니다. 속보 카테고리는 90초 fast-poll, 일반 피드는 5분 폴링. 별도 알림 설정 없이 토스트 + 브라우저 푸시.",
+      body: "연합뉴스 · 매일경제 · 한국경제 · CNBC 등 공개 피드가 한 화면에서 흐릅니다. 고신호 속보는 우선 수집하고 일반 피드는 정기 갱신합니다. 별도 새로고침 없이 새로운 기사를 확인할 수 있습니다.",
     },
     {
       no: "02",
@@ -478,7 +478,7 @@ function PullQuote() {
       >
         &ldquo;블룸버그 터미널의 정보 밀도를{" "}
         <span style={{ color: PALETTE.amber, fontStyle: "normal", fontFamily: "var(--font-display-condensed)", textTransform: "uppercase" }}>
-          X 속보 계정의 속도
+          공개 뉴스 와이어의 흐름
         </span>
         로, 무료로.&rdquo;
       </blockquote>
