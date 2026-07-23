@@ -85,7 +85,7 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
 
   return (
     <div
-      className="px-5 h-7 flex items-center shrink-0 select-none"
+      className="status-bar px-5 h-7 flex items-center shrink-0 select-none"
       style={{
         background: "#08090B",
         borderTop: "1px solid rgba(245,240,225,0.10)",
@@ -633,7 +633,7 @@ function HomeInner() {
   }, [ingesting, runIngest, toggleDarkMode, markAllRead, exportSaved, selectedArticle, filteredArticles, selectArticle, toggleSave, activeMainTab, splitView]);
 
   return (
-    <div className="flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <div className="macro-app flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Ambient Light — single soft gold radial in upper-right, no stars/nebulas */}
       <div className="ambient-light" aria-hidden="true" />
       {/* Platform Navigation */}
@@ -733,6 +733,7 @@ function HomeInner() {
             timelineMode={timelineMode}
             newArticleIds={newArticleIds}
             onSelectArticle={selectArticle}
+            onCloseArticle={() => setSelectedArticle(null)}
             onSelectSource={(id) => setSelectedSourceId((prev) => (prev === id ? null : id))}
             onSelectTag={(tag) => setSelectedTag((prev) => (prev === tag ? null : tag))}
             onRangeChange={setRange}

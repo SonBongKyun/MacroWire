@@ -1,6 +1,29 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Activity,
+  Bell,
+  BookOpenText,
+  BriefcaseBusiness,
+  Calculator,
+  ChartNoAxesCombined,
+  ChevronDown,
+  CircleHelp,
+  FileText,
+  FlaskConical,
+  LayoutDashboard,
+  Lightbulb,
+  Menu,
+  Newspaper,
+  PanelLeftClose,
+  Radio,
+  RefreshCw,
+  Search,
+  Siren,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 export type MainTab = "dashboard" | "news" | "markets" | "analytics" | "ai" | "research" | "portfolio";
@@ -40,74 +63,89 @@ interface PlatformNavProps {
 
 const SEARCH_HISTORY_KEY = "macro-wire-search-history";
 
-const tabs: { key: MainTab; label: string }[] = [
-  { key: "dashboard", label: "DESK" },
-  { key: "news", label: "WIRE" },
-  { key: "markets", label: "MARKETS" },
-  { key: "analytics", label: "ANALYTICS" },
-  { key: "ai", label: "AI" },
-  { key: "research", label: "RESEARCH" },
-  { key: "portfolio", label: "PORTFOLIO" },
+const tabs = [
+  { key: "dashboard" as const, label: "데스크", shortLabel: "데스크", icon: LayoutDashboard },
+  { key: "news" as const, label: "와이어", shortLabel: "와이어", icon: Newspaper },
+  { key: "markets" as const, label: "마켓", shortLabel: "마켓", icon: ChartNoAxesCombined },
+  { key: "analytics" as const, label: "분석", shortLabel: "분석", icon: Activity },
+  { key: "ai" as const, label: "AI 브리핑", shortLabel: "AI", icon: Sparkles },
+  { key: "research" as const, label: "리서치", shortLabel: "리서치", icon: FlaskConical },
+  { key: "portfolio" as const, label: "포트폴리오", shortLabel: "자산", icon: BriefcaseBusiness },
 ];
 
-export function PlatformNav({
-  activeTab,
-  onTabChange,
-  searchQuery,
-  onSearchChange,
-  darkMode,
-  onToggleDark,
-  onIngest,
-  ingesting,
-  countdown,
-  lastUpdated,
-  onOpenPalette,
-  onShowHelp,
-  themeToggleRef,
-  notificationCount,
-  onToggleNotifications,
-  newArticleCount,
-  unreadCount = 0,
-  tags = [],
-  onToggleSplit,
-  splitView = false,
-  onToggleCalculator,
-  calculatorOpen = false,
-  onOpenWeeklyReport,
-  onOpenNewsletter,
-  onToggleMemo,
-  memoOpen = false,
-  onToggleAlertFeed,
-  alertFeedOpen = false,
-  breakingCountdown = 0,
-  lastBreakingUpdate = null,
-}: PlatformNavProps) {
-  // Deterministic 0 on first render (server + client match), populated after mount.
-  const [now, setNow] = useState(0);
-  useEffect(() => { setNow(Date.now()); }, []);
+const mobilePrimaryTabs = tabs.filter((tab) =>
+  ["dashboard", "news", "markets", "ai"].includes(tab.key)
+);
+const mobileMoreTabs = tabs.filter((tab) =>
+  ["analytics", "research", "portfolio"].includes(tab.key)
+);
+
+function formatCountdown(value: number) {
+  const safe = Math.max(0, value);
+  return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`;
+}
+
+export function PlatformNav(props: PlatformNavProps) {
+  const {
+    activeTab,
+    onTabChange,
+    searchQuery,
+    onSearchChange,
+    onIngest,
+    ingesting,
+    countdown,
+    lastUpdated,
+    onOpenPalette,
+    onShowHelp,
+    notificationCount,
+    onToggleNotifications,
+    newArticleCount,
+    unreadCount = 0,
+    tags = [],
+    onToggleSplit,
+    splitView = false,
+    onToggleCalculator,
+    calculatorOpen = false,
+    onOpenWeeklyReport,
+    onOpenNewsletter,
+    onToggleMemo,
+    memoOpen = false,
+    onToggleAlertFeed,
+    alertFeedOpen = false,
+    breakingCountdown = 0,
+    lastBreakingUpdate,
+  } = props;
+
   const [reportDropdownOpen, setReportDropdownOpen] = useState(false);
-  const reportDropdownRef = useRef<HTMLDivElement>(null);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const autocompleteRef = useRef<HTMLDivElement>(null);
+  const [now, setNow] = useState(0);
+  const reportDropdownRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load search history
   useEffect(() => {
+    setNow(Date.now());
     try {
       const stored = localStorage.getItem(SEARCH_HISTORY_KEY);
       if (stored) setSearchHistory(JSON.parse(stored));
-    } catch {}
+    } catch {
+      setSearchHistory([]);
+    }
   }, []);
 
-  // Close autocomplete and report dropdown on click outside
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setShowAutocomplete(false);
       }
-      if (reportDropdownRef.current && !reportDropdownRef.current.contains(e.target as Node)) {
+      if (reportDropdownRef.current && !reportDropdownRef.current.contains(event.target as Node)) {
         setReportDropdownOpen(false);
       }
     };
@@ -115,472 +153,380 @@ export function PlatformNav({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const matchingTags = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const q = searchQuery.toLowerCase();
-    return tags.filter((t) => t.toLowerCase().includes(q));
-  }, [searchQuery, tags]);
-
-  const recentSearches = useMemo(() => {
-    return searchHistory.slice(0, 5);
-  }, [searchHistory]);
-
-  const shouldShowDropdown = searchFocused && searchQuery.trim().length > 0 && (matchingTags.length > 0 || recentSearches.length > 0);
-
-  const saveSearchHistory = useCallback((query: string) => {
-    if (!query.trim()) return;
-    setSearchHistory((prev) => {
-      const filtered = prev.filter((h) => h !== query);
-      const next = [query, ...filtered].slice(0, 10);
-      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(next));
-      return next;
-    });
-  }, []);
-
-  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && searchQuery.trim()) {
-      saveSearchHistory(searchQuery.trim());
-      setShowAutocomplete(false);
-      (e.target as HTMLInputElement).blur();
-    }
-    if (e.key === "Escape") {
-      setShowAutocomplete(false);
-      (e.target as HTMLInputElement).blur();
-    }
-  }, [searchQuery, saveSearchHistory]);
-
-  const handleSuggestionClick = useCallback((value: string) => {
-    onSearchChange(value);
-    saveSearchHistory(value);
-    setShowAutocomplete(false);
-  }, [onSearchChange, saveSearchHistory]);
-
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(t);
-  }, []);
-
-  function updatedAgo(): string {
-    if (!lastUpdated) return "";
-    const diff = now - new Date(lastUpdated).getTime();
-    const mins = Math.floor(diff / 60_000);
-    if (mins < 1) return "\uBC29\uAE08";
-    if (mins < 60) return `${mins}\uBD84 \uC804`;
-    return `${Math.floor(mins / 60)}\uC2DC\uAC04 \uC804`;
-  }
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
+    const handler = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
         onOpenPalette();
+      }
+      if (event.key === "Escape") {
+        setMobileMoreOpen(false);
+        setReportDropdownOpen(false);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onOpenPalette]);
 
+  const matchingTags = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+    return tags.filter((tag) => tag.toLowerCase().includes(query)).slice(0, 6);
+  }, [searchQuery, tags]);
+
+  const recentSearches = useMemo(() => searchHistory.slice(0, 4), [searchHistory]);
+  const shouldShowDropdown =
+    searchFocused &&
+    showAutocomplete &&
+    searchQuery.trim().length > 0 &&
+    (matchingTags.length > 0 || recentSearches.length > 0);
+
+  const saveSearchHistory = useCallback((query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setSearchHistory((previous) => {
+      const next = [trimmed, ...previous.filter((item) => item !== trimmed)].slice(0, 10);
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const selectSuggestion = useCallback((value: string) => {
+    onSearchChange(value);
+    saveSearchHistory(value);
+    setShowAutocomplete(false);
+  }, [onSearchChange, saveSearchHistory]);
+
+  const updatedAgo = useMemo(() => {
+    if (!lastUpdated || !now) return "동기화 대기";
+    const minutes = Math.max(0, Math.floor((now - new Date(lastUpdated).getTime()) / 60_000));
+    if (minutes < 1) return "방금 동기화";
+    if (minutes < 60) return `${minutes}분 전 동기화`;
+    return `${Math.floor(minutes / 60)}시간 전 동기화`;
+  }, [lastUpdated, now]);
+
+  const newsCount = newArticleCount || unreadCount;
+
   return (
-    <header className="relative flex items-center gap-3 px-4 h-[48px] glass-header shrink-0 select-none z-20">
-      {/* Logo — Spike mark + MacroWire wordmark */}
-      <Logo size="sm" />
-
-      <div className="topbar-divider" />
-
-      {/* Tab Navigation — horizontally scrollable on mobile */}
-      <nav className="platform-tabs flex items-center h-full">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.key;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => onTabChange(tab.key)}
-              className="relative h-full flex items-center transition-colors"
-              style={{
-                padding: "0 18px",
-                fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
-                fontSize: 11,
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? "#F5F0E1" : "#8C8C91",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-              }}
-            >
-              {tab.label}
-              {tab.key === "news" && newArticleCount > 0 && (
-                <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[9px] font-bold rounded-full bg-[var(--danger)] text-white leading-none">
-                  {newArticleCount > 99 ? "99+" : newArticleCount}
-                </span>
-              )}
-              {tab.key === "news" && newArticleCount === 0 && unreadCount > 0 && (
-                <span className="ml-1.5 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-bold leading-none"
-                  style={{ borderRadius: 2, background: "rgba(255,176,0,0.15)", color: "#FFB000" }}>
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              )}
-              {isActive && (
-                <span
-                  className="absolute bottom-0 left-0 right-0"
-                  style={{
-                    height: 2,
-                    background: "#FFB000",
-                    borderRadius: 0,
-                  }}
-                />
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Spacer */}
-      <div className="header-spacer flex-1" />
-
-      {/* Alert Feed Toggle */}
-      {onToggleAlertFeed && (
-        <button
-          onClick={onToggleAlertFeed}
-          className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
-          style={{
-            borderRadius: 2,
-            border: alertFeedOpen ? "1px solid #FFB000" : "1px solid transparent",
-            background: alertFeedOpen ? "rgba(255,176,0,0.1)" : "transparent",
-            color: alertFeedOpen ? "#FFB000" : "#8C8C91",
-            cursor: "pointer",
-          }}
-          title="알림 피드 (Shift+A)"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M8 1.5a4 4 0 014 4v2.5l1.5 2H2.5L4 8V5.5a4 4 0 014-4z" />
-            <path d="M6 12a2 2 0 004 0" />
-            <line x1="3" y1="5" x2="5" y2="5" opacity="0.5" />
-            <line x1="3" y1="7" x2="5" y2="7" opacity="0.5" />
-          </svg>
-        </button>
-      )}
-
-      {/* Split View Toggle — news tab only */}
-      {activeTab === "news" && onToggleSplit && (
-        <button
-          onClick={onToggleSplit}
-          className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
-          style={{
-            borderRadius: 2,
-            border: splitView ? "1px solid #FFB000" : "1px solid transparent",
-            background: splitView ? "rgba(255,176,0,0.1)" : "transparent",
-            color: splitView ? "#FFB000" : "#8C8C91",
-            cursor: "pointer",
-          }}
-          title="분할 뷰 (Ctrl+Shift+S)"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <rect x="1" y="2" width="14" height="12" rx="1" />
-            <line x1="5.5" y1="2" x2="5.5" y2="14" />
-            <line x1="10.5" y1="2" x2="10.5" y2="14" />
-          </svg>
-        </button>
-      )}
-
-      {/* Currency Calculator Toggle */}
-      {onToggleCalculator && (
-        <button
-          onClick={onToggleCalculator}
-          className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
-          style={{
-            borderRadius: 2,
-            border: calculatorOpen ? "1px solid #FFB000" : "1px solid transparent",
-            background: calculatorOpen ? "rgba(255,176,0,0.1)" : "transparent",
-            color: calculatorOpen ? "#FFB000" : "#8C8C91",
-            cursor: "pointer",
-            fontFamily: "var(--font-mono)",
-            fontSize: 13,
-            fontWeight: 700,
-          }}
-          title="환율 계산기"
-        >
-          ₩
-        </button>
-      )}
-
-      {/* Insight Memo Toggle */}
-      {onToggleMemo && (
-        <button
-          onClick={onToggleMemo}
-          className="secondary-action flex items-center justify-center w-7 h-7 shrink-0 transition-all"
-          style={{
-            borderRadius: 2,
-            border: memoOpen ? "1px solid #FFB000" : "1px solid transparent",
-            background: memoOpen ? "rgba(255,176,0,0.1)" : "transparent",
-            color: memoOpen ? "#FFB000" : "#8C8C91",
-            cursor: "pointer",
-          }}
-          title={"\uC778\uC0AC\uC774\uD2B8 \uBA54\uBAA8 (Shift+M)"}
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M3 2h7l3 3v9H3V2z" />
-            <path d="M10 2v3h3" />
-            <line x1="5" y1="8" x2="11" y2="8" />
-            <line x1="5" y1="10.5" x2="9" y2="10.5" />
-          </svg>
-        </button>
-      )}
-
-      {/* Report / Newsletter */}
-      {(onOpenWeeklyReport || onOpenNewsletter) && (
-        <div ref={reportDropdownRef} className="secondary-action relative shrink-0">
-          <button
-            onClick={() => setReportDropdownOpen((v) => !v)}
-            className="flex items-center justify-center w-7 h-7 shrink-0 transition-all"
-            style={{
-              borderRadius: 2,
-              border: reportDropdownOpen ? "1px solid #FFB000" : "1px solid transparent",
-              background: reportDropdownOpen ? "rgba(255,176,0,0.1)" : "transparent",
-              color: reportDropdownOpen ? "#FFB000" : "#8C8C91",
-              cursor: "pointer",
-            }}
-            title="리포트"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="3" y="1" width="10" height="14" rx="1" />
-              <line x1="5.5" y1="4.5" x2="10.5" y2="4.5" />
-              <line x1="5.5" y1="7" x2="10.5" y2="7" />
-              <line x1="5.5" y1="9.5" x2="8.5" y2="9.5" />
-            </svg>
-          </button>
-          {reportDropdownOpen && (
-            <div
-              className="absolute right-0 top-full mt-1 z-50"
-              style={{
-                background: "#1B1C22",
-                border: "1px solid #2C2D34",
-                minWidth: 160,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-              }}
-            >
-              {onOpenWeeklyReport && (
-                <button
-                  onClick={() => { setReportDropdownOpen(false); onOpenWeeklyReport(); }}
-                  className="w-full text-left px-3 py-2 text-[11px] transition-colors flex items-center gap-2"
-                  style={{ color: "#EBEBEB" }}
-                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,176,0,0.1)"; }}
-                  onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#8C8C91" strokeWidth="1.2">
-                    <rect x="1" y="1" width="10" height="10" rx="1" />
-                    <line x1="3" y1="4" x2="9" y2="4" />
-                    <line x1="3" y1="6" x2="7" y2="6" />
-                    <line x1="3" y1="8" x2="5" y2="8" />
-                  </svg>
-                  주간 리포트
-                </button>
-              )}
-              {onOpenNewsletter && (
-                <button
-                  onClick={() => { setReportDropdownOpen(false); onOpenNewsletter(); }}
-                  className="w-full text-left px-3 py-2 text-[11px] transition-colors flex items-center gap-2"
-                  style={{ color: "#EBEBEB" }}
-                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,176,0,0.1)"; }}
-                  onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#8C8C91" strokeWidth="1.2">
-                    <rect x="1" y="2" width="10" height="8" rx="1" />
-                    <path d="M1 3l5 3 5-3" />
-                  </svg>
-                  뉴스레터 생성
-                </button>
-              )}
-            </div>
-          )}
+    <>
+      <header className="wire-header" data-testid="wire-header">
+        <div className="wire-brand">
+          <Logo size="sm" />
+          <span className="wire-brand-meta">GLOBAL INTELLIGENCE</span>
         </div>
-      )}
 
-      {/* Search */}
-      <div ref={searchContainerRef} className="header-search relative shrink-0" style={{ width: 240 }}>
-        <svg
-          className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--muted)]"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          id="wire-search"
-          type="text"
-          placeholder={"\uAE30\uC0AC, \uD0DC\uADF8, \uC18C\uC2A4 \uAC80\uC0C9..."}
-          value={searchQuery}
-          onChange={(e) => { onSearchChange(e.target.value); setShowAutocomplete(true); }}
-          onFocus={() => { setSearchFocused(true); setShowAutocomplete(true); }}
-          onBlur={() => { setTimeout(() => setSearchFocused(false), 150); }}
-          onKeyDown={handleSearchKeyDown}
-          className="w-full bg-[var(--surface-active)] border border-[var(--border)] rounded-[var(--radius-md)] pl-8 pr-14 py-[5px] text-[11px] placeholder-[var(--muted)] focus:outline-none search-input transition-all"
-        />
-        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+        <nav className="platform-tabs" aria-label="주요 화면">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.key;
+            const badge = tab.key === "news" ? newsCount : 0;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                className={`wire-tab ${isActive ? "is-active" : ""}`}
+                onClick={() => onTabChange(tab.key)}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <Icon aria-hidden="true" size={15} strokeWidth={1.8} />
+                <span>{tab.label}</span>
+                {badge > 0 && (
+                  <span className={`wire-count ${newArticleCount > 0 ? "is-new" : ""}`}>
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="wire-header-spacer" />
+
+        <div ref={searchContainerRef} className="wire-search">
+          <Search aria-hidden="true" size={15} strokeWidth={1.8} />
+          <input
+            id="wire-search"
+            type="search"
+            aria-label="기사, 태그, 소스 검색"
+            placeholder="기사, 태그, 소스 검색"
+            value={searchQuery}
+            onChange={(event) => {
+              onSearchChange(event.target.value);
+              setShowAutocomplete(true);
+            }}
+            onFocus={() => {
+              setSearchFocused(true);
+              setShowAutocomplete(true);
+            }}
+            onBlur={() => window.setTimeout(() => setSearchFocused(false), 150)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && searchQuery.trim()) {
+                saveSearchHistory(searchQuery);
+                setShowAutocomplete(false);
+                event.currentTarget.blur();
+              }
+              if (event.key === "Escape") {
+                setShowAutocomplete(false);
+                event.currentTarget.blur();
+              }
+            }}
+          />
           {searchQuery ? (
-            <button
-              onClick={() => onSearchChange("")}
-              className="text-[var(--muted)] hover:text-[var(--foreground)] text-xs w-4 h-4 flex items-center justify-center rounded-full hover:bg-[var(--surface-hover)] transition-colors"
-            >
-              x
+            <button type="button" className="wire-search-clear" onClick={() => onSearchChange("")} aria-label="검색어 지우기">
+              <X size={14} />
             </button>
           ) : (
-            <kbd
-              className="kbd-key"
-              style={{ fontSize: "9px", padding: "1px 4px", minWidth: "auto", height: "16px" }}
-            >
-              Ctrl+K
-            </kbd>
+            <kbd>Ctrl K</kbd>
           )}
-        </div>
 
-        {/* Autocomplete dropdown */}
-        {shouldShowDropdown && showAutocomplete && (
-          <div
-            ref={autocompleteRef}
-            className="absolute top-full left-0 right-0 mt-1 glass-modal rounded-[var(--radius-md)] border border-[var(--border)] shadow-lg overflow-hidden z-50"
-            style={{ maxHeight: 250, overflowY: "auto" }}
-          >
-            {matchingTags.length > 0 && (
-              <div className="px-3 pt-2.5 pb-1">
-                <span className="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wider">{"\uD0DC\uADF8"}</span>
-                <div className="mt-1.5 flex flex-col">
+          {shouldShowDropdown && (
+            <div className="wire-search-results">
+              {matchingTags.length > 0 && (
+                <div className="wire-search-group">
+                  <span className="wire-search-label">태그</span>
                   {matchingTags.map((tag) => (
-                    <button
-                      key={tag}
-                      onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(tag); }}
-                      className="text-left px-2 py-1.5 text-[11px] text-[var(--foreground)] hover:bg-[var(--surface-hover)] rounded-[var(--radius-sm)] transition-colors flex items-center gap-2"
-                    >
-                      <span className="text-[var(--accent)] text-[10px]">#</span>
+                    <button type="button" key={tag} onMouseDown={(event) => {
+                      event.preventDefault();
+                      selectSuggestion(tag);
+                    }}>
+                      <span>#</span>
                       {tag}
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-            {recentSearches.length > 0 && (
-              <div className="px-3 pt-2 pb-2.5">
-                {matchingTags.length > 0 && <div className="border-t border-[var(--border-subtle)] mb-2" />}
-                <span className="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wider">{"\uCD5C\uADFC \uAC80\uC0C9"}</span>
-                <div className="mt-1.5 flex flex-col">
-                  {recentSearches.map((q, i) => (
-                    <button
-                      key={`${q}-${i}`}
-                      onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(q); }}
-                      className="text-left px-2 py-1.5 text-[11px] text-[var(--foreground-secondary)] hover:bg-[var(--surface-hover)] rounded-[var(--radius-sm)] transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-3 h-3 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {q}
+              )}
+              {recentSearches.length > 0 && (
+                <div className="wire-search-group">
+                  <span className="wire-search-label">최근 검색</span>
+                  {recentSearches.map((query) => (
+                    <button type="button" key={query} onMouseDown={(event) => {
+                      event.preventDefault();
+                      selectSuggestion(query);
+                    }}>
+                      <BookOpenText size={13} />
+                      {query}
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="topbar-divider" />
-
-      {/* Breaking news LIVE indicator — pulsing red dot + countdown */}
-      {breakingCountdown > 0 && (
-        <div
-          className="live-indicator flex items-center gap-1.5 shrink-0"
-          title={`속보 자동 수집: ${breakingCountdown}초 후${lastBreakingUpdate ? ` (마지막: ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })})` : ""}`}
-          style={{ cursor: "default" }}
-        >
-          <span
-            style={{
-              display: "inline-block",
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              backgroundColor: "#ef4444",
-              boxShadow: "0 0 8px rgba(239,68,68,0.65)",
-              animation: "pulse-dot 1.6s ease-in-out infinite",
-            }}
-          />
-          <span style={{
-            fontSize: 7,
-            fontWeight: 800,
-            color: "#ef4444",
-            background: "rgba(239,68,68,0.12)",
-            border: "1px solid rgba(239,68,68,0.28)",
-            padding: "2px 5px",
-            borderRadius: 1,
-            letterSpacing: "0.08em",
-            lineHeight: 1.6,
-            fontFamily: "var(--font-heading)",
-          }}>
-            LIVE
-          </span>
-          <span style={{
-            fontSize: 9,
-            fontFamily: "var(--font-mono)",
-            fontVariantNumeric: "tabular-nums",
-            color: "#8C8C91",
-            letterSpacing: 0,
-            minWidth: 22,
-            textAlign: "right",
-          }}>
-            {breakingCountdown}s
-          </span>
-        </div>
-      )}
-
-      {/* Refresh with countdown ring */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        {countdown > 0 && !ingesting && (() => {
-          const maxCountdown = 300; // 5 minutes
-          const radius = 8;
-          const circumference = 2 * Math.PI * radius;
-          const progress = countdown / maxCountdown;
-          const dashOffset = circumference * (1 - progress);
-          const mins = Math.floor(countdown / 60);
-          const secs = countdown % 60;
-          return (
-            <div style={{ position: "relative", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" style={{ transform: "rotate(-90deg)" }}>
-                <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#2C2D34" strokeWidth="2" />
-                <circle cx="11" cy="11" r={radius} fill="transparent" stroke="#FFB000" strokeWidth="2"
-                  strokeDasharray={circumference} strokeDashoffset={dashOffset}
-                  strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s linear" }} />
-              </svg>
-              <span style={{
-                position: "absolute", fontSize: 7, fontFamily: "'Space Mono', var(--font-mono), monospace",
-                fontVariantNumeric: "tabular-nums", color: "#8C8C91", fontWeight: 600, lineHeight: 1,
-              }}>
-                {mins}:{String(secs).padStart(2, "0")}
-              </span>
+              )}
             </div>
-          );
-        })()}
+          )}
+        </div>
+
+        <div className="wire-live" title={lastBreakingUpdate ? `마지막 속보 ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR")}` : "속보 수집 대기 중"}>
+          <span className="wire-live-dot" aria-hidden="true" />
+          <span>LIVE</span>
+          <b>{breakingCountdown}s</b>
+        </div>
+
+        <div className="wire-tools" aria-label="빠른 도구">
+          <button type="button" onClick={onToggleNotifications} aria-label="알림 규칙" title="알림 규칙">
+            <Bell size={17} />
+            {notificationCount > 0 && <span className="tool-dot" />}
+          </button>
+          {onToggleAlertFeed && (
+            <button type="button" className={alertFeedOpen ? "is-active" : ""} onClick={onToggleAlertFeed} aria-label="알림 피드" title="알림 피드">
+              <Siren size={17} />
+            </button>
+          )}
+          {activeTab === "news" && onToggleSplit && (
+            <button type="button" className={splitView ? "is-active" : ""} onClick={onToggleSplit} aria-label="분할 보기" title="분할 보기">
+              <PanelLeftClose size={17} />
+            </button>
+          )}
+          {onToggleCalculator && (
+            <button type="button" className={calculatorOpen ? "is-active" : ""} onClick={onToggleCalculator} aria-label="환율 계산기" title="환율 계산기">
+              <Calculator size={17} />
+            </button>
+          )}
+          {onToggleMemo && (
+            <button type="button" className={memoOpen ? "is-active" : ""} onClick={onToggleMemo} aria-label="인사이트 메모" title="인사이트 메모">
+              <Lightbulb size={17} />
+            </button>
+          )}
+
+          {(onOpenWeeklyReport || onOpenNewsletter) && (
+            <div ref={reportDropdownRef} className="wire-report-menu">
+              <button
+                type="button"
+                className={reportDropdownOpen ? "is-active" : ""}
+                onClick={() => setReportDropdownOpen((open) => !open)}
+                aria-label="리포트 메뉴"
+                aria-expanded={reportDropdownOpen}
+                title="리포트"
+              >
+                <FileText size={17} />
+                <ChevronDown size={12} />
+              </button>
+              {reportDropdownOpen && (
+                <div className="wire-tool-popover">
+                  {onOpenWeeklyReport && (
+                    <button type="button" onClick={() => {
+                      setReportDropdownOpen(false);
+                      onOpenWeeklyReport();
+                    }}>
+                      <FileText size={15} />
+                      주간 리포트
+                    </button>
+                  )}
+                  {onOpenNewsletter && (
+                    <button type="button" onClick={() => {
+                      setReportDropdownOpen(false);
+                      onOpenNewsletter();
+                    }}>
+                      <BookOpenText size={15} />
+                      뉴스레터 생성
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         <button
+          type="button"
+          className="wire-mobile-search"
+          onClick={onOpenPalette}
+          aria-label="검색 열기"
+        >
+          <Search size={18} />
+        </button>
+
+        <button
+          type="button"
+          className="wire-refresh"
           onClick={onIngest}
           disabled={ingesting}
-          className={`flex items-center justify-center w-7 h-7 rounded-[var(--radius-sm)] transition-all ${
-            ingesting
-              ? "text-[var(--muted)] cursor-wait"
-              : "text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-hover)]"
-          }`}
-          title={ingesting ? "\uC218\uC9D1\uC911..." : "\uC0C8\uB85C\uACE0\uCE68"}
+          aria-label={ingesting ? "뉴스 수집 중" : "뉴스 새로고침"}
+          title={`${updatedAgo} · 다음 수집 ${formatCountdown(countdown)}`}
         >
-          {ingesting ? (
-            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          )}
+          <RefreshCw size={17} className={ingesting ? "is-spinning" : ""} />
+          <span>{ingesting ? "수집 중" : formatCountdown(countdown)}</span>
         </button>
-      </div>
+      </header>
 
-      {/* Dark mode only — no toggle */}
-    </header>
+      <nav className="mobile-tabbar" aria-label="모바일 주요 화면">
+        {mobilePrimaryTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              type="button"
+              key={tab.key}
+              className={isActive ? "is-active" : ""}
+              onClick={() => {
+                onTabChange(tab.key);
+                setMobileMoreOpen(false);
+              }}
+              aria-current={isActive ? "page" : undefined}
+            >
+              <span className="mobile-tab-icon">
+                <Icon size={20} strokeWidth={1.8} />
+                {tab.key === "news" && newsCount > 0 && <i>{newsCount > 99 ? "99+" : newsCount}</i>}
+              </span>
+              <span>{tab.shortLabel}</span>
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          className={mobileMoreOpen || mobileMoreTabs.some((tab) => tab.key === activeTab) ? "is-active" : ""}
+          onClick={() => setMobileMoreOpen((open) => !open)}
+          aria-expanded={mobileMoreOpen}
+        >
+          <Menu size={20} strokeWidth={1.8} />
+          <span>더보기</span>
+        </button>
+      </nav>
+
+      {mobileMoreOpen && (
+        <div className="mobile-more-backdrop" onClick={() => setMobileMoreOpen(false)}>
+          <div className="mobile-more-sheet" onClick={(event) => event.stopPropagation()}>
+            <div className="mobile-sheet-handle" />
+            <div className="mobile-sheet-head">
+              <div>
+                <strong>워크스페이스</strong>
+                <span>{updatedAgo}</span>
+              </div>
+              <button type="button" onClick={() => setMobileMoreOpen(false)} aria-label="더보기 닫기">
+                <X size={19} />
+              </button>
+            </div>
+
+            <div className="mobile-more-grid">
+              {mobileMoreTabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button type="button" key={tab.key} className={activeTab === tab.key ? "is-active" : ""} onClick={() => {
+                    onTabChange(tab.key);
+                    setMobileMoreOpen(false);
+                  }}>
+                    <Icon size={20} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+              {onToggleAlertFeed && (
+                <button type="button" onClick={() => {
+                  onToggleAlertFeed();
+                  setMobileMoreOpen(false);
+                }}>
+                  <Siren size={20} />
+                  <span>알림 피드</span>
+                </button>
+              )}
+              <button type="button" onClick={() => {
+                onToggleNotifications();
+                setMobileMoreOpen(false);
+              }}>
+                <Bell size={20} />
+                <span>알림 규칙</span>
+              </button>
+              {onToggleCalculator && (
+                <button type="button" onClick={() => {
+                  onToggleCalculator();
+                  setMobileMoreOpen(false);
+                }}>
+                  <Calculator size={20} />
+                  <span>환율 계산기</span>
+                </button>
+              )}
+              {onToggleMemo && (
+                <button type="button" onClick={() => {
+                  onToggleMemo();
+                  setMobileMoreOpen(false);
+                }}>
+                  <Lightbulb size={20} />
+                  <span>인사이트 메모</span>
+                </button>
+              )}
+              {onOpenWeeklyReport && (
+                <button type="button" onClick={() => {
+                  onOpenWeeklyReport();
+                  setMobileMoreOpen(false);
+                }}>
+                  <FileText size={20} />
+                  <span>주간 리포트</span>
+                </button>
+              )}
+              <button type="button" onClick={() => {
+                onShowHelp();
+                setMobileMoreOpen(false);
+              }}>
+                <CircleHelp size={20} />
+                <span>단축키</span>
+              </button>
+            </div>
+
+            <div className="mobile-live-row">
+              <Radio size={16} />
+              <span>속보 수집 활성</span>
+              <b>{breakingCountdown}초 후 확인</b>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

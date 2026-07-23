@@ -101,7 +101,7 @@ export function MarketTicker() {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex items-center px-4 h-9 shrink-0 overflow-hidden select-none ticker-shimmer">
+    <div className="ticker-bar flex items-center px-4 h-9 shrink-0 select-none ticker-shimmer">
       {/* Live indicator + market status */}
       <div className="flex items-center gap-1.5 mr-3 shrink-0">
         <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] stat-dot-live" />
@@ -117,7 +117,7 @@ export function MarketTicker() {
       <span className="text-[8px] text-[var(--border-strong)] mr-3">|</span>
 
       {/* Market items */}
-      <div className="flex items-center gap-4">
+      <div className="ticker-track flex items-center gap-4">
         {items.map((item, idx) => {
           const isUp = item.change >= 0;
           const color = isUp ? "#22c55e" : "#ef4444";

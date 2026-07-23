@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Anton, Crimson_Pro } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import "./macro-app.css";
 
 // Wire-bulletin type system —
 // JetBrains Mono for tickers/timestamps/data (sharper than Space Mono)
