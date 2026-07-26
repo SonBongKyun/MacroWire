@@ -313,7 +313,7 @@ export function PlatformNav(props: PlatformNavProps) {
           )}
         </div>
 
-        <div className="wire-live" title={lastBreakingUpdate ? `마지막 속보 ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR")}` : "속보 수집 대기 중"}>
+        <div className="wire-live" title={lastBreakingUpdate ? `최근 수집 데이터 ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR")}` : "새 기사 자동 확인 대기 중"}>
           <span className="wire-live-dot" aria-hidden="true" />
           <span>LIVE</span>
           <b>{breakingCountdown}s</b>
@@ -398,11 +398,11 @@ export function PlatformNav(props: PlatformNavProps) {
           className="wire-refresh"
           onClick={onIngest}
           disabled={ingesting}
-          aria-label={ingesting ? "뉴스 수집 중" : "뉴스 새로고침"}
-          title={`${updatedAgo} · 다음 수집 ${formatCountdown(countdown)}`}
+          aria-label={ingesting ? "뉴스 확인 중" : "뉴스 새로고침"}
+          title={`${updatedAgo} · 다음 확인 ${formatCountdown(countdown)}`}
         >
           <RefreshCw size={17} className={ingesting ? "is-spinning" : ""} />
-          <span>{ingesting ? "수집 중" : formatCountdown(countdown)}</span>
+          <span>{ingesting ? "확인 중" : formatCountdown(countdown)}</span>
         </button>
       </header>
 
@@ -521,7 +521,7 @@ export function PlatformNav(props: PlatformNavProps) {
 
             <div className="mobile-live-row">
               <Radio size={16} />
-              <span>속보 수집 활성</span>
+              <span>뉴스 자동 확인</span>
               <b>{breakingCountdown}초 후 확인</b>
             </div>
           </div>

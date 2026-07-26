@@ -3,6 +3,7 @@ import Parser from "rss-parser";
 import { prisma } from "../db/prisma";
 import { applyTags } from "../tagging/tagger";
 import { cleanupOldArticles } from "../cleanup/cleaner";
+import { withFeedRetry } from "./feedRetry";
 
 const parser = new Parser({
   timeout: 15000,
@@ -95,10 +96,10 @@ type FeedItem = { title: string; url: string; summary?: string; publishedAt?: Da
 async function fetchFeed(source: { feedUrl: string }): Promise<FeedItem[]> {
   const customParser = customParsers.find((p) => p.canHandle(source.feedUrl));
   if (customParser) {
-    const result = await customParser.parse(source.feedUrl);
+    const result = await withFeedRetry(() => customParser.parse(source.feedUrl));
     return result.items;
   }
-  const feed = await parser.parseURL(source.feedUrl);
+  const feed = await withFeedRetry(() => parser.parseURL(source.feedUrl));
   return feed.items.map((item) => ({
     title: item.title?.trim() ?? "Untitled",
     url: item.link ?? "",

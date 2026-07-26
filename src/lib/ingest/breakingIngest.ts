@@ -3,6 +3,7 @@ import Parser from "rss-parser";
 import { prisma } from "../db/prisma";
 import { applyTags } from "../tagging/tagger";
 import { seedSources } from "../db/seed";
+import { withFeedRetry } from "./feedRetry";
 
 const parser = new Parser({
   timeout: 10000,
@@ -48,7 +49,7 @@ async function ingestBreakingSource(source: {
   category: string;
 }): Promise<{ added: number; failed: boolean; newArticles: NewBreakingArticle[] }> {
   try {
-    const feed = await parser.parseURL(source.feedUrl);
+    const feed = await withFeedRetry(() => parser.parseURL(source.feedUrl));
     let added = 0;
     const newArticles: NewBreakingArticle[] = [];
 
@@ -126,14 +127,25 @@ export interface BreakingIngestResult {
 }
 
 export async function runBreakingIngest(): Promise<BreakingIngestResult> {
-  await seedSources();
-
-  const breakingSources = await prisma.source.findMany({
+  let breakingSources = await prisma.source.findMany({
     where: { enabled: true, category: "속보" },
   });
 
   if (breakingSources.length === 0) {
-    return { added: 0, failedSources: 0, sourceCount: 0, lastUpdated: new Date().toISOString(), newArticles: [] };
+    await seedSources();
+    breakingSources = await prisma.source.findMany({
+      where: { enabled: true, category: "속보" },
+    });
+  }
+
+  if (breakingSources.length === 0) {
+    return {
+      added: 0,
+      failedSources: 0,
+      sourceCount: 0,
+      lastUpdated: new Date().toISOString(),
+      newArticles: [],
+    };
   }
 
   console.log(`[breaking-ingest] fetching ${breakingSources.length} sources in parallel`);
