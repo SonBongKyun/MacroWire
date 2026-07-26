@@ -52,13 +52,11 @@ function formatDateHeader(dateStr: string): string {
 }
 
 function getEventDateTime(ev: EconEvent): Date {
-  return new Date(`${ev.date}T${ev.time}:00`);
+  return new Date(`${ev.date}T${ev.time}:00+09:00`);
 }
 
 export function EconomicCalendar() {
-  // Use a deterministic epoch placeholder for the SSR/first-render pass so
-  // server and client agree (real "now" comes after mount).
-  const [now, setNow] = useState<Date>(() => new Date(0));
+  const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
     setNow(new Date());
@@ -66,7 +64,9 @@ export function EconomicCalendar() {
     return () => clearInterval(id);
   }, []);
 
-  const today = now.toISOString().slice(0, 10);
+  const today = now
+    ? new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    : "";
 
   // Group events by date, sorted
   const grouped = useMemo(() => {
@@ -90,6 +90,7 @@ export function EconomicCalendar() {
 
   // Find next upcoming event for countdown
   const nextEvent = useMemo(() => {
+    if (!now) return null;
     const nowMs = now.getTime();
     for (const ev of EVENTS) {
       const evTime = getEventDateTime(ev).getTime();
@@ -99,7 +100,7 @@ export function EconomicCalendar() {
   }, [now]);
 
   const countdown = useMemo(() => {
-    if (!nextEvent) return null;
+    if (!nextEvent || !now) return null;
     const diff = getEventDateTime(nextEvent).getTime() - now.getTime();
     if (diff <= 0) return null;
     const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -213,7 +214,9 @@ export function EconomicCalendar() {
 
               {/* Events for this date */}
               {group.events.map((ev, idx) => {
-                const evPast = isPast || (isToday && getEventDateTime(ev).getTime() < now.getTime());
+                const evPast = isPast || Boolean(
+                  now && isToday && getEventDateTime(ev).getTime() < now.getTime()
+                );
                 const regionColor = REGION_COLORS[ev.region] || "#8C8C91";
 
                 return (

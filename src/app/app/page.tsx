@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import type { Source, Article, ArticlesResponse, IngestResult } from "@/types";
+import type { Source, Article, ArticlesResponse } from "@/types";
 import { KeyboardHelp } from "@/components/KeyboardHelp";
 import { MarketTicker } from "@/components/MarketTicker";
 import { CommandPalette } from "@/components/CommandPalette";
@@ -38,8 +38,8 @@ import { AlertFeed } from "@/components/AlertFeed";
 import { FinancialCalculators } from "@/components/FinancialCalculators";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const POLL_INTERVAL = 5 * 60;         // full ingest: every 5 min
-const BREAKING_POLL_INTERVAL = 90;   // breaking only: every 90 sec
+const NEWS_REFRESH_INTERVAL = 30;
+const SOURCE_REFRESH_INTERVAL = 5 * 60;
 
 function getMarketStatusForBar(): { open: boolean; label: string } {
   const now = new Date();
@@ -194,7 +194,7 @@ function HomeInner() {
   const [readFilter, setReadFilter] = useState<"all" | "unread" | "read">("all");
   const [regionFilter, setRegionFilter] = useState<string>("전체");
   const darkMode = true; // MacroWire: dark only
-  const [countdown, setCountdown] = useState(POLL_INTERVAL);
+  const [countdown, setCountdown] = useState(NEWS_REFRESH_INTERVAL);
   const [showHelp, setShowHelp] = useState(false);
   const [newArticleCount, setNewArticleCount] = useState(0);
   const [newArticleIds, setNewArticleIds] = useState<string[]>([]);
@@ -229,12 +229,9 @@ function HomeInner() {
   const [memoOpen, setMemoOpen] = useState(false);
   const [alertFeedOpen, setAlertFeedOpen] = useState(false);
   const [financialCalcOpen, setFinancialCalcOpen] = useState(false);
-  const [breakingCountdown, setBreakingCountdown] = useState(BREAKING_POLL_INTERVAL);
-  const [lastBreakingUpdate, setLastBreakingUpdate] = useState<string | null>(null);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const breakingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Persist active tab
   useEffect(() => {
@@ -258,9 +255,14 @@ function HomeInner() {
   const fetchSources = useCallback(async () => {
     try {
       const res = await fetch("/api/sources");
+      if (!res.ok) throw new Error(`Sources request failed (${res.status})`);
       const data = await res.json();
       setSources(Array.isArray(data) ? data : []);
-    } catch (err) { console.error("Failed to fetch sources:", err); }
+      return true;
+    } catch (err) {
+      console.error("Failed to fetch sources:", err);
+      return false;
+    }
   }, []);
 
   // Build query
@@ -277,17 +279,26 @@ function HomeInner() {
   }, [range, selectedSourceId, selectedTag, searchQuery, showSaved]);
 
   // Fetch articles
-  const fetchArticles = useCallback(async (append = false) => {
-    setLoading(true);
+  const fetchArticles = useCallback(async ({
+    append = false,
+    announceNew = true,
+    silent = false,
+  }: {
+    append?: boolean;
+    announceNew?: boolean;
+    silent?: boolean;
+  } = {}) => {
+    if (!silent) setLoading(true);
     try {
       const qs = buildQuery(append ? nextCursor : null);
       const res = await fetch(`/api/articles?${qs}`);
+      if (!res.ok) throw new Error(`Articles request failed (${res.status})`);
       const json: ArticlesResponse = await res.json();
       const items = Array.isArray(json?.data) ? json.data : [];
       if (append) {
         setArticles((prev) => [...prev, ...items]);
       } else {
-        if (prevArticleIds.current.size > 0) {
+        if (announceNew && prevArticleIds.current.size > 0) {
           const newOnes = items.filter((a: Article) => !prevArticleIds.current.has(a.id));
           if (newOnes.length > 0) {
             setNewArticleCount((prev) => prev + newOnes.length);
@@ -309,73 +320,48 @@ function HomeInner() {
         }
         prevArticleIds.current = new Set(items.map((a: Article) => a.id));
         setArticles(items);
-        setSelectedArticle(null);
+        setSelectedArticle((previous) => (
+          previous ? items.find((article: Article) => article.id === previous.id) ?? null : null
+        ));
+
+        const newestIngestedAt = items.reduce((latest: number, article: Article) => {
+          const timestamp = new Date(article.createdAt).getTime();
+          return Number.isFinite(timestamp) ? Math.max(latest, timestamp) : latest;
+        }, 0);
+        if (newestIngestedAt > 0) {
+          setLastUpdated(new Date(newestIngestedAt).toISOString());
+        }
       }
       setNextCursor(json?.nextCursor ?? null);
       setHasMore(json?.hasMore ?? false);
-    } catch (err) { console.error("Failed to fetch articles:", err); }
-    finally { setLoading(false); }
+      return true;
+    } catch (err) {
+      console.error("Failed to fetch articles:", err);
+      return false;
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, [buildQuery, nextCursor]);
 
-  // Ingest
-  const runIngest = useCallback(async () => {
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") Notification.requestPermission();
-    setIngesting(true);
+  // Refresh the browser view. Source ingestion runs in protected background jobs.
+  const refreshNews = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
+    if (!silent) setIngesting(true);
     try {
-      const res = await fetch("/api/ingest", { method: "POST" });
-      const result: IngestResult = await res.json();
-      setLastUpdated(result.lastUpdated);
-      await fetchArticles();
-      await fetchSources();
-      setCountdown(POLL_INTERVAL);
-      showToast(`기사 수집 완료: ${result.added ?? 0}건 추가`);
-    } catch (err) { console.error("Ingest failed:", err); showToast("기사 수집 실패", "error"); }
-    finally { setIngesting(false); }
+      const [articlesOk, sourcesOk] = await Promise.all([
+        fetchArticles({ silent }),
+        silent ? Promise.resolve(true) : fetchSources(),
+      ]);
+      if (!articlesOk || !sourcesOk) throw new Error("News refresh failed");
+      setCountdown(NEWS_REFRESH_INTERVAL);
+      if (!silent) showToast("뉴스 새로고침 완료");
+    } catch (err) {
+      console.error("News refresh failed:", err);
+      if (!silent) showToast("뉴스 새로고침 실패", "error");
+    }
+    finally {
+      if (!silent) setIngesting(false);
+    }
   }, [fetchArticles, fetchSources, showToast]);
-
-  // Breaking news fast ingest — silent until new 속보 arrives, then shows clickable toast
-  const runBreakingIngest = useCallback(async () => {
-    try {
-      const res = await fetch("/api/ingest/breaking", { method: "POST" });
-      const result = await res.json();
-      if (result.added > 0) {
-        await fetchArticles();
-        setLastBreakingUpdate(result.lastUpdated);
-
-        // Surface the top new breaking article as a clickable toast
-        const top = Array.isArray(result.newArticles) ? result.newArticles[0] : null;
-        if (top) {
-          const titleLabel = result.added > 1
-            ? `${top.sourceName} · +${result.added - 1}건`
-            : top.sourceName;
-          showToast(top.title, "breaking", {
-            title: titleLabel,
-            onAction: () => {
-              setActiveMainTab("news");
-              // Select the article if it's already in our list
-              setArticles((prev) => {
-                const found = prev.find((a) => a.id === top.id);
-                if (found) setSelectedArticle(found);
-                return prev;
-              });
-            },
-          });
-
-          // Browser push notification — when permission granted
-          if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-            try {
-              new Notification("MacroWire · 속보", {
-                body: top.title,
-                icon: "/icon.svg",
-                tag: "macro-wire-breaking",
-              });
-            } catch { /* silent */ }
-          }
-        }
-      }
-      setBreakingCountdown(BREAKING_POLL_INTERVAL);
-    } catch { /* silent */ }
-  }, [fetchArticles, showToast]);
 
   const handleAddSource = useCallback(async (data: { name: string; feedUrl: string; category: string }) => {
     try {
@@ -440,7 +426,8 @@ function HomeInner() {
     showToast("내보내기 완료");
   }, [articles, showToast]);
 
-  // Initial load — auto-seed sources if empty, auto-ingest if no articles
+  // Initial load — auto-seed sources if empty. Ingestion is handled by
+  // protected background jobs, never by an unauthenticated browser request.
   useEffect(() => {
     const init = async () => {
       // 1) fetch or seed sources
@@ -459,52 +446,32 @@ function HomeInner() {
         }
       } catch { /* silent */ }
 
-      // 2) fetch articles; auto-ingest on empty DB
-      try {
-        const r = await fetch("/api/articles?range=24h&limit=50");
-        const json = await r.json();
-        const items: Article[] = Array.isArray(json?.data) ? json.data : [];
-        if (items.length === 0 && srcs.length > 0) {
-          // DB is empty — trigger a one-time silent ingest
-          runIngest();
-        }
-      } catch { /* silent */ }
+      // Article loading is owned by the filter effect below.
     };
     init();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Refetch on filter change
   useEffect(() => {
-    fetchArticles();
+    fetchArticles({ announceNew: false });
     setNewArticleCount(0);
     setNewArticleIds([]);
   }, [range, selectedSourceId, selectedTag, searchQuery, showSaved]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-poll
+  // Check for newly ingested articles without exposing the protected ingest API.
   useEffect(() => {
-    intervalRef.current = setInterval(() => { setCountdown(POLL_INTERVAL); runIngest(); }, POLL_INTERVAL * 1000);
+    intervalRef.current = setInterval(() => {
+      setCountdown(NEWS_REFRESH_INTERVAL);
+      refreshNews({ silent: true });
+    }, NEWS_REFRESH_INTERVAL * 1000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [runIngest]);
+  }, [refreshNews]);
 
-  // Breaking news fast poll — every 90 seconds, parallel fetch of 속보 sources only
+  // Source state changes infrequently, so refresh it on a slower cadence.
   useEffect(() => {
-    // Run once immediately after a short delay, then every 90s
-    const initial = setTimeout(() => runBreakingIngest(), 5000);
-    breakingIntervalRef.current = setInterval(() => {
-      setBreakingCountdown(BREAKING_POLL_INTERVAL);
-      runBreakingIngest();
-    }, BREAKING_POLL_INTERVAL * 1000);
-    return () => {
-      clearTimeout(initial);
-      if (breakingIntervalRef.current) clearInterval(breakingIntervalRef.current);
-    };
-  }, [runBreakingIngest]);
-
-  // Breaking countdown ticker
-  useEffect(() => {
-    const t = setInterval(() => setBreakingCountdown((p) => (p > 0 ? p - 1 : 0)), 1000);
+    const t = setInterval(fetchSources, SOURCE_REFRESH_INTERVAL * 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [fetchSources]);
 
   const handleTagClick = useCallback((tag: string) => {
     setSelectedTag((prev) => (prev === tag ? null : tag));
@@ -514,7 +481,7 @@ function HomeInner() {
   // Command palette
   const handlePaletteAction = useCallback((action: string) => {
     switch (action) {
-      case "ingest": runIngest(); break;
+      case "ingest": refreshNews(); break;
       case "markAllRead": markAllRead(); break;
       case "export": exportSaved(); break;
       case "toggleDark": toggleDarkMode(); break;
@@ -538,7 +505,7 @@ function HomeInner() {
       case "insightMemo": setMemoOpen((v) => !v); break;
       case "financialCalc": setFinancialCalcOpen((v) => !v); break;
     }
-  }, [runIngest, markAllRead, exportSaved, toggleDarkMode]);
+  }, [refreshNews, markAllRead, exportSaved, toggleDarkMode]);
 
   const allTags = ["금리", "물가", "연준", "환율", "미국", "중국", "일본", "유럽", "수출입", "경기", "부동산", "가계부채", "재정", "에너지", "반도체", "AI", "지정학"];
 
@@ -621,7 +588,7 @@ function HomeInner() {
         case "1": e.preventDefault(); setRange("24h"); break;
         case "2": e.preventDefault(); setRange("7d"); break;
         case "3": e.preventDefault(); setRange("30d"); break;
-        case "r": e.preventDefault(); if (!ingesting) runIngest(); break;
+        case "r": e.preventDefault(); if (!ingesting) refreshNews(); break;
         case "d": e.preventDefault(); toggleDarkMode(); break;
         case "m": e.preventDefault(); markAllRead(); break;
         case "e": e.preventDefault(); exportSaved(); break;
@@ -630,7 +597,7 @@ function HomeInner() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [ingesting, runIngest, toggleDarkMode, markAllRead, exportSaved, selectedArticle, filteredArticles, selectArticle, toggleSave, activeMainTab, splitView]);
+  }, [ingesting, refreshNews, toggleDarkMode, markAllRead, exportSaved, selectedArticle, filteredArticles, selectArticle, toggleSave, activeMainTab, splitView]);
 
   return (
     <div className="macro-app flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -644,7 +611,7 @@ function HomeInner() {
         onSearchChange={setSearchQuery}
         darkMode={darkMode}
         onToggleDark={toggleDarkMode}
-        onIngest={runIngest}
+        onIngest={refreshNews}
         ingesting={ingesting}
         countdown={countdown}
         lastUpdated={lastUpdated}
@@ -666,8 +633,8 @@ function HomeInner() {
         memoOpen={memoOpen}
         onToggleAlertFeed={() => setAlertFeedOpen((v) => !v)}
         alertFeedOpen={alertFeedOpen}
-        breakingCountdown={breakingCountdown}
-        lastBreakingUpdate={lastBreakingUpdate}
+        breakingCountdown={countdown}
+        lastBreakingUpdate={lastUpdated}
       />
 
       {/* Market Ticker — always visible */}
@@ -740,7 +707,7 @@ function HomeInner() {
             onToggleSaved={() => setShowSaved((v) => !v)}
             onReadFilterChange={setReadFilter}
             onRegionFilterChange={setRegionFilter}
-            onLoadMore={() => fetchArticles(true)}
+            onLoadMore={() => fetchArticles({ append: true })}
             onToggleSave={toggleSave}
             onToggleRead={toggleRead}
             onTagClick={handleTagClick}
@@ -773,7 +740,7 @@ function HomeInner() {
                 onToggleSave={toggleSave}
                 onToggleRead={toggleRead}
                 hasMore={hasMore}
-                onLoadMore={() => fetchArticles(true)}
+                onLoadMore={() => fetchArticles({ append: true })}
                 readFilter={readFilter}
                 onReadFilterChange={setReadFilter}
                 onTagClick={handleTagClick}

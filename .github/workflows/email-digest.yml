@@ -10,11 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Trigger hourly digest
+      - name: Check digest configuration
+        id: config
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          test -n "$CRON_SECRET"
+          if [ -n "$CRON_SECRET" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Email digest skipped because CRON_SECRET is not configured."
+          fi
+
+      - name: Trigger hourly digest
+        if: steps.config.outputs.enabled == 'true'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
           curl --fail-with-body --retry 2 \
             -H "Authorization: Bearer $CRON_SECRET" \
             https://macro-wire-psi.vercel.app/api/email/digest

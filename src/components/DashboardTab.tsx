@@ -507,6 +507,7 @@ function formatPrice(price: number): string {
 function ArticleVolumeChart({ articles }: { articles: Article[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [nowMs, setNowMs] = useState(0);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -519,20 +520,28 @@ function ArticleVolumeChart({ articles }: { articles: Article[] }) {
     return () => ro.disconnect();
   }, []);
 
+  useEffect(() => {
+    const updateNow = () => setNowMs(Date.now());
+    updateNow();
+    const timer = window.setInterval(updateNow, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const hourlyData = useMemo(() => {
-    const now = Date.now();
-    const currentHour = new Date().getHours();
+    const currentHour = nowMs
+      ? new Date(nowMs + 9 * 60 * 60 * 1000).getUTCHours()
+      : 0;
     const counts = new Array(24).fill(0);
-    const cutoff = now - 24 * 60 * 60 * 1000;
+    const cutoff = nowMs - 24 * 60 * 60 * 1000;
     for (const a of articles) {
       const t = new Date(a.publishedAt).getTime();
-      if (t >= cutoff && t <= now) {
-        const h = new Date(a.publishedAt).getHours();
+      if (nowMs > 0 && t >= cutoff && t <= nowMs) {
+        const h = new Date(t + 9 * 60 * 60 * 1000).getUTCHours();
         counts[h] += 1;
       }
     }
     return { counts, currentHour };
-  }, [articles]);
+  }, [articles, nowMs]);
 
   const maxCount = Math.max(...hourlyData.counts, 1);
   const svgHeight = 60;
@@ -1107,13 +1116,17 @@ export default function DashboardTab({
     setScrolled(el.scrollTop > 0);
   }, []);
 
-  // Check if Korean market is currently open
-  const isMarketOpen = useMemo(() => {
-    const now = new Date();
-    const kst = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-    const day = kst.getDay();
-    const timeVal = kst.getHours() * 60 + kst.getMinutes();
-    return day >= 1 && day <= 5 && timeVal >= 540 && timeVal < 930;
+  const [isMarketOpen, setIsMarketOpen] = useState(false);
+  useEffect(() => {
+    const updateMarketStatus = () => {
+      const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      const day = kst.getUTCDay();
+      const timeVal = kst.getUTCHours() * 60 + kst.getUTCMinutes();
+      setIsMarketOpen(day >= 1 && day <= 5 && timeVal >= 540 && timeVal < 930);
+    };
+    updateMarketStatus();
+    const timer = window.setInterval(updateMarketStatus, 60_000);
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
