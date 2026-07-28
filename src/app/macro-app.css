@@ -495,6 +495,52 @@
   border-radius: 5px;
 }
 
+.news-focus-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding: 2px;
+  background: #111820;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.news-focus-segment button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 7px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.news-focus-segment button:hover {
+  color: var(--foreground);
+}
+
+.news-focus-segment button.is-active {
+  color: #08090b;
+  background: var(--accent);
+}
+
+.news-focus-segment small {
+  min-width: 15px;
+  color: inherit;
+  font-family: var(--font-mono), monospace;
+  font-size: 8px;
+  font-weight: 800;
+  opacity: 0.72;
+  text-align: right;
+}
+
 .news-segment button {
   min-width: 38px;
   height: 26px;
@@ -570,6 +616,64 @@
 .news-icon-button.is-active {
   color: var(--accent-light);
   border-color: var(--border-accent);
+}
+
+.article-signal-badge,
+.detail-signal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  color: #f7c85f;
+  background: rgba(231, 180, 79, 0.09);
+  border: 1px solid rgba(231, 180, 79, 0.32);
+  border-radius: 2px;
+  font-family: var(--font-mono), monospace;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.article-signal-badge {
+  height: 17px;
+  padding: 0 5px;
+}
+
+.detail-signal-badge {
+  height: 20px;
+  padding: 0 6px;
+}
+
+.detail-signal-badge.is-important {
+  color: #8bd5ff;
+  background: rgba(76, 179, 235, 0.08);
+  border-color: rgba(76, 179, 235, 0.24);
+}
+
+.article-detail-actions {
+  flex-wrap: wrap;
+}
+
+.detail-next-action {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 11px;
+  color: var(--accent-light);
+  background: rgba(231, 180, 79, 0.08);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.detail-next-action:hover {
+  color: #08090b;
+  background: var(--accent);
 }
 
 .news-density button {

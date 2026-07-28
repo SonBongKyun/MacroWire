@@ -16,6 +16,7 @@ import type { DashboardSections, DashboardLayout } from "@/hooks/useDashboardLay
 import { getRecommendations } from "@/lib/ai/recommendations";
 import type { Recommendation } from "@/lib/ai/recommendations";
 import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
+import { isMacroSignal } from "@/lib/news/signal";
 
 function AnimatedNumber({ value, duration = 600 }: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);
@@ -1165,7 +1166,8 @@ export default function DashboardTab({
 
   const trendingTags = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const a of articles) {
+    const signalArticles = articles.filter(isMacroSignal);
+    for (const a of signalArticles.length > 0 ? signalArticles : articles) {
       for (const tag of a.tags) {
         counts[tag] = (counts[tag] || 0) + 1;
       }
@@ -1176,7 +1178,8 @@ export default function DashboardTab({
   }, [articles]);
 
   const latestArticles = useMemo(() => {
-    return [...articles]
+    const signalArticles = articles.filter(isMacroSignal);
+    return [...(signalArticles.length > 0 ? signalArticles : articles)]
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
       .slice(0, 8);
   }, [articles]);
@@ -1187,7 +1190,7 @@ export default function DashboardTab({
   // ── Breaking News Stream ──
   const breakingArticles = useMemo(() => {
     return articles
-      .filter((a) => a.tags.includes("속보"))
+      .filter((a) => isMacroSignal(a) && a.tags.includes("속보"))
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
       .slice(0, 10);
   }, [articles]);
@@ -1195,9 +1198,11 @@ export default function DashboardTab({
   // ── AI Recommendations ──
   const recommendations: Recommendation[] = useMemo(() => {
     if (articles.length === 0) return [];
-    const readIds = articles.filter((a) => a.isRead).map((a) => a.id);
-    const savedIds = articles.filter((a) => a.isSaved).map((a) => a.id);
-    return getRecommendations(articles, readIds, savedIds, 5);
+    const signalArticles = articles.filter(isMacroSignal);
+    const candidates = signalArticles.length > 0 ? signalArticles : articles;
+    const readIds = candidates.filter((a) => a.isRead).map((a) => a.id);
+    const savedIds = candidates.filter((a) => a.isSaved).map((a) => a.id);
+    return getRecommendations(candidates, readIds, savedIds, 5);
   }, [articles]);
 
   return (

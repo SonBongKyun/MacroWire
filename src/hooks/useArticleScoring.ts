@@ -3,6 +3,7 @@
 import { useMemo, useCallback } from "react";
 import type { Article } from "@/types";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
+import { classifyArticleSignal } from "@/lib/news/signal";
 
 export interface ArticleScore {
   articleId: string;
@@ -12,6 +13,7 @@ export interface ArticleScore {
     sourceQuality: number; // based on read/save rates
     tagRelevance: number;  // popular tags = higher
     sentiment: number;     // strong sentiment = higher impact
+    macroSignal: number;   // likely market or policy relevance
   };
 }
 
@@ -64,6 +66,7 @@ function computeScores(articles: Article[]): ArticleScore[] {
     // Sentiment strength: stronger sentiment = higher impact
     const result = analyzeSentiment(article.title, article.summary);
     const sentiment = result.sentiment === "neutral" ? 20 : 80;
+    const macroSignal = classifyArticleSignal(article).score;
 
     // Source quality: engagement rate
     const src = sourceStats[article.sourceId];
@@ -74,12 +77,14 @@ function computeScores(articles: Article[]): ArticleScore[] {
       sourceQuality = Math.min(100, (readRate * 60 + saveRate * 40) * 100);
     }
 
-    // Weighted composite: recency 50%, tags 20%, sentiment 15%, source 15%
+    // Relevance must outweigh pure recency so fresh non-macro stories do not
+    // dominate the "impact" sort.
     const impactScore = Math.round(
-      recency * 0.5 +
-      tagRelevance * 0.2 +
-      sentiment * 0.15 +
-      sourceQuality * 0.15
+      macroSignal * 0.45 +
+      recency * 0.3 +
+      tagRelevance * 0.1 +
+      sentiment * 0.05 +
+      sourceQuality * 0.1
     );
 
     return {
@@ -90,6 +95,7 @@ function computeScores(articles: Article[]): ArticleScore[] {
         sourceQuality: Math.round(sourceQuality),
         tagRelevance: Math.round(tagRelevance),
         sentiment,
+        macroSignal,
       },
     };
   });

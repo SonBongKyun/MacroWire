@@ -1,0 +1,160 @@
+import type { Article } from "../../types";
+
+export type SignalTier = "critical" | "important" | "general";
+
+export interface ArticleSignal {
+  score: number;
+  tier: SignalTier;
+  reasons: string[];
+  isBreaking: boolean;
+}
+
+type SignalArticle = Pick<Article, "title" | "summary" | "tags" | "sourceName">;
+
+const TAG_SIGNALS: Record<string, { weight: number; reason: string }> = {
+  금리: { weight: 24, reason: "통화정책" },
+  연준: { weight: 24, reason: "통화정책" },
+  물가: { weight: 22, reason: "물가" },
+  환율: { weight: 22, reason: "외환시장" },
+  수출입: { weight: 18, reason: "무역" },
+  경기: { weight: 16, reason: "경기" },
+  재정: { weight: 18, reason: "재정정책" },
+  에너지: { weight: 17, reason: "원자재" },
+  반도체: { weight: 17, reason: "산업" },
+  AI: { weight: 12, reason: "산업" },
+  지정학: { weight: 20, reason: "지정학" },
+  부동산: { weight: 15, reason: "부동산" },
+  가계부채: { weight: 20, reason: "금융안정" },
+};
+
+const TEXT_SIGNALS: Array<{ pattern: RegExp; weight: number; reason: string }> = [
+  {
+    pattern: /(기준금리|금리\s*(인상|인하|동결)|통화정책|federal reserve|\bfed\b|fomc|ecb|central bank|interest rates?)/i,
+    weight: 38,
+    reason: "통화정책",
+  },
+  {
+    pattern: /(소비자물가|생산자물가|인플레이션|디플레이션|\bcpi\b|\bppi\b|inflation|deflation)/i,
+    weight: 35,
+    reason: "물가",
+  },
+  {
+    pattern: /(원[·\-\/]?달러|달러[·\-\/]?원|환율|외환|국채|채권금리|수익률곡선|treasur|bond yield|currency|forex)/i,
+    weight: 34,
+    reason: "금융시장",
+  },
+  {
+    pattern: /(국내총생산|\bgdp\b|경기침체|경기회복|고용지표|실업률|비농업|소매판매|산업생산|pmi|recession|payrolls?)/i,
+    weight: 31,
+    reason: "경기지표",
+  },
+  {
+    pattern: /(관세|무역수지|수출|수입|재정적자|국가채무|추경|예산안|tariff|trade deficit|fiscal|government debt)/i,
+    weight: 29,
+    reason: "정책·무역",
+  },
+  {
+    pattern: /(국제유가|원유|천연가스|opec|브렌트|wti|에너지\s*(가격|공급)|crude oil|natural gas)/i,
+    weight: 28,
+    reason: "원자재",
+  },
+  {
+    pattern: /(반도체|파운드리|메모리칩|hbm|chip export|semiconductor|nvidia|tsmc)/i,
+    weight: 26,
+    reason: "반도체",
+  },
+  {
+    pattern: /(제재|휴전|전쟁|분쟁|미사일|핵협상|공급망|sanction|ceasefire|geopolit|supply chain)/i,
+    weight: 26,
+    reason: "지정학",
+  },
+  {
+    pattern: /(증시|코스피|코스닥|나스닥|s&p\s*500|다우지수|실적\s*(발표|전망)|earnings|stock market)/i,
+    weight: 20,
+    reason: "시장",
+  },
+];
+
+const NOISE_SIGNALS: Array<{ pattern: RegExp; penalty: number }> = [
+  {
+    pattern: /(야구|축구|농구|배구|골프|테니스|홈런|득점|선수|감독|프로리그|올림픽|월드컵|챔피언스리그|경기종료|우승컵)/i,
+    penalty: 52,
+  },
+  {
+    pattern: /(가수|배우|드라마|예능|영화제|음악방송|컴백|앨범|걸그룹|보이그룹|연예계|팬미팅|콘서트)/i,
+    penalty: 52,
+  },
+  {
+    pattern: /(입건|구속영장|흉기|실종|교통사고|화재\s*발생|부고|별세|장례식)/i,
+    penalty: 36,
+  },
+];
+
+function normalizeTag(tag: string): string {
+  return tag.trim().replace(/^#/, "");
+}
+
+export function isBreakingArticle(article: SignalArticle): boolean {
+  return (
+    article.tags.some((tag) => normalizeTag(tag) === "속보") ||
+    article.sourceName.includes("속보")
+  );
+}
+
+export function classifyArticleSignal(article: SignalArticle): ArticleSignal {
+  const text = `${article.title} ${article.summary || ""}`;
+  const reasonWeights = new Map<string, number>();
+  let score = 4;
+  let hasMacroEvidence = false;
+
+  const addReason = (reason: string, weight: number) => {
+    reasonWeights.set(reason, Math.max(reasonWeights.get(reason) || 0, weight));
+  };
+
+  for (const rawTag of article.tags) {
+    const signal = TAG_SIGNALS[normalizeTag(rawTag)];
+    if (!signal) continue;
+    score += signal.weight;
+    hasMacroEvidence = true;
+    addReason(signal.reason, signal.weight);
+  }
+
+  for (const signal of TEXT_SIGNALS) {
+    if (!signal.pattern.test(text)) continue;
+    score += signal.weight;
+    hasMacroEvidence = true;
+    addReason(signal.reason, signal.weight);
+  }
+
+  for (const noise of NOISE_SIGNALS) {
+    if (noise.pattern.test(text)) score -= noise.penalty;
+  }
+
+  const isBreaking = isBreakingArticle(article);
+  if (isBreaking) {
+    score += hasMacroEvidence ? 8 : 2;
+    if (hasMacroEvidence) addReason("속보", 8);
+  }
+
+  // A breaking label or regional tag alone is not enough to call an article a macro signal.
+  if (!hasMacroEvidence) score = Math.min(score, 24);
+
+  const normalizedScore = Math.max(0, Math.min(100, Math.round(score)));
+  const tier: SignalTier =
+    normalizedScore >= 70
+      ? "critical"
+      : normalizedScore >= 38
+        ? "important"
+        : "general";
+
+  const reasons = [...reasonWeights.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([reason]) => reason);
+
+  return { score: normalizedScore, tier, reasons, isBreaking };
+}
+
+export function isMacroSignal(article: SignalArticle): boolean {
+  return classifyArticleSignal(article).tier !== "general";
+}
