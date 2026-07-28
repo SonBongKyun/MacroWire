@@ -74,3 +74,29 @@ test("keeps macro breaking news while filtering entertainment breaking news", ()
   assert.equal(macro.tier, "critical");
   assert.equal(entertainment.tier, "general");
 });
+
+test("does not trust broad AI or geopolitics tags without textual evidence", () => {
+  const corporate = classifyArticleSignal(article({
+    sourceName: "CNBC Breaking",
+    title: "Coca-Cola is about to report earnings. Here's what to expect",
+    tags: ["속보", "AI"],
+  }));
+  const crime = classifyArticleSignal(article({
+    sourceName: "연합뉴스 속보",
+    title: "'자수하러 왔는데요' 관심도 매뉴얼도 없는 경찰",
+    tags: ["속보", "지정학"],
+  }));
+
+  assert.equal(corporate.tier, "general");
+  assert.equal(crime.tier, "general");
+});
+
+test("keeps AI and semiconductor stories when the title contains market evidence", () => {
+  const signal = classifyArticleSignal(article({
+    title: "AI hardware stocks plunge on semiconductor export restrictions",
+    tags: ["AI", "반도체"],
+  }));
+
+  assert.notEqual(signal.tier, "general");
+  assert.ok(signal.reasons.includes("AI 산업"));
+});

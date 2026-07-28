@@ -11,20 +11,23 @@ export interface ArticleSignal {
 
 type SignalArticle = Pick<Article, "title" | "summary" | "tags" | "sourceName">;
 
-const TAG_SIGNALS: Record<string, { weight: number; reason: string }> = {
-  금리: { weight: 24, reason: "통화정책" },
-  연준: { weight: 24, reason: "통화정책" },
-  물가: { weight: 22, reason: "물가" },
-  환율: { weight: 22, reason: "외환시장" },
-  수출입: { weight: 18, reason: "무역" },
-  경기: { weight: 16, reason: "경기" },
-  재정: { weight: 18, reason: "재정정책" },
-  에너지: { weight: 17, reason: "원자재" },
-  반도체: { weight: 17, reason: "산업" },
-  AI: { weight: 12, reason: "산업" },
-  지정학: { weight: 20, reason: "지정학" },
-  부동산: { weight: 15, reason: "부동산" },
-  가계부채: { weight: 20, reason: "금융안정" },
+const TAG_SIGNALS: Record<
+  string,
+  { weight: number; reason: string; evidence: boolean }
+> = {
+  금리: { weight: 24, reason: "통화정책", evidence: true },
+  연준: { weight: 24, reason: "통화정책", evidence: true },
+  물가: { weight: 22, reason: "물가", evidence: true },
+  환율: { weight: 22, reason: "외환시장", evidence: true },
+  수출입: { weight: 18, reason: "무역", evidence: true },
+  재정: { weight: 18, reason: "재정정책", evidence: true },
+  에너지: { weight: 17, reason: "원자재", evidence: true },
+  가계부채: { weight: 20, reason: "금융안정", evidence: true },
+  부동산: { weight: 14, reason: "부동산", evidence: true },
+  경기: { weight: 8, reason: "경기", evidence: false },
+  반도체: { weight: 12, reason: "산업", evidence: false },
+  AI: { weight: 6, reason: "산업", evidence: false },
+  지정학: { weight: 10, reason: "지정학", evidence: false },
 };
 
 const TEXT_SIGNALS: Array<{ pattern: RegExp; weight: number; reason: string }> = [
@@ -49,7 +52,7 @@ const TEXT_SIGNALS: Array<{ pattern: RegExp; weight: number; reason: string }> =
     reason: "경기지표",
   },
   {
-    pattern: /(관세|무역수지|수출|수입|재정적자|국가채무|추경|예산안|tariff|trade deficit|fiscal|government debt)/i,
+    pattern: /(관세|무역수지|수출|수입|재정적자|국가채무|추경|예산안|tariff|trade (deficit|friction|war)|fiscal|government debt)/i,
     weight: 29,
     reason: "정책·무역",
   },
@@ -69,8 +72,13 @@ const TEXT_SIGNALS: Array<{ pattern: RegExp; weight: number; reason: string }> =
     reason: "지정학",
   },
   {
+    pattern: /((인공지능|artificial intelligence|\bAI\b).*(증시|주가|투자|시장|반도체|수출|규제|stocks?|market|chips?|export|regulation)|(stocks?|market|chips?|export|regulation).*(인공지능|artificial intelligence|\bAI\b))/i,
+    weight: 28,
+    reason: "AI 산업",
+  },
+  {
     pattern: /(증시|코스피|코스닥|나스닥|s&p\s*500|다우지수|실적\s*(발표|전망)|earnings|stock market)/i,
-    weight: 20,
+    weight: 16,
     reason: "시장",
   },
 ];
@@ -85,8 +93,8 @@ const NOISE_SIGNALS: Array<{ pattern: RegExp; penalty: number }> = [
     penalty: 52,
   },
   {
-    pattern: /(입건|구속영장|흉기|실종|교통사고|화재\s*발생|부고|별세|장례식)/i,
-    penalty: 36,
+    pattern: /(입건|구속영장|흉기|실종|교통사고|화재\s*발생|부고|별세|장례식|자수|피의자|압수수색|마약|살인|경찰\s*(수사|출동))/i,
+    penalty: 46,
   },
 ];
 
@@ -115,7 +123,7 @@ export function classifyArticleSignal(article: SignalArticle): ArticleSignal {
     const signal = TAG_SIGNALS[normalizeTag(rawTag)];
     if (!signal) continue;
     score += signal.weight;
-    hasMacroEvidence = true;
+    hasMacroEvidence ||= signal.evidence;
     addReason(signal.reason, signal.weight);
   }
 
