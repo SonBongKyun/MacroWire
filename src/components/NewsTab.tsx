@@ -520,7 +520,7 @@ export function NewsTab({
         className={`news-workspace flex-1 min-h-0 ${selectedArticle ? "has-selection" : ""}`}
       >
         {/* Left column: article list */}
-        <div className={`news-list-pane overflow-y-auto transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`}>
+        <div className={`news-list-pane overflow-hidden transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`}>
           <SpikeAlert articles={sortedArticles} onTagClick={onTagClick} />
 
           {sortedArticles.length === 0 && !loading ? (

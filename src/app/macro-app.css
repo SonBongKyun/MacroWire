@@ -703,7 +703,12 @@
 }
 
 .news-list-pane {
+  display: flex;
+  height: 100%;
   min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
   background: #090d11;
   border-left: 1px solid rgba(231, 180, 79, 0.14);
 }

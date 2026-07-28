@@ -259,7 +259,7 @@ export function ArticleList({
 
   return (
     <div
-      className="flex-1 flex flex-col overflow-hidden focus:outline-none relative"
+      className="h-full min-h-0 flex-1 flex flex-col overflow-hidden focus:outline-none relative"
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
