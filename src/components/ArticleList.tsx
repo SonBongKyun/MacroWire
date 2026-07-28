@@ -6,6 +6,7 @@ import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleScoring } from "@/hooks/useArticleScoring";
 import { PeekPopover } from "@/components/PeekPopover";
 import { EmptyState } from "@/components/EmptyState";
+import { classifyArticleSignal } from "@/lib/news/signal";
 
 type ReadFilter = "all" | "unread" | "read";
 type ViewMode = "list" | "card";
@@ -306,7 +307,8 @@ export function ArticleList({
               {visibleArticles.map((article) => {
                 const isSelected = selectedArticleId === article.id;
                 const isUnread = !article.isRead;
-                const isBreaking = article.tags.includes("속보");
+                const articleSignal = classifyArticleSignal(article);
+                const isBreaking = articleSignal.isBreaking;
                 return (
                   <div
                     key={article.id}
@@ -376,6 +378,14 @@ export function ArticleList({
                             textTransform: "uppercase",
                           }}>
                             BREAKING
+                          </span>
+                        )}
+                        {articleSignal.tier === "critical" && (
+                          <span
+                            className="article-signal-badge"
+                            title={`거시경제 신호 ${articleSignal.score}점 · ${articleSignal.reasons.join(", ")}`}
+                          >
+                            핵심 {articleSignal.score}
                           </span>
                         )}
                         <p style={{

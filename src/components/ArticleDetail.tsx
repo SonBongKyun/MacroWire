@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { CheckCheck, Radar } from "lucide-react";
 import type { Article } from "@/types";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { RelatedArticles } from "@/components/RelatedArticles";
@@ -9,6 +10,7 @@ import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleNotes } from "@/hooks/useArticleNotes";
 import { generateSmartSummary } from "@/lib/ai/summarizer";
 import type { SmartSummary } from "@/lib/ai/summarizer";
+import { classifyArticleSignal } from "@/lib/news/signal";
 
 interface ArticleDetailProps {
   article: Article | null;
@@ -129,6 +131,23 @@ export function ArticleDetail({
     return generateSmartSummary(article);
   }, [article]);
 
+  const articleSignal = useMemo(
+    () => (article ? classifyArticleSignal(article) : null),
+    [article]
+  );
+
+  const nextUnreadArticle = useMemo(() => {
+    if (!article || articles.length < 2) return null;
+    const currentIndex = articles.findIndex((item) => item.id === article.id);
+    if (currentIndex < 0) return articles.find((item) => !item.isRead) || null;
+
+    for (let offset = 1; offset < articles.length; offset++) {
+      const candidate = articles[(currentIndex + offset) % articles.length];
+      if (!candidate.isRead) return candidate;
+    }
+    return null;
+  }, [article, articles]);
+
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -167,6 +186,25 @@ export function ArticleDetail({
       showToast("공유 텍스트가 복사되었습니다");
     });
   }, [article, showToast]);
+
+  const handleReadAndNext = useCallback(() => {
+    if (!article) return;
+    if (!article.isRead) onToggleRead(article);
+
+    if (nextUnreadArticle && onSelectArticle) {
+      onSelectArticle(nextUnreadArticle);
+      showToast("읽음 처리 후 다음 기사로 이동했습니다");
+      return;
+    }
+
+    showToast(article.isRead ? "다음 미확인 기사가 없습니다" : "모든 기사를 확인했습니다");
+  }, [
+    article,
+    nextUnreadArticle,
+    onSelectArticle,
+    onToggleRead,
+    showToast,
+  ]);
 
   if (!article) {
     return (
@@ -207,6 +245,15 @@ export function ArticleDetail({
           <div className="flex-1" />
           {/* Status badges */}
           <div className="flex items-center gap-1.5">
+            {articleSignal && articleSignal.tier !== "general" && (
+              <span
+                className={`detail-signal-badge is-${articleSignal.tier}`}
+                title={articleSignal.reasons.join(", ")}
+              >
+                <Radar size={10} />
+                {articleSignal.tier === "critical" ? "핵심" : "주요"} {articleSignal.score}
+              </span>
+            )}
             {(() => {
               const s = analyzeSentiment(article.title, article.summary);
               return (
@@ -565,7 +612,7 @@ export function ArticleDetail({
       )}
 
       {/* Actions */}
-      <div className="p-4 border-t border-[var(--border)] flex gap-2 bg-[var(--surface)]">
+      <div className="article-detail-actions p-4 border-t border-[var(--border)] flex gap-2 bg-[var(--surface)]">
         <a
           href={article.url}
           target="_blank"
@@ -577,6 +624,16 @@ export function ArticleDetail({
           </svg>
           원문 보기
         </a>
+        {onSelectArticle && (
+          <button
+            onClick={handleReadAndNext}
+            className="detail-next-action"
+            title={nextUnreadArticle ? "읽음 처리 후 다음 미확인 기사로 이동" : "읽음 처리"}
+          >
+            <CheckCheck size={15} />
+            <span>{nextUnreadArticle ? "읽고 다음" : "읽음 완료"}</span>
+          </button>
+        )}
         {/* Fullscreen reading mode */}
         <button
           onClick={() => setFullscreen(true)}

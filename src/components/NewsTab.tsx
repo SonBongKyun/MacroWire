@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { ArrowLeft, Rows3, Star } from "lucide-react";
+import { ArrowLeft, List, Radar, Rows3, Star, Zap } from "lucide-react";
 import type { Article, Source } from "@/types";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
@@ -9,8 +9,13 @@ import { EmptyState } from "@/components/EmptyState";
 import { SpikeAlert } from "@/components/SpikeAlert";
 import { NewsTimeline } from "@/components/NewsTimeline";
 import { useArticleScoring } from "@/hooks/useArticleScoring";
+import {
+  classifyArticleSignal,
+  type ArticleSignal,
+} from "@/lib/news/signal";
 
 type SortMode = "newest" | "impact" | "oldest" | "source";
+type FocusMode = "signal" | "all" | "breaking";
 export type DensityMode = "compact" | "comfortable";
 
 interface NewsTabProps {
@@ -72,6 +77,32 @@ const READ_FILTERS: Array<{ value: "all" | "unread" | "read"; label: string }> =
   { value: "read", label: "읽음" },
 ];
 
+const FOCUS_MODES: Array<{
+  value: FocusMode;
+  label: string;
+  title: string;
+  icon: typeof Radar;
+}> = [
+  {
+    value: "signal",
+    label: "핵심",
+    title: "시장과 정책에 영향을 줄 가능성이 높은 기사",
+    icon: Radar,
+  },
+  {
+    value: "all",
+    label: "전체",
+    title: "수집된 모든 기사",
+    icon: List,
+  },
+  {
+    value: "breaking",
+    label: "속보",
+    title: "거시경제 관련 속보",
+    icon: Zap,
+  },
+];
+
 export function NewsTab({
   articles,
   selectedArticle,
@@ -110,6 +141,7 @@ export function NewsTab({
 }: NewsTabProps) {
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [density, setDensity] = useState<DensityMode>("comfortable");
+  const [focusMode, setFocusMode] = useState<FocusMode>("signal");
   const [regionFading, setRegionFading] = useState(false);
   const { getScore } = useArticleScoring(articles);
 
@@ -117,6 +149,14 @@ export function NewsTab({
     const savedDensity = localStorage.getItem("macro-wire-news-density");
     if (savedDensity === "compact" || savedDensity === "comfortable") {
       setDensity(savedDensity);
+    }
+    const savedFocusMode = localStorage.getItem("macro-wire-focus-mode");
+    if (
+      savedFocusMode === "signal" ||
+      savedFocusMode === "all" ||
+      savedFocusMode === "breaking"
+    ) {
+      setFocusMode(savedFocusMode);
     }
   }, []);
 
@@ -131,8 +171,42 @@ export function NewsTab({
     setTimeout(() => setRegionFading(false), 200);
   }, [onRegionFilterChange]);
 
+  const changeFocusMode = useCallback((nextMode: FocusMode) => {
+    setFocusMode(nextMode);
+    localStorage.setItem("macro-wire-focus-mode", nextMode);
+  }, []);
+
+  const articleSignals = useMemo(() => {
+    const map = new Map<string, ArticleSignal>();
+    for (const article of articles) {
+      map.set(article.id, classifyArticleSignal(article));
+    }
+    return map;
+  }, [articles]);
+
+  const focusCounts = useMemo(() => {
+    let signal = 0;
+    let breaking = 0;
+    for (const article of articles) {
+      const articleSignal = articleSignals.get(article.id);
+      if (!articleSignal || articleSignal.tier === "general") continue;
+      signal++;
+      if (articleSignal.isBreaking) breaking++;
+    }
+    return { all: articles.length, signal, breaking };
+  }, [articles, articleSignals]);
+
+  const focusedArticles = useMemo(() => {
+    if (focusMode === "all") return articles;
+    return articles.filter((article) => {
+      const signal = articleSignals.get(article.id);
+      if (!signal || signal.tier === "general") return false;
+      return focusMode === "signal" || signal.isBreaking;
+    });
+  }, [articles, articleSignals, focusMode]);
+
   const sortedArticles = useMemo(() => {
-    const list = [...articles];
+    const list = [...focusedArticles];
     switch (sortMode) {
       case "newest":
         return list.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
@@ -149,7 +223,16 @@ export function NewsTab({
       default:
         return list;
     }
-  }, [articles, sortMode, getScore]);
+  }, [focusedArticles, sortMode, getScore]);
+
+  useEffect(() => {
+    if (
+      selectedArticle &&
+      !focusedArticles.some((article) => article.id === selectedArticle.id)
+    ) {
+      onCloseArticle();
+    }
+  }, [focusedArticles, onCloseArticle, selectedArticle]);
 
   /* Collect active filter chips for dismissable display */
   const activeFilters: Array<{ key: string; label: string; onClear: () => void }> = [];
@@ -166,6 +249,13 @@ export function NewsTab({
       key: "source",
       label: src?.name || selectedSourceId,
       onClear: () => onSelectSource(null),
+    });
+  }
+  if (focusMode !== "all") {
+    activeFilters.push({
+      key: "focus",
+      label: focusMode === "signal" ? "핵심 신호" : "거시경제 속보",
+      onClear: () => changeFocusMode("all"),
     });
   }
 
@@ -200,6 +290,27 @@ export function NewsTab({
                 {r.label}
               </button>
             ))}
+          </div>
+
+          <div className="news-focus-segment" role="group" aria-label="뉴스 집중 모드">
+            {FOCUS_MODES.map((mode) => {
+              const Icon = mode.icon;
+              const isActive = focusMode === mode.value;
+              return (
+                <button
+                  key={mode.value}
+                  type="button"
+                  className={isActive ? "is-active" : ""}
+                  onClick={() => changeFocusMode(mode.value)}
+                  aria-pressed={isActive}
+                  title={mode.title}
+                >
+                  <Icon size={12} />
+                  <span>{mode.label}</span>
+                  <small>{focusCounts[mode.value]}</small>
+                </button>
+              );
+            })}
           </div>
 
           {/* Source dropdown */}
@@ -415,7 +526,11 @@ export function NewsTab({
           {sortedArticles.length === 0 && !loading ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 20px", textAlign: "center" }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#EBEBEB", marginBottom: 6 }}>
-                {activeFilters.length > 0 || searchQuery ? "검색 결과가 없습니다" : "기사가 없습니다"}
+                {focusMode === "breaking"
+                  ? "거시경제 속보가 없습니다"
+                  : activeFilters.length > 0 || searchQuery
+                    ? "검색 결과가 없습니다"
+                    : "기사가 없습니다"}
               </div>
               {(activeFilters.length > 0 || searchQuery) ? (
                 <>
