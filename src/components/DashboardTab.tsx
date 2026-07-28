@@ -5,6 +5,7 @@ import type { Article, Source } from "@/types";
 import type { PortfolioPrice } from "@/hooks/usePortfolio";
 import type { WatchlistStore } from "@/hooks/useWatchlist";
 import { MiniSparkline } from "@/components/PriceChart";
+import { EmptyState } from "@/components/EmptyState";
 import { EconomicCalendar } from "@/components/EconomicCalendar";
 import { SentimentGauge } from "@/components/SentimentGauge";
 import { GlobalMacroDashboard } from "@/components/GlobalMacroDashboard";
@@ -878,7 +879,7 @@ function ReadingProgressSection({
   );
 }
 
-// ── AI Insights Panel ──
+// ── Signal Monitor ──
 const INSIGHT_TYPE_CONFIG: Record<MarketInsight["type"], { color: string; label: string }> = {
   trend: { color: "#3B82F6", label: "TREND" },
   alert: { color: "#F59E0B", label: "ALERT" },
@@ -892,21 +893,18 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
   if (insights.length === 0) return null;
 
   return (
-    <div style={{ marginTop: 24 }}>
+    <div className="desk-signal-monitor">
       <div
         className="dash-section-title"
-        style={{ display: "flex", alignItems: "center", gap: 8 }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFB000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-        </svg>
-        AI INSIGHTS
+        SIGNAL MONITOR
       </div>
       <div>
         {insights.slice(0, 5).map((insight, i) => {
           const cfg = INSIGHT_TYPE_CONFIG[insight.type];
           return (
             <div
+              className="desk-signal-row"
               key={i}
               style={{
                 padding: "10px 0",
@@ -1321,80 +1319,12 @@ export default function DashboardTab({
 
       {/* ── Empty State ── */}
       {articles.length === 0 && !marketLoading && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "60px 20px",
-            textAlign: "center",
-            gap: 0,
-          }}
-        >
-          {/* Animated logo icon */}
-          <div style={{
-            width: 56, height: 56,
-            borderRadius: 4,
-            border: "1px solid rgba(255,176,0,0.2)",
-            background: "rgba(255,176,0,0.05)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 20,
-            position: "relative",
-            overflow: "hidden",
-          }}>
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,176,0,0.4)" />
-              <rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,176,0,0.6)" />
-              <rect x="15" y="7" width="4" height="18" rx="1" fill="rgba(255,176,0,0.8)" />
-              <rect x="21" y="3" width="4" height="22" rx="1" fill="#FFB000" />
-            </svg>
-            <div style={{
-              position: "absolute",
-              top: 0, left: "-30%",
-              width: "50%",
-              height: "100%",
-              background: "linear-gradient(90deg, transparent, rgba(255,176,0,0.15), transparent)",
-              animation: "card-shimmer 2s ease-in-out infinite",
-            }} />
-          </div>
-          <div
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: "var(--foreground-bright)",
-              marginBottom: 8,
-              fontFamily: "var(--font-heading)",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            기사 수집 중
-          </div>
-          <div
-            style={{
-              fontSize: 12,
-              color: "var(--muted)",
-              maxWidth: 320,
-              lineHeight: 1.6,
-            }}
-          >
-            RSS 소스에서 최신 기사를 불러오고 있습니다.<br/>
-            잠시 후 자동으로 업데이트됩니다.
-          </div>
-          {/* Pulsing dots */}
-          <div style={{ display: "flex", gap: 6, marginTop: 20 }}>
-            {[0, 1, 2].map((i) => (
-              <div key={i} style={{
-                width: 5, height: 5,
-                borderRadius: "50%",
-                background: "#FFB000",
-                opacity: 0.4,
-                animation: `pulse-dot 1.5s ease-in-out ${i * 0.3}s infinite`,
-              }} />
-            ))}
-          </div>
+        <div className="dash-empty-state">
+          <EmptyState
+            glyph="no-articles"
+            title="수집된 헤드라인이 없습니다"
+            description="연결된 피드에서 새 기사가 확인되면 이 데스크에 자동으로 분류됩니다."
+          />
         </div>
       )}
 
@@ -1404,7 +1334,7 @@ export default function DashboardTab({
         <div className="dash-left-col">
           {/* ── Breaking News Stream ── */}
           {breakingArticles.length > 0 && (
-            <div style={{ marginBottom: 0 }}>
+            <div className="desk-breaking">
               <div className="dash-section-title" style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
                 <span style={{
                   display: "inline-flex",
@@ -1442,6 +1372,7 @@ export default function DashboardTab({
                   return (
                     <button
                       key={a.id}
+                      className="desk-breaking-row"
                       onClick={() => { onSelectArticle(a); onTabChange("news"); }}
                       style={{
                         display: "flex",
@@ -1456,14 +1387,6 @@ export default function DashboardTab({
                         cursor: "pointer",
                         transition: "background 0.2s ease, padding-left 0.2s ease",
                         position: "relative",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "linear-gradient(90deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.02) 100%)";
-                        e.currentTarget.style.paddingLeft = "20px";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "transparent";
-                        e.currentTarget.style.paddingLeft = "16px";
                       }}
                     >
                       {isFresh && (
@@ -1518,11 +1441,12 @@ export default function DashboardTab({
           )}
 
           {sections.topStories && (<>
-          <div className="dash-section-title">TOP STORIES</div>
+          <div className="dash-section-title">LEAD STORIES</div>
 
           {/* Hero article — large, gold-accented */}
           {heroArticle ? (
             <button
+              className="desk-lead-story"
               onClick={() => { onSelectArticle(heroArticle); onTabChange("news"); }}
               style={{
                 display: "block",
@@ -1537,10 +1461,8 @@ export default function DashboardTab({
                 marginBottom: 24,
                 transition: "box-shadow 0.2s ease, border-color 0.2s ease",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 24px rgba(255,176,0,0.1)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
             >
-              <h2 style={{
+              <h2 className="desk-lead-title" style={{
                 margin: 0,
                 lineHeight: 1.35,
                 fontSize: 22,
@@ -1552,7 +1474,7 @@ export default function DashboardTab({
                 {heroArticle.title}
               </h2>
               {heroArticle.summary && (
-                <p style={{
+                <p className="desk-lead-summary" style={{
                   margin: "10px 0 0",
                   fontSize: 13,
                   color: "#8C8C91",
@@ -1567,6 +1489,7 @@ export default function DashboardTab({
                 </p>
               )}
               <div
+                className="desk-lead-meta"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -1656,25 +1579,21 @@ export default function DashboardTab({
           )}
           </>)}
 
-          {/* AI Insights */}
+          {/* Signal monitor */}
           {sections.aiInsights && (
           <AiInsightsPanel articles={articles} />
           )}
 
-          {/* FOR YOU — AI Recommendations */}
+          {/* Read next */}
           {recommendations.length > 0 && (
-            <div style={{ marginTop: 20 }}>
+            <div className="desk-read-next">
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFB000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: "#FFB000", fontFamily: "var(--font-heading)" }}>
-                  FOR YOU
+                <span className="dash-section-title" style={{ marginBottom: 0, flex: 1 }}>
+                  READ NEXT
                 </span>
               </div>
-              <div style={{ fontSize: 10, color: "#8C8C91", marginBottom: 12 }}>
-                읽기 패턴 기반 추천
+              <div className="desk-read-next-caption">
+                관심 흐름
               </div>
 
               <div>
@@ -1686,6 +1605,7 @@ export default function DashboardTab({
                     "#22c55e";
                   return (
                     <button
+                      className="desk-recommendation-row"
                       key={rec.article.id}
                       onClick={() => { onSelectArticle(rec.article); onTabChange("news"); }}
                       style={{
@@ -1699,8 +1619,6 @@ export default function DashboardTab({
                         cursor: "pointer",
                         transition: "background 0.15s ease",
                       }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,176,0,0.04)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span
@@ -1845,66 +1763,22 @@ export default function DashboardTab({
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {trendingTags.map(([tag, count], idx) => {
                           // Use the centralized TAG_COLORS system; fall back to a hash-based pick from the palette
-                          const fallbackPalette = ["#FFB000", "#22c55e", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f59e0b", "#ec4899", "#10b981", "#8b5cf6"];
+                          const fallbackPalette = ["#72aef8", "#42c987", "#e55f67", "#f1bd58", "#7fc4c5", "#a6b0b8"];
                           const hashIdx = Math.abs(tag.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % fallbackPalette.length;
                           const color = TAG_COLORS[tag] || fallbackPalette[hashIdx] || TAG_FALLBACK_COLOR;
-                          const maxCount = trendingTags[0]?.[1] ?? 1;
                           const rank = idx + 1;
-                          // Size by popularity — top 3 larger
-                          const size = rank <= 3 ? "lg" : "sm";
-                          const ratio = count / maxCount;
                           return (
                             <button
                               key={tag}
                               onClick={() => onTabChange("news")}
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 5,
-                                padding: size === "lg" ? "5px 11px" : "3px 9px",
-                                fontSize: size === "lg" ? 11 : 10,
-                                fontWeight: 700,
-                                color,
-                                background: `linear-gradient(135deg, ${color}${Math.round(ratio * 34).toString(16).padStart(2, "0")} 0%, ${color}10 100%)`,
-                                border: `1px solid ${color}${Math.round(ratio * 76).toString(16).padStart(2, "0")}`,
-                                borderRadius: 2,
-                                cursor: "pointer",
-                                transition: "all 0.15s ease",
-                                boxShadow: rank <= 3 ? `0 0 10px ${color}22` : "none",
-                              }}
-                              onMouseEnter={(e) => {
-                                (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${color}40 0%, ${color}20 100%)`;
-                                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 14px ${color}44`;
-                                (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-                              }}
-                              onMouseLeave={(e) => {
-                                (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${color}${Math.round(ratio * 34).toString(16).padStart(2, "0")} 0%, ${color}10 100%)`;
-                                (e.currentTarget as HTMLElement).style.boxShadow = rank <= 3 ? `0 0 10px ${color}22` : "none";
-                                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                              }}
+                              className={`dash-trend-tag ${rank <= 3 ? "is-top" : ""}`}
+                              style={{ "--tag-color": color } as React.CSSProperties}
                             >
                               {rank <= 3 && (
-                                <span style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: 8,
-                                  fontWeight: 800,
-                                  color: "#08090B",
-                                  background: color,
-                                  borderRadius: 1,
-                                  padding: "1px 4px",
-                                  letterSpacing: 0,
-                                  minWidth: 12,
-                                }}>{rank}</span>
+                                <span className="dash-trend-rank">{rank}</span>
                               )}
                               {tag}
-                              <span style={{
-                                fontSize: 9,
-                                opacity: 0.75,
-                                fontFamily: "var(--font-mono)",
-                                fontVariantNumeric: "tabular-nums",
-                              }}>
+                              <span className="dash-trend-count">
                                 {count}
                               </span>
                             </button>

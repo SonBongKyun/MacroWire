@@ -10,7 +10,7 @@
  *     action={{ label: "지금 수집", onClick: runIngest }}
  *   />
  *
- * Glyphs are stroke-only line illustrations in the brand gold accent.
+ * Glyphs are quiet line illustrations using the workbench signal color.
  */
 
 export type EmptyGlyph =
@@ -45,101 +45,25 @@ export function EmptyState({
   const padding = compact ? "32px 20px" : "56px 24px";
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        padding,
-        gap: 0,
-      }}
-    >
+    <div className="empty-state" style={{ padding }}>
       <Glyph name={glyph} size={size} />
-      <h3
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: compact ? 13 : 16,
-          fontWeight: 700,
-          color: "#F5F0E1",
-          letterSpacing: "-0.014em",
-          marginTop: compact ? 14 : 20,
-          marginBottom: 8,
-        }}
-      >
+      <h3 className="empty-state-title" style={{ fontSize: compact ? 13 : 16, marginTop: compact ? 14 : 20 }}>
         {title}
       </h3>
       {description && (
-        <p
-          style={{
-            fontFamily: "var(--font-serif), 'Crimson Pro', serif",
-            fontStyle: "italic",
-            fontSize: compact ? 12 : 14,
-            color: "#C9C4B6",
-            lineHeight: 1.55,
-            maxWidth: 320,
-            marginBottom: action || secondaryAction ? 20 : 0,
-          }}
-        >
+        <p className="empty-state-description" style={{ fontSize: compact ? 11 : 12, marginBottom: action || secondaryAction ? 20 : 0 }}>
           {description}
         </p>
       )}
       {(action || secondaryAction) && (
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="empty-state-actions">
           {action && (
-            <button
-              onClick={action.onClick}
-              style={{
-                padding: "11px 20px",
-                fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#08090B",
-                background: "#FFB000",
-                border: "none",
-                borderRadius: 0,
-                cursor: "pointer",
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                transition: "background 0.15s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "#FFC640";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "#FFB000";
-              }}
-            >
-              {action.label} →
+            <button onClick={action.onClick} className="empty-state-action is-primary">
+              {action.label}
             </button>
           )}
           {secondaryAction && (
-            <button
-              onClick={secondaryAction.onClick}
-              style={{
-                padding: "11px 20px",
-                fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
-                fontSize: 11,
-                fontWeight: 600,
-                color: "#F5F0E1",
-                background: "transparent",
-                border: "1px solid rgba(245,240,225,0.18)",
-                borderRadius: 0,
-                cursor: "pointer",
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                transition: "border-color 0.15s ease, color 0.15s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "#FFB000";
-                (e.currentTarget as HTMLElement).style.color = "#FFB000";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,240,225,0.18)";
-                (e.currentTarget as HTMLElement).style.color = "#F5F0E1";
-              }}
-            >
+            <button onClick={secondaryAction.onClick} className="empty-state-action">
               {secondaryAction.label}
             </button>
           )}
@@ -150,24 +74,10 @@ export function EmptyState({
 }
 
 /* ──────────────────────────────────────
-   GLYPH LIBRARY — pure inline SVG, gold stroke
+   GLYPH LIBRARY — pure inline SVG, signal-blue stroke
    ────────────────────────────────────── */
 
 function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
-  // Soft gold halo behind every glyph for a subtle premium glow
-  const halo = (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "absolute",
-        inset: 0,
-        background:
-          "radial-gradient(50% 50% at 50% 50%, rgba(255,176,0,0.08) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }}
-    />
-  );
-
   const containerStyle = {
     position: "relative" as const,
     width: size,
@@ -177,15 +87,14 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     justifyContent: "center",
   };
 
-  const stroke = "#FFB000";
-  const dim = "rgba(255,176,0,0.4)";
-  const veryDim = "rgba(255,176,0,0.15)";
+  const stroke = "#72AEF8";
+  const dim = "rgba(114,174,248,0.48)";
+  const veryDim = "rgba(114,174,248,0.2)";
 
   switch (name) {
     case "no-articles":
       return (
         <div style={containerStyle}>
-          {halo}
           {/* Antenna with no incoming signal — three concentric arcs, dashed outermost */}
           <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
             {/* Base */}
@@ -203,7 +112,6 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     case "all-read":
       return (
         <div style={containerStyle}>
-          {halo}
           {/* Outlined check inside a soft circle */}
           <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
             <circle cx="40" cy="40" r="28" stroke={dim} strokeWidth="2" fill="none" />
@@ -216,7 +124,6 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     case "no-selection":
       return (
         <div style={containerStyle}>
-          {halo}
           {/* Document with arrow pointing into it from the left */}
           <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
             <rect x="36" y="20" width="32" height="42" rx="2" stroke={stroke} strokeWidth="2" fill="none" />
@@ -233,7 +140,6 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     case "no-portfolio":
       return (
         <div style={containerStyle}>
-          {halo}
           {/* Empty chart frame with axis */}
           <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
             <rect x="14" y="14" width="52" height="46" rx="2" stroke={stroke} strokeWidth="2" fill="none" />
@@ -252,7 +158,6 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     case "no-sources":
       return (
         <div style={containerStyle}>
-          {halo}
           {/* Disconnected wire — two ends with a gap */}
           <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
             <circle cx="20" cy="40" r="6" stroke={stroke} strokeWidth="2" fill="none" />
@@ -268,7 +173,6 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     case "no-notifications":
       return (
         <div style={containerStyle}>
-          {halo}
           {/* Muted bell with sleep z-zz lines */}
           <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
             <path d="M28 50 V40 a12 12 0 0 1 24 0 V50 l3 4 H25 Z" stroke={stroke} strokeWidth="2" strokeLinejoin="round" fill="none" />
@@ -282,7 +186,6 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     case "no-results":
       return (
         <div style={containerStyle}>
-          {halo}
           {/* Magnifier with no result inside */}
           <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
             <circle cx="34" cy="34" r="16" stroke={stroke} strokeWidth="2" fill="none" />
@@ -296,7 +199,6 @@ function Glyph({ name, size }: { name: EmptyGlyph; size: number }) {
     case "no-saved":
       return (
         <div style={containerStyle}>
-          {halo}
           {/* Outlined bookmark */}
           <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
             <path d="M30 18 H50 a2 2 0 0 1 2 2 V60 L40 52 L28 60 V20 a2 2 0 0 1 2 -2 Z" stroke={stroke} strokeWidth="2" strokeLinejoin="round" fill="none" />

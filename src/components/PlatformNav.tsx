@@ -19,9 +19,9 @@ import {
   PanelLeftClose,
   Radio,
   RefreshCw,
+  ScanText,
   Search,
   Siren,
-  Sparkles,
   X,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
@@ -68,7 +68,7 @@ const tabs = [
   { key: "news" as const, label: "와이어", shortLabel: "와이어", icon: Newspaper },
   { key: "markets" as const, label: "마켓", shortLabel: "마켓", icon: ChartNoAxesCombined },
   { key: "analytics" as const, label: "분석", shortLabel: "분석", icon: Activity },
-  { key: "ai" as const, label: "AI 브리핑", shortLabel: "AI", icon: Sparkles },
+  { key: "ai" as const, label: "브리핑", shortLabel: "브리핑", icon: ScanText },
   { key: "research" as const, label: "리서치", shortLabel: "리서치", icon: FlaskConical },
   { key: "portfolio" as const, label: "포트폴리오", shortLabel: "자산", icon: BriefcaseBusiness },
 ];
@@ -212,7 +212,7 @@ export function PlatformNav(props: PlatformNavProps) {
       <header className="wire-header" data-testid="wire-header">
         <div className="wire-brand">
           <Logo size="sm" />
-          <span className="wire-brand-meta">GLOBAL INTELLIGENCE</span>
+          <span className="wire-brand-meta">SEOUL / GLOBAL DESK</span>
         </div>
 
         <nav className="platform-tabs" aria-label="주요 화면">
@@ -227,6 +227,7 @@ export function PlatformNav(props: PlatformNavProps) {
                 className={`wire-tab ${isActive ? "is-active" : ""}`}
                 onClick={() => onTabChange(tab.key)}
                 aria-current={isActive ? "page" : undefined}
+                title={tab.label}
               >
                 <Icon aria-hidden="true" size={15} strokeWidth={1.8} />
                 <span>{tab.label}</span>
@@ -248,7 +249,7 @@ export function PlatformNav(props: PlatformNavProps) {
             id="wire-search"
             type="search"
             aria-label="기사, 태그, 소스 검색"
-            placeholder="기사, 태그, 소스 검색"
+            placeholder="헤드라인, 태그, 소스"
             value={searchQuery}
             onChange={(event) => {
               onSearchChange(event.target.value);
@@ -315,7 +316,7 @@ export function PlatformNav(props: PlatformNavProps) {
 
         <div className="wire-live" title={lastBreakingUpdate ? `최근 수집 데이터 ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR")}` : "새 기사 자동 확인 대기 중"}>
           <span className="wire-live-dot" aria-hidden="true" />
-          <span>LIVE</span>
+          <span>FEED</span>
           <b>{breakingCountdown}s</b>
         </div>
 
@@ -446,7 +447,7 @@ export function PlatformNav(props: PlatformNavProps) {
             <div className="mobile-sheet-handle" />
             <div className="mobile-sheet-head">
               <div>
-                <strong>워크스페이스</strong>
+                <strong>도구</strong>
                 <span>{updatedAgo}</span>
               </div>
               <button type="button" onClick={() => setMobileMoreOpen(false)} aria-label="더보기 닫기">
@@ -521,7 +522,7 @@ export function PlatformNav(props: PlatformNavProps) {
 
             <div className="mobile-live-row">
               <Radio size={16} />
-              <span>뉴스 자동 확인</span>
+              <span>피드 자동 확인</span>
               <b>{breakingCountdown}초 후 확인</b>
             </div>
           </div>

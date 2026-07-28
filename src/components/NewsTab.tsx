@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { ArrowLeft, List, Radar, Rows3, Star, Zap } from "lucide-react";
+import { ArrowLeft, List, Radar, Rows3, Star, X, Zap } from "lucide-react";
 import type { Article, Source } from "@/types";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
@@ -273,19 +273,8 @@ export function NewsTab({
               <button
                 key={r.value}
                 onClick={() => onRangeChange(r.value)}
-                className="transition-all"
-                style={{
-                  padding: "3px 10px",
-                  fontSize: 10,
-                  fontWeight: 700,
-                  fontFamily: "var(--font-mono)",
-                  letterSpacing: "0.02em",
-                  borderRadius: 3,
-                  border: "1px solid transparent",
-                  color: range === r.value ? "#08090B" : "#8C8C91",
-                  backgroundColor: range === r.value ? "#FFB000" : "transparent",
-                  cursor: "pointer",
-                }}
+                className={range === r.value ? "is-active" : ""}
+                aria-pressed={range === r.value}
               >
                 {r.label}
               </button>
@@ -353,17 +342,8 @@ export function NewsTab({
                 <button
                   key={r.value}
                   onClick={() => handleRegionChange(r.value)}
-                  style={{
-                    padding: "2px 8px",
-                    fontSize: 11,
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "#FFB000" : "#8C8C91",
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    position: "relative",
-                    borderBottom: isActive ? "2px solid #FFB000" : "2px solid transparent",
-                  }}
+                  className={isActive ? "is-active" : ""}
+                  aria-pressed={isActive}
                 >
                   {r.label}
                 </button>
@@ -381,15 +361,8 @@ export function NewsTab({
                 {i > 0 && <span style={{ color: "#2C2D34", margin: "0 6px" }}>|</span>}
                 <button
                   onClick={() => onReadFilterChange(f.value)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: 11,
-                    fontWeight: readFilter === f.value ? 700 : 400,
-                    color: readFilter === f.value ? "#EBEBEB" : "#8C8C91",
-                    padding: 0,
-                  }}
+                  className={readFilter === f.value ? "is-active" : ""}
+                  aria-pressed={readFilter === f.value}
                 >
                   {f.label}
                 </button>
@@ -471,44 +444,21 @@ export function NewsTab({
 
       {/* Active filter chips (dismissable) */}
       {(activeFilters.length > 0 || searchQuery) && (
-        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-[#2C2D34] bg-[#08090B]">
-          <span style={{ fontSize: 9, fontWeight: 600, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: 4 }}>필터</span>
+        <div className="news-active-filters">
+          <span className="news-active-filters-label">필터</span>
           {activeFilters.map((f) => (
             <button
               key={f.key}
               onClick={f.onClear}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                padding: "1px 8px",
-                fontSize: 10,
-                fontWeight: 600,
-                color: "#FFB000",
-                background: "rgba(255,176,0,0.15)",
-                border: "1px solid rgba(255,176,0,0.3)",
-                borderRadius: 2,
-                cursor: "pointer",
-              }}
+              className="news-filter-chip"
+              aria-label={`${f.label} 필터 제거`}
             >
               {f.label}
-              <svg style={{ width: 8, height: 8, opacity: 0.7 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X size={10} />
             </button>
           ))}
           {searchQuery && (
-            <span style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "1px 8px",
-              fontSize: 10,
-              color: "#8C8C91",
-              background: "rgba(140,140,145,0.08)",
-              border: "1px solid rgba(140,140,145,0.15)",
-              borderRadius: 2,
-            }}>
+            <span className="news-search-chip">
               &quot;{searchQuery}&quot;
             </span>
           )}
@@ -541,16 +491,7 @@ export function NewsTab({
                   </div>
                   <button
                     onClick={() => { activeFilters.forEach((f) => f.onClear()); }}
-                    style={{
-                      padding: "6px 16px",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: "#FFB000",
-                      background: "rgba(255,176,0,0.08)",
-                      border: "1px solid #FFB000",
-                      borderRadius: 2,
-                      cursor: "pointer",
-                    }}
+                    className="news-reset-filter"
                   >
                     필터 초기화
                   </button>
@@ -614,15 +555,8 @@ export function NewsTab({
             <EmptyState
               glyph="no-selection"
               title="기사를 선택하세요"
-              description="왼쪽 목록에서 클릭하거나 j / k 키로 이동할 수 있습니다."
+              description="목록에서 헤드라인을 선택하면 원문 정보와 신호 분석이 표시됩니다."
             />
-            <div style={{ display: "flex", gap: 6, marginTop: -12 }}>
-              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>j</kbd>
-              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>k</kbd>
-              <span style={{ fontSize: 10, color: "#8C8C91" }}>위/아래</span>
-              <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>Enter</kbd>
-              <span style={{ fontSize: 10, color: "#8C8C91" }}>열기</span>
-            </div>
           </div>
         )}
       </div>

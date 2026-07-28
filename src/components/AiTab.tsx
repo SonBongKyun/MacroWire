@@ -44,7 +44,7 @@ const INSIGHT_LABELS: Record<string, string> = {
 
 const REC_LABELS: Record<string, string> = {
   trending: "TREND",
-  personalized: "FOR YOU",
+  personalized: "READ NEXT",
   breaking: "BREAKING",
   "deep-dive": "DEEP DIVE",
 };
@@ -323,8 +323,8 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
 
         <SectionSep />
 
-        {/* ── AI INSIGHTS ── */}
-        <div className="dash-section-title">AI INSIGHTS</div>
+        {/* ── SIGNAL MONITOR ── */}
+        <div className="dash-section-title">SIGNAL MONITOR</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 14 }}>
           {insights.length === 0 && (
             <div style={{ fontSize: 11, color: "#8C8C91" }}>분석할 데이터가 부족합니다</div>
@@ -387,8 +387,8 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
 
         <SectionSep />
 
-        {/* ── FOR YOU - RECOMMENDATIONS ── */}
-        <div className="dash-section-title">FOR YOU</div>
+        {/* ── READ NEXT - RECOMMENDATIONS ── */}
+        <div className="dash-section-title">READ NEXT</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
           {recommendations.length === 0 && (
             <div style={{ fontSize: 11, color: "#8C8C91" }}>추천할 기사가 없습니다</div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
+import { ArrowUp, LoaderCircle } from "lucide-react";
 import type { Article } from "@/types";
 import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleScoring } from "@/hooks/useArticleScoring";
@@ -36,8 +37,8 @@ interface ArticleListProps {
   density?: "compact" | "comfortable";
 }
 
-const ROW_HEIGHT_COMPACT = 56;
-const ROW_HEIGHT_COMFORTABLE = 72;
+const ROW_HEIGHT_COMPACT = 64;
+const ROW_HEIGHT_COMFORTABLE = 84;
 const BUFFER_COUNT = 10;
 
 function timeAgo(dateStr: string): string {
@@ -309,173 +310,79 @@ export function ArticleList({
                 const isUnread = !article.isRead;
                 const articleSignal = classifyArticleSignal(article);
                 const isBreaking = articleSignal.isBreaking;
+                const impactScore = getScore(article.id)?.impactScore ?? 0;
+                const sourceCode = article.sourceName
+                  .replace(/[^A-Za-z가-힣]/g, "")
+                  .slice(0, 2)
+                  .toUpperCase();
                 return (
                   <div
                     key={article.id}
-                    className={`article-row article-row-${density}`}
+                    className={[
+                      "article-row",
+                      `article-row-${density}`,
+                      isSelected ? "is-selected" : "",
+                      isUnread ? "is-unread" : "is-read",
+                      isBreaking ? "is-breaking" : "",
+                      newIds.has(article.id) ? "is-new" : "",
+                    ].filter(Boolean).join(" ")}
                     onClick={() => onSelectArticle(article)}
                     onContextMenu={(e) => handleContextMenu(e, article)}
-                    style={{
-                      height: rowHeight,
-                      padding: density === "compact" ? "8px 14px" : "11px 16px",
-                      borderBottom: "1px solid #2C2D34",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 10,
-                      transition: "background-color 0.15s ease, border-color 0.15s ease",
-                      background: isSelected ? "rgba(231,180,79,0.09)" : "transparent",
-                      borderLeft: isSelected
-                        ? "2px solid #FFB000"
-                        : isBreaking && isUnread
-                        ? "2px solid rgba(239,68,68,0.65)"
-                        : "2px solid transparent",
-                      opacity: !isUnread && !isSelected ? 0.6 : 1,
-                      boxSizing: "border-box",
-                      overflow: "hidden",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) (e.currentTarget as HTMLElement).style.background = "rgba(235,235,235,0.04)";
-                      handleRowMouseEnter(e, article);
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) (e.currentTarget as HTMLElement).style.background = "transparent";
-                      handleRowMouseLeave();
-                    }}
+                    style={{ height: rowHeight }}
+                    onMouseEnter={(e) => handleRowMouseEnter(e, article)}
+                    onMouseLeave={handleRowMouseLeave}
                   >
-                    {/* Unread dot — red for 속보, gold otherwise */}
-                    <div style={{ width: 5, paddingTop: 5, flexShrink: 0 }}>
-                      {isUnread && (
-                        <div style={{
-                          width: 5,
-                          height: 5,
-                          borderRadius: "50%",
-                          backgroundColor: isBreaking ? "#ef4444" : "#FFB000",
-                          boxShadow: isBreaking
-                            ? "0 0 6px rgba(239,68,68,0.5)"
-                            : "0 0 6px rgba(255,176,0,0.4)",
-                        }} />
-                      )}
+                    <div className="article-row-rail">
+                      <span className="article-row-time">{timeAgo(article.publishedAt)}</span>
+                      <span className="article-source-code">{sourceCode || "MW"}</span>
+                      {isUnread && <span className="article-unread-marker" />}
                     </div>
 
-                    {/* Content */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      {/* Title row with impact indicator */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        {article.tags.includes("속보") && (
-                          <span style={{
-                            fontSize: 9,
-                            fontWeight: 700,
-                            color: "#ef4444",
-                            background: "transparent",
-                            border: "1px solid #ef4444",
-                            padding: "0 5px",
-                            borderRadius: 0,
-                            letterSpacing: "0.14em",
-                            flexShrink: 0,
-                            lineHeight: 1.5,
-                            fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
-                            textTransform: "uppercase",
-                          }}>
-                            BREAKING
-                          </span>
+                    <div className="article-row-body">
+                      <div className="article-row-titleline">
+                        {isBreaking && (
+                          <span className="article-breaking-badge">속보</span>
                         )}
                         {articleSignal.tier === "critical" && (
                           <span
                             className="article-signal-badge"
                             title={`거시경제 신호 ${articleSignal.score}점 · ${articleSignal.reasons.join(", ")}`}
                           >
-                            핵심 {articleSignal.score}
+                            S{articleSignal.score}
                           </span>
                         )}
-                        <p style={{
-                          fontSize: 14,
-                          fontWeight: isUnread ? 500 : 400,
-                          color: "#EBEBEB",
-                          lineHeight: 1.4,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          margin: 0,
-                          flex: 1,
-                          minWidth: 0,
-                        }}>
+                        <p className="article-row-title">
                           {article.title}
                         </p>
-                        {(() => {
-                          const score = getScore(article.id);
-                          if (!score) return null;
-                          const isHigh = score.impactScore > 70;
-                          return (
-                            <div
-                              title={`Impact: ${score.impactScore}`}
-                              style={{
-                                width: 2,
-                                height: 12,
-                                flexShrink: 0,
-                                borderRadius: 1,
-                                backgroundColor: isHigh ? "#FFB000" : "#8C8C91",
-                                opacity: isHigh ? 1 : 0.4 + (score.impactScore / 100) * 0.6,
-                                transition: "opacity 0.3s ease",
-                              }}
-                            />
-                          );
-                        })()}
                       </div>
 
-                      {/* Tags row — neutral by default, category color on hover/active */}
-                      {density === "comfortable" && article.tags.length > 0 && (
-                        <div className="article-row-tags" style={{ display: "flex", gap: 4, marginTop: 6, flexWrap: "wrap" }}>
+                      {density === "comfortable" && (
+                        <div className="article-row-subline">
+                          <span className="article-row-source">{article.sourceName}</span>
+                          <span className="article-row-rule" />
+                          <div className="article-row-tags">
                           {article.tags.slice(0, 3).map((tag) => {
-                            // Skip "속보" — already rendered as the prominent red pill before the title
                             if (tag === "속보") return null;
                             const color = TAG_COLORS[tag] || "#64748b";
                             return (
                               <button
                                 key={tag}
                                 onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
-                                style={{
-                                  fontSize: 9,
-                                  fontWeight: 600,
-                                  color: "#8C8C91",
-                                  background: "transparent",
-                                  border: "1px solid rgba(255,255,255,0.06)",
-                                  padding: "1px 6px",
-                                  borderRadius: 2,
-                                  cursor: "pointer",
-                                  lineHeight: 1.5,
-                                  letterSpacing: "0.01em",
-                                  transition: "color 0.15s ease, background 0.15s ease, border-color 0.15s ease",
-                                }}
-                                onMouseEnter={(e) => {
-                                  const el = e.currentTarget as HTMLElement;
-                                  el.style.color = color;
-                                  el.style.background = `${color}14`;
-                                  el.style.borderColor = `${color}30`;
-                                }}
-                                onMouseLeave={(e) => {
-                                  const el = e.currentTarget as HTMLElement;
-                                  el.style.color = "#8C8C91";
-                                  el.style.background = "transparent";
-                                  el.style.borderColor = "rgba(255,255,255,0.06)";
-                                }}
+                                className="article-row-tag"
+                                style={{ "--tag-color": color } as React.CSSProperties}
                               >
                                 {tag}
                               </button>
                             );
                           })}
+                          </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Right: source + time */}
-                    <div className="article-row-meta" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
-                      <span style={{ fontSize: 10, color: "#8C8C91", fontWeight: 400, whiteSpace: "nowrap" }}>
-                        {article.sourceName}
-                      </span>
-                      <span style={{ fontSize: 10, color: "#8C8C91", fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
-                        {timeAgo(article.publishedAt)}
-                      </span>
+                    <div className="article-row-impact" title={`영향도 ${impactScore}`}>
+                      <b>{impactScore}</b>
+                      <span>IMP</span>
                     </div>
                   </div>
                 );
@@ -485,11 +392,8 @@ export function ArticleList({
         )}
 
         {loading && articles.length > 0 && (
-          <div style={{ display: "flex", justifyContent: "center", padding: 24 }}>
-            <svg style={{ width: 20, height: 20, color: "#FFB000" }} className="animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-            </svg>
+          <div className="article-list-loading" aria-label="기사 불러오는 중">
+            <LoaderCircle size={19} className="animate-spin" />
           </div>
         )}
       </div>
@@ -498,26 +402,11 @@ export function ArticleList({
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          style={{
-            position: "absolute",
-            bottom: 16,
-            right: 16,
-            width: 28,
-            height: 28,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#2C2D34",
-            border: "1px solid #2C2D34",
-            borderRadius: 2,
-            color: "#EBEBEB",
-            cursor: "pointer",
-          }}
+          className="article-scroll-top"
           title="맨 위로"
+          aria-label="기사 목록 맨 위로"
         >
-          <svg style={{ width: 14, height: 14 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-          </svg>
+          <ArrowUp size={14} />
         </button>
       )}
 

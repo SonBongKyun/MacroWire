@@ -1,16 +1,5 @@
 "use client";
 
-/**
- * MacroWire wordmark — Bulletin edition.
- *
- * Wire-service masthead: a heavy condensed all-caps wordmark sat next to
- * a tiny meta caption ("DISPATCH №…") in the manner of a 1970s teletype
- * banner. No more gradient text, no Spike SVG mark — typography alone.
- *
- *   <Logo />                          // masthead with caption
- *   <Logo size="xl" caption={false}/> // wordmark only, hero scale
- */
-
 interface LogoProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   /** Show the small "DISPATCH №…" caption next to the wordmark */
@@ -23,11 +12,11 @@ interface LogoProps {
 }
 
 const SIZE_MAP = {
-  xs: { fontSize: 14, capSize: 7,  gap: 6,  letterSpacing: "0.04em" },
-  sm: { fontSize: 18, capSize: 8,  gap: 8,  letterSpacing: "0.04em" },
-  md: { fontSize: 24, capSize: 9,  gap: 10, letterSpacing: "0.05em" },
-  lg: { fontSize: 36, capSize: 10, gap: 14, letterSpacing: "0.05em" },
-  xl: { fontSize: 64, capSize: 12, gap: 18, letterSpacing: "0.06em" },
+  xs: { fontSize: 14, markSize: 21, markFontSize: 7, capSize: 7, gap: 7 },
+  sm: { fontSize: 18, markSize: 27, markFontSize: 8, capSize: 8, gap: 8 },
+  md: { fontSize: 24, markSize: 34, markFontSize: 10, capSize: 9, gap: 10 },
+  lg: { fontSize: 36, markSize: 46, markFontSize: 12, capSize: 10, gap: 13 },
+  xl: { fontSize: 58, markSize: 68, markFontSize: 17, capSize: 12, gap: 16 },
 } as const;
 
 function defaultDispatch(): string {
@@ -48,7 +37,7 @@ export function Logo({
 }: LogoProps) {
   const dims = SIZE_MAP[size];
   const wordmarkColor =
-    color === "amber" ? "#FFB000" : color === "current" ? "currentColor" : "#F5F0E1";
+    color === "amber" ? "#f1bd58" : color === "current" ? "currentColor" : "#f3f4f2";
 
   const dispatch = dispatchNo ?? defaultDispatch();
 
@@ -64,16 +53,32 @@ export function Logo({
       }}
     >
       <span
+        aria-hidden="true"
         style={{
-          fontFamily: "var(--font-display-condensed), 'Anton', 'Pretendard Variable', sans-serif",
-          fontSize: dims.fontSize,
-          fontWeight: 400, // Anton ships at 400
-          color: wordmarkColor,
-          textTransform: "uppercase",
-          letterSpacing: dims.letterSpacing,
+          display: "inline-grid",
+          width: dims.markSize,
+          height: dims.markSize,
+          placeItems: "center",
+          flex: "0 0 auto",
+          color: "#0d1115",
+          background: "#72aef8",
+          borderRadius: 2,
+          fontFamily: "var(--font-mono), monospace",
+          fontSize: dims.markFontSize,
+          fontWeight: 700,
         }}
       >
-        MACROWIRE
+        MW
+      </span>
+      <span
+        style={{
+          fontFamily: "var(--font-interface), 'Pretendard Variable', sans-serif",
+          fontSize: dims.fontSize,
+          fontWeight: 700,
+          color: wordmarkColor,
+        }}
+      >
+        MacroWire
       </span>
       {caption && (
         <span
@@ -83,16 +88,14 @@ export function Logo({
             gap: 2,
             paddingLeft: dims.gap,
             borderLeft: "1px solid rgba(245,240,225,0.18)",
-            fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+            fontFamily: "var(--font-mono), monospace",
             fontSize: dims.capSize,
-            color: "#C9C4B6",
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
+            color: "#929ba4",
             lineHeight: 1.3,
           }}
         >
-          <span>DISPATCH</span>
-          <span style={{ color: "#FFB000" }}>№ {dispatch}</span>
+          <span>Dispatch</span>
+          <span style={{ color: "#72aef8" }}>No. {dispatch}</span>
         </span>
       )}
     </div>

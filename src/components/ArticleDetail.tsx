@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { CheckCheck, Radar } from "lucide-react";
+import { CheckCheck, ChevronRight, Plus, Radar, Trash2 } from "lucide-react";
 import type { Article } from "@/types";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { RelatedArticles } from "@/components/RelatedArticles";
@@ -208,7 +208,7 @@ export function ArticleDetail({
 
   if (!article) {
     return (
-      <aside className="shrink-0 bg-[#08090B] flex flex-col items-center justify-center gap-4 select-none" style={{ width: "100%", height: "100%" }}>
+      <aside className="shrink-0 flex flex-col items-center justify-center gap-4 select-none" style={{ width: "100%", height: "100%" }}>
         <div style={{ opacity: 0.3 }}>
           <svg style={{ width: 40, height: 40, color: "#8C8C91" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
@@ -217,20 +217,15 @@ export function ArticleDetail({
         <div style={{ textAlign: "center", padding: "0 32px" }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: "#EBEBEB" }}>기사를 선택하세요</p>
           <p style={{ fontSize: 11, color: "#8C8C91", marginTop: 8, lineHeight: 1.6 }}>
-            왼쪽 목록에서 기사를 클릭하거나
+            목록에서 헤드라인을 선택하면 상세 정보가 표시됩니다.
           </p>
-          <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 8 }}>
-            <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>j</kbd>
-            <kbd style={{ fontSize: 9, fontFamily: "var(--font-mono)", padding: "2px 6px", border: "1px solid #2C2D34", borderRadius: 2, color: "#8C8C91" }}>k</kbd>
-            <span style={{ fontSize: 10, color: "#8C8C91" }}>키로 이동</span>
-          </div>
         </div>
       </aside>
     );
   }
 
   return (
-    <aside key={article.id} className="shrink-0 bg-[#08090B] flex flex-col overflow-hidden relative detail-enter" style={{ width: "100%", height: "100%", borderTop: "2px solid #FFB000" }}>
+    <aside key={article.id} className="shrink-0 flex flex-col overflow-hidden relative detail-enter" style={{ width: "100%", height: "100%" }}>
       {/* Reading progress bar */}
       <div className="reading-progress" style={{ width: `${readProgress * 100}%` }} />
 
@@ -355,85 +350,42 @@ export function ArticleDetail({
 
             {/* AI Smart Summary */}
             {smartSummary && (
-              <div style={{ marginTop: 12 }}>
-                <div style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "#FFB000",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase" as const,
-                  marginBottom: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFB000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                  </svg>
-                  AI 분석
+              <div className="detail-analysis">
+                <div className="detail-analysis-label">
+                  <Radar size={12} />
+                  신호 분석
                 </div>
 
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center" }}>
+                <div className="detail-analysis-meta">
                   {/* Key Entities */}
                   {smartSummary.keyEntities.length > 0 && smartSummary.keyEntities.map((entity) => (
-                    <span
-                      key={entity}
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        color: "#FFB000",
-                        border: "1px solid rgba(255,176,0,0.3)",
-                        padding: "1px 6px",
-                        background: "rgba(255,176,0,0.06)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <span key={entity} className="detail-entity">
                       {entity}
                     </span>
                   ))}
 
                   {/* Impact Level Badge */}
                   <span
-                    style={{
-                      fontSize: 9,
-                      fontWeight: 700,
-                      letterSpacing: "0.06em",
-                      padding: "2px 6px",
-                      color: smartSummary.impactLevel === "high" ? "#08090B" : smartSummary.impactLevel === "medium" ? "#EBEBEB" : "#8C8C91",
-                      background: smartSummary.impactLevel === "high" ? "#FFB000" : smartSummary.impactLevel === "medium" ? "#2C2D34" : "rgba(44,45,52,0.5)",
-                      textTransform: "uppercase" as const,
-                    }}
+                    className={`detail-impact is-${smartSummary.impactLevel}`}
                   >
                     {smartSummary.impactLevel === "high" ? "HIGH" : smartSummary.impactLevel === "medium" ? "MED" : "LOW"}
                   </span>
 
                   {/* Sentiment Indicator */}
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 10, color: "#8C8C91" }}>
-                    <span style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: smartSummary.sentiment === "positive" ? "#22c55e" : smartSummary.sentiment === "negative" ? "#ef4444" : "#94a3b8",
-                    }} />
+                  <span className="detail-sentiment">
+                    <span className={`detail-sentiment-dot is-${smartSummary.sentiment}`} />
                     {smartSummary.sentiment === "positive" ? "긍정" : smartSummary.sentiment === "negative" ? "부정" : "중립"}
                   </span>
                 </div>
 
                 {/* Related Topics */}
                 {smartSummary.relatedTopics.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                  <div className="detail-topics">
                     {smartSummary.relatedTopics.map((topic) => (
                       <button
                         key={topic}
                         onClick={() => onTagClick?.(topic)}
-                        style={{
-                          fontSize: 9,
-                          color: "#8C8C91",
-                          background: "rgba(140,140,145,0.08)",
-                          border: "none",
-                          padding: "1px 5px",
-                          cursor: "pointer",
-                        }}
+                        className="detail-topic"
                       >
                         #{topic}
                       </button>
@@ -471,9 +423,7 @@ export function ArticleDetail({
             onClick={() => setNotesOpen((v) => !v)}
             className="flex items-center gap-1.5 w-full text-left group"
           >
-            <svg className={`w-2.5 h-2.5 text-[var(--muted)] transition-transform ${notesOpen ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRight size={13} className={`text-[var(--muted)] transition-transform ${notesOpen ? "rotate-90" : ""}`} />
             <span className="section-label" style={{ marginBottom: 0 }}>메모 &amp; 하이라이트</span>
             {hasNote && (
               <span className="text-[9px] text-[var(--accent)] font-semibold">
@@ -499,19 +449,16 @@ export function ArticleDetail({
                   {highlights.map((h, i) => (
                     <div
                       key={i}
-                      className="relative pl-3 py-2 pr-7 text-[11px] leading-[1.7] text-[var(--foreground-secondary)]"
-                      style={{
-                        borderLeft: "2px solid #FFB000",
-                        background: "rgba(255,176,0,0.06)",
-                      }}
+                      className="detail-highlight"
                     >
                       {h}
                       <button
                         onClick={() => article && articleNotes.removeHighlight(article.id, h)}
-                        className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center text-[var(--muted)] hover:text-[var(--danger)] text-[10px] transition-colors"
+                        className="detail-highlight-remove"
                         title="삭제"
+                        aria-label="하이라이트 삭제"
                       >
-                        ✕
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   ))}
@@ -541,10 +488,11 @@ export function ArticleDetail({
                       setHighlightInput("");
                     }
                   }}
-                  className="px-2 py-1.5 text-[10px] font-semibold metal-btn transition-colors"
-                  style={{ color: "#FFB000", borderColor: "rgba(255,176,0,0.3)" }}
+                  className="detail-add-highlight"
+                  aria-label="하이라이트 추가"
                 >
-                  + 추가
+                  <Plus size={13} />
+                  <span>추가</span>
                 </button>
               </div>
             </div>
