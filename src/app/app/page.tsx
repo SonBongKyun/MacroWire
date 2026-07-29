@@ -80,77 +80,42 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
     ? new Date(lastUpdated).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
     : "--:--";
 
-  /* Em-dash separator — newspaper rule between fields */
-  const sep = <span style={{ color: "rgba(245,240,225,0.18)", padding: "0 4px", fontSize: 10 }}>—</span>;
+  const sep = <span className="status-separator" aria-hidden="true" />;
 
   return (
-    <div
-      className="status-bar px-5 h-7 flex items-center shrink-0 select-none"
-      style={{
-        background: "#08090B",
-        borderTop: "1px solid rgba(245,240,225,0.10)",
-        color: "#C9C4B6",
-        fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
-        fontVariantNumeric: "tabular-nums",
-      }}
-    >
-      <span style={{ fontSize: 10, color: "#FFB000", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" }}>
-        WIRE №{dispatchNo}
+    <div className="status-bar">
+      <span className="status-edition">MW / {dispatchNo}</span>
+      {sep}
+      <span className="status-clock">{clock} KST</span>
+      {sep}
+      <span className={`status-market ${marketStatus.open ? "is-open" : ""}`}>
+        <span className="status-dot" /> KRX {marketStatus.open ? "OPEN" : "CLOSED"}
       </span>
       {sep}
-      <span style={{ fontSize: 10, color: "#F5F0E1", fontWeight: 600, letterSpacing: "0.04em" }}>{clock}</span>
-      <span style={{ fontSize: 9, color: "#8C8C91", marginLeft: 4, letterSpacing: "0.10em" }}>KST</span>
-      {sep}
-      <span style={{
-        fontSize: 10,
-        fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
-        fontWeight: 700,
-        letterSpacing: "0.12em",
-        textTransform: "uppercase",
-        color: marketStatus.open ? "#22c55e" : "#8C8C91",
-      }}>
-        <span style={{ display: "inline-block" }} className={marketStatus.open ? "stat-dot-live" : ""}>{marketStatus.open ? "\u25CF" : "\u25CB"}</span> {marketStatus.open ? "MARKET OPEN" : "MARKET CLOSED"}
+      <span className="status-field">
+        SOURCES <b>{enabledSources}</b><span>/{totalSources}</span>
       </span>
       {sep}
-      <span style={{ fontSize: 10, color: "#C9C4B6", letterSpacing: "0.10em", textTransform: "uppercase" }}>
-        SOURCES <span style={{ color: "#22c55e", fontWeight: 700 }}>{enabledSources}</span>
-        <span style={{ color: "#8C8C91" }}>/{totalSources}</span>
-      </span>
-      {sep}
-      <span style={{ fontSize: 10, color: "#C9C4B6", letterSpacing: "0.10em", textTransform: "uppercase" }}>
-        FILED <span style={{ color: "#F5F0E1", fontWeight: 700 }}>{articleCount}</span>
+      <span className="status-field">
+        FILED <b>{articleCount}</b>
       </span>
       {unreadCount > 0 && (
         <>
           {sep}
-          <span style={{ fontSize: 10, color: "#FFB000", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase" }}>
-            UNREAD {unreadCount}
-          </span>
+          <span className="status-unread">UNREAD {unreadCount}</span>
         </>
       )}
       {activeFilterCount > 0 && (
         <>
           {sep}
-          <span style={{
-            fontSize: 9,
-            background: "#FFB000",
-            color: "#08090B",
-            padding: "1px 6px",
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-          }}>
+          <span className="status-filter">
             {activeFilterCount} FILTER
           </span>
         </>
       )}
       {sep}
-      <span style={{ fontSize: 10, color: "#8C8C91", letterSpacing: "0.10em", textTransform: "uppercase" }}>
-        LAST FILE <span style={{ color: "#C9C4B6" }}>{ingestTime}</span>
-      </span>
-      <div className="flex-1" />
-      <span style={{ fontSize: 9, color: "rgba(245,240,225,0.30)", letterSpacing: "0.10em" }}>
-        j  k  s  /  TAB  n  h  ?
+      <span className="status-field">
+        LAST FILE <b>{ingestTime}</b>
       </span>
     </div>
   );
@@ -601,8 +566,6 @@ function HomeInner() {
 
   return (
     <div className="macro-app flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)]">
-      {/* Ambient Light — single soft gold radial in upper-right, no stars/nebulas */}
-      <div className="ambient-light" aria-hidden="true" />
       {/* Platform Navigation */}
       <PlatformNav
         activeTab={activeMainTab}

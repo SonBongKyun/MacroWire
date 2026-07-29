@@ -106,7 +106,7 @@
    ────────────────────────────────────── */
 @theme {
   /* Bulletin: condensed-display Anton for English headlines, Pretendard 900 fallback for Korean */
-  --font-display: var(--font-display-condensed), "SUIT Variable", "Pretendard Variable", Pretendard, sans-serif;
+  --font-display: var(--font-interface), "SUIT Variable", "Pretendard Variable", Pretendard, sans-serif;
   --font-heading: "Pretendard Variable", Pretendard, "SUIT Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-body:    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-sans:    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;

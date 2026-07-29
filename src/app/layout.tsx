@@ -1,23 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Anton, Crimson_Pro } from "next/font/google";
+import { Crimson_Pro, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "./macro-app.css";
 
-// Wire-bulletin type system —
-// JetBrains Mono for tickers/timestamps/data (sharper than Space Mono)
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   weight: ["400", "500", "700"],
   subsets: ["latin"],
 });
-// Anton — single 400 weight, extreme condensed black, for editorial headlines
-const anton = Anton({
-  variable: "--font-display-condensed",
-  weight: "400",
+
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-interface",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
-// Crimson Pro — high-contrast serif for editorial pull-quotes / datelines
+
 const crimsonPro = Crimson_Pro({
   variable: "--font-serif",
   weight: ["400", "500", "600", "700"],
@@ -27,7 +25,7 @@ const crimsonPro = Crimson_Pro({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#08090B",
+  themeColor: "#0D1013",
   viewportFit: "cover",
 };
 
@@ -54,10 +52,7 @@ export default function RootLayout({
   const document = (
     <html lang="ko" className="dark">
       <head>
-        {/* Korean-optimised type system —
-            Pretendard Variable for body/UI, SUIT Variable for display headlines.
-            Both are open-source variable fonts; jsDelivr serves the dynamic-subset
-            (KO + Latin glyphs only) which keeps payload small. */}
+        {/* Korean fallback fonts complement the self-hosted interface and data faces. */}
         <link
           rel="preconnect"
           href="https://cdn.jsdelivr.net"
@@ -72,7 +67,7 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css"
         />
       </head>
-      <body className={`${jetbrainsMono.variable} ${anton.variable} ${crimsonPro.variable} antialiased`}>
+      <body className={`${jetbrainsMono.variable} ${ibmPlexSans.variable} ${crimsonPro.variable} antialiased`}>
         {children}
         {/* Service worker — disabled. Unregister any leftover SW from a prior
             version so cached "/" shells from before the landing/app split
@@ -101,8 +96,8 @@ export default function RootLayout({
     <ClerkProvider
       appearance={{
         variables: {
-          colorPrimary: "#FFB000",
-          colorBackground: "#08090B",
+          colorPrimary: "#72AEF8",
+          colorBackground: "#0D1013",
         },
       }}
     >
