@@ -163,7 +163,7 @@ export function TopBar({
           onClick={onToggleSaved}
           className={`flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold rounded-[var(--radius-sm)] transition-all ${
             showSaved
-              ? "bg-[var(--gold-surface)] border border-[var(--gold)] text-[var(--gold)]"
+              ? "bg-[var(--accent-surface)] border border-[var(--accent)] text-[var(--accent)]"
               : "metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
           }`}
         >
@@ -180,7 +180,7 @@ export function TopBar({
           </span>
         )}
         {newArticleCount > 0 && (
-          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-[var(--gold)] text-white shadow-sm">
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-[var(--accent)] text-white shadow-sm">
             +{newArticleCount}
           </span>
         )}
@@ -216,7 +216,7 @@ export function TopBar({
         {onTogglePortfolio && (
           <button
             onClick={onTogglePortfolio}
-            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--gold-surface)] transition-all"
+            className="w-7 h-7 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--muted)] hover:text-[var(--accent)] hover:bg-[var(--accent-surface)] transition-all"
             title="포트폴리오"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

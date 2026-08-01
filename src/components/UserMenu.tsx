@@ -18,8 +18,8 @@ export function UserMenu({ tier }: { tier?: "FREE" | "PRO" | "ELITE" }) {
           <button
             style={{
               background: "transparent",
-              border: "1px solid rgba(245,240,225,0.18)",
-              color: "#F5F0E1",
+              border: "1px solid color-mix(in srgb, var(--foreground-bright) 18%, transparent)",
+              color: "var(--foreground-bright)",
               padding: "5px 10px",
               fontSize: 11,
               fontFamily: "var(--font-mono)",
@@ -34,8 +34,8 @@ export function UserMenu({ tier }: { tier?: "FREE" | "PRO" | "ELITE" }) {
         <Link
           href="/#pricing"
           style={{
-            background: "#FFB000",
-            color: "#08090B",
+            background: "var(--accent)",
+            color: "var(--background)",
             padding: "5px 10px",
             fontSize: 11,
             fontFamily: "var(--font-mono)",
@@ -57,9 +57,9 @@ export function UserMenu({ tier }: { tier?: "FREE" | "PRO" | "ELITE" }) {
               fontWeight: 700,
               letterSpacing: "0.12em",
               padding: "2px 6px",
-              background: tier === "ELITE" ? "#FFB000" : "rgba(255,176,0,0.15)",
-              color: tier === "ELITE" ? "#08090B" : "#FFB000",
-              border: "1px solid rgba(255,176,0,0.30)",
+              background: tier === "ELITE" ? "var(--accent)" : "color-mix(in srgb, var(--accent) 15%, transparent)",
+              color: tier === "ELITE" ? "var(--background)" : "var(--accent)",
+              border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)",
               borderRadius: 2,
             }}
           >

@@ -62,7 +62,7 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
         <div
           style={{
             flex: stats.bearPct,
-            background: "linear-gradient(90deg, #ef4444, #ef444480)",
+            background: "linear-gradient(90deg, var(--danger), #ef444480)",
             borderRadius: "1px 0 0 1px",
             minWidth: stats.bearPct > 0 ? 2 : 0,
             transition: "flex 0.5s ease",
@@ -72,7 +72,7 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
         <div
           style={{
             flex: stats.neutralPct,
-            background: "#2C2D34",
+            background: "var(--border)",
             minWidth: stats.neutralPct > 0 ? 2 : 0,
             transition: "flex 0.5s ease",
           }}
@@ -81,7 +81,7 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
         <div
           style={{
             flex: stats.bullPct,
-            background: "linear-gradient(90deg, #22c55e80, #22c55e)",
+            background: "linear-gradient(90deg, #22c55e80, var(--success))",
             borderRadius: "0 1px 1px 0",
             minWidth: stats.bullPct > 0 ? 2 : 0,
             transition: "flex 0.5s ease",
@@ -97,9 +97,9 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
             transform: "translateX(-50%)",
             width: 3,
             height: 14,
-            background: "#FFB000",
+            background: "var(--accent)",
             borderRadius: 1,
-            boxShadow: "0 0 6px rgba(255,176,0,0.5)",
+            boxShadow: "0 0 6px color-mix(in srgb, var(--accent) 50%, transparent)",
             transition: "left 0.5s ease",
           }}
         />
@@ -110,18 +110,18 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
         style={{
           marginTop: 8,
           fontSize: 11,
-          color: "#8C8C91",
+          color: "var(--muted)",
           fontFamily: "var(--font-mono)",
           fontVariantNumeric: "tabular-nums",
           display: "flex",
           gap: 4,
         }}
       >
-        <span style={{ color: "#22c55e" }}>강세 {stats.bullPct}%</span>
-        <span style={{ color: "#8C8C91" }}>{" \u00B7 "}</span>
+        <span style={{ color: "var(--success)" }}>강세 {stats.bullPct}%</span>
+        <span style={{ color: "var(--muted)" }}>{" \u00B7 "}</span>
         <span>중립 {stats.neutralPct}%</span>
-        <span style={{ color: "#8C8C91" }}>{" \u00B7 "}</span>
-        <span style={{ color: "#ef4444" }}>약세 {stats.bearPct}%</span>
+        <span style={{ color: "var(--muted)" }}>{" \u00B7 "}</span>
+        <span style={{ color: "var(--danger)" }}>약세 {stats.bearPct}%</span>
       </div>
     </div>
   );

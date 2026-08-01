@@ -56,7 +56,7 @@ function ToastMessage({ toast, onRemove }: { toast: ToastItem; onRemove: (id: st
 
   const textColor = (toast.type === "info" || isBreaking) ? "var(--foreground-bright)" : "#fff";
 
-  const accentColor = isBreaking ? "#ef4444" : "#FFB000";
+  const accentColor = isBreaking ? "var(--danger)" : "var(--accent)";
 
   const handleClick = () => {
     if (toast.onAction) {
@@ -74,7 +74,7 @@ function ToastMessage({ toast, onRemove }: { toast: ToastItem; onRemove: (id: st
         background: bgColor,
         color: textColor,
         borderLeft: `4px solid ${accentColor}`,
-        border: isBreaking ? `1px solid rgba(239,68,68,0.3)` : undefined,
+        border: isBreaking ? `1px solid color-mix(in srgb, var(--danger) 30%, transparent)` : undefined,
         borderLeftWidth: 4,
         borderLeftColor: accentColor,
         padding: isBreaking ? "12px 16px" : "10px 16px",
@@ -82,7 +82,7 @@ function ToastMessage({ toast, onRemove }: { toast: ToastItem; onRemove: (id: st
         fontSize: 12,
         fontWeight: 500,
         boxShadow: isBreaking
-          ? "0 6px 28px rgba(239,68,68,0.18), 0 4px 16px rgba(0,0,0,0.5)"
+          ? "0 6px 28px color-mix(in srgb, var(--danger) 18%, transparent), 0 4px 16px rgba(0,0,0,0.5)"
           : "0 4px 16px rgba(0,0,0,0.3)",
         pointerEvents: "auto",
         minWidth: isBreaking ? 320 : 200,
@@ -97,7 +97,7 @@ function ToastMessage({ toast, onRemove }: { toast: ToastItem; onRemove: (id: st
             fontSize: 8,
             fontWeight: 800,
             color: "#fff",
-            background: "#ef4444",
+            background: "var(--danger)",
             padding: "2px 6px",
             borderRadius: 1,
             letterSpacing: "0.08em",
@@ -108,7 +108,7 @@ function ToastMessage({ toast, onRemove }: { toast: ToastItem; onRemove: (id: st
             속보
           </span>
           {toast.title && (
-            <span style={{ fontSize: 10, color: "#8C8C91", fontWeight: 500 }}>
+            <span style={{ fontSize: 10, color: "var(--muted)", fontWeight: 500 }}>
               {toast.title}
             </span>
           )}
@@ -118,14 +118,14 @@ function ToastMessage({ toast, onRemove }: { toast: ToastItem; onRemove: (id: st
         fontSize: isBreaking ? 13 : 12,
         lineHeight: isBreaking ? 1.45 : 1.4,
         fontWeight: isBreaking ? 600 : 500,
-        color: isBreaking ? "#EBEBEB" : textColor,
+        color: isBreaking ? "var(--foreground)" : textColor,
       }}>
         {toast.message}
       </div>
       {toast.onAction && isBreaking && (
         <div style={{
           fontSize: 9,
-          color: "#8C8C91",
+          color: "var(--muted)",
           marginTop: 8,
           letterSpacing: "0.05em",
           textTransform: "uppercase",

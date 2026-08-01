@@ -87,7 +87,7 @@ export function Logo({
             flexDirection: "column",
             gap: 2,
             paddingLeft: dims.gap,
-            borderLeft: "1px solid rgba(245,240,225,0.18)",
+            borderLeft: "1px solid color-mix(in srgb, var(--foreground-bright) 18%, transparent)",
             fontFamily: "var(--font-mono), monospace",
             fontSize: dims.capSize,
             color: "#929ba4",

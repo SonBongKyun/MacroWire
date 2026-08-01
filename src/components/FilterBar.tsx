@@ -74,8 +74,8 @@ export function FilterBar({
             style={chip.color
               ? {
                   color: chip.color,
-                  background: `${chip.color}14`,
-                  borderColor: `${chip.color}40`,
+                  background: `color-mix(in srgb, ${chip.color} 8%, transparent)`,
+                  borderColor: `color-mix(in srgb, ${chip.color} 25%, transparent)`,
                 }
               : undefined}
           >

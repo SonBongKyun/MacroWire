@@ -313,10 +313,10 @@ export function NewsTab({
                 fontSize: 11,
                 fontWeight: 500,
                 background: "transparent",
-                border: "1px solid #2C2D34",
+                border: "1px solid var(--border)",
                 borderRadius: 2,
                 padding: "2px 22px 2px 8px",
-                color: "#EBEBEB",
+                color: "var(--foreground)",
                 outline: "none",
                 cursor: "pointer",
                 minWidth: 90,
@@ -329,7 +329,7 @@ export function NewsTab({
                 </option>
               ))}
             </select>
-            <svg className="absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 pointer-events-none" style={{ color: "#8C8C91" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg className="absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 pointer-events-none" style={{ color: "var(--muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
@@ -352,13 +352,13 @@ export function NewsTab({
           </div>
 
           {/* Divider */}
-          <span style={{ width: 1, height: 16, backgroundColor: "#2C2D34" }} />
+          <span style={{ width: 1, height: 16, backgroundColor: "var(--border)" }} />
 
           {/* Read filter as text links */}
           <div className="news-read-filters">
             {READ_FILTERS.map((f, i) => (
               <span key={f.value} className="flex items-center">
-                {i > 0 && <span style={{ color: "#2C2D34", margin: "0 6px" }}>|</span>}
+                {i > 0 && <span style={{ color: "var(--border)", margin: "0 6px" }}>|</span>}
                 <button
                   onClick={() => onReadFilterChange(f.value)}
                   className={readFilter === f.value ? "is-active" : ""}
@@ -400,10 +400,10 @@ export function NewsTab({
                 fontSize: 11,
                 fontWeight: 500,
                 background: "transparent",
-                border: "1px solid #2C2D34",
+                border: "1px solid var(--border)",
                 borderRadius: 2,
                 padding: "2px 22px 2px 8px",
-                color: "#EBEBEB",
+                color: "var(--foreground)",
                 outline: "none",
                 cursor: "pointer",
                 minWidth: 70,
@@ -414,7 +414,7 @@ export function NewsTab({
               <option value="oldest">오래된순</option>
               <option value="source">소스별</option>
             </select>
-            <svg className="absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 pointer-events-none" style={{ color: "#8C8C91" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg className="absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 pointer-events-none" style={{ color: "var(--muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
@@ -475,7 +475,7 @@ export function NewsTab({
 
           {sortedArticles.length === 0 && !loading ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 20px", textAlign: "center" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#EBEBEB", marginBottom: 6 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--foreground)", marginBottom: 6 }}>
                 {focusMode === "breaking"
                   ? "거시경제 속보가 없습니다"
                   : activeFilters.length > 0 || searchQuery
@@ -484,7 +484,7 @@ export function NewsTab({
               </div>
               {(activeFilters.length > 0 || searchQuery) ? (
                 <>
-                  <div style={{ fontSize: 11, color: "#8C8C91", marginBottom: 16, lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 16, lineHeight: 1.6 }}>
                     현재 필터:{" "}
                     {activeFilters.map((f) => f.label).join(", ")}
                     {searchQuery && ((activeFilters.length > 0 ? ", " : "") + `"${searchQuery}"`)}
@@ -497,7 +497,7 @@ export function NewsTab({
                   </button>
                 </>
               ) : (
-                <div style={{ fontSize: 11, color: "#8C8C91", lineHeight: 1.6, maxWidth: 300 }}>
+                <div style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.6, maxWidth: 300 }}>
                   새로고침 버튼을 눌러 기사를 수집하거나 소스를 추가해 보세요
                 </div>
               )}

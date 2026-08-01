@@ -27,7 +27,7 @@ export function StatsBar({ articles, sources }: StatsBarProps) {
   const stats = [
     { label: "전체", value: total, color: "var(--accent)", dot: "var(--accent)" },
     { label: "안읽음", value: unread, color: "var(--accent)", dot: "var(--accent)" },
-    { label: "저장됨", value: saved, color: "var(--gold)", dot: "var(--gold)" },
+    { label: "저장됨", value: saved, color: "var(--accent)", dot: "var(--accent)" },
     { label: "소스", value: `${activeSources}/${sources.length}`, color: "var(--success)", dot: "var(--success)" },
   ];
 

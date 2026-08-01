@@ -43,20 +43,20 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
             style={{
               display: "block",
               padding: "8px 4px",
-              borderBottom: "1px solid #1F2026",
+              borderBottom: "1px solid var(--border-subtle)",
               background: "transparent",
               border: "none",
-              borderBlockEnd: "1px solid #1F2026",
+              borderBlockEnd: "1px solid var(--border-subtle)",
               cursor: "pointer",
               transition: "background 0.15s ease",
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,176,0,0.04)"; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--accent) 4%, transparent)"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
           >
             <p style={{
               fontSize: 11,
               lineHeight: 1.4,
-              color: "#EBEBEB",
+              color: "var(--foreground)",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -70,21 +70,21 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
               <div style={{
                 flex: 1,
                 height: 2,
-                background: "#2C2D34",
+                background: "var(--border)",
                 borderRadius: 1,
                 overflow: "hidden",
               }}>
                 <div style={{
                   width: `${Math.round(s.score * 100)}%`,
                   height: "100%",
-                  background: "#FFB000",
+                  background: "var(--accent)",
                   borderRadius: 1,
                   transition: "width 0.3s ease",
                 }} />
               </div>
               <span style={{
                 fontSize: 9,
-                color: "#FFB000",
+                color: "var(--accent)",
                 fontFamily: "var(--font-mono)",
                 fontVariantNumeric: "tabular-nums",
                 flexShrink: 0,
@@ -96,15 +96,15 @@ export function RelatedArticles({ article, articles, onSelectArticle }: RelatedA
             {/* Reasons */}
             {s.reasons.length > 0 && (
               <div style={{ marginTop: 3 }}>
-                <span style={{ fontSize: 9, color: "#8C8C91", fontStyle: "italic" }}>
+                <span style={{ fontSize: 9, color: "var(--muted)", fontStyle: "italic" }}>
                   {s.reasons.join(" · ")}
                 </span>
               </div>
             )}
 
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
-              <span style={{ fontSize: 9, color: "#FFB000", fontWeight: 500 }}>{s.article.sourceName}</span>
-              <span style={{ fontSize: 9, color: "#8C8C91" }}>{timeAgo(s.article.publishedAt)}</span>
+              <span style={{ fontSize: 9, color: "var(--accent)", fontWeight: 500 }}>{s.article.sourceName}</span>
+              <span style={{ fontSize: 9, color: "var(--muted)" }}>{timeAgo(s.article.publishedAt)}</span>
             </div>
           </button>
         ))}

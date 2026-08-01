@@ -1,0 +1,83 @@
+{
+  "$comment": [
+    "Reference macro indicators that no free market feed publishes — policy",
+    "rates and official statistics. These used to be bare string literals in the",
+    "component, so nothing on screen told you how old they were.",
+    "",
+    "Every entry now carries `asOf` (the release the figure comes from) and",
+    "`staleAfterDays`. Past that age the desk renders the figure dimmed with a",
+    "'확인 필요' marker instead of quietly presenting a stale number as current.",
+    "",
+    "Set `asOf` to null when a figure has not been verified — the panel will say",
+    "so rather than implying it is fresh. Update this file after each release."
+  ],
+
+  "groups": [
+    {
+      "region": "KR",
+      "label": "Korea",
+      "indicators": [
+        {
+          "id": "kr-policy-rate",
+          "label": "기준금리",
+          "value": "3.00%",
+          "direction": "flat",
+          "source": "한국은행",
+          "asOf": null,
+          "staleAfterDays": 60
+        },
+        {
+          "id": "kr-cpi",
+          "label": "CPI (YoY)",
+          "value": "2.1%",
+          "direction": "down",
+          "source": "통계청",
+          "asOf": null,
+          "staleAfterDays": 45
+        },
+        {
+          "id": "kr-gdp",
+          "label": "GDP (YoY)",
+          "value": "2.0%",
+          "direction": "up",
+          "source": "한국은행",
+          "asOf": null,
+          "staleAfterDays": 120
+        }
+      ]
+    },
+    {
+      "region": "US",
+      "label": "US / Global",
+      "indicators": [
+        {
+          "id": "us-policy-rate",
+          "label": "기준금리",
+          "value": "4.25-4.50%",
+          "direction": "flat",
+          "source": "Federal Reserve",
+          "asOf": null,
+          "staleAfterDays": 60
+        },
+        {
+          "id": "us-cpi",
+          "label": "CPI (YoY)",
+          "value": "2.8%",
+          "direction": "down",
+          "source": "BLS",
+          "asOf": null,
+          "staleAfterDays": 45
+        },
+        {
+          "id": "us-gdp",
+          "label": "GDP (QoQ, SAAR)",
+          "value": "2.3%",
+          "direction": "up",
+          "source": "BEA",
+          "asOf": null,
+          "staleAfterDays": 120
+        }
+      ]
+    }
+  ]
+}

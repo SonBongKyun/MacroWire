@@ -136,26 +136,26 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
       }}
     >
       <div
-        className="glass-modal border border-[#2C2D34] shadow-2xl flex flex-col"
+        className="glass-modal border border-[var(--border)] shadow-2xl flex flex-col"
         style={{
           width: 640,
           maxHeight: "80vh",
-          background: "#131316",
+          background: "var(--surface)",
         }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-5 py-4 border-b"
-          style={{ borderColor: "#2C2D34" }}
+          style={{ borderColor: "var(--border)" }}
         >
           <div>
             <h2
               className="font-heading font-bold text-[16px]"
-              style={{ color: "#EBEBEB", letterSpacing: "-0.01em" }}
+              style={{ color: "var(--foreground)", letterSpacing: "-0.01em" }}
             >
               {"\uD050\uB808\uC774\uC158 \uD53C\uB4DC"}
             </h2>
-            <p className="text-[11px] mt-0.5" style={{ color: "#8C8C91" }}>
+            <p className="text-[11px] mt-0.5" style={{ color: "var(--muted)" }}>
               {"\uC800\uC7A5\uB41C \uAE30\uC0AC"} {curatedItems.length}{"\uAC74"} &middot; {"\uBA54\uBAA8 \uBC0F \uD558\uC774\uB77C\uC774\uD2B8 \uD3EC\uD568"}
             </p>
           </div>
@@ -163,20 +163,20 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
             <button
               onClick={handleShareText}
               className="px-3 py-1.5 text-[11px] font-semibold metal-btn transition-colors"
-              style={{ color: "#FFB000", borderColor: "rgba(255,176,0,0.3)" }}
+              style={{ color: "var(--accent)", borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)" }}
             >
               {"\uD53C\uB4DC \uACF5\uC720"}
             </button>
             <button
               onClick={handleExportMarkdown}
               className="px-3 py-1.5 text-[11px] font-semibold metal-btn transition-colors"
-              style={{ color: "#8C8C91" }}
+              style={{ color: "var(--muted)" }}
             >
               {"\uB9C8\uD06C\uB2E4\uC6B4 \uB0B4\uBCF4\uB0B4\uAE30"}
             </button>
             <button
               onClick={onClose}
-              className="w-7 h-7 flex items-center justify-center text-[#8C8C91] hover:text-[#EBEBEB] transition-colors"
+              className="w-7 h-7 flex items-center justify-center text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -188,7 +188,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {curatedItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40" style={{ color: "#8C8C91" }}>
+            <div className="flex flex-col items-center justify-center h-40" style={{ color: "var(--muted)" }}>
               <svg className="w-8 h-8 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
@@ -203,13 +203,13 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                   <div
                     key={article.id}
                     className="border-b pb-4"
-                    style={{ borderColor: "#2C2D34" }}
+                    style={{ borderColor: "var(--border)" }}
                   >
                     {/* Title row */}
                     <div className="flex items-start gap-2">
                       <span
                         className="text-[10px] font-bold tabular-nums shrink-0 mt-0.5"
-                        style={{ color: "#FFB000", minWidth: 18 }}
+                        style={{ color: "var(--accent)", minWidth: 18 }}
                       >
                         {i + 1}.
                       </span>
@@ -219,22 +219,22 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-[13px] font-semibold leading-[1.5] hover:underline"
-                          style={{ color: "#EBEBEB" }}
+                          style={{ color: "var(--foreground)" }}
                         >
                           {article.title}
                         </a>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px]" style={{ color: "#8C8C91" }}>
+                          <span className="text-[10px]" style={{ color: "var(--muted)" }}>
                             {article.sourceName}
                           </span>
-                          <span className="text-[8px]" style={{ color: "#2C2D34" }}>&middot;</span>
-                          <span className="text-[10px] tabular-nums" style={{ color: "#8C8C91" }}>
+                          <span className="text-[8px]" style={{ color: "var(--border)" }}>&middot;</span>
+                          <span className="text-[10px] tabular-nums" style={{ color: "var(--muted)" }}>
                             {formatDate(article.publishedAt)}
                           </span>
                           {article.tags.length > 0 && (
                             <>
-                              <span className="text-[8px]" style={{ color: "#2C2D34" }}>&middot;</span>
-                              <span className="text-[10px]" style={{ color: "#8C8C91" }}>
+                              <span className="text-[8px]" style={{ color: "var(--border)" }}>&middot;</span>
+                              <span className="text-[10px]" style={{ color: "var(--muted)" }}>
                                 {article.tags.slice(0, 3).join(", ")}
                               </span>
                             </>
@@ -246,9 +246,9 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                           <div
                             className="mt-2 px-2.5 py-1.5 text-[11px] leading-[1.6]"
                             style={{
-                              color: "#EBEBEB",
-                              background: "rgba(255,176,0,0.06)",
-                              borderLeft: "2px solid rgba(255,176,0,0.3)",
+                              color: "var(--foreground)",
+                              background: "color-mix(in srgb, var(--accent) 6%, transparent)",
+                              borderLeft: "2px solid color-mix(in srgb, var(--accent) 30%, transparent)",
                             }}
                           >
                             {note.text}
@@ -264,7 +264,7 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
                                 className="pl-3 py-1 text-[11px] leading-[1.6]"
                                 style={{
                                   color: "var(--foreground-secondary, #B0B0B5)",
-                                  borderLeft: "2px solid #FFB000",
+                                  borderLeft: "2px solid var(--accent)",
                                   fontStyle: "italic",
                                 }}
                               >
@@ -285,13 +285,13 @@ export function CuratedFeed({ open, onClose, articles }: CuratedFeedProps) {
         {/* Footer */}
         <div
           className="px-5 py-3 border-t flex items-center justify-between"
-          style={{ borderColor: "#2C2D34" }}
+          style={{ borderColor: "var(--border)" }}
         >
-          <span className="text-[10px]" style={{ color: "#8C8C91" }}>
+          <span className="text-[10px]" style={{ color: "var(--muted)" }}>
             Shift+C {"\uB85C \uD1A0\uAE00"} &middot; ESC {"\uB2EB\uAE30"}
           </span>
           {copyToast && (
-            <span className="text-[10px] font-semibold" style={{ color: "#FFB000" }}>
+            <span className="text-[10px] font-semibold" style={{ color: "var(--accent)" }}>
               {"\uD074\uB9BD\uBCF4\uB4DC\uC5D0 \uBCF5\uC0AC\uB428!"}
             </span>
           )}

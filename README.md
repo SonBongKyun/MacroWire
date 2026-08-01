@@ -48,6 +48,27 @@ npm run dev
 | 읽음/저장 | 기사 읽음 상태 및 저장 토글 |
 | 자동 정리 | 30일 초과 기사 자동 삭제 (저장된 기사 제외) |
 | 3패널 UI | 좌측(소스/태그), 중앙(기사 목록), 우측(기사 상세) |
+| 시세 | Yahoo Finance 기반 단일 시세 계층 — 모든 화면이 같은 일간 등락률과 실제 일중 시세를 사용 |
+| 경제 캘린더 | 공표 규칙에서 매달 자동 산출 (하드코딩 일정 없음) |
+
+## 데이터 원칙
+
+화면에 보이는 숫자는 실제 값이거나, 실제가 아닐 때 그렇다고 표시합니다.
+
+- **시세는 한 곳에서만 계산합니다.** `src/lib/market/quote.ts`가 유일한 시세 계층이고
+  `/api/market`과 `/api/portfolio`가 이를 공유합니다. 일간 등락률은 항상
+  Yahoo `meta.previousClose`(직전 정규장 종가)를 기준으로 계산합니다. 조회 구간에 따라
+  달라지는 `chartPreviousClose`를 쓰면 5일 변동률이 일간 변동률로 표시됩니다.
+- **차트는 합성하지 않습니다.** 스파크라인은 실제 일중 종가 시계열입니다. 데이터가
+  부족하면 선을 그리지 않고 "일중 시세 없음"을 표시합니다.
+- **정적 수치는 기준일을 밝힙니다.** `config/macro_indicators.json`의 각 항목은 `asOf`와
+  `staleAfterDays`를 가지며, 기간이 지나거나 `asOf`가 `null`이면 대시보드가 흐리게
+  표시하고 "확인 필요"를 붙입니다.
+- **캘린더는 규칙으로 생성합니다.** `config/econ_calendar.json`의 `recurring` 규칙을
+  `src/lib/calendar/econ.ts`가 매달 전개하므로 일정이 과거로 굳지 않습니다.
+  규칙 기반 항목은 "추정"으로 표시하고, 확정된 중앙은행 일정은 `anchors`에 추가하면
+  같은 날짜의 추정 항목을 대체합니다. 발표 시각은 기관 현지 시간대로 저장해
+  미국 지표가 EST/EDT를 자동으로 따라갑니다.
 
 ## API 엔드포인트
 
@@ -85,11 +106,15 @@ src/
 │   ├── db/seed.ts
 │   ├── ingest/ingest.ts
 │   ├── cleanup/cleaner.ts
+│   ├── calendar/econ.ts      # 경제 캘린더 규칙 전개
+│   ├── market/quote.ts       # 시세 단일 계층 (등락률·스파크라인)
 │   └── tagging/tagger.ts
 └── types/index.ts
 config/
 ├── tag_rules.json
-└── sources_seed.json
+├── sources_seed.json
+├── econ_calendar.json        # 반복 규칙 + 확정 일정(anchors)
+└── macro_indicators.json     # 정책금리·물가 등 참고 수치 (asOf 필수)
 prisma/
 └── schema.prisma
 ```

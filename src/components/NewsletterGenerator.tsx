@@ -62,29 +62,29 @@ function generateNewsletterHTML(
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MacroWire DAILY BRIEF</title>
 </head>
-<body style="margin:0;padding:0;background:#08090B;font-family:Arial,Helvetica,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#08090B;padding:20px 0;">
+<body style="margin:0;padding:0;background:var(--background);font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:var(--background);padding:20px 0;">
 <tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#08090B;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:var(--background);">
   <!-- Header -->
-  <tr><td style="padding:32px 24px 16px;border-bottom:2px solid #FFB000;">
-    <div style="font-size:22px;font-weight:700;color:#FFB000;letter-spacing:0.08em;">MacroWire</div>
-    <div style="font-size:14px;color:#8C8C91;margin-top:4px;">DAILY BRIEF · ${date}</div>
+  <tr><td style="padding:32px 24px 16px;border-bottom:2px solid var(--accent);">
+    <div style="font-size:22px;font-weight:700;color:var(--accent);letter-spacing:0.08em;">MacroWire</div>
+    <div style="font-size:14px;color:var(--muted);margin-top:4px;">DAILY BRIEF · ${date}</div>
   </td></tr>
 
   <!-- Stories -->
   <tr><td style="padding:24px;">
-    <div style="font-size:11px;font-weight:700;color:#8C8C91;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">TOP STORIES</div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">TOP STORIES</div>
     ${selected.map((a, i) => {
       const time = new Date(a.publishedAt).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
       const preview = a.summary ? (a.summary.length > 120 ? a.summary.slice(0, 120) + "..." : a.summary) : "";
       return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;border-bottom:1px solid #2C2D34;padding-bottom:16px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:16px;">
     <tr><td>
-      <div style="font-size:13px;color:#FFB000;font-weight:700;margin-bottom:4px;">${String(i + 1).padStart(2, "0")}</div>
-      <a href="${a.url}" style="font-size:15px;color:#EBEBEB;font-weight:600;text-decoration:none;line-height:1.4;">${a.title}</a>
-      <div style="font-size:12px;color:#8C8C91;margin-top:6px;">${a.sourceName} · ${time}</div>
-      ${preview ? `<div style="font-size:13px;color:#8C8C91;margin-top:8px;line-height:1.5;">${preview}</div>` : ""}
+      <div style="font-size:13px;color:var(--accent);font-weight:700;margin-bottom:4px;">${String(i + 1).padStart(2, "0")}</div>
+      <a href="${a.url}" style="font-size:15px;color:var(--foreground);font-weight:600;text-decoration:none;line-height:1.4;">${a.title}</a>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">${a.sourceName} · ${time}</div>
+      ${preview ? `<div style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5;">${preview}</div>` : ""}
     </td></tr>
     </table>`;
     }).join("")}
@@ -93,15 +93,15 @@ function generateNewsletterHTML(
   ${prices && prices.length > 0 ? `
   <!-- Market -->
   <tr><td style="padding:0 24px 24px;">
-    <div style="font-size:11px;font-weight:700;color:#8C8C91;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;padding-top:8px;border-top:2px solid #2C2D34;">MARKET SNAPSHOT</div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;padding-top:8px;border-top:2px solid var(--border);">MARKET SNAPSHOT</div>
     <table width="100%" cellpadding="0" cellspacing="0">
     ${prices.map((p) => {
       const sign = p.change >= 0 ? "+" : "";
-      const color = p.change >= 0 ? "#22C55E" : "#EF4444";
+      const color = p.change >= 0 ? "var(--success)" : "var(--danger)";
       return `
-      <tr style="border-bottom:1px solid #2C2D34;">
-        <td style="padding:8px 0;font-size:13px;color:#EBEBEB;font-weight:600;">${p.symbol}</td>
-        <td style="padding:8px 0;font-size:13px;color:#EBEBEB;text-align:right;font-family:monospace;">${p.price.toLocaleString()}</td>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 0;font-size:13px;color:var(--foreground);font-weight:600;">${p.symbol}</td>
+        <td style="padding:8px 0;font-size:13px;color:var(--foreground);text-align:right;font-family:monospace;">${p.price.toLocaleString()}</td>
         <td style="padding:8px 0;font-size:13px;color:${color};text-align:right;font-family:monospace;">${sign}${p.changePct.toFixed(2)}%</td>
       </tr>`;
     }).join("")}
@@ -109,8 +109,8 @@ function generateNewsletterHTML(
   </td></tr>` : ""}
 
   <!-- Footer -->
-  <tr><td style="padding:20px 24px;border-top:1px solid #2C2D34;text-align:center;">
-    <div style="font-size:11px;color:#8C8C91;">Powered by <span style="color:#FFB000;font-weight:700;">MacroWire</span></div>
+  <tr><td style="padding:20px 24px;border-top:1px solid var(--border);text-align:center;">
+    <div style="font-size:11px;color:var(--muted);">Powered by <span style="color:var(--accent);font-weight:700;">MacroWire</span></div>
   </td></tr>
 </table>
 </td></tr>
@@ -191,8 +191,8 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
         className="w-full mb-8"
         style={{
           maxWidth: 900,
-          background: "#08090B",
-          border: "1px solid #2C2D34",
+          background: "var(--background)",
+          border: "1px solid var(--border)",
           display: "grid",
           gridTemplateColumns: "340px 1fr",
           minHeight: 500,
@@ -200,20 +200,20 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
         }}
       >
         {/* Left: Article Selection */}
-        <div style={{ borderRight: "1px solid #2C2D34", display: "flex", flexDirection: "column" }}>
+        <div style={{ borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column" }}>
           {/* Header */}
           <div
             className="flex items-center justify-between px-4 py-3"
-            style={{ borderBottom: "1px solid #2C2D34" }}
+            style={{ borderBottom: "1px solid var(--border)" }}
           >
             <div>
               <h2
                 className="font-heading"
-                style={{ color: "#FFB000", fontSize: 14, letterSpacing: "0.06em", fontWeight: 700 }}
+                style={{ color: "var(--accent)", fontSize: 14, letterSpacing: "0.06em", fontWeight: 700 }}
               >
                 NEWSLETTER
               </h2>
-              <p style={{ fontSize: 10, color: "#8C8C91", marginTop: 1 }}>
+              <p style={{ fontSize: 10, color: "var(--muted)", marginTop: 1 }}>
                 {selectedIds.size}건 선택됨
               </p>
             </div>
@@ -221,14 +221,14 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
               <button
                 onClick={selectAll}
                 className="text-[10px] font-medium transition-colors"
-                style={{ color: "#8C8C91", padding: "2px 6px", border: "1px solid #2C2D34" }}
+                style={{ color: "var(--muted)", padding: "2px 6px", border: "1px solid var(--border)" }}
               >
                 전체 선택
               </button>
               <button
                 onClick={selectNone}
                 className="text-[10px] font-medium transition-colors"
-                style={{ color: "#8C8C91", padding: "2px 6px", border: "1px solid #2C2D34" }}
+                style={{ color: "var(--muted)", padding: "2px 6px", border: "1px solid var(--border)" }}
               >
                 선택 해제
               </button>
@@ -249,8 +249,8 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                   className="cursor-pointer transition-colors"
                   style={{
                     padding: "10px 14px",
-                    borderBottom: "1px solid #2C2D34",
-                    background: isSelected ? "rgba(255,176,0,0.06)" : "transparent",
+                    borderBottom: "1px solid var(--border)",
+                    background: isSelected ? "color-mix(in srgb, var(--accent) 6%, transparent)" : "transparent",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
@@ -258,8 +258,8 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                       style={{
                         width: 16,
                         height: 16,
-                        border: `1px solid ${isSelected ? "#FFB000" : "#2C2D34"}`,
-                        background: isSelected ? "rgba(255,176,0,0.2)" : "transparent",
+                        border: `1px solid ${isSelected ? "var(--accent)" : "var(--border)"}`,
+                        background: isSelected ? "color-mix(in srgb, var(--accent) 20%, transparent)" : "transparent",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -268,7 +268,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                       }}
                     >
                       {isSelected && (
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#FFB000" strokeWidth="1.5">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--accent)" strokeWidth="1.5">
                           <path d="M2 5l2 2 4-4" />
                         </svg>
                       )}
@@ -278,7 +278,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                         style={{
                           fontSize: 12,
                           fontWeight: 500,
-                          color: isSelected ? "#EBEBEB" : "#8C8C91",
+                          color: isSelected ? "var(--foreground)" : "var(--muted)",
                           lineHeight: 1.4,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -287,9 +287,9 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                       >
                         {a.title}
                       </div>
-                      <div style={{ fontSize: 10, color: "#8C8C91", marginTop: 2 }}>
+                      <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
                         {a.sourceName} · {time}
-                        {a.isSaved && <span style={{ color: "#FFB000", marginLeft: 6 }}>★</span>}
+                        {a.isSaved && <span style={{ color: "var(--accent)", marginLeft: 6 }}>★</span>}
                       </div>
                     </div>
                   </div>
@@ -297,7 +297,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
               );
             })}
             {recentArticles.length === 0 && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: "#8C8C91", fontSize: 12 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: "var(--muted)", fontSize: 12 }}>
                 기사가 없습니다.
               </div>
             )}
@@ -309,7 +309,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
           {/* Preview Header */}
           <div
             className="flex items-center justify-between px-4 py-3"
-            style={{ borderBottom: "1px solid #2C2D34" }}
+            style={{ borderBottom: "1px solid var(--border)" }}
           >
             <div className="flex items-center gap-2">
               <button
@@ -317,9 +317,9 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 className="text-[10px] font-medium transition-colors"
                 style={{
                   padding: "3px 8px",
-                  border: "1px solid #2C2D34",
-                  background: previewMode === "preview" ? "rgba(255,176,0,0.15)" : "transparent",
-                  color: previewMode === "preview" ? "#FFB000" : "#8C8C91",
+                  border: "1px solid var(--border)",
+                  background: previewMode === "preview" ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "transparent",
+                  color: previewMode === "preview" ? "var(--accent)" : "var(--muted)",
                 }}
               >
                 미리보기
@@ -329,9 +329,9 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 className="text-[10px] font-medium transition-colors"
                 style={{
                   padding: "3px 8px",
-                  border: "1px solid #2C2D34",
-                  background: previewMode === "text" ? "rgba(255,176,0,0.15)" : "transparent",
-                  color: previewMode === "text" ? "#FFB000" : "#8C8C91",
+                  border: "1px solid var(--border)",
+                  background: previewMode === "text" ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "transparent",
+                  color: previewMode === "text" ? "var(--accent)" : "var(--muted)",
                 }}
               >
                 텍스트
@@ -342,9 +342,9 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 onClick={handleCopyClipboard}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
                 style={{
-                  border: "1px solid #2C2D34",
-                  background: copied ? "rgba(255,176,0,0.15)" : "transparent",
-                  color: copied ? "#FFB000" : "#8C8C91",
+                  border: "1px solid var(--border)",
+                  background: copied ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "transparent",
+                  color: copied ? "var(--accent)" : "var(--muted)",
                 }}
               >
                 {copied ? "복사됨" : "클립보드 복사"}
@@ -352,13 +352,13 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
               <button
                 onClick={handleDownloadHTML}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
-                style={{ border: "1px solid #2C2D34", background: "transparent", color: "#8C8C91" }}
+                style={{ border: "1px solid var(--border)", background: "transparent", color: "var(--muted)" }}
               >
                 HTML 다운로드
               </button>
               <button
                 onClick={onClose}
-                className="flex items-center justify-center w-7 h-7 text-[#8C8C91] hover:text-[#EBEBEB] transition-colors"
+                className="flex items-center justify-center w-7 h-7 text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M1 1l12 12M13 1L1 13" />
@@ -370,7 +370,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
           {/* Preview Content */}
           <div style={{ flex: 1, overflowY: "auto", padding: previewMode === "text" ? 0 : 20 }}>
             {selectedArticles.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "60px 0", color: "#8C8C91", fontSize: 12 }}>
+              <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)", fontSize: 12 }}>
                 기사를 선택하세요
               </div>
             ) : previewMode === "text" ? (
@@ -378,7 +378,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 style={{
                   fontFamily: "'Space Mono', monospace",
                   fontSize: 12,
-                  color: "#EBEBEB",
+                  color: "var(--foreground)",
                   lineHeight: 1.6,
                   padding: 20,
                   whiteSpace: "pre-wrap",
@@ -391,11 +391,11 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
               /* Formatted preview */
               <div style={{ maxWidth: 560, margin: "0 auto" }}>
                 {/* Newsletter Header */}
-                <div style={{ paddingBottom: 14, borderBottom: "2px solid #FFB000", marginBottom: 20 }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: "#FFB000", letterSpacing: "0.08em" }}>
+                <div style={{ paddingBottom: 14, borderBottom: "2px solid var(--accent)", marginBottom: 20 }}>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)", letterSpacing: "0.08em" }}>
                     MacroWire
                   </div>
-                  <div style={{ fontSize: 13, color: "#8C8C91", marginTop: 4 }}>
+                  <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
                     DAILY BRIEF · {formatDate()}
                   </div>
                 </div>
@@ -405,7 +405,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                   style={{
                     fontSize: 10,
                     fontWeight: 700,
-                    color: "#8C8C91",
+                    color: "var(--muted)",
                     letterSpacing: "0.1em",
                     textTransform: "uppercase" as const,
                     marginBottom: 14,
@@ -423,19 +423,19 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                   return (
                     <div
                       key={a.id}
-                      style={{ marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid #2C2D34" }}
+                      style={{ marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid var(--border)" }}
                     >
-                      <div style={{ fontSize: 12, color: "#FFB000", fontWeight: 700, marginBottom: 4 }}>
+                      <div style={{ fontSize: 12, color: "var(--accent)", fontWeight: 700, marginBottom: 4 }}>
                         {String(i + 1).padStart(2, "0")}
                       </div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "#EBEBEB", lineHeight: 1.4 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)", lineHeight: 1.4 }}>
                         {a.title}
                       </div>
-                      <div style={{ fontSize: 11, color: "#8C8C91", marginTop: 5 }}>
+                      <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 5 }}>
                         {a.sourceName} · {time}
                       </div>
                       {preview && (
-                        <div style={{ fontSize: 12, color: "#8C8C91", marginTop: 6, lineHeight: 1.5 }}>
+                        <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 6, lineHeight: 1.5 }}>
                           {preview}
                         </div>
                       )}
@@ -445,12 +445,12 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
 
                 {/* Market Snapshot */}
                 {portfolioPrices && portfolioPrices.length > 0 && (
-                  <div style={{ marginTop: 8, paddingTop: 16, borderTop: "2px solid #2C2D34" }}>
+                  <div style={{ marginTop: 8, paddingTop: 16, borderTop: "2px solid var(--border)" }}>
                     <div
                       style={{
                         fontSize: 10,
                         fontWeight: 700,
-                        color: "#8C8C91",
+                        color: "var(--muted)",
                         letterSpacing: "0.1em",
                         textTransform: "uppercase" as const,
                         marginBottom: 10,
@@ -460,11 +460,11 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                     </div>
                     {portfolioPrices.map((p) => {
                       const sign = p.change >= 0 ? "+" : "";
-                      const color = p.change >= 0 ? "#22C55E" : "#EF4444";
+                      const color = p.change >= 0 ? "var(--success)" : "var(--danger)";
                       return (
                         <div
                           key={p.symbol}
-                          style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid #2C2D34", fontSize: 12 }}
+                          style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--border)", fontSize: 12 }}
                         >
                           <span style={{ fontWeight: 600 }}>{p.symbol}</span>
                           <span style={{ fontFamily: "'Space Mono', monospace" }}>
@@ -478,9 +478,9 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                 )}
 
                 {/* Footer */}
-                <div style={{ marginTop: 24, paddingTop: 14, borderTop: "1px solid #2C2D34", textAlign: "center" }}>
-                  <span style={{ fontSize: 11, color: "#8C8C91" }}>
-                    Powered by <span style={{ color: "#FFB000", fontWeight: 700 }}>MacroWire</span>
+                <div style={{ marginTop: 24, paddingTop: 14, borderTop: "1px solid var(--border)", textAlign: "center" }}>
+                  <span style={{ fontSize: 11, color: "var(--muted)" }}>
+                    Powered by <span style={{ color: "var(--accent)", fontWeight: 700 }}>MacroWire</span>
                   </span>
                 </div>
               </div>

@@ -42,8 +42,8 @@ export function LocaleSwitch() {
     <button
       onClick={() => change(k)}
       style={{
-        background: locale === k ? "rgba(255,176,0,0.18)" : "transparent",
-        color: locale === k ? "#FFB000" : "#8C8C91",
+        background: locale === k ? "color-mix(in srgb, var(--accent) 18%, transparent)" : "transparent",
+        color: locale === k ? "var(--accent)" : "var(--muted)",
         border: "none",
         padding: "3px 8px",
         fontSize: 10,
@@ -63,7 +63,7 @@ export function LocaleSwitch() {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        border: "1px solid rgba(245,240,225,0.18)",
+        border: "1px solid color-mix(in srgb, var(--foreground-bright) 18%, transparent)",
         borderRadius: 2,
         overflow: "hidden",
       }}

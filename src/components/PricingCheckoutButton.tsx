@@ -29,8 +29,8 @@ export function PricingCheckoutButton({
     transition: "background 0.15s",
   };
   const onPrimary: React.CSSProperties = highlight
-    ? { ...baseStyle, background: "#FFB000", color: "#08090B", border: "1px solid #FFB000" }
-    : { ...baseStyle, background: "transparent", color: "#F5F0E1", border: "1px solid rgba(245,240,225,0.30)" };
+    ? { ...baseStyle, background: "var(--accent)", color: "var(--background)", border: "1px solid var(--accent)" }
+    : { ...baseStyle, background: "transparent", color: "var(--foreground-bright)", border: "1px solid color-mix(in srgb, var(--foreground-bright) 30%, transparent)" };
 
   if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
     return (
@@ -90,7 +90,7 @@ export function PricingCheckoutButton({
         </button>
       </Show>
       {err && (
-        <div style={{ marginTop: 8, fontSize: 11, color: "#ff6b6b", fontFamily: "var(--font-mono)" }}>
+        <div style={{ marginTop: 8, fontSize: 11, color: "var(--danger)", fontFamily: "var(--font-mono)" }}>
           {err}
         </div>
       )}

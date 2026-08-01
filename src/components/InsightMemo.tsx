@@ -138,25 +138,25 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
       <div
         className="glass-modal border shadow-2xl flex flex-col"
         style={{
-          borderColor: "#2C2D34",
-          background: "#131316",
+          borderColor: "var(--border)",
+          background: "var(--surface)",
           maxHeight: "calc(100vh - 80px)",
         }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3 border-b"
-          style={{ borderColor: "#2C2D34" }}
+          style={{ borderColor: "var(--border)" }}
         >
           <h3
             className="font-heading font-bold text-[13px]"
-            style={{ color: "#EBEBEB" }}
+            style={{ color: "var(--foreground)" }}
           >
             {"\uC778\uC0AC\uC774\uD2B8 \uBA54\uBAA8"}
           </h3>
           <button
             onClick={onClose}
-            className="w-5 h-5 flex items-center justify-center text-[#8C8C91] hover:text-[#EBEBEB] transition-colors text-xs"
+            className="w-5 h-5 flex items-center justify-center text-[var(--muted)] hover:text-[var(--foreground)] transition-colors text-xs"
           >
             {"\u2715"}
           </button>
@@ -169,19 +169,19 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={"\uC2DC\uC7A5 \uC778\uC0AC\uC774\uD2B8\uB97C \uAE30\uB85D\uD558\uC138\uC694..."}
-            className="w-full bg-[#1B1C22] border px-3 py-2 text-[12px] text-[#EBEBEB] placeholder-[#8C8C91] focus:outline-none resize-none"
-            style={{ borderColor: "#2C2D34", fontSize: 12 }}
+            className="w-full bg-[var(--surface-raised)] border px-3 py-2 text-[12px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none resize-none"
+            style={{ borderColor: "var(--border)", fontSize: 12 }}
             onFocus={(e) => {
-              (e.target as HTMLTextAreaElement).style.borderColor = "rgba(255,176,0,0.4)";
+              (e.target as HTMLTextAreaElement).style.borderColor = "color-mix(in srgb, var(--accent) 40%, transparent)";
             }}
             onBlur={(e) => {
-              (e.target as HTMLTextAreaElement).style.borderColor = "#2C2D34";
+              (e.target as HTMLTextAreaElement).style.borderColor = "var(--border)";
             }}
           />
 
           {/* Tags */}
           <div>
-            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "#8C8C91" }}>
+            <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
               {"\uD0DC\uADF8"}
             </span>
             <div className="flex flex-wrap gap-1 mt-1">
@@ -190,15 +190,15 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                   key={tag}
                   className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px]"
                   style={{
-                    color: "#FFB000",
-                    background: "rgba(255,176,0,0.1)",
-                    border: "1px solid rgba(255,176,0,0.2)",
+                    color: "var(--accent)",
+                    background: "color-mix(in srgb, var(--accent) 10%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)",
                   }}
                 >
                   {tag}
                   <button
                     onClick={() => removeTag(tag)}
-                    className="text-[8px] hover:text-[#EBEBEB] transition-colors"
+                    className="text-[8px] hover:text-[var(--foreground)] transition-colors"
                   >
                     {"\u2715"}
                   </button>
@@ -212,7 +212,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                   if (e.key === "Enter") { e.preventDefault(); addTag(); }
                 }}
                 placeholder={"\uD0DC\uADF8 \uCD94\uAC00..."}
-                className="bg-transparent text-[10px] text-[#EBEBEB] placeholder-[#8C8C91] focus:outline-none"
+                className="bg-transparent text-[10px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none"
                 style={{ width: 70 }}
               />
             </div>
@@ -223,7 +223,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
             <button
               onClick={() => setShowArticlePicker((v) => !v)}
               className="text-[9px] font-bold uppercase tracking-wider flex items-center gap-1"
-              style={{ color: "#8C8C91" }}
+              style={{ color: "var(--muted)" }}
             >
               {"\uAD00\uB828 \uAE30\uC0AC"}
               <svg
@@ -236,7 +236,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
               {linkedArticleIds.length > 0 && (
-                <span className="text-[9px] font-semibold" style={{ color: "#FFB000" }}>
+                <span className="text-[9px] font-semibold" style={{ color: "var(--accent)" }}>
                   {linkedArticleIds.length}
                 </span>
               )}
@@ -254,15 +254,15 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                       className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] truncate"
                       style={{
                         maxWidth: 200,
-                        color: "#EBEBEB",
-                        background: "rgba(255,176,0,0.06)",
-                        border: "1px solid #2C2D34",
+                        color: "var(--foreground)",
+                        background: "color-mix(in srgb, var(--accent) 6%, transparent)",
+                        border: "1px solid var(--border)",
                       }}
                     >
                       {a.title.slice(0, 30)}...
                       <button
                         onClick={() => toggleLinkedArticle(id)}
-                        className="text-[8px] text-[#8C8C91] hover:text-[#EBEBEB] shrink-0"
+                        className="text-[8px] text-[var(--muted)] hover:text-[var(--foreground)] shrink-0"
                       >
                         {"\u2715"}
                       </button>
@@ -279,8 +279,8 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                   value={articleSearch}
                   onChange={(e) => setArticleSearch(e.target.value)}
                   placeholder={"\uAE30\uC0AC \uAC80\uC0C9..."}
-                  className="w-full bg-[#1B1C22] border px-2 py-1 text-[10px] text-[#EBEBEB] placeholder-[#8C8C91] focus:outline-none"
-                  style={{ borderColor: "#2C2D34" }}
+                  className="w-full bg-[var(--surface-raised)] border px-2 py-1 text-[10px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none"
+                  style={{ borderColor: "var(--border)" }}
                 />
                 <div
                   className="overflow-y-auto"
@@ -294,8 +294,8 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                         onClick={() => toggleLinkedArticle(a.id)}
                         className="w-full text-left px-2 py-1 text-[10px] truncate transition-colors flex items-center gap-1.5"
                         style={{
-                          color: isLinked ? "#FFB000" : "#EBEBEB",
-                          background: isLinked ? "rgba(255,176,0,0.08)" : "transparent",
+                          color: isLinked ? "var(--accent)" : "var(--foreground)",
+                          background: isLinked ? "color-mix(in srgb, var(--accent) 8%, transparent)" : "transparent",
                         }}
                         onMouseEnter={(e) => {
                           if (!isLinked) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
@@ -322,9 +322,9 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
             disabled={!text.trim()}
             className="w-full py-2 text-[11px] font-bold transition-colors"
             style={{
-              background: text.trim() ? "rgba(255,176,0,0.15)" : "rgba(255,176,0,0.05)",
-              color: text.trim() ? "#FFB000" : "#8C8C91",
-              border: `1px solid ${text.trim() ? "rgba(255,176,0,0.3)" : "#2C2D34"}`,
+              background: text.trim() ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "color-mix(in srgb, var(--accent) 5%, transparent)",
+              color: text.trim() ? "var(--accent)" : "var(--muted)",
+              border: `1px solid ${text.trim() ? "color-mix(in srgb, var(--accent) 30%, transparent)" : "var(--border)"}`,
               cursor: text.trim() ? "pointer" : "default",
             }}
           >
@@ -336,10 +336,10 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
         {recentMemos.length > 0 && (
           <div
             className="border-t overflow-y-auto flex-1"
-            style={{ borderColor: "#2C2D34", maxHeight: 300 }}
+            style={{ borderColor: "var(--border)", maxHeight: 300 }}
           >
             <div className="px-4 pt-2.5 pb-1">
-              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "#8C8C91" }}>
+              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
                 {"\uCD5C\uADFC \uBA54\uBAA8"}
               </span>
             </div>
@@ -347,9 +347,9 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
               <div
                 key={memo.id}
                 className="px-4 py-2.5 border-b"
-                style={{ borderColor: "#2C2D34" }}
+                style={{ borderColor: "var(--border)" }}
               >
-                <p className="text-[11px] leading-[1.6]" style={{ color: "#EBEBEB" }}>
+                <p className="text-[11px] leading-[1.6]" style={{ color: "var(--foreground)" }}>
                   {memo.text}
                 </p>
                 {memo.tags.length > 0 && (
@@ -358,7 +358,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                       <span
                         key={tag}
                         className="text-[9px] px-1 py-0"
-                        style={{ color: "#FFB000", background: "rgba(255,176,0,0.08)" }}
+                        style={{ color: "var(--accent)", background: "color-mix(in srgb, var(--accent) 8%, transparent)" }}
                       >
                         #{tag}
                       </span>
@@ -370,7 +370,7 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                     {memo.linkedArticleIds.map((id) => {
                       const a = articles.find((x) => x.id === id);
                       return a ? (
-                        <p key={id} className="text-[9px] truncate" style={{ color: "#8C8C91" }}>
+                        <p key={id} className="text-[9px] truncate" style={{ color: "var(--muted)" }}>
                           {"\u2192"} {a.title}
                         </p>
                       ) : null;
@@ -378,23 +378,23 @@ export function InsightMemo({ open, onClose, articles }: InsightMemoProps) {
                   </div>
                 )}
                 <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[9px] tabular-nums" style={{ color: "#8C8C91" }}>
+                  <span className="text-[9px] tabular-nums" style={{ color: "var(--muted)" }}>
                     {formatTimestamp(memo.createdAt)}
                   </span>
                   <div className="flex-1" />
                   <button
                     onClick={() => copyMemo(memo)}
                     className="text-[9px] font-semibold transition-colors"
-                    style={{ color: copyToast === memo.id ? "#FFB000" : "#8C8C91" }}
+                    style={{ color: copyToast === memo.id ? "var(--accent)" : "var(--muted)" }}
                   >
                     {copyToast === memo.id ? "\uBCF5\uC0AC\uB428!" : "\uBCF5\uC0AC"}
                   </button>
                   <button
                     onClick={() => deleteMemo(memo.id)}
                     className="text-[9px] transition-colors"
-                    style={{ color: "#8C8C91" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#ef4444"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#8C8C91"; }}
+                    style={{ color: "var(--muted)" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--danger)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--muted)"; }}
                   >
                     {"\uC0AD\uC81C"}
                   </button>

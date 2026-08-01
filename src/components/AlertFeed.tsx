@@ -127,8 +127,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
       style={{
         width: 380,
         maxHeight: 520,
-        background: "#1B1C22",
-        border: "1px solid #2C2D34",
+        background: "var(--surface-raised)",
+        border: "1px solid var(--border)",
         display: "flex",
         flexDirection: "column",
         boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
@@ -141,7 +141,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
           alignItems: "center",
           justifyContent: "space-between",
           padding: "10px 14px",
-          borderBottom: "1px solid #2C2D34",
+          borderBottom: "1px solid var(--border)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -149,7 +149,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
             style={{
               fontSize: 11,
               fontWeight: 700,
-              color: "#EBEBEB",
+              color: "var(--foreground)",
               letterSpacing: "0.06em",
               fontFamily: "var(--font-heading)",
             }}
@@ -161,8 +161,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
               style={{
                 fontSize: 9,
                 fontWeight: 700,
-                color: "#08090B",
-                background: "#FFB000",
+                color: "var(--background)",
+                background: "var(--accent)",
                 padding: "1px 6px",
                 borderRadius: 2,
                 fontFamily: "var(--font-mono)",
@@ -178,20 +178,20 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
               onClick={markAllRead}
               style={{
                 background: "none",
-                border: "1px solid #2C2D34",
-                color: "#8C8C91",
+                border: "1px solid var(--border)",
+                color: "var(--muted)",
                 fontSize: 10,
                 padding: "3px 8px",
                 cursor: "pointer",
                 fontWeight: 600,
               }}
               onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.color = "#FFB000";
-                (e.target as HTMLElement).style.borderColor = "#FFB000";
+                (e.target as HTMLElement).style.color = "var(--accent)";
+                (e.target as HTMLElement).style.borderColor = "var(--accent)";
               }}
               onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.color = "#8C8C91";
-                (e.target as HTMLElement).style.borderColor = "#2C2D34";
+                (e.target as HTMLElement).style.color = "var(--muted)";
+                (e.target as HTMLElement).style.borderColor = "var(--border)";
               }}
             >
               모두 읽음
@@ -202,7 +202,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
             style={{
               background: "none",
               border: "none",
-              color: "#8C8C91",
+              color: "var(--muted)",
               fontSize: 14,
               cursor: "pointer",
               padding: "0 2px",
@@ -235,20 +235,20 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                 padding: "10px 14px",
                 width: "100%",
                 textAlign: "left",
-                background: item.read ? "transparent" : "rgba(255,176,0,0.04)",
+                background: item.read ? "transparent" : "color-mix(in srgb, var(--accent) 4%, transparent)",
                 border: "none",
-                borderBottom: "1px solid rgba(44,45,52,0.5)",
+                borderBottom: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
                 cursor: "pointer",
-                borderLeft: item.read ? "2px solid transparent" : "2px solid #FFB000",
+                borderLeft: item.read ? "2px solid transparent" : "2px solid var(--accent)",
                 transition: "background 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,176,0,0.08)";
+                (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--accent) 8%, transparent)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background = item.read
                   ? "transparent"
-                  : "rgba(255,176,0,0.04)";
+                  : "color-mix(in srgb, var(--accent) 4%, transparent)";
               }}
             >
               {/* Rule type icon */}
@@ -262,8 +262,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                   fontSize: 10,
                   fontWeight: 700,
                   fontFamily: "var(--font-mono)",
-                  color: item.read ? "#8C8C91" : "#FFB000",
-                  background: item.read ? "rgba(140,140,145,0.1)" : "rgba(255,176,0,0.15)",
+                  color: item.read ? "var(--muted)" : "var(--accent)",
+                  background: item.read ? "rgba(140,140,145,0.1)" : "color-mix(in srgb, var(--accent) 15%, transparent)",
                   flexShrink: 0,
                   borderRadius: 2,
                 }}
@@ -277,7 +277,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                   style={{
                     fontSize: 12,
                     fontWeight: item.read ? 400 : 600,
-                    color: item.read ? "#8C8C91" : "#EBEBEB",
+                    color: item.read ? "var(--muted)" : "var(--foreground)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -299,7 +299,7 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                       fontSize: 9,
                       fontFamily: "var(--font-mono)",
                       fontVariantNumeric: "tabular-nums",
-                      color: "#8C8C91",
+                      color: "var(--muted)",
                     }}
                   >
                     {new Date(item.timestamp).toLocaleTimeString("ko-KR", {
@@ -311,8 +311,8 @@ export function AlertFeed({ articles, rules, onSelectArticle, onClose }: AlertFe
                     style={{
                       fontSize: 9,
                       fontWeight: 600,
-                      color: item.read ? "#8C8C91" : "#FFB000",
-                      background: item.read ? "rgba(140,140,145,0.08)" : "rgba(255,176,0,0.12)",
+                      color: item.read ? "var(--muted)" : "var(--accent)",
+                      background: item.read ? "rgba(140,140,145,0.08)" : "color-mix(in srgb, var(--accent) 12%, transparent)",
                       padding: "1px 5px",
                       borderRadius: 2,
                     }}

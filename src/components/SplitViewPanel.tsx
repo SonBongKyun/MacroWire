@@ -62,15 +62,15 @@ export function SplitViewPanel({
     <div
       className="h-full overflow-y-auto"
       style={{
-        borderLeft: "1px solid #2C2D34",
-        background: "#08090B",
+        borderLeft: "1px solid var(--border)",
+        background: "var(--background)",
       }}
     >
       {/* Mode Toggle */}
       <div
         className="flex items-center shrink-0"
         style={{
-          borderBottom: "1px solid #2C2D34",
+          borderBottom: "1px solid var(--border)",
           height: 32,
           padding: "0 12px",
           gap: 0,
@@ -88,7 +88,7 @@ export function SplitViewPanel({
                 cursor: "pointer",
                 fontSize: 10,
                 fontWeight: isActive ? 700 : 500,
-                color: isActive ? "#FFB000" : "#8C8C91",
+                color: isActive ? "var(--accent)" : "var(--muted)",
                 padding: "0 10px",
                 height: 32,
                 position: "relative",
@@ -106,7 +106,7 @@ export function SplitViewPanel({
                     left: 10,
                     right: 10,
                     height: 2,
-                    background: "#FFB000",
+                    background: "var(--accent)",
                   }}
                 />
               )}
@@ -123,7 +123,7 @@ export function SplitViewPanel({
               style={{
                 fontSize: 9,
                 fontWeight: 700,
-                color: "#8C8C91",
+                color: "var(--muted)",
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
                 marginBottom: 10,
@@ -132,9 +132,9 @@ export function SplitViewPanel({
               Portfolio Prices
             </div>
             {portfolioLoading ? (
-              <div style={{ fontSize: 11, color: "#8C8C91" }}>로딩...</div>
+              <div style={{ fontSize: 11, color: "var(--muted)" }}>로딩...</div>
             ) : portfolioPrices.length === 0 ? (
-              <div style={{ fontSize: 11, color: "#8C8C91" }}>포트폴리오 비어있음</div>
+              <div style={{ fontSize: 11, color: "var(--muted)" }}>포트폴리오 비어있음</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
                 {portfolioPrices.map((item) => (
@@ -145,7 +145,7 @@ export function SplitViewPanel({
                       alignItems: "center",
                       justifyContent: "space-between",
                       padding: "6px 0",
-                      borderBottom: "1px solid rgba(44,45,52,0.5)",
+                      borderBottom: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
                     }}
                   >
                     <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -153,7 +153,7 @@ export function SplitViewPanel({
                         style={{
                           fontSize: 11,
                           fontWeight: 600,
-                          color: "#EBEBEB",
+                          color: "var(--foreground)",
                         }}
                       >
                         {item.label}
@@ -162,7 +162,7 @@ export function SplitViewPanel({
                         style={{
                           fontSize: 9,
                           fontFamily: "var(--font-mono)",
-                          color: "#8C8C91",
+                          color: "var(--muted)",
                           textTransform: "uppercase",
                         }}
                       >
@@ -175,7 +175,7 @@ export function SplitViewPanel({
                           fontSize: 12,
                           fontWeight: 700,
                           fontFamily: "var(--font-mono)",
-                          color: "#EBEBEB",
+                          color: "var(--foreground)",
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >
@@ -187,7 +187,7 @@ export function SplitViewPanel({
                           fontWeight: 600,
                           fontFamily: "var(--font-mono)",
                           fontVariantNumeric: "tabular-nums",
-                          color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
+                          color: item.changePct >= 0 ? "var(--success)" : "var(--danger)",
                         }}
                       >
                         {item.changePct >= 0 ? "+" : ""}{item.changePct.toFixed(2)}%
@@ -204,7 +204,7 @@ export function SplitViewPanel({
               style={{
                 fontSize: 9,
                 fontWeight: 700,
-                color: "#8C8C91",
+                color: "var(--muted)",
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
                 marginBottom: 10,
@@ -232,7 +232,7 @@ export function SplitViewPanel({
                   key={stat.label}
                   style={{
                     padding: "8px 10px",
-                    border: "1px solid #2C2D34",
+                    border: "1px solid var(--border)",
                     borderRadius: 2,
                   }}
                 >
@@ -240,7 +240,7 @@ export function SplitViewPanel({
                     style={{
                       fontSize: 20,
                       fontWeight: 800,
-                      color: "#FFB000",
+                      color: "var(--accent)",
                       fontFamily: "var(--font-mono)",
                       fontVariantNumeric: "tabular-nums",
                       lineHeight: 1,
@@ -251,7 +251,7 @@ export function SplitViewPanel({
                   <div
                     style={{
                       fontSize: 9,
-                      color: "#8C8C91",
+                      color: "var(--muted)",
                       fontWeight: 500,
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
@@ -271,7 +271,7 @@ export function SplitViewPanel({
                   style={{
                     fontSize: 9,
                     fontWeight: 700,
-                    color: "#8C8C91",
+                    color: "var(--muted)",
                     textTransform: "uppercase",
                     letterSpacing: "0.1em",
                     marginBottom: 8,
@@ -287,10 +287,10 @@ export function SplitViewPanel({
                         fontSize: 10,
                         fontWeight: 600,
                         padding: "2px 8px",
-                        border: "1px solid rgba(255,176,0,0.2)",
+                        border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)",
                         borderRadius: 2,
-                        color: "#FFB000",
-                        background: "rgba(255,176,0,0.05)",
+                        color: "var(--accent)",
+                        background: "color-mix(in srgb, var(--accent) 5%, transparent)",
                       }}
                     >
                       {tag}
@@ -298,7 +298,7 @@ export function SplitViewPanel({
                         style={{
                           marginLeft: 4,
                           fontSize: 9,
-                          color: "#8C8C91",
+                          color: "var(--muted)",
                           fontFamily: "var(--font-mono)",
                         }}
                       >
@@ -317,7 +317,7 @@ export function SplitViewPanel({
                   style={{
                     fontSize: 9,
                     fontWeight: 700,
-                    color: "#8C8C91",
+                    color: "var(--muted)",
                     textTransform: "uppercase",
                     letterSpacing: "0.1em",
                     marginBottom: 8,
@@ -334,17 +334,17 @@ export function SplitViewPanel({
                         alignItems: "center",
                         justifyContent: "space-between",
                         padding: "5px 0",
-                        borderBottom: "1px solid rgba(44,45,52,0.5)",
+                        borderBottom: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
                       }}
                     >
-                      <span style={{ fontSize: 11, color: "#EBEBEB", fontWeight: 500 }}>
+                      <span style={{ fontSize: 11, color: "var(--foreground)", fontWeight: 500 }}>
                         {source}
                       </span>
                       <span
                         style={{
                           fontSize: 10,
                           fontFamily: "var(--font-mono)",
-                          color: "#8C8C91",
+                          color: "var(--muted)",
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >

@@ -120,7 +120,7 @@ export function MarketTicker() {
       <div className="ticker-track flex items-center gap-4">
         {items.map((item, idx) => {
           const isUp = item.change >= 0;
-          const color = isUp ? "#22c55e" : "#ef4444";
+          const color = isUp ? "var(--success)" : "var(--danger)";
           const arrow = isUp ? "\u25B2" : "\u25BC";
           const tickClass = tickClasses[item.symbol] || "";
 
@@ -161,7 +161,7 @@ export function MarketTicker() {
           <span className="text-[8px] text-[var(--border-strong)] mx-2">|</span>
           <span
             className="text-[9px] tabular-nums font-mono shrink-0"
-            style={{ color: "#8C8C91", whiteSpace: "nowrap" }}
+            style={{ color: "var(--muted)", whiteSpace: "nowrap" }}
           >
             {lastUpdated.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
           </span>

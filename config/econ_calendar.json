@@ -1,0 +1,133 @@
+{
+  "$comment": [
+    "Economic calendar source. Two kinds of entries:",
+    "",
+    "  recurring — statistical releases that follow a published, stable schedule",
+    "              (e.g. US nonfarm payrolls is always the first Friday). These",
+    "              are expanded for any month, so this file never goes stale.",
+    "              They are surfaced in the UI as 추정 (estimated) because the",
+    "              agency can shift a release by a day.",
+    "",
+    "  anchors   — one-off dates that cannot be derived from a rule: central-bank",
+    "              meetings, ad-hoc briefings. Add them here as they are published",
+    "              (FOMC and 한은 금통위 publish a full-year schedule in advance).",
+    "              These render as 확정 (confirmed). Past anchors are ignored, so",
+    "              leaving old ones here is harmless.",
+    "",
+    "Times are LOCAL to the release agency and converted to KST for display,",
+    "so US releases follow EST/EDT automatically instead of drifting an hour."
+  ],
+
+  "recurring": [
+    {
+      "id": "kr-trade",
+      "title": "한국 수출입 동향",
+      "region": "KR",
+      "importance": "high",
+      "time": "09:00",
+      "timeZone": "Asia/Seoul",
+      "rule": { "kind": "dayOfMonth", "day": 1, "adjust": "next" }
+    },
+    {
+      "id": "kr-cpi",
+      "title": "한국 소비자물가동향",
+      "region": "KR",
+      "importance": "high",
+      "time": "08:00",
+      "timeZone": "Asia/Seoul",
+      "rule": { "kind": "dayOfMonth", "day": 2, "adjust": "next" }
+    },
+    {
+      "id": "kr-employment",
+      "title": "한국 고용동향",
+      "region": "KR",
+      "importance": "medium",
+      "time": "08:00",
+      "timeZone": "Asia/Seoul",
+      "rule": { "kind": "nthWeekday", "nth": 2, "weekday": 3 }
+    },
+    {
+      "id": "kr-industrial",
+      "title": "한국 산업활동동향",
+      "region": "KR",
+      "importance": "medium",
+      "time": "08:00",
+      "timeZone": "Asia/Seoul",
+      "rule": { "kind": "lastBusinessDay" }
+    },
+    {
+      "id": "us-payrolls",
+      "title": "미국 고용보고서 (비농업)",
+      "region": "US",
+      "importance": "high",
+      "time": "08:30",
+      "timeZone": "America/New_York",
+      "rule": { "kind": "nthWeekday", "nth": 1, "weekday": 5 }
+    },
+    {
+      "id": "us-cpi",
+      "title": "미국 소비자물가 (CPI)",
+      "region": "US",
+      "importance": "high",
+      "time": "08:30",
+      "timeZone": "America/New_York",
+      "rule": { "kind": "nthWeekday", "nth": 2, "weekday": 3 }
+    },
+    {
+      "id": "us-ppi",
+      "title": "미국 생산자물가 (PPI)",
+      "region": "US",
+      "importance": "medium",
+      "time": "08:30",
+      "timeZone": "America/New_York",
+      "rule": { "kind": "nthWeekday", "nth": 2, "weekday": 4 }
+    },
+    {
+      "id": "us-retail",
+      "title": "미국 소매판매",
+      "region": "US",
+      "importance": "medium",
+      "time": "08:30",
+      "timeZone": "America/New_York",
+      "rule": { "kind": "nthWeekday", "nth": 3, "weekday": 2 }
+    },
+    {
+      "id": "us-ism",
+      "title": "미국 ISM 제조업 PMI",
+      "region": "US",
+      "importance": "high",
+      "time": "10:00",
+      "timeZone": "America/New_York",
+      "rule": { "kind": "dayOfMonth", "day": 1, "adjust": "next" }
+    },
+    {
+      "id": "us-pce",
+      "title": "미국 PCE 물가지수",
+      "region": "US",
+      "importance": "high",
+      "time": "08:30",
+      "timeZone": "America/New_York",
+      "rule": { "kind": "nthWeekday", "nth": -1, "weekday": 5 }
+    },
+    {
+      "id": "cn-pmi",
+      "title": "중국 제조업 PMI",
+      "region": "CN",
+      "importance": "high",
+      "time": "09:30",
+      "timeZone": "Asia/Shanghai",
+      "rule": { "kind": "lastBusinessDay" }
+    },
+    {
+      "id": "eu-hicp",
+      "title": "유로존 HICP 물가 (속보)",
+      "region": "EU",
+      "importance": "high",
+      "time": "11:00",
+      "timeZone": "Europe/Brussels",
+      "rule": { "kind": "lastBusinessDay" }
+    }
+  ],
+
+  "anchors": []
+}

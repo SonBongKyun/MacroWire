@@ -77,7 +77,7 @@ export function ExportPanel({ articles, onClose }: ExportPanelProps) {
 body{font-family:-apple-system,sans-serif;margin:40px;color:#333}
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid #ddd;padding:8px 12px;text-align:left;font-size:13px}
-th{background:#f5f5f5;font-weight:700}
+th{background:var(--foreground-bright);font-weight:700}
 a{color:#1e3a5f;text-decoration:none}
 a:hover{text-decoration:underline}
 .tag{display:inline-block;padding:1px 6px;margin:1px;border-radius:3px;font-size:10px;font-weight:600;background:#f0f0f0;color:#555}

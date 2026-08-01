@@ -210,13 +210,13 @@ export function ArticleDetail({
     return (
       <aside className="shrink-0 flex flex-col items-center justify-center gap-4 select-none" style={{ width: "100%", height: "100%" }}>
         <div style={{ opacity: 0.3 }}>
-          <svg style={{ width: 40, height: 40, color: "#8C8C91" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+          <svg style={{ width: 40, height: 40, color: "var(--muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
           </svg>
         </div>
         <div style={{ textAlign: "center", padding: "0 32px" }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: "#EBEBEB" }}>기사를 선택하세요</p>
-          <p style={{ fontSize: 11, color: "#8C8C91", marginTop: 8, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>기사를 선택하세요</p>
+          <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 8, lineHeight: 1.6 }}>
             목록에서 헤드라인을 선택하면 상세 정보가 표시됩니다.
           </p>
         </div>
@@ -254,7 +254,7 @@ export function ArticleDetail({
               return (
                 <span
                   className="text-[9px] font-semibold px-1.5 py-0.5 rounded-[2px]"
-                  style={{ color: s.color, backgroundColor: `${s.color}18` }}
+                  style={{ color: s.color, backgroundColor: `color-mix(in srgb, ${s.color} 9%, transparent)` }}
                 >
                   {s.label}
                 </span>
@@ -324,7 +324,7 @@ export function ArticleDetail({
                 <button
                   key={tag}
                   className="tag-pill tag-pill-lg"
-                  style={{ color, backgroundColor: `${color}15`, borderColor: `${color}30` }}
+                  style={{ color, backgroundColor: `color-mix(in srgb, ${color} 8%, transparent)`, borderColor: `color-mix(in srgb, ${color} 19%, transparent)` }}
                   onClick={() => onTagClick?.(tag)}
                   title={`${tag} — ${tagCounts[tag] || 0}건`}
                 >
@@ -709,7 +709,7 @@ export function ArticleDetail({
                     <span
                       key={tag}
                       className="tag-pill tag-pill-lg"
-                      style={{ color, backgroundColor: `${color}15`, borderColor: `${color}30` }}
+                      style={{ color, backgroundColor: `color-mix(in srgb, ${color} 8%, transparent)`, borderColor: `color-mix(in srgb, ${color} 19%, transparent)` }}
                     >
                       {tag}
                     </span>

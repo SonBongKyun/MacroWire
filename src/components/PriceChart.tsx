@@ -70,8 +70,8 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
   const visibleData = zoomLevel > 0 ? data.slice(Math.max(data.length - Math.max(data.length - zoomLevel, 6))) : data;
 
   const isPositive = change !== undefined ? change >= 0 : visibleData[visibleData.length - 1] >= visibleData[0];
-  const lineColor = isPositive ? "#FFB000" : "#ef4444";
-  const fillColor = isPositive ? "rgba(255,176,0,0.1)" : "rgba(239,68,68,0.1)";
+  const lineColor = isPositive ? "var(--accent)" : "var(--danger)";
+  const fillColor = isPositive ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "color-mix(in srgb, var(--danger) 10%, transparent)";
 
   const padRight = 52;
   const padTop = 6;
@@ -134,7 +134,7 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
           onWheel={handleWheel}
         >
           {/* Reference line at start price */}
-          <line x1={0} y1={startY} x2={chartW} y2={startY} stroke="#2C2D34" strokeWidth={1} strokeDasharray="3,3" />
+          <line x1={0} y1={startY} x2={chartW} y2={startY} stroke="var(--border)" strokeWidth={1} strokeDasharray="3,3" />
 
           {/* Area fill */}
           <path d={areaPath} fill={fillColor} style={{ transition: "d 0.2s ease" }} />
@@ -146,10 +146,10 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
           <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r={2.5} fill={lineColor} />
 
           {/* Y-axis: min/max labels on right */}
-          <text x={w - 2} y={padTop + 4} textAnchor="end" fill="#8C8C91" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
+          <text x={w - 2} y={padTop + 4} textAnchor="end" fill="var(--muted)" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
             {max >= 1000 ? max.toLocaleString("en-US", { maximumFractionDigits: 0 }) : max.toFixed(2)}
           </text>
-          <text x={w - 2} y={padTop + chartH} textAnchor="end" fill="#8C8C91" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
+          <text x={w - 2} y={padTop + chartH} textAnchor="end" fill="var(--muted)" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
             {min >= 1000 ? min.toLocaleString("en-US", { maximumFractionDigits: 0 }) : min.toFixed(2)}
           </text>
 
@@ -160,7 +160,7 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
 
           {/* X-axis labels */}
           {xLabels.map((xl) => (
-            <text key={xl.label} x={xl.x} y={height - 2} textAnchor="middle" fill="#8C8C91" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
+            <text key={xl.label} x={xl.x} y={height - 2} textAnchor="middle" fill="var(--muted)" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
               {xl.label}
             </text>
           ))}
@@ -168,8 +168,8 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
           {/* Hover crosshair */}
           {hoverPoint && (
             <>
-              <line x1={hoverPoint.x} y1={padTop} x2={hoverPoint.x} y2={padTop + chartH} stroke="#8C8C91" strokeWidth={1} strokeDasharray="3,3" pointerEvents="none" />
-              <circle cx={hoverPoint.x} cy={hoverPoint.y} r={4} fill="#FFB000" pointerEvents="none" />
+              <line x1={hoverPoint.x} y1={padTop} x2={hoverPoint.x} y2={padTop + chartH} stroke="var(--muted)" strokeWidth={1} strokeDasharray="3,3" pointerEvents="none" />
+              <circle cx={hoverPoint.x} cy={hoverPoint.y} r={4} fill="var(--accent)" pointerEvents="none" />
             </>
           )}
         </svg>
@@ -182,12 +182,12 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
               left: hoverPoint.x,
               top: hoverPoint.y - 32,
               transform: "translateX(-50%)",
-              background: "#1B1C22",
-              border: "1px solid #2C2D34",
+              background: "var(--surface-raised)",
+              border: "1px solid var(--border)",
               padding: "4px 8px",
               fontFamily: "'Space Mono', var(--font-mono), monospace",
               fontSize: 11,
-              color: "#EBEBEB",
+              color: "var(--foreground)",
               whiteSpace: "nowrap",
               pointerEvents: "none",
               zIndex: 10,
@@ -213,16 +213,16 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
                   fontSize: 10,
                   fontWeight: 600,
                   fontFamily: "'Space Mono', var(--font-mono), monospace",
-                  color: isActive ? "#08090B" : "#8C8C91",
-                  background: isActive ? "#FFB000" : "transparent",
-                  border: isActive ? "1px solid #FFB000" : "1px solid #2C2D34",
+                  color: isActive ? "var(--background)" : "var(--muted)",
+                  background: isActive ? "var(--accent)" : "transparent",
+                  border: isActive ? "1px solid var(--accent)" : "1px solid var(--border)",
                   cursor: "pointer",
                   transition: "all 0.15s ease",
                   letterSpacing: "0.04em",
                   lineHeight: 1.4,
                 }}
-                onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "#FFB000"; }}
-                onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "#2C2D34"; }}
+                onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"; }}
+                onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
               >
                 {r.label}
               </button>
@@ -250,8 +250,8 @@ export function MiniSparkline({
   if (!data || data.length < 2) return null;
 
   const isPositive = change !== undefined ? change >= 0 : data[data.length - 1] >= data[0];
-  const lineColor = isPositive ? "#FFB000" : "#ef4444";
-  const fillColor = isPositive ? "rgba(255,176,0,0.08)" : "rgba(239,68,68,0.08)";
+  const lineColor = isPositive ? "var(--accent)" : "var(--danger)";
+  const fillColor = isPositive ? "color-mix(in srgb, var(--accent) 8%, transparent)" : "color-mix(in srgb, var(--danger) 8%, transparent)";
 
   const pad = 1;
   const min = Math.min(...data);

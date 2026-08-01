@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback, DragEvent } from "react";
 import type { Article, Source } from "@/types";
+import type { Quote } from "@/lib/market/quote";
 import type { PortfolioPrice } from "@/hooks/usePortfolio";
 import type { WatchlistStore } from "@/hooks/useWatchlist";
 import { MiniSparkline } from "@/components/PriceChart";
@@ -19,42 +20,59 @@ import type { Recommendation } from "@/lib/ai/recommendations";
 import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
 import { isMacroSignal } from "@/lib/news/signal";
 
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 function AnimatedNumber({ value, duration = 600 }: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);
   const prev = useRef(0);
 
   useEffect(() => {
     const start = prev.current;
-    const diff = value - start;
-    if (diff === 0) return;
-    const startTime = Date.now();
-    const tick = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      setDisplay(Math.round(start + diff * eased));
-      if (progress < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
     prev.current = value;
+    const diff = value - start;
+
+    // Land on the exact figure with no animation when the target has not moved,
+    // or when the reader has asked for reduced motion. A counting stat is
+    // decoration; the number itself is the point.
+    if (diff === 0 || prefersReducedMotion()) {
+      setDisplay(value);
+      return;
+    }
+
+    let frame = 0;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      if (progress < 1) {
+        setDisplay(Math.round(start + diff * eased));
+        frame = requestAnimationFrame(tick);
+      } else {
+        setDisplay(value);
+      }
+    };
+    frame = requestAnimationFrame(tick);
+    // Without this an in-flight loop keeps calling setState after unmount.
+    return () => cancelAnimationFrame(frame);
   }, [value, duration]);
 
   return <>{display.toLocaleString()}</>;
 }
 
 
-interface MarketItem {
-  symbol: string;
-  label: string;
-  price: number;
-  change: number;
-  changePct: number;
+type MarketItem = Quote & {
   open?: number;
   high?: number;
   low?: number;
   close?: number;
   fullName?: string;
-}
+};
 
 const MARKET_FULL_NAMES: Record<string, string> = {
   "KOSPI": "Korea Composite Stock Price Index",
@@ -88,8 +106,8 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
         transform: "translateX(-50%)",
         marginTop: 6,
         zIndex: 50,
-        background: "#1B1C22",
-        border: "1px solid #2C2D34",
+        background: "var(--surface-raised)",
+        border: "1px solid var(--border)",
         borderRadius: 2,
         boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
         maxWidth: 200,
@@ -98,7 +116,7 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
         pointerEvents: "none",
       }}
     >
-      <div style={{ fontSize: 10, color: "#8C8C91", marginBottom: 6, lineHeight: 1.3 }}>
+      <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 6, lineHeight: 1.3 }}>
         {fullName}
       </div>
       <div
@@ -106,7 +124,7 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
           fontSize: 18,
           fontWeight: 700,
           fontFamily: "var(--font-mono)",
-          color: "#EBEBEB",
+          color: "var(--foreground)",
           fontVariantNumeric: "tabular-nums",
           lineHeight: 1.1,
           marginBottom: 4,
@@ -128,7 +146,7 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
             fontWeight: 700,
             fontFamily: "var(--font-mono)",
             fontVariantNumeric: "tabular-nums",
-            color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
+            color: item.changePct >= 0 ? "var(--success)" : "var(--danger)",
           }}
         >
           {item.changePct >= 0 ? "+" : ""}{item.change.toFixed(2)}
@@ -139,46 +157,46 @@ function MarketPopover({ item, visible }: { item: MarketItem; visible: boolean }
             fontWeight: 600,
             fontFamily: "var(--font-mono)",
             fontVariantNumeric: "tabular-nums",
-            color: item.changePct >= 0 ? "#22c55e" : "#ef4444",
+            color: item.changePct >= 0 ? "var(--success)" : "var(--danger)",
           }}
         >
           ({item.changePct >= 0 ? "+" : ""}{item.changePct.toFixed(2)}%)
         </span>
       </div>
       {hasRange ? (
-        <div style={{ borderTop: "1px solid #2C2D34", paddingTop: 6 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91" }}>
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--muted)" }}>
             <span>저가</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "var(--foreground)" }}>
               {formatPrice(item.low!)}
             </span>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91", marginTop: 2 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
             <span>고가</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "var(--foreground)" }}>
               {formatPrice(item.high!)}
             </span>
           </div>
         </div>
       ) : item.open != null ? (
-        <div style={{ borderTop: "1px solid #2C2D34", paddingTop: 6 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91" }}>
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--muted)" }}>
             <span>시가</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "var(--foreground)" }}>
               {formatPrice(item.open)}
             </span>
           </div>
           {item.close != null && (
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8C8C91", marginTop: 2 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
               <span>종가</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "#EBEBEB" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: "var(--foreground)" }}>
                 {formatPrice(item.close)}
               </span>
             </div>
           )}
         </div>
       ) : null}
-      <div style={{ marginTop: 6, fontSize: 9, color: "#FFB000" }}>
+      <div style={{ marginTop: 6, fontSize: 9, color: "var(--accent)" }}>
         시장 탭에서 자세히 보기
       </div>
     </div>
@@ -260,9 +278,9 @@ function LayoutDropdown({
       <button
         onClick={() => setOpen((v) => !v)}
         style={{
-          background: open ? "rgba(255,176,0,0.1)" : "transparent",
-          border: open ? "1px solid #FFB000" : "1px solid #2C2D34",
-          color: open ? "#FFB000" : "#8C8C91",
+          background: open ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "transparent",
+          border: open ? "1px solid var(--accent)" : "1px solid var(--border)",
+          color: open ? "var(--accent)" : "var(--muted)",
           fontSize: 10,
           fontWeight: 600,
           padding: "4px 10px",
@@ -289,8 +307,8 @@ function LayoutDropdown({
             right: 0,
             top: "100%",
             marginTop: 4,
-            background: "#1B1C22",
-            border: "1px solid #2C2D34",
+            background: "var(--surface-raised)",
+            border: "1px solid var(--border)",
             minWidth: 220,
             boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
             zIndex: 50,
@@ -300,8 +318,8 @@ function LayoutDropdown({
             <>
               {/* Saved layouts */}
               {layouts.length > 0 && (
-                <div style={{ padding: "6px 0", borderBottom: "1px solid #2C2D34" }}>
-                  <div style={{ padding: "4px 12px", fontSize: 9, color: "#8C8C91", fontWeight: 700, letterSpacing: "0.06em" }}>
+                <div style={{ padding: "6px 0", borderBottom: "1px solid var(--border)" }}>
+                  <div style={{ padding: "4px 12px", fontSize: 9, color: "var(--muted)", fontWeight: 700, letterSpacing: "0.06em" }}>
                     저장된 레이아웃
                   </div>
                   {layouts.map((layout) => (
@@ -320,7 +338,7 @@ function LayoutDropdown({
                           flex: 1,
                           background: "none",
                           border: "none",
-                          color: layout.id === activeLayoutId ? "#FFB000" : "#EBEBEB",
+                          color: layout.id === activeLayoutId ? "var(--accent)" : "var(--foreground)",
                           fontSize: 11,
                           fontWeight: layout.id === activeLayoutId ? 700 : 400,
                           textAlign: "left",
@@ -330,7 +348,7 @@ function LayoutDropdown({
                       >
                         {layout.name}
                         {layout.id === activeLayoutId && (
-                          <span style={{ marginLeft: 6, fontSize: 9, color: "#FFB000" }}>&#10003;</span>
+                          <span style={{ marginLeft: 6, fontSize: 9, color: "var(--accent)" }}>&#10003;</span>
                         )}
                       </button>
                       <button
@@ -338,7 +356,7 @@ function LayoutDropdown({
                         style={{
                           background: "none",
                           border: "none",
-                          color: "#8C8C91",
+                          color: "var(--muted)",
                           fontSize: 11,
                           cursor: "pointer",
                           padding: "0 2px",
@@ -362,21 +380,21 @@ function LayoutDropdown({
                     padding: "8px 12px",
                     background: "none",
                     border: "none",
-                    color: "#EBEBEB",
+                    color: "var(--foreground)",
                     fontSize: 11,
                     cursor: "pointer",
-                    borderBottom: "1px solid #2C2D34",
+                    borderBottom: "1px solid var(--border)",
                   }}
-                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,176,0,0.08)"; }}
+                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "color-mix(in srgb, var(--accent) 8%, transparent)"; }}
                   onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
                 >
                   현재 레이아웃 저장
                   {layouts.length >= 5 && (
-                    <span style={{ fontSize: 9, color: "#8C8C91", marginLeft: 6 }}>(최대 5개)</span>
+                    <span style={{ fontSize: 9, color: "var(--muted)", marginLeft: 6 }}>(최대 5개)</span>
                   )}
                 </button>
               ) : (
-                <div style={{ padding: "8px 12px", borderBottom: "1px solid #2C2D34", display: "flex", gap: 6 }}>
+                <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", display: "flex", gap: 6 }}>
                   <input
                     autoFocus
                     value={saveName}
@@ -392,9 +410,9 @@ function LayoutDropdown({
                     placeholder="레이아웃 이름"
                     style={{
                       flex: 1,
-                      background: "#08090B",
-                      border: "1px solid #2C2D34",
-                      color: "#EBEBEB",
+                      background: "var(--background)",
+                      border: "1px solid var(--border)",
+                      color: "var(--foreground)",
                       fontSize: 11,
                       padding: "3px 8px",
                       outline: "none",
@@ -409,9 +427,9 @@ function LayoutDropdown({
                       }
                     }}
                     style={{
-                      background: "#FFB000",
+                      background: "var(--accent)",
                       border: "none",
-                      color: "#08090B",
+                      color: "var(--background)",
                       fontSize: 10,
                       fontWeight: 700,
                       padding: "3px 8px",
@@ -432,11 +450,11 @@ function LayoutDropdown({
                   padding: "8px 12px",
                   background: "none",
                   border: "none",
-                  color: "#EBEBEB",
+                  color: "var(--foreground)",
                   fontSize: 11,
                   cursor: "pointer",
                 }}
-                onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,176,0,0.08)"; }}
+                onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "color-mix(in srgb, var(--accent) 8%, transparent)"; }}
                 onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
               >
                 섹션 편집
@@ -444,11 +462,11 @@ function LayoutDropdown({
             </>
           ) : (
             <>
-              <div style={{ padding: "8px 12px", borderBottom: "1px solid #2C2D34", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#EBEBEB", letterSpacing: "0.04em" }}>섹션 편집</span>
+              <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "var(--foreground)", letterSpacing: "0.04em" }}>섹션 편집</span>
                 <button
                   onClick={() => setEditing(false)}
-                  style={{ background: "none", border: "none", color: "#8C8C91", fontSize: 10, cursor: "pointer", fontWeight: 600 }}
+                  style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 10, cursor: "pointer", fontWeight: 600 }}
                 >
                   완료
                 </button>
@@ -463,7 +481,7 @@ function LayoutDropdown({
                     padding: "6px 12px",
                     cursor: "pointer",
                     fontSize: 11,
-                    color: sections[key] ? "#EBEBEB" : "#8C8C91",
+                    color: sections[key] ? "var(--foreground)" : "var(--muted)",
                   }}
                 >
                   <input
@@ -471,7 +489,7 @@ function LayoutDropdown({
                     checked={sections[key]}
                     onChange={() => onToggleSection(key)}
                     style={{
-                      accentColor: "#FFB000",
+                      accentColor: "var(--accent)",
                       width: 13,
                       height: 13,
                     }}
@@ -578,7 +596,7 @@ function ArticleVolumeChart({ articles }: { articles: Article[] }) {
                 y={y}
                 width={barWidth}
                 height={Math.max(barH, 1)}
-                fill={isCurrent ? "#D4B878" : "#FFB000"}
+                fill={isCurrent ? "var(--accent-light)" : "var(--accent)"}
                 opacity={isCurrent ? 1 : 0.7}
                 rx={1}
               >
@@ -618,9 +636,9 @@ function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
   }
 
   const FRESHNESS_LABELS: Record<string, { text: string; color: string }> = {
-    active: { text: "ACTIVE", color: "#22c55e" },
-    slow: { text: "SLOW", color: "#FFB000" },
-    stale: { text: "STALE", color: "#ef4444" },
+    active: { text: "ACTIVE", color: "var(--success)" },
+    slow: { text: "SLOW", color: "var(--accent)" },
+    stale: { text: "STALE", color: "var(--danger)" },
   };
 
   return (
@@ -629,7 +647,7 @@ function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {top5.map((rank, idx) => {
           const scoreColor =
-            rank.qualityScore > 70 ? "#FFB000" : rank.qualityScore >= 40 ? "#8C8C91" : "#ef4444";
+            rank.qualityScore > 70 ? "var(--accent)" : rank.qualityScore >= 40 ? "var(--muted)" : "var(--danger)";
           const freshness = FRESHNESS_LABELS[rank.freshness] || FRESHNESS_LABELS.stale;
 
           return (
@@ -715,7 +733,7 @@ function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
                 style={{
                   padding: "2px 5px",
                   color: freshness.color,
-                  background: `${freshness.color}15`,
+                  background: `color-mix(in srgb, ${freshness.color} 8%, transparent)`,
                   fontWeight: 600,
                   flexShrink: 0,
                   fontSize: 9,
@@ -757,7 +775,7 @@ function ReadingProgressSection({
           style={{
             background: "none",
             border: "none",
-            color: "#8C8C91",
+            color: "var(--muted)",
             fontSize: 9,
             cursor: "pointer",
             fontWeight: 600,
@@ -771,7 +789,7 @@ function ReadingProgressSection({
       {editingGoals ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11, color: "#8C8C91", minWidth: 60 }}>일일 목표</span>
+            <span style={{ fontSize: 11, color: "var(--muted)", minWidth: 60 }}>일일 목표</span>
             <input
               type="number"
               min={1}
@@ -780,9 +798,9 @@ function ReadingProgressSection({
               onChange={(e) => onSetGoal({ dailyTarget: Math.max(1, parseInt(e.target.value) || 1) })}
               style={{
                 width: 60,
-                background: "#08090B",
-                border: "1px solid #2C2D34",
-                color: "#EBEBEB",
+                background: "var(--background)",
+                border: "1px solid var(--border)",
+                color: "var(--foreground)",
                 fontSize: 12,
                 fontFamily: "var(--font-mono)",
                 padding: "3px 8px",
@@ -790,10 +808,10 @@ function ReadingProgressSection({
                 outline: "none",
               }}
             />
-            <span style={{ fontSize: 10, color: "#8C8C91" }}>건/일</span>
+            <span style={{ fontSize: 10, color: "var(--muted)" }}>건/일</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11, color: "#8C8C91", minWidth: 60 }}>주간 목표</span>
+            <span style={{ fontSize: 11, color: "var(--muted)", minWidth: 60 }}>주간 목표</span>
             <input
               type="number"
               min={1}
@@ -802,9 +820,9 @@ function ReadingProgressSection({
               onChange={(e) => onSetGoal({ weeklyTarget: Math.max(1, parseInt(e.target.value) || 1) })}
               style={{
                 width: 60,
-                background: "#08090B",
-                border: "1px solid #2C2D34",
-                color: "#EBEBEB",
+                background: "var(--background)",
+                border: "1px solid var(--border)",
+                color: "var(--foreground)",
                 fontSize: 12,
                 fontFamily: "var(--font-mono)",
                 padding: "3px 8px",
@@ -812,7 +830,7 @@ function ReadingProgressSection({
                 outline: "none",
               }}
             />
-            <span style={{ fontSize: 10, color: "#8C8C91" }}>건/주</span>
+            <span style={{ fontSize: 10, color: "var(--muted)" }}>건/주</span>
           </div>
         </div>
       ) : (
@@ -820,17 +838,17 @@ function ReadingProgressSection({
           {/* Daily progress */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "#EBEBEB", fontWeight: 500 }}>오늘</span>
-              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: dailyPct >= 100 ? "#FFB000" : "#EBEBEB", fontWeight: 700 }}>
+              <span style={{ fontSize: 11, color: "var(--foreground)", fontWeight: 500 }}>오늘</span>
+              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: dailyPct >= 100 ? "var(--accent)" : "var(--foreground)", fontWeight: 700 }}>
                 {progress.todayRead}/{goal.dailyTarget}
               </span>
             </div>
-            <div style={{ width: "100%", height: 4, background: "#2C2D34", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: 4, background: "var(--border)", overflow: "hidden" }}>
               <div
                 style={{
                   width: `${dailyPct}%`,
                   height: "100%",
-                  background: "#FFB000",
+                  background: "var(--accent)",
                   transition: "width 0.3s ease",
                 }}
               />
@@ -840,17 +858,17 @@ function ReadingProgressSection({
           {/* Weekly progress */}
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "#EBEBEB", fontWeight: 500 }}>이번 주</span>
-              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: weeklyPct >= 100 ? "#FFB000" : "#EBEBEB", fontWeight: 700 }}>
+              <span style={{ fontSize: 11, color: "var(--foreground)", fontWeight: 500 }}>이번 주</span>
+              <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", color: weeklyPct >= 100 ? "var(--accent)" : "var(--foreground)", fontWeight: 700 }}>
                 {progress.weekRead}/{goal.weeklyTarget}
               </span>
             </div>
-            <div style={{ width: "100%", height: 4, background: "#2C2D34", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: 4, background: "var(--border)", overflow: "hidden" }}>
               <div
                 style={{
                   width: `${weeklyPct}%`,
                   height: "100%",
-                  background: "#FFB000",
+                  background: "var(--accent)",
                   transition: "width 0.3s ease",
                 }}
               />
@@ -864,7 +882,7 @@ function ReadingProgressSection({
                 style={{
                   fontSize: 12,
                   fontWeight: 700,
-                  color: "#FFB000",
+                  color: "var(--accent)",
                   fontFamily: "var(--font-mono)",
                 }}
               >
@@ -883,8 +901,8 @@ function ReadingProgressSection({
 const INSIGHT_TYPE_CONFIG: Record<MarketInsight["type"], { color: string; label: string }> = {
   trend: { color: "#3B82F6", label: "TREND" },
   alert: { color: "#F59E0B", label: "ALERT" },
-  opportunity: { color: "#22C55E", label: "OPPORTUNITY" },
-  risk: { color: "#EF4444", label: "RISK" },
+  opportunity: { color: "var(--success)", label: "OPPORTUNITY" },
+  risk: { color: "var(--danger)", label: "RISK" },
 };
 
 function AiInsightsPanel({ articles }: { articles: Article[] }) {
@@ -908,7 +926,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
               key={i}
               style={{
                 padding: "10px 0",
-                borderBottom: i < insights.length - 1 ? "1px solid #1F2026" : "none",
+                borderBottom: i < insights.length - 1 ? "1px solid var(--border-subtle)" : "none",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -919,7 +937,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                     borderRadius: "50%",
                     background: cfg.color,
                     flexShrink: 0,
-                    boxShadow: `0 0 6px ${cfg.color}60`,
+                    boxShadow: `0 0 6px color-mix(in srgb, ${cfg.color} 38%, transparent)`,
                   }}
                 />
                 <span
@@ -937,7 +955,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                   style={{
                     fontSize: 13,
                     fontWeight: 700,
-                    color: "#EBEBEB",
+                    color: "var(--foreground)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -952,7 +970,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                 style={{
                   margin: "0 0 6px 15px",
                   fontSize: 11,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   lineHeight: 1.5,
                 }}
               >
@@ -965,7 +983,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                     flex: 1,
                     maxWidth: 120,
                     height: 3,
-                    background: "#1F2026",
+                    background: "var(--border-subtle)",
                     borderRadius: 1,
                     overflow: "hidden",
                   }}
@@ -974,7 +992,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                     style={{
                       width: `${insight.confidence}%`,
                       height: "100%",
-                      background: insight.confidence >= 70 ? "#FFB000" : "#8C8C91",
+                      background: insight.confidence >= 70 ? "var(--accent)" : "var(--muted)",
                       borderRadius: 1,
                       transition: "width 0.5s ease",
                     }}
@@ -984,13 +1002,13 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
                   style={{
                     fontSize: 9,
                     fontFamily: "var(--font-mono)",
-                    color: insight.confidence >= 70 ? "#FFB000" : "#8C8C91",
+                    color: insight.confidence >= 70 ? "var(--accent)" : "var(--muted)",
                     fontVariantNumeric: "tabular-nums",
                   }}
                 >
                   {insight.confidence}%
                 </span>
-                <span style={{ fontSize: 9, color: "#8C8C91" }}>
+                <span style={{ fontSize: 9, color: "var(--muted)" }}>
                   {insight.basedOn.length}건 기반
                 </span>
               </div>
@@ -1225,7 +1243,7 @@ export default function DashboardTab({
         {marketLoading ? (
           <>
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} style={{ background: "#131316", border: "1px solid #2C2D34", padding: 16 }}>
+              <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: 16 }}>
                 <div className="skeleton" style={{ height: 10, width: 48, marginBottom: 8 }} />
                 <div className="skeleton" style={{ height: 28, width: 100, marginBottom: 6 }} />
                 <div className="skeleton" style={{ height: 15, width: 70, marginBottom: 8 }} />
@@ -1235,18 +1253,11 @@ export default function DashboardTab({
           </>
         ) : marketData.length > 0 ? (
           marketData.slice(0, 4).map((item) => {
-            const startPrice = item.price / (1 + item.changePct / 100);
-            const steps = 20;
-            const diff = item.price - startPrice;
-            const sparkData: number[] = [startPrice];
-            for (let i = 1; i < steps; i++) {
-              const progress = i / (steps - 1);
-              const noise = (Math.sin(i * 2.7 + item.changePct) * 0.3 + Math.cos(i * 1.3) * 0.2) * Math.abs(diff) * 0.5;
-              sparkData.push(startPrice + diff * progress + noise);
-            }
-            sparkData.push(item.price);
+            // Real intraday closes from /api/market. Cards with too thin a
+            // session simply skip the sparkline rather than draw a made-up one.
+            const sparkData = item.sparkline ?? [];
             const isUp = item.changePct >= 0;
-            const borderColor = isUp ? "#22c55e" : "#ef4444";
+            const borderColor = isUp ? "var(--success)" : "var(--danger)";
             return (
               <div
                 key={item.symbol}
@@ -1263,7 +1274,7 @@ export default function DashboardTab({
                   fontWeight: 700,
                   textTransform: "uppercase" as const,
                   letterSpacing: "0.16em",
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
                 }}>
                   ─ {item.label}
@@ -1273,7 +1284,7 @@ export default function DashboardTab({
                   fontWeight: 700,
                   fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
                   fontVariantNumeric: "tabular-nums" as const,
-                  color: "#F5F0E1",
+                  color: "var(--foreground-bright)",
                   lineHeight: 1,
                   letterSpacing: 0,
                   display: "flex",
@@ -1282,7 +1293,7 @@ export default function DashboardTab({
                 }}>
                   {formatPrice(item.price)}
                   {!isMarketOpen && (
-                    <span style={{ fontSize: 9, fontWeight: 500, color: "#8C8C91", fontFamily: "var(--font-mono)", letterSpacing: "0.12em" }}>CLOSED</span>
+                    <span style={{ fontSize: 9, fontWeight: 500, color: "var(--muted)", fontFamily: "var(--font-mono)", letterSpacing: "0.12em" }}>CLOSED</span>
                   )}
                 </span>
                 <span style={{
@@ -1290,7 +1301,7 @@ export default function DashboardTab({
                   fontWeight: 700,
                   fontFamily: "var(--font-mono)",
                   fontVariantNumeric: "tabular-nums" as const,
-                  color: isUp ? "#22c55e" : "#ef4444",
+                  color: isUp ? "var(--success)" : "var(--danger)",
                   display: "flex",
                   alignItems: "center",
                   gap: 4,
@@ -1298,20 +1309,24 @@ export default function DashboardTab({
                   <span style={{ fontSize: 12 }}>{isUp ? "\u25B2" : "\u25BC"}</span>
                   {isUp ? "+" : ""}{item.change.toFixed(2)} ({Math.abs(item.changePct).toFixed(1)}%)
                 </span>
-                <div style={{ marginTop: 4 }}>
-                  <MiniSparkline
-                    data={sparkData}
-                    width={120}
-                    height={40}
-                    change={item.changePct}
-                  />
+                <div style={{ marginTop: 4, minHeight: 40 }}>
+                  {sparkData.length >= 2 ? (
+                    <MiniSparkline
+                      data={sparkData}
+                      width={120}
+                      height={40}
+                      change={item.changePct}
+                    />
+                  ) : (
+                    <span className="market-strip-nochart">일중 시세 없음</span>
+                  )}
                 </div>
                 <MarketPopover item={item} visible={hoveredMarketIdx === marketData.indexOf(item)} />
               </div>
             );
           })
         ) : (
-          <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "#8C8C91" }}>
+          <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "var(--muted)" }}>
             시장 데이터 없음
           </div>
         )}
@@ -1342,7 +1357,7 @@ export default function DashboardTab({
                   gap: 6,
                   fontSize: 9,
                   fontWeight: 700,
-                  color: "#ef4444",
+                  color: "var(--danger)",
                   background: "transparent",
                   fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
                   letterSpacing: "0.18em",
@@ -1351,16 +1366,16 @@ export default function DashboardTab({
                     width: 6,
                     height: 6,
                     borderRadius: "50%",
-                    backgroundColor: "#ef4444",
+                    backgroundColor: "var(--danger)",
                     animation: "pulse-dot 1.6s ease-in-out infinite",
                   }} />
                   BREAKING
                 </span>
-                <span style={{ color: "#F5F0E1" }}>속보 디스패치</span>
+                <span style={{ color: "var(--foreground-bright)" }}>속보 디스패치</span>
               </div>
               <div style={{
-                borderTop: "1px solid rgba(239,68,68,0.45)",
-                borderBottom: "1px solid rgba(245,240,225,0.10)",
+                borderTop: "1px solid color-mix(in srgb, var(--danger) 45%, transparent)",
+                borderBottom: "1px solid color-mix(in srgb, var(--foreground-bright) 10%, transparent)",
                 background: "transparent",
                 marginBottom: 20,
                 overflow: "hidden",
@@ -1383,7 +1398,7 @@ export default function DashboardTab({
                         padding: "11px 16px",
                         background: "transparent",
                         border: "none",
-                        borderBottom: i < breakingArticles.length - 1 ? "1px solid rgba(239,68,68,0.08)" : "none",
+                        borderBottom: i < breakingArticles.length - 1 ? "1px solid color-mix(in srgb, var(--danger) 8%, transparent)" : "none",
                         cursor: "pointer",
                         transition: "background 0.2s ease, padding-left 0.2s ease",
                         position: "relative",
@@ -1398,15 +1413,15 @@ export default function DashboardTab({
                           width: 4,
                           height: 4,
                           borderRadius: "50%",
-                          backgroundColor: "#ef4444",
-                          boxShadow: "0 0 6px rgba(239,68,68,0.7)",
+                          backgroundColor: "var(--danger)",
+                          boxShadow: "0 0 6px color-mix(in srgb, var(--danger) 70%, transparent)",
                           animation: "pulse-dot 1.6s ease-in-out infinite",
                         }} />
                       )}
                       <span style={{
                         fontSize: 9,
                         fontWeight: 700,
-                        color: isFresh ? "#ef4444" : "rgba(239,68,68,0.7)",
+                        color: isFresh ? "var(--danger)" : "color-mix(in srgb, var(--danger) 70%, transparent)",
                         fontFamily: "var(--font-mono)",
                         flexShrink: 0,
                         paddingTop: 2,
@@ -1418,7 +1433,7 @@ export default function DashboardTab({
                       <span style={{
                         fontSize: 13,
                         fontWeight: !a.isRead ? 500 : 400,
-                        color: !a.isRead ? "#EBEBEB" : "#8C8C91",
+                        color: !a.isRead ? "var(--foreground)" : "var(--muted)",
                         lineHeight: 1.45,
                         flex: 1,
                       }}>
@@ -1426,7 +1441,7 @@ export default function DashboardTab({
                       </span>
                       <span style={{
                         fontSize: 9,
-                        color: "#8C8C91",
+                        color: "var(--muted)",
                         flexShrink: 0,
                         paddingTop: 3,
                         letterSpacing: "0.02em",
@@ -1452,10 +1467,10 @@ export default function DashboardTab({
                 display: "block",
                 textAlign: "left",
                 width: "100%",
-                background: "#15161C",
-                border: "1px solid #2C2D34",
-                borderTop: "1px solid rgba(255,176,0,0.25)",
-                borderLeft: "3px solid #FFB000",
+                background: "var(--surface-raised)",
+                border: "1px solid var(--border)",
+                borderTop: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
+                borderLeft: "3px solid var(--accent)",
                 padding: "24px 28px",
                 cursor: "pointer",
                 marginBottom: 24,
@@ -1468,7 +1483,7 @@ export default function DashboardTab({
                 fontSize: 22,
                 fontWeight: 700,
                 fontFamily: "var(--font-heading)",
-                color: "#EBEBEB",
+                color: "var(--foreground)",
                 letterSpacing: "-0.01em",
               }}>
                 {heroArticle.title}
@@ -1477,7 +1492,7 @@ export default function DashboardTab({
                 <p className="desk-lead-summary" style={{
                   margin: "10px 0 0",
                   fontSize: 13,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   lineHeight: 1.5,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -1497,17 +1512,17 @@ export default function DashboardTab({
                   marginTop: 12,
                 }}
               >
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#FFB000" }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--accent)" }}>
                   {heroArticle.sourceName}
                 </span>
-                <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#FFB000", opacity: 0.5 }} />
-                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#FFB000", opacity: 0.7 }}>
+                <span style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--accent)", opacity: 0.5 }} />
+                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--accent)", opacity: 0.7 }}>
                   {timeAgo(heroArticle.publishedAt)}
                 </span>
               </div>
             </button>
           ) : (
-            <div style={{ borderLeft: "3px solid #2C2D34", paddingLeft: 24, marginBottom: 24, background: "#15161C", padding: "24px 28px", border: "1px solid #2C2D34", borderTop: "1px solid rgba(255,176,0,0.15)" }}>
+            <div style={{ borderLeft: "3px solid var(--border)", paddingLeft: 24, marginBottom: 24, background: "var(--surface-raised)", padding: "24px 28px", border: "1px solid var(--border)", borderTop: "1px solid color-mix(in srgb, var(--accent) 15%, transparent)" }}>
               <div className="skeleton" style={{ height: 24, width: "70%", marginBottom: 10 }} />
               <div className="skeleton" style={{ height: 14, width: "40%" }} />
             </div>
@@ -1524,7 +1539,7 @@ export default function DashboardTab({
                   style={{
                     textAlign: "left",
                     border: "none",
-                    borderBottom: "1px solid #1F2026",
+                    borderBottom: "1px solid var(--border-subtle)",
                     width: "100%",
                     padding: "10px 8px",
                     cursor: "pointer",
@@ -1540,9 +1555,9 @@ export default function DashboardTab({
                         width: 6,
                         height: 6,
                         borderRadius: "50%",
-                        background: "#FFB000",
+                        background: "var(--accent)",
                         flexShrink: 0,
-                        boxShadow: "0 0 6px rgba(255,176,0,0.4)",
+                        boxShadow: "0 0 6px color-mix(in srgb, var(--accent) 40%, transparent)",
                       }}
                     />
                   ) : (
@@ -1552,7 +1567,7 @@ export default function DashboardTab({
                     style={{
                       fontSize: 14,
                       fontWeight: article.isRead ? 400 : 600,
-                      color: "#EBEBEB",
+                      color: "var(--foreground)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
@@ -1567,7 +1582,7 @@ export default function DashboardTab({
                       flexShrink: 0,
                       whiteSpace: "nowrap",
                       fontSize: 10,
-                      color: "#8C8C91",
+                      color: "var(--muted)",
                       fontFamily: "var(--font-mono)",
                     }}
                   >
@@ -1599,10 +1614,10 @@ export default function DashboardTab({
               <div>
                 {recommendations.map((rec) => {
                   const dotColor =
-                    rec.type === "trending" ? "#FFB000" :
-                    rec.type === "personalized" ? "#60a5fa" :
-                    rec.type === "breaking" ? "#ef4444" :
-                    "#22c55e";
+                    rec.type === "trending" ? "var(--accent)" :
+                    rec.type === "personalized" ? "var(--accent-light)" :
+                    rec.type === "breaking" ? "var(--danger)" :
+                    "var(--success)";
                   return (
                     <button
                       className="desk-recommendation-row"
@@ -1614,7 +1629,7 @@ export default function DashboardTab({
                         textAlign: "left",
                         background: "transparent",
                         border: "none",
-                        borderBottom: "1px solid #1F2026",
+                        borderBottom: "1px solid var(--border-subtle)",
                         padding: "8px 4px",
                         cursor: "pointer",
                         transition: "background 0.15s ease",
@@ -1629,14 +1644,14 @@ export default function DashboardTab({
                             borderRadius: "50%",
                             background: dotColor,
                             flexShrink: 0,
-                            boxShadow: `0 0 6px ${dotColor}40`,
+                            boxShadow: `0 0 6px color-mix(in srgb, ${dotColor} 25%, transparent)`,
                           }}
                         />
                         <span
                           style={{
                             fontSize: 13,
                             fontWeight: 500,
-                            color: "#EBEBEB",
+                            color: "var(--foreground)",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -1651,7 +1666,7 @@ export default function DashboardTab({
                             flexShrink: 0,
                             whiteSpace: "nowrap",
                             fontSize: 10,
-                            color: "#8C8C91",
+                            color: "var(--muted)",
                             fontFamily: "var(--font-mono)",
                           }}
                         >
@@ -1659,7 +1674,7 @@ export default function DashboardTab({
                         </span>
                       </div>
                       <div style={{ marginLeft: 14, marginTop: 2 }}>
-                        <span style={{ fontSize: 10, color: "#8C8C91", fontStyle: "italic" }}>
+                        <span style={{ fontSize: 10, color: "var(--muted)", fontStyle: "italic" }}>
                           {rec.reason}
                         </span>
                       </div>
@@ -1697,14 +1712,14 @@ export default function DashboardTab({
               onDragLeave: handleDragLeave,
               onDrop: (e: DragEvent<HTMLDivElement>) => handleDrop(e, sectionId),
               style: {
-                border: isDragOver ? "1px dashed #FFB000" : "1px solid transparent",
+                border: isDragOver ? "1px dashed var(--accent)" : "1px solid transparent",
                 borderRadius: 2,
                 padding: isDragOver ? "8px" : "0px",
                 transition: "border 0.15s ease, padding 0.15s ease",
               } as React.CSSProperties,
             };
             const grip = (
-              <span style={{ cursor: "grab", color: "#8C8C91", fontSize: 12, lineHeight: 1, userSelect: "none", opacity: 0.5, letterSpacing: "0.08em" }} title="드래그하여 순서 변경">⋮⋮</span>
+              <span style={{ cursor: "grab", color: "var(--muted)", fontSize: 12, lineHeight: 1, userSelect: "none", opacity: 0.5, letterSpacing: "0.08em" }} title="드래그하여 순서 변경">⋮⋮</span>
             );
             switch (sectionId) {
               case "market":
@@ -1722,7 +1737,7 @@ export default function DashboardTab({
                           <span className="type-small" style={{ fontWeight: 600, color: "var(--foreground-bright)", minWidth: 80, flexShrink: 0 }}>{item.label}</span>
                           <span style={{ flex: 1 }} />
                           <span className="type-data-md" style={{ color: "var(--foreground-bright)", fontWeight: 700, fontSize: 13 }}>{formatPrice(item.price)}</span>
-                          <span className="type-data-sm" style={{ fontWeight: 600, color: item.changePct >= 0 ? "#22c55e" : "#ef4444", width: 60, textAlign: "right", flexShrink: 0 }}>{item.changePct >= 0 ? "+" : ""}{item.changePct.toFixed(2)}%</span>
+                          <span className="type-data-sm" style={{ fontWeight: 600, color: item.changePct >= 0 ? "var(--success)" : "var(--danger)", width: 60, textAlign: "right", flexShrink: 0 }}>{item.changePct >= 0 ? "+" : ""}{item.changePct.toFixed(2)}%</span>
                         </div>
                       ))}</div>
                     )}
@@ -1737,8 +1752,8 @@ export default function DashboardTab({
                     <div className="dash-stat-grid">
                       {[{ label: "오늘 기사", value: todayStats.total }, { label: "읽지 않음", value: todayStats.unread }, { label: "저장됨", value: todayStats.saved }, { label: "활성 소스", value: todayStats.sourceCount }].map((stat) => (
                         <div key={stat.label} className="dash-stat-cell">
-                          <span style={{ fontSize: 28, fontWeight: 700, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", lineHeight: 1, letterSpacing: "-0.02em", color: "#EBEBEB" }}><AnimatedNumber value={stat.value} /></span>
-                          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", color: "#8C8C91", marginTop: 4 }}>{stat.label}</span>
+                          <span style={{ fontSize: 28, fontWeight: 700, fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums", lineHeight: 1, letterSpacing: "-0.02em", color: "var(--foreground)" }}><AnimatedNumber value={stat.value} /></span>
+                          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", color: "var(--muted)", marginTop: 4 }}>{stat.label}</span>
                         </div>
                       ))}
                     </div>
@@ -1758,7 +1773,7 @@ export default function DashboardTab({
                   <div key={sectionId} {...sectionDragProps}>
                     <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>TRENDING</span>{grip}</div>
                     {trendingTags.length === 0 ? (
-                      <span style={{ fontSize: 12, color: "#8C8C91" }}>태그 데이터 없음</span>
+                      <span style={{ fontSize: 12, color: "var(--muted)" }}>태그 데이터 없음</span>
                     ) : (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {trendingTags.map(([tag, count], idx) => {

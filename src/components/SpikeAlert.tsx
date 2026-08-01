@@ -15,10 +15,10 @@ export function SpikeAlert({ articles, onTagClick }: SpikeAlertProps) {
   if (spikes.length === 0) return null;
 
   return (
-    <div className="px-5 h-9 border-b border-[var(--border-subtle)] flex items-center gap-2 shrink-0 bg-[var(--gold-surface)] overflow-x-auto hide-in-focus">
+    <div className="px-5 h-9 border-b border-[var(--border-subtle)] flex items-center gap-2 shrink-0 bg-[var(--accent-surface)] overflow-x-auto hide-in-focus">
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="w-2 h-2 rounded-full bg-[var(--gold)] spike-alert-dot" />
-        <span className="text-[9px] font-bold text-[var(--gold)] tracking-[0.12em] uppercase">Spike</span>
+        <span className="w-2 h-2 rounded-full bg-[var(--accent)] spike-alert-dot" />
+        <span className="text-[9px] font-bold text-[var(--accent)] tracking-[0.12em] uppercase">Spike</span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         {spikes.slice(0, 3).map((s) => (
@@ -26,7 +26,7 @@ export function SpikeAlert({ articles, onTagClick }: SpikeAlertProps) {
             key={s.tag}
             onClick={() => onTagClick?.(s.tag)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors hover:opacity-80 shrink-0 whitespace-nowrap"
-            style={{ color: s.color, backgroundColor: `${s.color}15`, border: `1px solid ${s.color}30` }}
+            style={{ color: s.color, backgroundColor: `color-mix(in srgb, ${s.color} 8%, transparent)`, border: `1px solid color-mix(in srgb, ${s.color} 19%, transparent)` }}
           >
             <span>🔥</span>
             <span>{s.tag}</span>

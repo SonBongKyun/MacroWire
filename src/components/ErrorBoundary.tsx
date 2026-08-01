@@ -43,8 +43,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             height: "100%",
             minHeight: 300,
             padding: "40px 24px",
-            backgroundColor: "#08090B",
-            color: "#8C8C91",
+            backgroundColor: "var(--background)",
+            color: "var(--muted)",
             textAlign: "center",
             gap: 16,
           }}
@@ -54,7 +54,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               width: 48,
               height: 48,
               borderRadius: 4,
-              border: "1px solid #2C2D34",
+              border: "1px solid var(--border)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -66,7 +66,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               height="24"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8C8C91"
+              stroke="var(--muted)"
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -81,7 +81,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             style={{
               fontSize: 16,
               fontWeight: 600,
-              color: "#EBEBEB",
+              color: "var(--foreground)",
               margin: 0,
               letterSpacing: "-0.01em",
             }}
@@ -93,7 +93,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <p
               style={{
                 fontSize: 12,
-                color: "#8C8C91",
+                color: "var(--muted)",
                 margin: 0,
                 maxWidth: 400,
                 lineHeight: 1.5,
@@ -111,8 +111,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               padding: "8px 20px",
               fontSize: 12,
               fontWeight: 600,
-              color: "#08090B",
-              backgroundColor: "#FFB000",
+              color: "var(--background)",
+              backgroundColor: "var(--accent)",
               border: "none",
               borderRadius: 2,
               cursor: "pointer",

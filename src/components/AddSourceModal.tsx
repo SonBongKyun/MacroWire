@@ -153,8 +153,8 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
               onClick={() => setActiveTab(tab.id)}
               className="flex-1 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider transition-colors"
               style={{
-                color: activeTab === tab.id ? "#FFB000" : "#8C8C91",
-                borderBottom: activeTab === tab.id ? "2px solid #FFB000" : "2px solid transparent",
+                color: activeTab === tab.id ? "var(--accent)" : "var(--muted)",
+                borderBottom: activeTab === tab.id ? "2px solid var(--accent)" : "2px solid transparent",
                 background: "none",
                 cursor: "pointer",
               }}
@@ -254,12 +254,12 @@ export function AddSourceModal({ open, onClose, onAdd }: AddSourceModalProps) {
                 <div className="border border-[var(--border)] p-3 space-y-1.5" style={{ borderRadius: 0, background: "var(--background)" }}>
                   <div className="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">가져오기 결과</div>
                   <div className="flex items-center gap-2 text-[12px]">
-                    <span style={{ color: "#22c55e", fontWeight: 600 }}>{opmlResult.imported}</span>
+                    <span style={{ color: "var(--success)", fontWeight: 600 }}>{opmlResult.imported}</span>
                     <span style={{ color: "var(--muted)" }}>개 추가됨</span>
                   </div>
                   {opmlResult.skipped > 0 && (
                     <div className="flex items-center gap-2 text-[12px]">
-                      <span style={{ color: "#FFB000", fontWeight: 600 }}>{opmlResult.skipped}</span>
+                      <span style={{ color: "var(--accent)", fontWeight: 600 }}>{opmlResult.skipped}</span>
                       <span style={{ color: "var(--muted)" }}>개 건너뜀 (이미 존재)</span>
                     </div>
                   )}

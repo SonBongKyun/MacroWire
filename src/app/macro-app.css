@@ -798,6 +798,9 @@
   content: "";
   width: 16px;
   height: 2px;
+  /* globals.css paints this pseudo as a gold "─" glyph; the rule is replaced
+     by a bar here, and the colour is reset so no amber survives on it. */
+  color: var(--accent);
   background: var(--accent);
 }
 
@@ -2644,4 +2647,420 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* The v7 gold tokens still live on :root for the landing and recap pages,
+   which keep their editorial amber. Inside the workbench they alias onto the
+   accent so the shell and the panels share one highlight colour. */
+.macro-app {
+  --gold: var(--accent);
+  --gold-light: var(--accent-light);
+  --gold-surface: var(--accent-surface);
+}
+
+/* ===========================================================================
+   v9 — Trustworthy desk
+   Panels that report real, sourced numbers: intraday charts, a rule-generated
+   economic calendar, and macro indicators that admit how old they are.
+   =========================================================================== */
+
+.macro-app .market-strip-nochart,
+.macro-app .markets-chart-empty,
+.macro-app .macro-live-empty,
+.macro-app .econ-cal-empty {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.macro-app .market-strip-nochart {
+  padding-top: 14px;
+}
+
+.macro-app .markets-chart-empty {
+  padding: 46px 0;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+/* ── Economic calendar ───────────────────────────────────────────────────── */
+
+.macro-app .econ-cal-next {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  padding: 9px 11px;
+  color: var(--accent);
+  background: var(--accent-surface);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-sm);
+}
+
+.macro-app .econ-cal-next-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.macro-app .econ-cal-next-title {
+  overflow: hidden;
+  color: var(--foreground-bright);
+  font-size: 11px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.macro-app .econ-cal-next-meta {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.macro-app .econ-cal-next-meta b {
+  color: var(--accent);
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.macro-app .econ-cal-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 0 5px;
+  color: var(--foreground-secondary);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-app .econ-cal-date.is-today {
+  color: var(--accent);
+}
+
+.macro-app .econ-cal-date.is-past {
+  color: var(--muted);
+}
+
+.macro-app .econ-cal-today-badge {
+  padding: 1px 5px;
+  color: var(--background);
+  background: var(--accent);
+  border-radius: 2px;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.macro-app .econ-cal-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0 7px 8px;
+  border-left: 2px solid transparent;
+  transition: opacity 0.2s ease;
+}
+
+.macro-app .econ-cal-row.has-rule {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.macro-app .econ-cal-row.is-today {
+  border-left-color: var(--accent);
+}
+
+.macro-app .econ-cal-row.is-done {
+  opacity: 0.45;
+}
+
+.macro-app .econ-cal-dot {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  background: var(--muted);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.macro-app .econ-cal-row.is-high .econ-cal-dot {
+  background: var(--accent);
+  opacity: 1;
+}
+
+.macro-app .econ-cal-time {
+  width: 40px;
+  flex-shrink: 0;
+  color: var(--foreground-secondary);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-app .econ-cal-row.is-done .econ-cal-time {
+  color: var(--muted);
+}
+
+.macro-app .econ-cal-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--foreground-bright);
+  font-size: 12px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.macro-app .econ-cal-row.is-done .econ-cal-title {
+  color: var(--muted);
+}
+
+.macro-app .econ-cal-estimate {
+  flex-shrink: 0;
+  padding: 1px 4px;
+  color: var(--muted);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 2px;
+  font-size: 9px;
+  font-weight: 600;
+  cursor: help;
+}
+
+.macro-app .econ-cal-region,
+.macro-app .econ-region-chip {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--muted) 12%, transparent);
+  border-radius: 2px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.macro-app .econ-cal-region.region-KR,
+.macro-app .econ-cal-region.region-US {
+  color: var(--accent);
+  background: var(--accent-surface);
+}
+
+.macro-app .econ-cal-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+/* ── Macro indicators ────────────────────────────────────────────────────── */
+
+.macro-app .macro-subhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.macro-app .macro-subhead-stamp {
+  color: var(--muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+}
+
+.macro-app .macro-live-grid {
+  display: grid;
+  gap: 0;
+  grid-template-columns: 1fr 1fr;
+}
+
+.macro-app .macro-live-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.macro-app .macro-live-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.macro-app .macro-live-value {
+  color: var(--foreground-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-app .macro-live-move {
+  min-width: 46px;
+  color: var(--muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.macro-app .macro-live-move.is-up {
+  color: var(--success);
+}
+
+.macro-app .macro-live-move.is-down {
+  color: var(--danger);
+}
+
+.macro-app .macro-live-move.is-flat {
+  color: var(--muted);
+}
+
+.macro-app .macro-live-skeleton {
+  height: 30px;
+  margin: 3px 10px 3px 0;
+}
+
+.macro-app .macro-ref-groups {
+  display: grid;
+  margin-top: 16px;
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.macro-app .macro-ref-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+
+.macro-app .macro-ref-label {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.macro-app .macro-ref-source {
+  color: var(--border-strong);
+  font-size: 9px;
+}
+
+.macro-app .macro-ref-values {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.macro-app .macro-ref-value {
+  color: var(--foreground-bright);
+  font-family: var(--font-mono), monospace;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-app .macro-ref-dir {
+  font-size: 8px;
+}
+
+.macro-app .macro-ref-dir.dir-up {
+  color: var(--success);
+}
+
+.macro-app .macro-ref-dir.dir-down {
+  color: var(--danger);
+}
+
+.macro-app .macro-ref-dir.dir-flat {
+  color: var(--muted);
+}
+
+.macro-app .macro-ref-asof {
+  width: 100%;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+/* A figure whose vintage is unknown or overdue is dimmed and flagged rather
+   than presented as if it were current. */
+.macro-app .macro-ref-row.needs-check .macro-ref-value {
+  color: var(--foreground-secondary);
+  opacity: 0.62;
+}
+
+.macro-app .macro-ref-row.needs-check .macro-ref-asof {
+  color: var(--warning);
+  cursor: help;
+}
+
+@media (max-width: 900px) {
+  .macro-app .macro-live-grid,
+  .macro-app .macro-ref-groups {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Legacy v7 amber leaking in from globals.css ─────────────────────────────
+   globals.css still carries the v7 gold theme for the landing and recap pages.
+   Most of it is neutralised because the workbench redefines --accent, but a
+   handful of rules hardcode the amber literal. Override those inside the app
+   shell so the workbench really does render a single accent. */
+
+.macro-app .glass-header {
+  border-bottom-color: var(--border);
+  box-shadow: none;
+}
+
+.macro-app .glass-header::after,
+.macro-app .glass-header::before {
+  display: none;
+}
+
+.macro-app .type-label,
+.macro-app .article-summary::first-letter {
+  color: var(--accent);
+}
+
+.macro-app .accent-border-left {
+  border-left-color: var(--accent);
+}
+
+.macro-app .new-articles-bar {
+  color: var(--accent);
+  background: var(--accent-surface);
+  border-color: var(--border-accent);
+}
+
+.macro-app .new-articles-bar:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.macro-app .stat-card:nth-child(1)::before,
+.macro-app .dash-stat-cell:nth-child(1)::before,
+.macro-app .stat-accent.accent-gold::before {
+  background: var(--accent);
 }

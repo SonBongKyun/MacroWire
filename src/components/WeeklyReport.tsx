@@ -131,34 +131,34 @@ function generateHTML(
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #08090B; color: #EBEBEB; font-family: 'Space Grotesk', sans-serif; padding: 40px 20px; }
+  body { background: var(--background); color: var(--foreground); font-family: 'Space Grotesk', sans-serif; padding: 40px 20px; }
   .container { max-width: 800px; margin: 0 auto; }
-  h1 { color: #FFB000; font-size: 24px; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 4px; }
-  .date-range { color: #8C8C91; font-family: 'Space Mono', monospace; font-size: 13px; margin-bottom: 32px; }
+  h1 { color: var(--accent); font-size: 24px; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 4px; }
+  .date-range { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 13px; margin-bottom: 32px; }
   .section { margin-bottom: 32px; }
-  .section-label { font-size: 11px; font-weight: 700; color: #8C8C91; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #2C2D34; padding-bottom: 8px; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .stat-card { background: #1B1C22; border: 1px solid #2C2D34; padding: 16px; }
-  .stat-value { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: #FFB000; }
-  .stat-label { font-size: 11px; color: #8C8C91; margin-top: 4px; }
-  .story-item { padding: 12px 0; border-bottom: 1px solid #2C2D34; }
-  .story-num { font-family: 'Space Mono', monospace; color: #FFB000; font-size: 13px; font-weight: 700; }
+  .stat-card { background: var(--surface-raised); border: 1px solid var(--border); padding: 16px; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .story-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .story-num { font-family: 'Space Mono', monospace; color: var(--accent); font-size: 13px; font-weight: 700; }
   .story-title { font-size: 14px; font-weight: 600; margin-left: 8px; }
-  .story-meta { font-size: 11px; color: #8C8C91; margin-top: 4px; margin-left: 24px; }
+  .story-meta { font-size: 11px; color: var(--muted); margin-top: 4px; margin-left: 24px; }
   .tag-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .tag-name { font-size: 12px; width: 80px; text-align: right; color: #8C8C91; }
-  .tag-bar { height: 16px; background: rgba(255,176,0,0.3); border-right: 2px solid #FFB000; }
-  .tag-count { font-family: 'Space Mono', monospace; font-size: 11px; color: #8C8C91; margin-left: 4px; }
+  .tag-name { font-size: 12px; width: 80px; text-align: right; color: var(--muted); }
+  .tag-bar { height: 16px; background: color-mix(in srgb, var(--accent) 30%, transparent); border-right: 2px solid var(--accent); }
+  .tag-count { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-left: 4px; }
   .keyword-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .keyword { background: #1B1C22; border: 1px solid #2C2D34; padding: 4px 10px; font-size: 12px; }
-  .keyword-count { font-family: 'Space Mono', monospace; color: #FFB000; font-size: 10px; margin-left: 4px; }
-  .market-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2C2D34; font-size: 13px; }
-  .market-symbol { color: #EBEBEB; font-weight: 600; }
+  .keyword { background: var(--surface-raised); border: 1px solid var(--border); padding: 4px 10px; font-size: 12px; }
+  .keyword-count { font-family: 'Space Mono', monospace; color: var(--accent); font-size: 10px; margin-left: 4px; }
+  .market-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .market-symbol { color: var(--foreground); font-weight: 600; }
   .market-price { font-family: 'Space Mono', monospace; }
-  .market-change-up { color: #22C55E; }
-  .market-change-down { color: #EF4444; }
-  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #2C2D34; font-size: 11px; color: #8C8C91; text-align: center; }
-  @media print { body { background: #fff; color: #1a1a1a; } .stat-card { border-color: #ddd; background: #f9f9f9; } .stat-value { color: #8B6914; } h1 { color: #8B6914; } .section-label { color: #666; border-color: #ddd; } .story-num { color: #8B6914; } .tag-bar { background: rgba(139,105,20,0.2); border-color: #8B6914; } .keyword { border-color: #ddd; background: #f9f9f9; } .keyword-count { color: #8B6914; } .market-row { border-color: #ddd; } .footer { border-color: #ddd; } }
+  .market-change-up { color: var(--success); }
+  .market-change-down { color: var(--danger); }
+  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); text-align: center; }
+  @media print { body { background: #fff; color: #1a1a1a; } .stat-card { border-color: #ddd; background: var(--foreground-bright); } .stat-value { color: var(--accent-dim); } h1 { color: var(--accent-dim); } .section-label { color: #666; border-color: #ddd; } .story-num { color: var(--accent-dim); } .tag-bar { background: rgba(139,105,20,0.2); border-color: var(--accent-dim); } .keyword { border-color: #ddd; background: var(--foreground-bright); } .keyword-count { color: var(--accent-dim); } .market-row { border-color: #ddd; } .footer { border-color: #ddd; } }
 </style>
 </head>
 <body>
@@ -174,7 +174,7 @@ function generateHTML(
       <div class="stat-card"><div class="stat-value">${readRate.toFixed(0)}%</div><div class="stat-label">읽음률</div></div>
       <div class="stat-card"><div class="stat-value">${savedRate.toFixed(0)}%</div><div class="stat-label">저장률</div></div>
     </div>
-    <div style="margin-top:12px;font-size:12px;color:#8C8C91">가장 활발한 날: <span style="color:#EBEBEB;font-weight:600">${mostActiveDay}</span></div>
+    <div style="margin-top:12px;font-size:12px;color:var(--muted)">가장 활발한 날: <span style="color:var(--foreground);font-weight:600">${mostActiveDay}</span></div>
   </div>
 
   ${topStories.length > 0 ? `
@@ -341,24 +341,24 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
         className="w-full mb-8"
         style={{
           maxWidth: 800,
-          background: "#08090B",
-          border: "1px solid #2C2D34",
+          background: "var(--background)",
+          border: "1px solid var(--border)",
           minHeight: 400,
         }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: "1px solid #2C2D34" }}
+          style={{ borderBottom: "1px solid var(--border)" }}
         >
           <div>
             <h1
               className="font-heading"
-              style={{ color: "#FFB000", fontSize: 20, letterSpacing: "0.08em", fontWeight: 700 }}
+              style={{ color: "var(--accent)", fontSize: 20, letterSpacing: "0.08em", fontWeight: 700 }}
             >
               MacroWire WEEKLY REPORT
             </h1>
-            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: "#8C8C91", marginTop: 2 }}>
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: "var(--muted)", marginTop: 2 }}>
               {week.label}
             </p>
           </div>
@@ -367,9 +367,9 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
               onClick={handleCopyMarkdown}
               className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
               style={{
-                border: "1px solid #2C2D34",
-                background: copied ? "rgba(255,176,0,0.15)" : "transparent",
-                color: copied ? "#FFB000" : "#8C8C91",
+                border: "1px solid var(--border)",
+                background: copied ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "transparent",
+                color: copied ? "var(--accent)" : "var(--muted)",
               }}
             >
               {copied ? "복사됨" : "Markdown로 복사"}
@@ -377,20 +377,20 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
             <button
               onClick={handleExportHTML}
               className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
-              style={{ border: "1px solid #2C2D34", background: "transparent", color: "#8C8C91" }}
+              style={{ border: "1px solid var(--border)", background: "transparent", color: "var(--muted)" }}
             >
               HTML로 내보내기
             </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-colors"
-              style={{ border: "1px solid #2C2D34", background: "transparent", color: "#8C8C91" }}
+              style={{ border: "1px solid var(--border)", background: "transparent", color: "var(--muted)" }}
             >
               인쇄
             </button>
             <button
               onClick={onClose}
-              className="flex items-center justify-center w-7 h-7 text-[#8C8C91] hover:text-[#EBEBEB] transition-colors"
+              className="flex items-center justify-center w-7 h-7 text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M1 1l12 12M13 1L1 13" />
@@ -408,12 +408,12 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
               style={{
                 fontSize: 10,
                 fontWeight: 700,
-                color: "#8C8C91",
+                color: "var(--muted)",
                 letterSpacing: "0.1em",
                 textTransform: "uppercase" as const,
                 marginBottom: 10,
                 paddingBottom: 6,
-                borderBottom: "1px solid #2C2D34",
+                borderBottom: "1px solid var(--border)",
               }}
             >
               OVERVIEW
@@ -427,17 +427,17 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
               ].map((s) => (
                 <div
                   key={s.label}
-                  style={{ background: "#1B1C22", border: "1px solid #2C2D34", padding: "14px 16px" }}
+                  style={{ background: "var(--surface-raised)", border: "1px solid var(--border)", padding: "14px 16px" }}
                 >
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 22, fontWeight: 700, color: "#FFB000" }}>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 22, fontWeight: 700, color: "var(--accent)" }}>
                     {s.value}
                   </div>
-                  <div style={{ fontSize: 11, color: "#8C8C91", marginTop: 2 }}>{s.label}</div>
+                  <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{s.label}</div>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 8, fontSize: 11, color: "#8C8C91" }}>
-              가장 활발한 날: <span style={{ color: "#EBEBEB", fontWeight: 600 }}>{mostActiveDay}</span>
+            <div style={{ marginTop: 8, fontSize: 11, color: "var(--muted)" }}>
+              가장 활발한 날: <span style={{ color: "var(--foreground)", fontWeight: 600 }}>{mostActiveDay}</span>
             </div>
           </div>
 
@@ -449,23 +449,23 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2C2D34",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 TOP STORIES
               </div>
               {topStories.map((a, i) => (
-                <div key={a.id} style={{ padding: "10px 0", borderBottom: "1px solid #2C2D34" }}>
-                  <span style={{ fontFamily: "'Space Mono', monospace", color: "#FFB000", fontSize: 12, fontWeight: 700 }}>
+                <div key={a.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
+                  <span style={{ fontFamily: "'Space Mono', monospace", color: "var(--accent)", fontSize: 12, fontWeight: 700 }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span style={{ fontSize: 13, fontWeight: 600, marginLeft: 8, color: "#EBEBEB" }}>{a.title}</span>
-                  <div style={{ fontSize: 11, color: "#8C8C91", marginTop: 3, marginLeft: 24 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, marginLeft: 8, color: "var(--foreground)" }}>{a.title}</span>
+                  <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 3, marginLeft: 24 }}>
                     {a.sourceName} · {new Date(a.publishedAt).toLocaleDateString("ko-KR")}
                   </div>
                 </div>
@@ -481,29 +481,29 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2C2D34",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 TAG BREAKDOWN
               </div>
               {tagBreakdown.map((t) => (
                 <div key={t.tag} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-                  <span style={{ fontSize: 11, width: 80, textAlign: "right", color: "#8C8C91" }}>{t.tag}</span>
+                  <span style={{ fontSize: 11, width: 80, textAlign: "right", color: "var(--muted)" }}>{t.tag}</span>
                   <div
                     style={{
                       height: 14,
-                      background: "rgba(255,176,0,0.25)",
-                      borderRight: "2px solid #FFB000",
+                      background: "color-mix(in srgb, var(--accent) 25%, transparent)",
+                      borderRight: "2px solid var(--accent)",
                       width: Math.max(4, (t.count / tagMax) * 300),
                       transition: "width 0.3s",
                     }}
                   />
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "#8C8C91" }}>{t.count}</span>
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "var(--muted)" }}>{t.count}</span>
                 </div>
               ))}
             </div>
@@ -517,31 +517,31 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2C2D34",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 SOURCE ACTIVITY
               </div>
               {sourceCounts.map((s) => (
                 <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
-                  <span style={{ fontSize: 11, width: 120, textAlign: "right", color: "#8C8C91", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span style={{ fontSize: 11, width: 120, textAlign: "right", color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {s.name}
                   </span>
                   <div
                     style={{
                       height: 14,
-                      background: "rgba(255,176,0,0.25)",
-                      borderRight: "2px solid #FFB000",
+                      background: "color-mix(in srgb, var(--accent) 25%, transparent)",
+                      borderRight: "2px solid var(--accent)",
                       width: Math.max(4, (s.count / (sourceCounts[0]?.count || 1)) * 250),
                       transition: "width 0.3s",
                     }}
                   />
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "#8C8C91" }}>{s.count}</span>
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "var(--muted)" }}>{s.count}</span>
                 </div>
               ))}
             </div>
@@ -555,23 +555,23 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2C2D34",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 MARKET SUMMARY
               </div>
               {portfolioPrices.map((p) => {
                 const sign = p.change >= 0 ? "+" : "";
-                const color = p.change >= 0 ? "#22C55E" : "#EF4444";
+                const color = p.change >= 0 ? "var(--success)" : "var(--danger)";
                 return (
                   <div
                     key={p.symbol}
-                    style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid #2C2D34", fontSize: 12 }}
+                    style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid var(--border)", fontSize: 12 }}
                   >
                     <span style={{ fontWeight: 600 }}>{p.symbol}</span>
                     <span style={{ fontFamily: "'Space Mono', monospace" }}>
@@ -592,12 +592,12 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   letterSpacing: "0.1em",
                   textTransform: "uppercase" as const,
                   marginBottom: 10,
                   paddingBottom: 6,
-                  borderBottom: "1px solid #2C2D34",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 TRENDING KEYWORDS
@@ -607,15 +607,15 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   <span
                     key={k.word}
                     style={{
-                      background: "#1B1C22",
-                      border: "1px solid #2C2D34",
+                      background: "var(--surface-raised)",
+                      border: "1px solid var(--border)",
                       padding: "4px 10px",
                       fontSize: 11,
-                      color: "#EBEBEB",
+                      color: "var(--foreground)",
                     }}
                   >
                     {k.word}
-                    <span style={{ fontFamily: "'Space Mono', monospace", color: "#FFB000", fontSize: 10, marginLeft: 4 }}>
+                    <span style={{ fontFamily: "'Space Mono', monospace", color: "var(--accent)", fontSize: 10, marginLeft: 4 }}>
                       {k.count}
                     </span>
                   </span>
@@ -626,7 +626,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
 
           {/* Empty state */}
           {totalArticles === 0 && (
-            <div style={{ textAlign: "center", padding: "40px 0", color: "#8C8C91", fontSize: 13 }}>
+            <div style={{ textAlign: "center", padding: "40px 0", color: "var(--muted)", fontSize: 13 }}>
               이번 주 수집된 기사가 없습니다.
             </div>
           )}

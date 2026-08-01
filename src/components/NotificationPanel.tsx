@@ -91,7 +91,7 @@ export function NotificationPanel({
         {permissionStatus !== "granted" && (
           <button
             onClick={onRequestPermission}
-            className="w-full px-3 py-2 text-[11px] font-semibold rounded-[var(--radius-sm)] bg-[var(--gold-surface)] border border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)] hover:text-white transition-all"
+            className="w-full px-3 py-2 text-[11px] font-semibold rounded-[var(--radius-sm)] bg-[var(--accent-surface)] border border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-all"
           >
             {permissionStatus === "denied" ? "알림 차단됨 — 브라우저 설정에서 허용" : "브라우저 알림 권한 요청"}
           </button>
