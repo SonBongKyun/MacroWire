@@ -203,5 +203,11 @@
     "name": "Investing 분석",
     "feedUrl": "https://kr.investing.com/rss/286.rss",
     "category": "분석"
+  },
+  {
+    "name": "Investing.com",
+    "feedUrl": "https://www.investing.com/rss/news.rss",
+    "category": "글로벌",
+    "retired": true
   }
 ]

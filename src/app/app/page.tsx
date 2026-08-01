@@ -43,7 +43,9 @@ const CurrencyCalculator = dynamic(() => import("@/components/CurrencyCalculator
 const WeeklyReport = dynamic(() => import("@/components/WeeklyReport").then((m) => m.WeeklyReport));
 const NewsletterGenerator = dynamic(() => import("@/components/NewsletterGenerator").then((m) => m.NewsletterGenerator));
 const CuratedFeed = dynamic(() => import("@/components/CuratedFeed").then((m) => m.CuratedFeed));
-const InsightMemo = dynamic(() => import("@/components/InsightMemo").then((m) => m.InsightMemo));
+// Research notes replace the old quick-memo panel; the hook migrates the
+// stored memos on first load.
+const ResearchNotes = dynamic(() => import("@/components/ResearchNotes").then((m) => m.ResearchNotes));
 const AlertFeed = dynamic(() => import("@/components/AlertFeed").then((m) => m.AlertFeed));
 const FinancialCalculators = dynamic(() => import("@/components/FinancialCalculators").then((m) => m.FinancialCalculators));
 
@@ -906,10 +908,14 @@ function HomeInner() {
         articles={articles}
       />
 
-      <InsightMemo
+      <ResearchNotes
         open={memoOpen}
         onClose={() => setMemoOpen(false)}
         articles={articles}
+        onSelectArticle={(article) => {
+          selectArticle(article);
+          setMemoOpen(false);
+        }}
       />
 
       {/* Alert Feed Panel */}
