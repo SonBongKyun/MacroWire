@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Clock } from "lucide-react";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 import {
   getEconEvents,
   getNextEconEvent,
@@ -36,9 +37,12 @@ export function EconomicCalendar() {
 
   useEffect(() => {
     setNow(new Date());
-    const id = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(id);
   }, []);
+
+  useVisibleInterval(
+    useCallback(() => setNow(new Date()), []),
+    60_000
+  );
 
   // Recompute on the minute is wasteful for the expansion itself, so key the
   // event list off the day and let only the countdown tick.
@@ -59,7 +63,7 @@ export function EconomicCalendar() {
 
   return (
     <div className="econ-cal">
-      <div className="dash-section-title">ECONOMIC CALENDAR</div>
+      <div className="dash-section-title">경제 일정</div>
 
       {countdown && nextEvent && (
         <div className="econ-cal-next">

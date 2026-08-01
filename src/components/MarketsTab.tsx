@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Quote } from "@/lib/market/quote";
 import type { PortfolioPrice, PortfolioAsset } from "@/hooks/usePortfolio";
 import { PriceChart, MiniSparkline } from "@/components/PriceChart";
 import { usePriceAlerts } from "@/hooks/usePriceAlerts";
 import { usePortfolioPnL } from "@/hooks/usePortfolioPnL";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 interface MarketsTabProps {
   portfolioPrices: PortfolioPrice[];
@@ -150,6 +151,10 @@ export function MarketsTab({
 
   const existingSymbols = new Set(portfolioAssets.map((a) => a.symbol));
 
+  // Holds the fetcher so the visibility-aware poller can call it without
+  // re-running the mount effect.
+  const marketPoll = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     async function fetchMarket() {
@@ -167,12 +172,16 @@ export function MarketsTab({
       }
     }
     fetchMarket();
-    const id = setInterval(fetchMarket, 5 * 60 * 1000);
+    marketPoll.current = fetchMarket;
     return () => {
       cancelled = true;
-      clearInterval(id);
     };
   }, []);
+
+  useVisibleInterval(
+    useCallback(() => marketPoll.current?.(), []),
+    5 * 60 * 1000
+  );
 
   // Check alerts when prices update
   useEffect(() => {
@@ -340,9 +349,7 @@ export function MarketsTab({
               paddingBottom: 8,
               marginBottom: 12,
               fontFamily: "var(--font-mono)",
-            }}>
-              PRICE CHART
-            </div>
+            }}>가격 차트</div>
 
             {/* Asset selector */}
             <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid var(--border)" }}>
@@ -390,7 +397,7 @@ export function MarketsTab({
         {/* ── Section 2: Portfolio Table ── */}
         <div style={{ marginBottom: 32 }}>
           <div style={sectionHeaderStyle}>
-            <span>PORTFOLIO</span>
+            <span>보유 종목</span>
             {portfolioLoading && (
               <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400, textTransform: "none" }} className="animate-pulse">
                 로딩...
@@ -521,7 +528,7 @@ export function MarketsTab({
         {/* ── Section 3: Alerts ── */}
         <div style={{ marginBottom: 32 }}>
           <div style={sectionHeaderStyle}>
-            <span>ALERTS</span>
+            <span>가격 알림</span>
             <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400, textTransform: "none" }}>
               {alerts.filter((a) => a.active && !a.triggeredAt).length} active
             </span>
@@ -588,7 +595,7 @@ export function MarketsTab({
                         color: isTriggered ? "var(--accent)" : alert.active ? "var(--success)" : "var(--muted)",
                         borderBottom: "1px solid var(--border)",
                       }}>
-                        {isTriggered ? "TRIGGERED" : alert.active ? "ACTIVE" : "OFF"}
+                        {isTriggered ? "도달" : alert.active ? "감시 중" : "해제"}
                       </td>
                       <td style={{ padding: "8px 0", textAlign: "right", borderBottom: "1px solid var(--border)", width: 60, whiteSpace: "nowrap" }}>
                         {!isTriggered && (
@@ -693,7 +700,7 @@ export function MarketsTab({
         {/* ── Section 4: Positions P&L ── */}
         <div style={{ marginBottom: 32 }}>
           <div style={sectionHeaderStyle}>
-            <span>POSITIONS</span>
+            <span>포지션</span>
             {pnlData.items.length > 0 && (
               <span style={{
                 fontSize: 11,
@@ -769,7 +776,7 @@ export function MarketsTab({
                 {/* Total row */}
                 <tr>
                   <td style={{ padding: "10px 0", fontSize: 12, fontWeight: 700, color: "var(--foreground)", borderTop: "1px solid var(--border)" }}>
-                    TOTAL
+                    합계
                   </td>
                   <td style={{ borderTop: "1px solid var(--border)" }} />
                   <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--muted)", borderTop: "1px solid var(--border)" }}>
@@ -874,9 +881,7 @@ export function MarketsTab({
             borderBottom: "1px solid var(--border)",
             paddingBottom: 8,
             marginBottom: 12,
-          }}>
-            POPULAR
-          </div>
+          }}>자주 찾는 종목</div>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px" }}>
             {POPULAR_SYMBOLS.map((s) => {

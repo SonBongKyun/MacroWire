@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 export type MainTab = "dashboard" | "news" | "markets" | "analytics" | "ai" | "research" | "portfolio";
 
@@ -135,10 +136,10 @@ export function PlatformNav(props: PlatformNavProps) {
     }
   }, []);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
+  useVisibleInterval(
+    useCallback(() => setNow(Date.now()), []),
+    60_000
+  );
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {
@@ -212,7 +213,7 @@ export function PlatformNav(props: PlatformNavProps) {
       <header className="wire-header" data-testid="wire-header">
         <div className="wire-brand">
           <Logo size="sm" />
-          <span className="wire-brand-meta">SEOUL / GLOBAL DESK</span>
+          <span className="wire-brand-meta">서울 · 글로벌 데스크</span>
         </div>
 
         <nav className="platform-tabs" aria-label="주요 화면">
@@ -316,7 +317,7 @@ export function PlatformNav(props: PlatformNavProps) {
 
         <div className="wire-live" title={lastBreakingUpdate ? `최근 수집 데이터 ${new Date(lastBreakingUpdate).toLocaleTimeString("ko-KR")}` : "새 기사 자동 확인 대기 중"}>
           <span className="wire-live-dot" aria-hidden="true" />
-          <span>FEED</span>
+          <span>수신</span>
           <b>{breakingCountdown}s</b>
         </div>
 

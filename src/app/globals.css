@@ -7,6 +7,12 @@
    ══════════════════════════════════════ */
 
 :root {
+  /* One interface face for Korean and Latin. Previously this variable came
+     from next/font (IBM Plex Sans) with Pretendard only as a Korean fallback,
+     which meant every line mixed two designers' letterforms. */
+  --font-interface: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, sans-serif;
+
   --background: #fafaf8;
   --background-mesh: none;
   --foreground: #18181b;
@@ -106,8 +112,8 @@
    ────────────────────────────────────── */
 @theme {
   /* Bulletin: condensed-display Anton for English headlines, Pretendard 900 fallback for Korean */
-  --font-display: var(--font-interface), "SUIT Variable", "Pretendard Variable", Pretendard, sans-serif;
-  --font-heading: "Pretendard Variable", Pretendard, "SUIT Variable", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display: var(--font-interface);
+  --font-heading: var(--font-interface);
   --font-body:    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-sans:    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --default-font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -175,14 +181,14 @@ a:hover { color: var(--accent); }
 .font-display { font-family: var(--font-display); }
 .font-heading { font-family: var(--font-heading); }
 .font-body    { font-family: var(--font-body); }
-.font-data    { font-family: var(--font-mono), "Space Mono", monospace; font-variant-numeric: tabular-nums; }
+.font-data    { font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
 
 /* Apply heading font to key elements */
 h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: -0.018em; }
 h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
 
 /* Apply mono font to all tabular/numeric contexts */
-.tabular-nums { font-family: var(--font-mono), "Space Mono", monospace; }
+.tabular-nums { font-family: var(--font-mono), ui-monospace, monospace; }
 .section-label {
   font-family: var(--font-heading);
   font-size: 12px;
@@ -193,8 +199,8 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   flex-shrink: 0;
 }
 
-/* Override Tailwind font-mono to use Space Mono */
-.font-mono { font-family: var(--font-mono), "Space Mono", monospace; font-variant-numeric: tabular-nums; }
+/* Tailwind font-mono maps onto the numeral face */
+.font-mono { font-family: var(--font-mono), ui-monospace, monospace; font-variant-numeric: tabular-nums; }
 
 /* ══════════════════════════════════════
    TYPOGRAPHY SCALE — 9-step ladder
@@ -596,7 +602,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   gap: 2px;
   padding: 2px 8px;
   border-radius: 1px;
-  font-family: var(--font-heading), "Space Grotesk", sans-serif;
+  font-family: var(--font-heading);
   font-size: 10px;
   font-weight: 700;
   line-height: 1.3;
@@ -880,7 +886,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   padding: 0 6px;
   font-size: 10px;
   font-weight: 600;
-  font-family: var(--font-mono), "Space Mono", monospace;
+  font-family: var(--font-mono), ui-monospace, monospace;
   border-radius: var(--radius-xs);
   background: var(--surface);
   border: 1px solid var(--border);
@@ -912,7 +918,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   background: var(--surface);
   border-top: 1px solid var(--border);
   font-size: 10px;
-  font-family: var(--font-mono), "Space Mono", monospace;
+  font-family: var(--font-mono), ui-monospace, monospace;
   color: var(--muted);
   position: relative;
 }
@@ -1456,7 +1462,7 @@ html { scroll-behavior: smooth; }
   gap: 6px;
   padding: 0 16px;
   height: 100%;
-  font-family: var(--font-heading), "Space Grotesk", sans-serif;
+  font-family: var(--font-heading);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -1789,7 +1795,7 @@ html { scroll-behavior: smooth; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-heading), 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -1825,7 +1831,7 @@ html { scroll-behavior: smooth; }
   justify-content: center;
   background: var(--accent);
   color: white;
-  font-family: var(--font-heading), 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading);
   font-size: 12px;
   font-weight: 800;
 }
@@ -2310,7 +2316,7 @@ button:active { transform: scale(0.98); }
 
 /* Large data display */
 .data-hero {
-  font-family: var(--font-mono), 'Space Mono', monospace;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 28px;
   font-weight: 700;
   line-height: 1;

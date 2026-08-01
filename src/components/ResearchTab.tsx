@@ -181,9 +181,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
               color: "var(--accent)",
               letterSpacing: "0.08em",
             }}
-          >
-            RESEARCH
-          </span>
+          >리서치</span>
           {activeQuery && (
             <span
               className="font-mono"
@@ -279,7 +277,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                 letterSpacing: "0.1em",
               }}
             >
-              {activeQuery ? "RESEARCH RESULTS" : "LATEST ARTICLES"}
+              {activeQuery ? "RESEARCH RESULTS" : "최근 기사"}
             </span>
           </div>
           <div style={{ flex: 1, overflowY: "auto" }}>
@@ -438,7 +436,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                 letterSpacing: "0.1em",
               }}
             >
-              {activeQuery ? "TOPIC ANALYSIS" : "OVERVIEW"}
+              {activeQuery ? "TOPIC ANALYSIS" : "요약"}
             </span>
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
@@ -456,9 +454,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                         letterSpacing: "0.08em",
                         marginBottom: 10,
                       }}
-                    >
-                      TAG FREQUENCY
-                    </div>
+                    >태그 빈도</div>
                     {tagFrequency.map(([tag, count]) => (
                       <div
                         key={tag}
@@ -529,9 +525,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                         letterSpacing: "0.08em",
                         marginBottom: 10,
                       }}
-                    >
-                      SOURCE DISTRIBUTION
-                    </div>
+                    >소스 분포</div>
                     {sourceDistribution.map(([source, count]) => (
                       <div
                         key={source}
@@ -679,9 +673,7 @@ export function ResearchTab({ articles: propArticles, onSelectArticle }: Researc
                         letterSpacing: "0.08em",
                         marginBottom: 10,
                       }}
-                    >
-                      RELATED TAGS
-                    </div>
+                    >연관 태그</div>
                     <div
                       style={{
                         display: "flex",

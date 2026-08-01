@@ -311,9 +311,7 @@ export function PortfolioTab({
               letterSpacing: "0.1em",
               marginBottom: 4,
             }}
-          >
-            PORTFOLIO VALUE
-          </div>
+          >평가액</div>
           <div
             className="font-mono"
             style={{ fontSize: 28, fontWeight: 700, color: "var(--accent)", lineHeight: 1 }}
@@ -331,9 +329,7 @@ export function PortfolioTab({
               letterSpacing: "0.1em",
               marginBottom: 4,
             }}
-          >
-            TOTAL P&L
-          </div>
+          >총 손익</div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
             <span
               className="font-mono"
@@ -368,9 +364,7 @@ export function PortfolioTab({
               letterSpacing: "0.1em",
               marginBottom: 4,
             }}
-          >
-            DAY CHANGE
-          </div>
+          >일간 변동</div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
             <span
               className="font-mono"
@@ -413,7 +407,7 @@ export function PortfolioTab({
             transition: "all 0.15s",
           }}
         >
-          {loading ? "..." : "REFRESH"}
+          {loading ? "..." : "새로고침"}
         </button>
       </div>
 
@@ -450,9 +444,7 @@ export function PortfolioTab({
                 color: "var(--muted)",
                 letterSpacing: "0.1em",
               }}
-            >
-              HOLDINGS
-            </span>
+            >보유 내역</span>
           </div>
           <div style={{ flex: 1, overflowY: "auto" }}>
             <table
@@ -677,7 +669,7 @@ export function PortfolioTab({
                         fontSize: 11,
                       }}
                     >
-                      TOTAL
+                      합계
                     </td>
                     <td colSpan={3} />
                     <td
@@ -754,9 +746,7 @@ export function PortfolioTab({
                   letterSpacing: "0.1em",
                   marginBottom: 12,
                 }}
-              >
-                ALLOCATION
-              </div>
+              >비중</div>
               {/* SVG Pie Chart */}
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <svg width="100" height="100" viewBox="0 0 100 100">
@@ -835,9 +825,7 @@ export function PortfolioTab({
                   letterSpacing: "0.1em",
                   marginBottom: 10,
                 }}
-              >
-                ALERTS
-              </div>
+              >가격 알림</div>
               {alerts.length === 0 && (
                 <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 8 }}>
                   설정된 알림이 없습니다
@@ -980,9 +968,7 @@ export function PortfolioTab({
                   letterSpacing: "0.1em",
                   marginBottom: 10,
                 }}
-              >
-                NOTES
-              </div>
+              >메모</div>
               {portfolioAssets.map((asset) => {
                 const note = notes.find((n) => n.symbol === asset.symbol);
                 return (

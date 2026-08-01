@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Flame } from "lucide-react";
 import type { Article } from "@/types";
 import { detectSpikes } from "@/lib/analytics/spike";
 
@@ -18,7 +19,7 @@ export function SpikeAlert({ articles, onTagClick }: SpikeAlertProps) {
     <div className="px-5 h-9 border-b border-[var(--border-subtle)] flex items-center gap-2 shrink-0 bg-[var(--accent-surface)] overflow-x-auto hide-in-focus">
       <div className="flex items-center gap-1.5 shrink-0">
         <span className="w-2 h-2 rounded-full bg-[var(--accent)] spike-alert-dot" />
-        <span className="text-[9px] font-bold text-[var(--accent)] tracking-[0.12em] uppercase">Spike</span>
+        <span className="text-[10px] font-semibold text-[var(--accent)]">급증</span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         {spikes.slice(0, 3).map((s) => (
@@ -28,7 +29,7 @@ export function SpikeAlert({ articles, onTagClick }: SpikeAlertProps) {
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors hover:opacity-80 shrink-0 whitespace-nowrap"
             style={{ color: s.color, backgroundColor: `color-mix(in srgb, ${s.color} 8%, transparent)`, border: `1px solid color-mix(in srgb, ${s.color} 19%, transparent)` }}
           >
-            <span>🔥</span>
+            <Flame size={11} aria-hidden="true" />
             <span>{s.tag}</span>
             <span className="text-[9px] opacity-70">
               {s.currentCount}건 ({s.ratio > 10 ? "10x+" : `${s.ratio}x`})

@@ -36,15 +36,15 @@ const INSIGHT_COLORS: Record<string, string> = {
 };
 
 const INSIGHT_LABELS: Record<string, string> = {
-  trend: "TREND",
-  risk: "RISK",
-  opportunity: "OPPORTUNITY",
-  alert: "ALERT",
+  trend: "흐름",
+  risk: "위험",
+  opportunity: "기회",
+  alert: "주의",
 };
 
 const REC_LABELS: Record<string, string> = {
-  trending: "TREND",
-  personalized: "READ NEXT",
+  trending: "흐름",
+  personalized: "이어 읽기",
   breaking: "BREAKING",
   "deep-dive": "DEEP DIVE",
 };
@@ -267,7 +267,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
       <div style={{ overflowY: "auto", padding: "24px 28px", borderRight: "1px solid var(--border)" }}>
 
         {/* ── AI MARKET BRIEF ── */}
-        <div className="dash-section-title">AI MARKET BRIEF</div>
+        <div className="dash-section-title is-lead">AI 브리핑</div>
         <div style={{ marginTop: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <span
@@ -286,11 +286,11 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
           <div style={{ display: "flex", gap: 24, marginBottom: 12 }}>
             <div>
               <span style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>기사</span>
-              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "var(--foreground)" }}>{marketBrief.todayCount}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "var(--font-mono), ui-monospace, monospace", color: "var(--foreground)" }}>{marketBrief.todayCount}</div>
             </div>
             <div>
               <span style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>속보</span>
-              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Space Mono', monospace", color: marketBrief.breakingCount > 0 ? "var(--danger)" : "var(--foreground)" }}>{marketBrief.breakingCount}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "var(--font-mono), ui-monospace, monospace", color: marketBrief.breakingCount > 0 ? "var(--danger)" : "var(--foreground)" }}>{marketBrief.breakingCount}</div>
             </div>
             <div>
               <span style={{ fontSize: 10, color: "var(--success)" }}>+{marketBrief.pos}</span>
@@ -311,7 +311,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                     padding: "2px 8px",
                     border: "1px solid var(--border)",
                     color: "var(--accent)",
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "var(--font-mono), ui-monospace, monospace",
                   }}
                 >
                   {tag} <span style={{ color: "var(--muted)" }}>{count}</span>
@@ -324,7 +324,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <SectionSep />
 
         {/* ── SIGNAL MONITOR ── */}
-        <div className="dash-section-title">SIGNAL MONITOR</div>
+        <div className="dash-section-title">신호 모니터</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 14 }}>
           {insights.length === 0 && (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>분석할 데이터가 부족합니다</div>
@@ -351,7 +351,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, marginLeft: 14 }}>
                 <ConfidenceBar value={insight.confidence} />
-                <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", color: "var(--muted)" }}>
+                <span style={{ fontSize: 9, fontFamily: "var(--font-mono), ui-monospace, monospace", color: "var(--muted)" }}>
                   {Math.round(insight.confidence)}%
                 </span>
                 <span style={{ fontSize: 9, color: "var(--muted)" }}>
@@ -388,7 +388,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <SectionSep />
 
         {/* ── READ NEXT - RECOMMENDATIONS ── */}
-        <div className="dash-section-title">READ NEXT</div>
+        <div className="dash-section-title">이어 읽기</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
           {recommendations.length === 0 && (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>추천할 기사가 없습니다</div>
@@ -432,7 +432,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                 <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
                   {rec.reason}
                 </div>
-                <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2, fontFamily: "'Space Mono', monospace" }}>
+                <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2, fontFamily: "var(--font-interface)", fontVariantNumeric: "tabular-nums" }}>
                   {rec.article.sourceName} {timeAgo(rec.article.publishedAt)}
                 </div>
               </div>
@@ -443,7 +443,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <SectionSep />
 
         {/* ── SENTIMENT ANALYSIS ── */}
-        <div className="dash-section-title">SENTIMENT ANALYSIS</div>
+        <div className="dash-section-title">시장 심리</div>
         <div style={{ marginTop: 12 }}>
           {/* Horizontal bar */}
           <div style={{ display: "flex", height: 6, width: "100%", marginBottom: 8 }}>
@@ -451,16 +451,16 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
             <div style={{ width: `${(sentimentBar.neu / sentimentBar.total) * 100}%`, background: "var(--muted)" }} />
             <div style={{ width: `${(sentimentBar.pos / sentimentBar.total) * 100}%`, background: "var(--success)" }} />
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "'Space Mono', monospace", marginBottom: 14 }}>
-            <span style={{ color: "var(--danger)" }}>BEARISH {sentimentBar.neg}</span>
-            <span style={{ color: "var(--muted)" }}>NEUTRAL {sentimentBar.neu}</span>
-            <span style={{ color: "var(--success)" }}>BULLISH {sentimentBar.pos}</span>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "var(--font-interface)", fontVariantNumeric: "tabular-nums", marginBottom: 14 }}>
+            <span style={{ color: "var(--danger)" }}>약세 {sentimentBar.neg}</span>
+            <span style={{ color: "var(--muted)" }}>중립 {sentimentBar.neu}</span>
+            <span style={{ color: "var(--success)" }}>강세 {sentimentBar.pos}</span>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
             {/* Top positive */}
             <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "var(--success)", letterSpacing: "0.05em", marginBottom: 6 }}>TOP BULLISH</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "var(--success)", letterSpacing: "0.05em", marginBottom: 6 }}>강세 신호</div>
               {sentimentBar.topPositive.map(({ article }) => (
                 <div
                   key={article.id}
@@ -478,7 +478,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
             </div>
             {/* Top negative */}
             <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "var(--danger)", letterSpacing: "0.05em", marginBottom: 6 }}>TOP BEARISH</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "var(--danger)", letterSpacing: "0.05em", marginBottom: 6 }}>약세 신호</div>
               {sentimentBar.topNegative.map(({ article }) => (
                 <div
                   key={article.id}
@@ -502,7 +502,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
       <div style={{ overflowY: "auto", padding: "24px 24px" }}>
 
         {/* ── ENTITY TRACKER ── */}
-        <div className="dash-section-title">ENTITY TRACKER</div>
+        <div className="dash-section-title">언급된 주체</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 4 }}>
           {entityTracker.length === 0 && (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>데이터 없음</div>
@@ -532,7 +532,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   }}
                 />
               </div>
-              <span style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: "var(--muted)", width: 24, textAlign: "right" }}>
+              <span style={{ fontSize: 10, fontFamily: "var(--font-mono), ui-monospace, monospace", color: "var(--muted)", width: 24, textAlign: "right" }}>
                 {count}
               </span>
             </div>
@@ -542,7 +542,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <SectionSep />
 
         {/* ── TOPIC NETWORK ── */}
-        <div className="dash-section-title">TOPIC NETWORK</div>
+        <div className="dash-section-title">주제 연결망</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
           {topicNetwork.length === 0 && (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>데이터 없음</div>
@@ -552,7 +552,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               <span style={{ color: "var(--accent)", fontWeight: 600 }}>{tagA}</span>
               <span style={{ color: "var(--muted)", fontSize: 10 }}>&harr;</span>
               <span style={{ color: "var(--accent)", fontWeight: 600 }}>{tagB}</span>
-              <span style={{ color: "var(--muted)", fontFamily: "'Space Mono', monospace", fontSize: 10, marginLeft: "auto" }}>
+              <span style={{ color: "var(--muted)", fontFamily: "var(--font-interface)", fontVariantNumeric: "tabular-nums", fontSize: 10, marginLeft: "auto" }}>
                 {count}건
               </span>
             </div>
@@ -562,7 +562,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <SectionSep />
 
         {/* ── SOURCE INTELLIGENCE ── */}
-        <div className="dash-section-title">SOURCE INTELLIGENCE</div>
+        <div className="dash-section-title">소스 분석</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
           {sourceIntel.length === 0 && (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>데이터 없음</div>
@@ -582,7 +582,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "var(--foreground)" }}>{name}</span>
-                  <span style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: "var(--muted)" }}>{count}</span>
+                  <span style={{ fontSize: 10, fontFamily: "var(--font-mono), ui-monospace, monospace", color: "var(--muted)" }}>{count}</span>
                 </div>
                 {topTags.length > 0 && (
                   <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2 }}>
@@ -597,7 +597,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <SectionSep />
 
         {/* ── IMPACT RANKING ── */}
-        <div className="dash-section-title">IMPACT RANKING</div>
+        <div className="dash-section-title">영향도 순위</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
           {impactRanking.length === 0 && (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>데이터 없음</div>
@@ -619,7 +619,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               <span
                 style={{
                   fontSize: 11,
-                  fontFamily: "'Space Mono', monospace",
+                  fontFamily: "var(--font-mono), ui-monospace, monospace",
                   color: "var(--muted)",
                   width: 18,
                   textAlign: "right",
@@ -647,7 +647,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                       letterSpacing: "0.05em",
                     }}
                   >
-                    {summary.impactLevel.toUpperCase()}
+                    {summary.impactLevel === "high" ? "영향 큼" : summary.impactLevel === "medium" ? "보통" : "낮음"}
                   </span>
                   <span
                     style={{

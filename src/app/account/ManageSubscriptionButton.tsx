@@ -31,7 +31,7 @@ export function ManageSubscriptionButton() {
         disabled={loading}
         style={{
           background: "transparent",
-          color: "#F5F0E1",
+          color: "#EDEAE0",
           border: "1px solid rgba(245,240,225,0.30)",
           padding: "8px 14px",
           fontSize: 12,

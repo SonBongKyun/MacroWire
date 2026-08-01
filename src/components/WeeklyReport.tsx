@@ -131,30 +131,30 @@ function generateHTML(
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--background); color: var(--foreground); font-family: 'Space Grotesk', sans-serif; padding: 40px 20px; }
+  body { background: var(--background); color: var(--foreground); font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif; padding: 40px 20px; }
   .container { max-width: 800px; margin: 0 auto; }
   h1 { color: var(--accent); font-size: 24px; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 4px; }
-  .date-range { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 13px; margin-bottom: 32px; }
+  .date-range { color: var(--muted); font-family: var(--font-mono), ui-monospace, monospace; font-size: 13px; margin-bottom: 32px; }
   .section { margin-bottom: 32px; }
   .section-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
   .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   .stat-card { background: var(--surface-raised); border: 1px solid var(--border); padding: 16px; }
-  .stat-value { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-value { font-family: var(--font-mono), ui-monospace, monospace; font-size: 22px; font-weight: 700; color: var(--accent); }
   .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
   .story-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .story-num { font-family: 'Space Mono', monospace; color: var(--accent); font-size: 13px; font-weight: 700; }
+  .story-num { font-family: var(--font-mono), ui-monospace, monospace; color: var(--accent); font-size: 13px; font-weight: 700; }
   .story-title { font-size: 14px; font-weight: 600; margin-left: 8px; }
   .story-meta { font-size: 11px; color: var(--muted); margin-top: 4px; margin-left: 24px; }
   .tag-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .tag-name { font-size: 12px; width: 80px; text-align: right; color: var(--muted); }
   .tag-bar { height: 16px; background: color-mix(in srgb, var(--accent) 30%, transparent); border-right: 2px solid var(--accent); }
-  .tag-count { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-left: 4px; }
+  .tag-count { font-family: var(--font-mono), ui-monospace, monospace; font-size: 11px; color: var(--muted); margin-left: 4px; }
   .keyword-list { display: flex; flex-wrap: wrap; gap: 8px; }
   .keyword { background: var(--surface-raised); border: 1px solid var(--border); padding: 4px 10px; font-size: 12px; }
-  .keyword-count { font-family: 'Space Mono', monospace; color: var(--accent); font-size: 10px; margin-left: 4px; }
+  .keyword-count { font-family: var(--font-mono), ui-monospace, monospace; color: var(--accent); font-size: 10px; margin-left: 4px; }
   .market-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .market-symbol { color: var(--foreground); font-weight: 600; }
-  .market-price { font-family: 'Space Mono', monospace; }
+  .market-price { font-family: var(--font-mono), ui-monospace, monospace; }
   .market-change-up { color: var(--success); }
   .market-change-down { color: var(--danger); }
   .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); text-align: center; }
@@ -167,7 +167,7 @@ function generateHTML(
   <div class="date-range">${weekLabel}</div>
 
   <div class="section">
-    <div class="section-label">OVERVIEW</div>
+    <div class="section-label">요약</div>
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-value">${totalArticles}</div><div class="stat-label">총 기사</div></div>
       <div class="stat-card"><div class="stat-value">${sourceCounts.length}</div><div class="stat-label">활성 소스</div></div>
@@ -179,7 +179,7 @@ function generateHTML(
 
   ${topStories.length > 0 ? `
   <div class="section">
-    <div class="section-label">TOP STORIES</div>
+    <div class="section-label">주요 기사</div>
     ${topStories.map((a, i) => `
     <div class="story-item">
       <span class="story-num">${String(i + 1).padStart(2, "0")}</span>
@@ -190,7 +190,7 @@ function generateHTML(
 
   ${tagBreakdown.length > 0 ? `
   <div class="section">
-    <div class="section-label">TAG BREAKDOWN</div>
+    <div class="section-label">태그 분포</div>
     ${tagBreakdown.map((t) => `
     <div class="tag-row">
       <span class="tag-name">${t.tag}</span>
@@ -201,7 +201,7 @@ function generateHTML(
 
   ${sourceCounts.length > 0 ? `
   <div class="section">
-    <div class="section-label">SOURCE ACTIVITY</div>
+    <div class="section-label">소스 활동</div>
     ${sourceCounts.map((s) => `
     <div class="tag-row">
       <span class="tag-name">${s.name}</span>
@@ -212,7 +212,7 @@ function generateHTML(
 
   ${prices && prices.length > 0 ? `
   <div class="section">
-    <div class="section-label">MARKET SUMMARY</div>
+    <div class="section-label">시장 요약</div>
     ${prices.map((p) => {
       const sign = p.change >= 0 ? "+" : "";
       const cls = p.change >= 0 ? "market-change-up" : "market-change-down";
@@ -226,7 +226,7 @@ function generateHTML(
 
   ${keywords.length > 0 ? `
   <div class="section">
-    <div class="section-label">TRENDING KEYWORDS</div>
+    <div class="section-label">많이 다뤄진 키워드</div>
     <div class="keyword-list">
       ${keywords.map((k) => `<span class="keyword">${k.word}<span class="keyword-count">${k.count}</span></span>`).join("")}
     </div>
@@ -358,7 +358,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
             >
               MacroWire WEEKLY REPORT
             </h1>
-            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, color: "var(--muted)", marginTop: 2 }}>
+            <p style={{ fontFamily: "var(--font-mono), ui-monospace, monospace", fontSize: 12, color: "var(--muted)", marginTop: 2 }}>
               {week.label}
             </p>
           </div>
@@ -415,9 +415,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                 paddingBottom: 6,
                 borderBottom: "1px solid var(--border)",
               }}
-            >
-              OVERVIEW
-            </div>
+            >요약</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               {[
                 { value: totalArticles, label: "총 기사" },
@@ -429,7 +427,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   key={s.label}
                   style={{ background: "var(--surface-raised)", border: "1px solid var(--border)", padding: "14px 16px" }}
                 >
-                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 22, fontWeight: 700, color: "var(--accent)" }}>
+                  <div style={{ fontFamily: "var(--font-mono), ui-monospace, monospace", fontSize: 22, fontWeight: 700, color: "var(--accent)" }}>
                     {s.value}
                   </div>
                   <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{s.label}</div>
@@ -456,12 +454,10 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   paddingBottom: 6,
                   borderBottom: "1px solid var(--border)",
                 }}
-              >
-                TOP STORIES
-              </div>
+              >주요 기사</div>
               {topStories.map((a, i) => (
                 <div key={a.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
-                  <span style={{ fontFamily: "'Space Mono', monospace", color: "var(--accent)", fontSize: 12, fontWeight: 700 }}>
+                  <span style={{ fontFamily: "var(--font-mono), ui-monospace, monospace", color: "var(--accent)", fontSize: 12, fontWeight: 700 }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span style={{ fontSize: 13, fontWeight: 600, marginLeft: 8, color: "var(--foreground)" }}>{a.title}</span>
@@ -488,9 +484,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   paddingBottom: 6,
                   borderBottom: "1px solid var(--border)",
                 }}
-              >
-                TAG BREAKDOWN
-              </div>
+              >태그 분포</div>
               {tagBreakdown.map((t) => (
                 <div key={t.tag} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
                   <span style={{ fontSize: 11, width: 80, textAlign: "right", color: "var(--muted)" }}>{t.tag}</span>
@@ -503,7 +497,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                       transition: "width 0.3s",
                     }}
                   />
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "var(--muted)" }}>{t.count}</span>
+                  <span style={{ fontFamily: "var(--font-mono), ui-monospace, monospace", fontSize: 10, color: "var(--muted)" }}>{t.count}</span>
                 </div>
               ))}
             </div>
@@ -524,9 +518,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   paddingBottom: 6,
                   borderBottom: "1px solid var(--border)",
                 }}
-              >
-                SOURCE ACTIVITY
-              </div>
+              >소스 활동</div>
               {sourceCounts.map((s) => (
                 <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
                   <span style={{ fontSize: 11, width: 120, textAlign: "right", color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -541,7 +533,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                       transition: "width 0.3s",
                     }}
                   />
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "var(--muted)" }}>{s.count}</span>
+                  <span style={{ fontFamily: "var(--font-mono), ui-monospace, monospace", fontSize: 10, color: "var(--muted)" }}>{s.count}</span>
                 </div>
               ))}
             </div>
@@ -562,9 +554,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   paddingBottom: 6,
                   borderBottom: "1px solid var(--border)",
                 }}
-              >
-                MARKET SUMMARY
-              </div>
+              >시장 요약</div>
               {portfolioPrices.map((p) => {
                 const sign = p.change >= 0 ? "+" : "";
                 const color = p.change >= 0 ? "var(--success)" : "var(--danger)";
@@ -574,7 +564,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                     style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid var(--border)", fontSize: 12 }}
                   >
                     <span style={{ fontWeight: 600 }}>{p.symbol}</span>
-                    <span style={{ fontFamily: "'Space Mono', monospace" }}>
+                    <span style={{ fontFamily: "var(--font-mono), ui-monospace, monospace" }}>
                       {p.price.toLocaleString()}{" "}
                       <span style={{ color }}>{sign}{p.changePct.toFixed(2)}%</span>
                     </span>
@@ -599,9 +589,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                   paddingBottom: 6,
                   borderBottom: "1px solid var(--border)",
                 }}
-              >
-                TRENDING KEYWORDS
-              </div>
+              >많이 다뤄진 키워드</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {keywords.map((k) => (
                   <span
@@ -615,7 +603,7 @@ export function WeeklyReport({ open, onClose, articles, portfolioPrices }: Weekl
                     }}
                   >
                     {k.word}
-                    <span style={{ fontFamily: "'Space Mono', monospace", color: "var(--accent)", fontSize: 10, marginLeft: 4 }}>
+                    <span style={{ fontFamily: "var(--font-mono), ui-monospace, monospace", color: "var(--accent)", fontSize: 10, marginLeft: 4 }}>
                       {k.count}
                     </span>
                   </span>

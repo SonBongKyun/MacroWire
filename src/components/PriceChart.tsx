@@ -146,21 +146,21 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
           <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r={2.5} fill={lineColor} />
 
           {/* Y-axis: min/max labels on right */}
-          <text x={w - 2} y={padTop + 4} textAnchor="end" fill="var(--muted)" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
+          <text x={w - 2} y={padTop + 4} textAnchor="end" fill="var(--muted)" fontSize={10} fontFamily="var(--font-mono), ui-monospace, monospace">
             {max >= 1000 ? max.toLocaleString("en-US", { maximumFractionDigits: 0 }) : max.toFixed(2)}
           </text>
-          <text x={w - 2} y={padTop + chartH} textAnchor="end" fill="var(--muted)" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
+          <text x={w - 2} y={padTop + chartH} textAnchor="end" fill="var(--muted)" fontSize={10} fontFamily="var(--font-mono), ui-monospace, monospace">
             {min >= 1000 ? min.toLocaleString("en-US", { maximumFractionDigits: 0 }) : min.toFixed(2)}
           </text>
 
           {/* Current price label */}
-          <text x={w - 2} y={points[points.length - 1].y + 4} textAnchor="end" fill={lineColor} fontSize={10} fontWeight={700} fontFamily="'Space Mono', var(--font-mono), monospace">
+          <text x={w - 2} y={points[points.length - 1].y + 4} textAnchor="end" fill={lineColor} fontSize={10} fontWeight={700} fontFamily="var(--font-mono), ui-monospace, monospace">
             {currentPrice >= 1000 ? currentPrice.toLocaleString("en-US", { maximumFractionDigits: 0 }) : currentPrice.toFixed(2)}
           </text>
 
           {/* X-axis labels */}
           {xLabels.map((xl) => (
-            <text key={xl.label} x={xl.x} y={height - 2} textAnchor="middle" fill="var(--muted)" fontSize={10} fontFamily="'Space Mono', var(--font-mono), monospace">
+            <text key={xl.label} x={xl.x} y={height - 2} textAnchor="middle" fill="var(--muted)" fontSize={10} fontFamily="var(--font-mono), ui-monospace, monospace">
               {xl.label}
             </text>
           ))}
@@ -185,7 +185,7 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
               background: "var(--surface-raised)",
               border: "1px solid var(--border)",
               padding: "4px 8px",
-              fontFamily: "'Space Mono', var(--font-mono), monospace",
+              fontFamily: "var(--font-mono), ui-monospace, monospace",
               fontSize: 11,
               color: "var(--foreground)",
               whiteSpace: "nowrap",
@@ -212,7 +212,7 @@ export function PriceChart({ data, width: propWidth, height = 120, label, change
                   padding: "2px 8px",
                   fontSize: 10,
                   fontWeight: 600,
-                  fontFamily: "'Space Mono', var(--font-mono), monospace",
+                  fontFamily: "var(--font-mono), ui-monospace, monospace",
                   color: isActive ? "var(--background)" : "var(--muted)",
                   background: isActive ? "var(--accent)" : "transparent",
                   border: isActive ? "1px solid var(--accent)" : "1px solid var(--border)",

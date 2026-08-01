@@ -49,7 +49,7 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
   if (tags.length === 0) {
     return (
       <div>
-        <div className="dash-section-title">TAG CORRELATION</div>
+        <div className="dash-section-title">태그 상관관계</div>
         <div style={{ fontSize: 12, color: "var(--muted)" }}>태그 데이터 없음</div>
       </div>
     );
@@ -68,7 +68,7 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
 
   return (
     <div>
-      <div className="dash-section-title">TAG CORRELATION</div>
+      <div className="dash-section-title">태그 상관관계</div>
       <div
         style={{ position: "relative", display: "inline-block" }}
         onMouseLeave={() => setTooltip(null)}
@@ -92,7 +92,7 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
                   transformOrigin: "bottom left",
                   transform: "rotate(-45deg)",
                   fontSize: 9,
-                  fontFamily: "var(--font-mono)",
+                  fontFamily: "var(--font-interface)",
                   color: "var(--muted)",
                   whiteSpace: "nowrap",
                 }}
@@ -117,7 +117,7 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
                   justifyContent: "flex-end",
                   paddingRight: 6,
                   fontSize: 9,
-                  fontFamily: "var(--font-mono)",
+                  fontFamily: "var(--font-interface)",
                   color: "var(--muted)",
                 }}
               >
@@ -183,7 +183,8 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
               border: "1px solid var(--border)",
               padding: "4px 8px",
               fontSize: 10,
-              fontFamily: "var(--font-mono)",
+              fontFamily: "var(--font-interface)",
+              fontVariantNumeric: "tabular-nums",
               color: "var(--foreground)",
               whiteSpace: "nowrap",
               pointerEvents: "none",

@@ -368,7 +368,7 @@ export function ArticleDetail({
                   <span
                     className={`detail-impact is-${smartSummary.impactLevel}`}
                   >
-                    {smartSummary.impactLevel === "high" ? "HIGH" : smartSummary.impactLevel === "medium" ? "MED" : "LOW"}
+                    {smartSummary.impactLevel === "high" ? "영향 큼" : smartSummary.impactLevel === "medium" ? "보통" : "낮음"}
                   </span>
 
                   {/* Sentiment Indicator */}

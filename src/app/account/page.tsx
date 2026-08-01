@@ -32,8 +32,8 @@ export default async function AccountPage() {
     <main
       style={{
         minHeight: "100dvh",
-        background: "#08090B",
-        color: "#F5F0E1",
+        background: "#0B0E11",
+        color: "#EDEAE0",
         padding: "60px 24px",
         fontFamily: "var(--font-mono)",
       }}
@@ -41,7 +41,7 @@ export default async function AccountPage() {
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
         <a
           href="/app"
-          style={{ fontSize: 11, color: "#FFB000", letterSpacing: "0.10em", textDecoration: "none" }}
+          style={{ fontSize: 11, color: "#72AEF8", letterSpacing: "0.10em", textDecoration: "none" }}
         >
           ← BACK TO WIRE
         </a>
@@ -64,7 +64,7 @@ export default async function AccountPage() {
 
         <section style={card}>
           <div style={label}>PLAN</div>
-          <div style={{ ...value, color: user.tier === "FREE" ? "#F5F0E1" : "#FFB000" }}>
+          <div style={{ ...value, color: user.tier === "FREE" ? "#EDEAE0" : "#72AEF8" }}>
             {plan.name}
             {plan.priceKRW > 0 && (
               <span style={{ marginLeft: 12, fontSize: 12, color: "#8C8C91" }}>
@@ -93,8 +93,8 @@ export default async function AccountPage() {
                 display: "inline-block",
                 marginTop: 14,
                 padding: "8px 14px",
-                background: "#FFB000",
-                color: "#08090B",
+                background: "#72AEF8",
+                color: "#0B0E11",
                 fontWeight: 700,
                 fontSize: 12,
                 textDecoration: "none",
@@ -133,7 +133,7 @@ export default async function AccountPage() {
 
 const card: React.CSSProperties = {
   border: "1px solid rgba(245,240,225,0.12)",
-  background: "#0D0D0F",
+  background: "#11161A",
   padding: "20px 24px",
   marginBottom: 16,
 };

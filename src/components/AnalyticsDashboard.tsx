@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  BarChart3,
+  CalendarDays,
+  FileText,
+  Grid2x2,
+  Orbit,
+  TrendingUp,
+} from "lucide-react";
 import type { Article } from "@/types";
 import { getEconEvents, toKstDate } from "@/lib/calendar/econ";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 import { computeTagTrends, computeSentimentHeatmap, computeTagBubbles, computeDailyDigest, computeWeeklyReport } from "@/lib/analytics/trends";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { TAG_COLORS } from "@/lib/constants/colors";
@@ -49,12 +58,13 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
   // Time-dependent, so it is resolved after mount to keep SSR and hydration
   // in agreement — same pattern the desk calendar uses.
   const [todayKst, setTodayKst] = useState("");
+  const syncDay = useCallback(() => setTodayKst(toKstDate(new Date())), []);
+
   useEffect(() => {
-    const sync = () => setTodayKst(toKstDate(new Date()));
-    sync();
-    const id = setInterval(sync, 60_000);
-    return () => clearInterval(id);
-  }, []);
+    syncDay();
+  }, [syncDay]);
+
+  useVisibleInterval(syncDay, 60_000);
 
   const econEvents = useMemo(
     () =>
@@ -70,13 +80,15 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
   const digest = useMemo(() => computeDailyDigest(articles), [articles]);
   const report = useMemo(() => computeWeeklyReport(articles), [articles]);
 
-  const tabs: { key: Tab; label: string; icon: string }[] = [
-    { key: "trends", label: "트렌드", icon: "📈" },
-    { key: "heatmap", label: "감성맵", icon: "🗺️" },
-    { key: "bubbles", label: "버블맵", icon: "🫧" },
-    { key: "digest", label: "데일리", icon: "📋" },
-    { key: "report", label: "주간", icon: "📊" },
-    { key: "calendar", label: "캘린더", icon: "📅" },
+  // Emoji read as filler in a data product and render differently on every
+  // platform; these come from the icon set the rest of the app already uses.
+  const tabs: { key: Tab; label: string; Icon: typeof TrendingUp }[] = [
+    { key: "trends", label: "트렌드", Icon: TrendingUp },
+    { key: "heatmap", label: "감성맵", Icon: Grid2x2 },
+    { key: "bubbles", label: "버블맵", Icon: Orbit },
+    { key: "digest", label: "데일리", Icon: FileText },
+    { key: "report", label: "주간", Icon: BarChart3 },
+    { key: "calendar", label: "일정", Icon: CalendarDays },
   ];
 
   const topTrendTags = (() => {
@@ -103,9 +115,10 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-3 py-1.5 text-[10px] font-bold rounded-[3px] transition-all ${tab === t.key ? "bg-[var(--accent)] text-white shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-[3px] transition-colors ${tab === t.key ? "bg-[var(--accent)] text-white shadow-sm" : "text-[var(--muted)] hover:text-[var(--foreground)]"}`}
             >
-              <span className="mr-1">{t.icon}</span>{t.label}
+              <t.Icon size={13} aria-hidden="true" />
+              {t.label}
             </button>
           ))}
         </div>
@@ -395,7 +408,7 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full econ-region-chip" style={{ color: REGION_COLORS[regionTag] || "var(--muted)" }}>{regionTag}</span>
                           <span className="text-[9px] tabular-nums text-[var(--muted)] font-mono">{ev.kstTime}</span>
-                          <span className={`text-[8px] font-bold uppercase tracking-wider ${ev.importance === "high" ? "text-[var(--danger)]" : "text-[var(--muted)]"}`}>{ev.importance === "high" ? "HIGH" : "MED"}</span>
+                          <span className={`text-[8px] font-bold uppercase tracking-wider ${ev.importance === "high" ? "text-[var(--danger)]" : "text-[var(--muted)]"}`}>{ev.importance === "high" ? "중요" : "보통"}</span>
                         </div>
                       </div>
                       {relatedCount > 0 && (

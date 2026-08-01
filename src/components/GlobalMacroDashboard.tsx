@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Quote } from "@/lib/market/quote";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 import indicatorConfig from "../../config/macro_indicators.json";
 
 /** Yields and risk gauges the shared quote layer can source for free. */
@@ -110,34 +111,34 @@ export function GlobalMacroDashboard() {
 
   useEffect(() => {
     setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), 60 * 60 * 1000);
-    return () => clearInterval(id);
+  }, []);
+
+  useVisibleInterval(
+    useCallback(() => setNow(Date.now()), []),
+    60 * 60 * 1000
+  );
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `/api/portfolio?symbols=${encodeURIComponent(LIVE_SYMBOLS.join(","))}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) setQuotes(data);
+      }
+    } catch {
+      /* the panel degrades to reference-only */
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const res = await fetch(
-          `/api/portfolio?symbols=${encodeURIComponent(LIVE_SYMBOLS.join(","))}`
-        );
-        if (res.ok) {
-          const data = await res.json();
-          if (!cancelled && Array.isArray(data)) setQuotes(data);
-        }
-      } catch {
-        /* the panel degrades to reference-only */
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
     load();
-    const id = setInterval(load, 5 * 60 * 1000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
+  }, [load]);
+
+  useVisibleInterval(load, 5 * 60 * 1000);
 
   const asOfLabel = useMemo(() => {
     const stamps = quotes.map((q) => q.asOf).filter((v): v is string => Boolean(v));
@@ -153,7 +154,7 @@ export function GlobalMacroDashboard() {
 
   return (
     <div className="macro-indicators">
-      <div className="dash-section-title">MACRO INDICATORS</div>
+      <div className="dash-section-title">매크로 지표</div>
 
       <div className="macro-live">
         <div className="macro-subhead">

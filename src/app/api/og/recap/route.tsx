@@ -31,8 +31,8 @@ export async function GET(req: Request) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "#08090B",
-          color: "#F5F0E1",
+          background: "#0B0E11",
+          color: "#EDEAE0",
           padding: "60px 70px",
           fontFamily: "sans-serif",
           position: "relative",
@@ -45,7 +45,7 @@ export async function GET(req: Request) {
             left: 70,
             right: 70,
             height: 3,
-            background: "#FFB000",
+            background: "#72AEF8",
           }}
         />
         <div
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
             marginTop: 30,
             fontSize: 22,
             letterSpacing: "0.16em",
-            color: "#FFB000",
+            color: "#72AEF8",
             fontWeight: 700,
           }}
         >
@@ -102,7 +102,7 @@ export async function GET(req: Request) {
           }}
         >
           <span>macro-wire-psi.vercel.app/macro</span>
-          <span style={{ color: "#FFB000", fontWeight: 700, letterSpacing: "0.12em" }}>
+          <span style={{ color: "#72AEF8", fontWeight: 700, letterSpacing: "0.12em" }}>
             {locale === "ko" ? "AI가 정리합니다" : "Distilled by AI"}
           </span>
         </div>

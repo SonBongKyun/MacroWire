@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
+import { crimsonPro } from "../fonts-editorial";
 
 // Render at request time so build doesn't depend on Neon being reachable.
 // The DailyRecap row only changes when the cron fires, so the LATER move is
@@ -61,10 +62,11 @@ export default async function MacroLanding() {
 
   return (
     <main
+      className={crimsonPro.variable}
       style={{
         minHeight: "100dvh",
-        background: "#08090B",
-        color: "#F5F0E1",
+        background: "#0B0E11",
+        color: "#EDEAE0",
         padding: "60px 24px 96px",
         fontFamily: "var(--font-mono)",
       }}
@@ -74,7 +76,7 @@ export default async function MacroLanding() {
           href="/"
           style={{
             fontSize: 11,
-            color: "#FFB000",
+            color: "#72AEF8",
             letterSpacing: "0.10em",
             textDecoration: "none",
             display: "inline-block",
@@ -114,7 +116,7 @@ export default async function MacroLanding() {
               fontFamily: "var(--font-serif), Crimson Pro, serif",
               fontSize: 20,
               lineHeight: 1.55,
-              color: "#C9C4B6",
+              color: "#A9A79E",
               marginBottom: 40,
             }}
           >
@@ -128,7 +130,7 @@ export default async function MacroLanding() {
               style={{
                 fontSize: 11,
                 letterSpacing: "0.20em",
-                color: "#FFB000",
+                color: "#72AEF8",
                 marginBottom: 20,
               }}
             >
@@ -141,7 +143,7 @@ export default async function MacroLanding() {
                   style={{
                     marginBottom: 36,
                     paddingBottom: 28,
-                    borderBottom: "1px solid rgba(245,240,225,0.08)",
+                    borderBottom: "1px solid rgba(237,234,224,0.10)",
                   }}
                 >
                   <div
@@ -161,25 +163,25 @@ export default async function MacroLanding() {
                     style={{
                       fontSize: 22,
                       lineHeight: 1.35,
-                      color: "#F5F0E1",
+                      color: "#EDEAE0",
                       textDecoration: "none",
                       fontWeight: 600,
                     }}
                   >
                     {s.title}
                   </a>
-                  <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.65, color: "#C9C4B6" }}>
+                  <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.65, color: "#A9A79E" }}>
                     {s.why}
                   </p>
                   <div
                     style={{
                       marginTop: 12,
                       padding: "10px 14px",
-                      background: "rgba(255,176,0,0.06)",
-                      borderLeft: "2px solid #FFB000",
+                      background: "rgba(114,174,248,0.08)",
+                      borderLeft: "2px solid #72AEF8",
                       fontSize: 13,
                       lineHeight: 1.5,
-                      color: "#FFB000",
+                      color: "#72AEF8",
                     }}
                   >
                     <strong>TRADE IMPLICATION</strong> — {s.tradeImplication}
@@ -198,15 +200,15 @@ export default async function MacroLanding() {
           style={{
             marginTop: 48,
             padding: "32px",
-            background: "#0D0D0F",
-            border: "1px solid rgba(245,240,225,0.12)",
+            background: "#11161A",
+            border: "1px solid rgba(237,234,224,0.18)",
           }}
         >
           <div
             style={{
               fontSize: 11,
               letterSpacing: "0.16em",
-              color: "#FFB000",
+              color: "#72AEF8",
               marginBottom: 8,
             }}
           >
@@ -222,7 +224,7 @@ export default async function MacroLanding() {
           >
             매크로 트레이더를 위한 단 하나의 데스크
           </h2>
-          <p style={{ fontSize: 14, color: "#C9C4B6", marginBottom: 20 }}>
+          <p style={{ fontSize: 14, color: "#A9A79E", marginBottom: 20 }}>
             지속적으로 수집되는 글로벌 매크로 와이어. AI가 \"왜 중요한지\"까지 정리합니다.
           </p>
           <Link
@@ -230,8 +232,8 @@ export default async function MacroLanding() {
             style={{
               display: "inline-block",
               padding: "10px 18px",
-              background: "#FFB000",
-              color: "#08090B",
+              background: "#72AEF8",
+              color: "#0B0E11",
               fontWeight: 700,
               fontSize: 12,
               letterSpacing: "0.10em",
@@ -244,7 +246,7 @@ export default async function MacroLanding() {
 
         {recapEn && (
           <section style={{ marginTop: 36, color: "#8C8C91", fontSize: 12 }}>
-            <Link href="/macro/en" style={{ color: "#FFB000" }}>
+            <Link href="/macro/en" style={{ color: "#72AEF8" }}>
               Read this recap in English →
             </Link>
           </section>
