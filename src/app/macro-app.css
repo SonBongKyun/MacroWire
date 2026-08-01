@@ -2720,7 +2720,8 @@
 
 .macro-app .econ-cal-next-meta b {
   color: var(--accent);
-  font-family: var(--font-mono), monospace;
+  /* "1일 13시간" — Korean plus figures, so the text face carries it. */
+  font-family: var(--font-interface);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }

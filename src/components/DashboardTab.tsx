@@ -1518,7 +1518,7 @@ export default function DashboardTab({
                   {heroArticle.sourceName}
                 </span>
                 <span style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--accent)", opacity: 0.5 }} />
-                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--accent)", opacity: 0.7 }}>
+                <span style={{ fontSize: 11, fontFamily: "var(--font-interface)", fontVariantNumeric: "tabular-nums", color: "var(--accent)", opacity: 0.7 }}>
                   {timeAgo(heroArticle.publishedAt)}
                 </span>
               </div>

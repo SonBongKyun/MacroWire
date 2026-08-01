@@ -109,7 +109,7 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
           marginTop: 8,
           fontSize: 11,
           color: "var(--muted)",
-          fontFamily: "var(--font-mono)",
+          fontFamily: "var(--font-interface)",
           fontVariantNumeric: "tabular-nums",
           display: "flex",
           gap: 4,
