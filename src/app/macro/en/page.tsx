@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
-import { crimsonPro } from "../../fonts-editorial";
+import { editorialSerif } from "../../fonts-editorial";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +57,7 @@ export default async function MacroLandingEn() {
 
   return (
     <main
-      className={crimsonPro.variable}
+      className={editorialSerif.variable}
       style={{
         minHeight: "100dvh",
         background: "#0B0E11",
@@ -80,7 +80,7 @@ export default async function MacroLandingEn() {
         </h1>
 
         {recap?.summary && (
-          <p style={{ fontFamily: "var(--font-serif), Crimson Pro, serif", fontSize: 20, lineHeight: 1.55, color: "#A9A79E", marginBottom: 40 }}>
+          <p style={{ fontFamily: "var(--font-serif), serif", fontSize: 20, lineHeight: 1.55, color: "#A9A79E", marginBottom: 40 }}>
             {recap.summary}
           </p>
         )}

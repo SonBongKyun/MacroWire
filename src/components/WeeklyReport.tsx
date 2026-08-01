@@ -131,7 +131,7 @@ function generateHTML(
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--background); color: var(--foreground); font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif; padding: 40px 20px; }
+  body { background: var(--background); color: var(--foreground); font-family: 'Wanted Sans Variable', 'Wanted Sans', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; padding: 40px 20px; }
   .container { max-width: 800px; margin: 0 auto; }
   h1 { color: var(--accent); font-size: 24px; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 4px; }
   .date-range { color: var(--muted); font-family: var(--font-mono), ui-monospace, monospace; font-size: 13px; margin-bottom: 32px; }

@@ -8,10 +8,10 @@
 
 :root {
   /* One interface face for Korean and Latin. Previously this variable came
-     from next/font (IBM Plex Sans) with Pretendard only as a Korean fallback,
+     from next/font (IBM Plex Sans) with a Korean face only as a fallback,
      which meant every line mixed two designers' letterforms. */
-  --font-interface: "Pretendard Variable", Pretendard, -apple-system,
-    BlinkMacSystemFont, system-ui, sans-serif;
+  --font-interface: "Wanted Sans Variable", "Wanted Sans", -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 
   --background: #fafaf8;
   --background-mesh: none;
@@ -111,12 +111,12 @@
    TYPE SYSTEM — Korean-first
    ────────────────────────────────────── */
 @theme {
-  /* Bulletin: condensed-display Anton for English headlines, Pretendard 900 fallback for Korean */
+  /* Display and headings both resolve to the one interface face. */
   --font-display: var(--font-interface);
   --font-heading: var(--font-interface);
-  --font-body:    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-sans:    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --default-font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-body:    var(--font-interface);
+  --font-sans:    var(--font-interface);
+  --default-font-family: var(--font-interface);
   /* Editorial serif (datelines, pull-quotes) is wired via --font-serif from Next.js next/font */
 }
 
@@ -131,7 +131,7 @@
    `--default-font-family`, which we cannot easily override via cascade —
    so we set the variable globally instead. */
 :root, ::before, ::after {
-  --default-font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --default-font-family: var(--font-interface);
 }
 html,
 body,
@@ -139,7 +139,7 @@ button,
 input,
 select,
 textarea {
-  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+  font-family: var(--font-interface) !important;
 }
 
 /* ── Scrollbar ── */
@@ -1492,7 +1492,7 @@ h1, h2 { font-family: var(--font-display); letter-spacing: -0.022em; }
   max-width: 620px;
   margin: 0 0 32px;
   color: #c8c7c0;
-  font-family: var(--font-serif), "Crimson Pro", serif;
+  font-family: var(--font-serif), serif;
   font-size: clamp(17px, 1.6vw, 21px);
   font-style: italic;
   font-weight: 400;
