@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import dynamic from "next/dynamic";
 import type { Source, Article, ArticlesResponse } from "@/types";
 import { KeyboardHelp } from "@/components/KeyboardHelp";
 import { MarketTicker } from "@/components/MarketTicker";
@@ -14,32 +15,49 @@ import { useThemeCustom } from "@/hooks/useThemeCustom";
 import { useMultiView } from "@/hooks/useMultiView";
 import { useDashboardLayout } from "@/hooks/useDashboardLayout";
 import { useReadingGoals } from "@/hooks/useReadingGoals";
-import { NotificationPanel } from "@/components/NotificationPanel";
-import { ThemeSelector } from "@/components/ThemeSelector";
-import { ExportPanel } from "@/components/ExportPanel";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 import { PlatformNav, type MainTab } from "@/components/PlatformNav";
-import { CurrencyCalculator } from "@/components/CurrencyCalculator";
 import DashboardTab from "@/components/DashboardTab";
 import { NewsTab } from "@/components/NewsTab";
-import { MarketsTab } from "@/components/MarketsTab";
-import { AnalyticsTab } from "@/components/AnalyticsTab";
-import { ResearchTab } from "@/components/ResearchTab";
-import { AiTab } from "@/components/AiTab";
-import { PortfolioTab } from "@/components/PortfolioTab";
 import { ToastProvider, useToast } from "@/components/Toast";
-import { SplitViewPanel } from "@/components/SplitViewPanel";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
-import { WeeklyReport } from "@/components/WeeklyReport";
-import { NewsletterGenerator } from "@/components/NewsletterGenerator";
-import { CuratedFeed } from "@/components/CuratedFeed";
-import { InsightMemo } from "@/components/InsightMemo";
-import { AlertFeed } from "@/components/AlertFeed";
-import { FinancialCalculators } from "@/components/FinancialCalculators";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+
+// Everything below is reachable only after a tap — a secondary tab, an
+// overlay, or split view. Loading it all up front made the first paint on a
+// phone carry code most sessions never open, so it is split into chunks the
+// browser fetches when the feature is actually opened.
+const MarketsTab = dynamic(() => import("@/components/MarketsTab").then((m) => m.MarketsTab), { loading: TabLoading });
+const AnalyticsTab = dynamic(() => import("@/components/AnalyticsTab").then((m) => m.AnalyticsTab), { loading: TabLoading });
+const ResearchTab = dynamic(() => import("@/components/ResearchTab").then((m) => m.ResearchTab), { loading: TabLoading });
+const AiTab = dynamic(() => import("@/components/AiTab").then((m) => m.AiTab), { loading: TabLoading });
+const PortfolioTab = dynamic(() => import("@/components/PortfolioTab").then((m) => m.PortfolioTab), { loading: TabLoading });
+
+const SplitViewPanel = dynamic(() => import("@/components/SplitViewPanel").then((m) => m.SplitViewPanel));
+const NotificationPanel = dynamic(() => import("@/components/NotificationPanel").then((m) => m.NotificationPanel));
+const ThemeSelector = dynamic(() => import("@/components/ThemeSelector").then((m) => m.ThemeSelector));
+const ExportPanel = dynamic(() => import("@/components/ExportPanel").then((m) => m.ExportPanel));
+const CurrencyCalculator = dynamic(() => import("@/components/CurrencyCalculator").then((m) => m.CurrencyCalculator));
+const WeeklyReport = dynamic(() => import("@/components/WeeklyReport").then((m) => m.WeeklyReport));
+const NewsletterGenerator = dynamic(() => import("@/components/NewsletterGenerator").then((m) => m.NewsletterGenerator));
+const CuratedFeed = dynamic(() => import("@/components/CuratedFeed").then((m) => m.CuratedFeed));
+const InsightMemo = dynamic(() => import("@/components/InsightMemo").then((m) => m.InsightMemo));
+const AlertFeed = dynamic(() => import("@/components/AlertFeed").then((m) => m.AlertFeed));
+const FinancialCalculators = dynamic(() => import("@/components/FinancialCalculators").then((m) => m.FinancialCalculators));
 
 const NEWS_REFRESH_INTERVAL = 30;
 const SOURCE_REFRESH_INTERVAL = 5 * 60;
+
+/** Placeholder while a lazily-loaded tab chunk arrives. */
+function TabLoading() {
+  return (
+    <div className="tab-loading" role="status" aria-live="polite">
+      <span className="tab-loading-bar" />
+      <span className="tab-loading-label">불러오는 중</span>
+    </div>
+  );
+}
 
 function getMarketStatusForBar(): { open: boolean; label: string } {
   const now = new Date();
@@ -62,19 +80,20 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
   // Real status is computed inside the useEffect below.
   const [marketStatus, setMarketStatus] = useState<{ open: boolean; label: string }>({ open: false, label: "마감" });
 
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      setClock(now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
-      // Dispatch number = day-of-year (wire-bulletin tradition)
-      const start = new Date(now.getFullYear(), 0, 0);
-      setDispatchNo(String(Math.floor((now.getTime() - start.getTime()) / 86_400_000)).padStart(3, "0"));
-      setMarketStatus(getMarketStatusForBar());
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+  const tick = useCallback(() => {
+    const now = new Date();
+    setClock(now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+    // Dispatch number = day-of-year (wire-bulletin tradition)
+    const start = new Date(now.getFullYear(), 0, 0);
+    setDispatchNo(String(Math.floor((now.getTime() - start.getTime()) / 86_400_000)).padStart(3, "0"));
+    setMarketStatus(getMarketStatusForBar());
   }, []);
+
+  useEffect(() => {
+    tick();
+  }, [tick]);
+
+  useVisibleInterval(tick, 1000);
 
   const ingestTime = lastUpdated
     ? new Date(lastUpdated).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
@@ -195,8 +214,6 @@ function HomeInner() {
   const [alertFeedOpen, setAlertFeedOpen] = useState(false);
   const [financialCalcOpen, setFinancialCalcOpen] = useState(false);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Persist active tab
   useEffect(() => {
@@ -210,11 +227,12 @@ function HomeInner() {
 
   const toggleDarkMode = useCallback(() => {}, []);
 
-  // Countdown
-  useEffect(() => {
-    countdownRef.current = setInterval(() => setCountdown((p) => (p > 0 ? p - 1 : 0)), 1000);
-    return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
-  }, []);
+  // Countdown — purely cosmetic, so it does not need to catch up on resume.
+  useVisibleInterval(
+    useCallback(() => setCountdown((p) => (p > 0 ? p - 1 : 0)), []),
+    1000,
+    { runOnResume: false }
+  );
 
   // Fetch sources
   const fetchSources = useCallback(async () => {
@@ -424,19 +442,18 @@ function HomeInner() {
   }, [range, selectedSourceId, selectedTag, searchQuery, showSaved]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Check for newly ingested articles without exposing the protected ingest API.
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
+  // Paused while the tab is hidden, and fired once on return so the desk is
+  // current the moment you look at it.
+  useVisibleInterval(
+    useCallback(() => {
       setCountdown(NEWS_REFRESH_INTERVAL);
       refreshNews({ silent: true });
-    }, NEWS_REFRESH_INTERVAL * 1000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [refreshNews]);
+    }, [refreshNews]),
+    NEWS_REFRESH_INTERVAL * 1000
+  );
 
   // Source state changes infrequently, so refresh it on a slower cadence.
-  useEffect(() => {
-    const t = setInterval(fetchSources, SOURCE_REFRESH_INTERVAL * 1000);
-    return () => clearInterval(t);
-  }, [fetchSources]);
+  useVisibleInterval(fetchSources, SOURCE_REFRESH_INTERVAL * 1000);
 
   const handleTagClick = useCallback((tag: string) => {
     setSelectedTag((prev) => (prev === tag ? null : tag));

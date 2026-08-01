@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Article } from "@/types";
 import { getEconEvents, toKstDate } from "@/lib/calendar/econ";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 import { computeTagTrends, computeSentimentHeatmap, computeTagBubbles, computeDailyDigest, computeWeeklyReport } from "@/lib/analytics/trends";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { TAG_COLORS } from "@/lib/constants/colors";
@@ -49,12 +50,13 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
   // Time-dependent, so it is resolved after mount to keep SSR and hydration
   // in agreement — same pattern the desk calendar uses.
   const [todayKst, setTodayKst] = useState("");
+  const syncDay = useCallback(() => setTodayKst(toKstDate(new Date())), []);
+
   useEffect(() => {
-    const sync = () => setTodayKst(toKstDate(new Date()));
-    sync();
-    const id = setInterval(sync, 60_000);
-    return () => clearInterval(id);
-  }, []);
+    syncDay();
+  }, [syncDay]);
+
+  useVisibleInterval(syncDay, 60_000);
 
   const econEvents = useMemo(
     () =>

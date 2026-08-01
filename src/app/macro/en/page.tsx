@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
+import { crimsonPro } from "../../fonts-editorial";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,7 @@ export default async function MacroLandingEn() {
 
   return (
     <main
+      className={crimsonPro.variable}
       style={{
         minHeight: "100dvh",
         background: "#08090B",

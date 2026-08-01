@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit --pretty false",
     "test": "tsx --test tests/**/*.test.ts",
+    "icons": "node scripts/generate-icons.mjs",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",

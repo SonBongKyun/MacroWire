@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 interface MarketItem {
   symbol: string;
@@ -75,15 +76,15 @@ export function MarketTicker() {
 
   useEffect(() => {
     fetchMarket();
-    const interval = setInterval(fetchMarket, 5 * 60 * 1000);
-    return () => clearInterval(interval);
   }, [fetchMarket]);
 
+  useVisibleInterval(fetchMarket, 5 * 60 * 1000);
+
   // Update market status every minute
-  useEffect(() => {
-    const interval = setInterval(() => setMarketStatus(getMarketStatus()), 60_000);
-    return () => clearInterval(interval);
-  }, []);
+  useVisibleInterval(
+    useCallback(() => setMarketStatus(getMarketStatus()), []),
+    60_000
+  );
 
   if (loading) {
     return (

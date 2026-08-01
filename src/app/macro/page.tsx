@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
+import { crimsonPro } from "../fonts-editorial";
 
 // Render at request time so build doesn't depend on Neon being reachable.
 // The DailyRecap row only changes when the cron fires, so the LATER move is
@@ -61,6 +62,7 @@ export default async function MacroLanding() {
 
   return (
     <main
+      className={crimsonPro.variable}
       style={{
         minHeight: "100dvh",
         background: "#08090B",

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { crimsonPro } from "./fonts-editorial";
 import { Logo } from "@/components/Logo";
 
 /* ════════════════════════════════════════════════════════════════
@@ -30,6 +31,7 @@ function dateline(): string {
 export default function LandingPage() {
   return (
     <main
+      className={crimsonPro.variable}
       style={{
         background: PALETTE.obsidian,
         color: PALETTE.paper,

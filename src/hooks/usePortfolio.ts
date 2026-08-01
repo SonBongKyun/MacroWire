@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Quote } from "@/lib/market/quote";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 export interface PortfolioAsset {
   symbol: string;
@@ -101,9 +102,9 @@ export function usePortfolio() {
   // Auto-fetch on mount and when assets change
   useEffect(() => {
     fetchPrices();
-    const id = setInterval(fetchPrices, 5 * 60 * 1000);
-    return () => clearInterval(id);
   }, [fetchPrices]);
+
+  useVisibleInterval(fetchPrices, 5 * 60 * 1000);
 
   return { store, prices, loading, addAsset, removeAsset, fetchPrices };
 }

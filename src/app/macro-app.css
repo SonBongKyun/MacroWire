@@ -3064,3 +3064,228 @@
 .macro-app .stat-accent.accent-gold::before {
   background: var(--accent);
 }
+
+/* ===========================================================================
+   Phone ergonomics
+   The desk was designed at desk density: 8–10px labels and 22–30px controls.
+   That survives a mouse and fails a thumb, so on small screens every control
+   grows to a 44px target and nothing renders below 11px.
+   =========================================================================== */
+
+@media (max-width: 768px) {
+  /* ── Legible floor ──────────────────────────────────────────────────────
+     Three sources of tiny type: CSS classes, Tailwind arbitrary sizes, and
+     inline styles. The attribute selectors catch the latter two, and the
+     !important is what lets a stylesheet win against an inline font-size. */
+  .macro-app [class*="text-[8px]"],
+  .macro-app [class*="text-[9px]"],
+  .macro-app [class*="text-[10px]"],
+  .macro-app [style*="font-size: 8px"],
+  .macro-app [style*="font-size: 9px"],
+  .macro-app [style*="font-size: 10px"],
+  .macro-app [style*="font-size:8px"],
+  .macro-app [style*="font-size:9px"],
+  .macro-app [style*="font-size:10px"],
+  .macro-app .wire-brand-meta,
+  .macro-app .wire-count,
+  .macro-app .wire-live,
+  .macro-app .wire-refresh,
+  .macro-app .wire-search-label,
+  .macro-app .news-focus-segment button,
+  .macro-app .news-focus-segment small,
+  .macro-app .news-result-count small,
+  .macro-app .news-segment button,
+  .macro-app .news-read-filters button,
+  .macro-app .news-active-filters-label,
+  .macro-app .news-filter-chip,
+  .macro-app .news-search-chip,
+  .macro-app .detail-analysis-label,
+  .macro-app .detail-entity,
+  .macro-app .detail-impact,
+  .macro-app .detail-topic,
+  .macro-app .detail-sentiment,
+  .macro-app .detail-add-highlight,
+  .macro-app .detail-next-action,
+  .macro-app .article-row-time,
+  .macro-app .article-source-code,
+  .macro-app .article-breaking-badge,
+  .macro-app .article-row-source,
+  .macro-app .article-row-tag,
+  .macro-app .article-signal-badge,
+  .macro-app .dash-section-title,
+  .macro-app .desk-read-next-caption,
+  .macro-app .dash-trend-tag,
+  .macro-app .dash-trend-count,
+  .macro-app .econ-cal-next-meta,
+  .macro-app .econ-cal-date,
+  .macro-app .econ-cal-estimate,
+  .macro-app .econ-cal-region,
+  .macro-app .econ-region-chip,
+  .macro-app .econ-cal-note,
+  .macro-app .macro-subhead,
+  .macro-app .macro-subhead-stamp,
+  .macro-app .macro-live-label,
+  .macro-app .macro-live-move,
+  .macro-app .macro-ref-label,
+  .macro-app .macro-ref-source,
+  .macro-app .macro-ref-asof {
+    font-size: 11px !important;
+  }
+
+  /* Badges that live inside a fixed-size chip keep their small size — growing
+     them would burst the chip rather than help anyone read it. */
+  .macro-app .mobile-tab-icon i,
+  .macro-app .dash-trend-rank,
+  .macro-app .econ-cal-today-badge,
+  .macro-app .article-row-impact span {
+    font-size: 9px !important;
+  }
+
+  .macro-app .article-row-title {
+    font-size: 15px;
+  }
+
+  /* The rail carries a timestamp and a source code that just grew. */
+  .macro-app .article-row-rail {
+    min-width: 54px;
+  }
+
+  /* ── 44px targets ───────────────────────────────────────────────────────
+     Blanket minimum, then display fixes for the controls that are laid out
+     inline (min-height does nothing on a non-replaced inline box). */
+  .macro-app button,
+  .macro-app select,
+  .macro-app input[type="text"],
+  .macro-app input[type="search"],
+  .macro-app input[type="number"],
+  .macro-app a[href]:not(.article-row-tag) {
+    min-height: 44px;
+  }
+
+  .macro-app .news-segment button,
+  .macro-app .news-focus-segment button,
+  .macro-app .news-read-filters button,
+  .macro-app .news-regions button,
+  .macro-app .news-icon-button,
+  .macro-app .news-density button,
+  .macro-app .dash-trend-tag,
+  .macro-app .wire-mobile-search,
+  .macro-app .wire-refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .macro-app .wire-mobile-search,
+  .macro-app .news-icon-button {
+    min-width: 44px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .macro-app .news-source-select select,
+  .macro-app .news-sort-select select {
+    min-height: 44px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Tag chips stay small but get vertical breathing room so a thumb can hit
+     one without opening the article underneath. */
+  .macro-app .article-row-tag {
+    min-height: 26px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  /* The mobile tab bar sets its own 62px height; the blanket rule must not
+     stretch its grid cells. Its labels are primary navigation, so they read at
+     11px rather than the 10px the desktop chrome uses. */
+  .macro-app .mobile-tabbar > button {
+    min-height: 0;
+    font-size: 11px;
+  }
+
+  /* Tag chips stay visually small so they do not crowd the headline, but the
+     hit area is expanded to a thumb-sized box with a transparent overlay. */
+  .macro-app .article-row-tag {
+    position: relative;
+  }
+
+  .macro-app .article-row-tag::after {
+    content: "";
+    position: absolute;
+    inset: -9px -3px;
+  }
+
+  /* Chart axis labels sit outside the text hierarchy but still get a nudge. */
+  .macro-app svg text {
+    font-size: 10px;
+  }
+
+  /* ── Touch feel ─────────────────────────────────────────────────────────── */
+  .macro-app {
+    -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  /* Stop a scroll that reaches the end of a pane from dragging the page (and
+     on iOS, from triggering pull-to-refresh mid-article). */
+  .macro-app .news-list-pane,
+  .macro-app .news-detail-pane,
+  .macro-app .dash-two-col,
+  .macro-app .tab-content-enter > div {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* The ticker is a horizontal scroller on a phone, not a marquee. */
+  .macro-app .ticker-bar {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .macro-app .ticker-bar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Lazily-loaded tab placeholder */
+.macro-app .tab-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  min-height: 180px;
+}
+
+.macro-app .tab-loading-bar {
+  width: 96px;
+  height: 2px;
+  overflow: hidden;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.macro-app .tab-loading-bar::after {
+  content: "";
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--accent);
+  animation: tab-loading-slide 1s ease-in-out infinite;
+}
+
+.macro-app .tab-loading-label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+@keyframes tab-loading-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}

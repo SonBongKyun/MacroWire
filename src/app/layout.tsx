@@ -1,26 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Crimson_Pro, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ibmPlexSans, jetbrainsMono } from "./fonts";
 import "./globals.css";
 import "./macro-app.css";
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
-  weight: ["400", "500", "700"],
-  subsets: ["latin"],
-});
-
-const ibmPlexSans = IBM_Plex_Sans({
-  variable: "--font-interface",
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-});
-
-const crimsonPro = Crimson_Pro({
-  variable: "--font-serif",
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -39,8 +21,14 @@ export const metadata: Metadata = {
     title: "MacroWire",
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    // iOS ignores SVG here and renders a blank tile, so the home-screen icon
+    // has to be a raster.
+    apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
   },
 };
 
@@ -52,7 +40,10 @@ export default function RootLayout({
   const document = (
     <html lang="ko" className="dark">
       <head>
-        {/* Korean fallback fonts complement the self-hosted interface and data faces. */}
+        {/* Pretendard carries Korean text; the Latin interface and data faces
+            are self-hosted by next/font. SUIT used to be loaded here too, but
+            it only ever sat behind Pretendard in the fallback stack — a
+            render-blocking third-party stylesheet for a face that never won. */}
         <link
           rel="preconnect"
           href="https://cdn.jsdelivr.net"
@@ -62,12 +53,8 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css"
-        />
       </head>
-      <body className={`${jetbrainsMono.variable} ${ibmPlexSans.variable} ${crimsonPro.variable} antialiased`}>
+      <body className={`${jetbrainsMono.variable} ${ibmPlexSans.variable} antialiased`}>
         {children}
         {/* Service worker — disabled. Unregister any leftover SW from a prior
             version so cached "/" shells from before the landing/app split

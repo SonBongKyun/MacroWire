@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 export type MainTab = "dashboard" | "news" | "markets" | "analytics" | "ai" | "research" | "portfolio";
 
@@ -135,10 +136,10 @@ export function PlatformNav(props: PlatformNavProps) {
     }
   }, []);
 
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
+  useVisibleInterval(
+    useCallback(() => setNow(Date.now()), []),
+    60_000
+  );
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {

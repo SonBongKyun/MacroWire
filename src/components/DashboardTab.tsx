@@ -19,6 +19,7 @@ import { getRecommendations } from "@/lib/ai/recommendations";
 import type { Recommendation } from "@/lib/ai/recommendations";
 import { TAG_COLORS, TAG_FALLBACK_COLOR } from "@/lib/constants/colors";
 import { isMacroSignal } from "@/lib/news/signal";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 function prefersReducedMotion(): boolean {
   return (
@@ -540,12 +541,13 @@ function ArticleVolumeChart({ articles }: { articles: Article[] }) {
     return () => ro.disconnect();
   }, []);
 
+  const updateNow = useCallback(() => setNowMs(Date.now()), []);
+
   useEffect(() => {
-    const updateNow = () => setNowMs(Date.now());
     updateNow();
-    const timer = window.setInterval(updateNow, 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
+  }, [updateNow]);
+
+  useVisibleInterval(updateNow, 60_000);
 
   const hourlyData = useMemo(() => {
     const currentHour = nowMs
@@ -1134,17 +1136,18 @@ export default function DashboardTab({
   }, []);
 
   const [isMarketOpen, setIsMarketOpen] = useState(false);
-  useEffect(() => {
-    const updateMarketStatus = () => {
-      const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
-      const day = kst.getUTCDay();
-      const timeVal = kst.getUTCHours() * 60 + kst.getUTCMinutes();
-      setIsMarketOpen(day >= 1 && day <= 5 && timeVal >= 540 && timeVal < 930);
-    };
-    updateMarketStatus();
-    const timer = window.setInterval(updateMarketStatus, 60_000);
-    return () => window.clearInterval(timer);
+  const updateMarketStatus = useCallback(() => {
+    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const day = kst.getUTCDay();
+    const timeVal = kst.getUTCHours() * 60 + kst.getUTCMinutes();
+    setIsMarketOpen(day >= 1 && day <= 5 && timeVal >= 540 && timeVal < 930);
   }, []);
+
+  useEffect(() => {
+    updateMarketStatus();
+  }, [updateMarketStatus]);
+
+  useVisibleInterval(updateMarketStatus, 60_000);
 
   useEffect(() => {
     let cancelled = false;

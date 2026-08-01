@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Quote } from "@/lib/market/quote";
 import type { PortfolioPrice, PortfolioAsset } from "@/hooks/usePortfolio";
 import { PriceChart, MiniSparkline } from "@/components/PriceChart";
 import { usePriceAlerts } from "@/hooks/usePriceAlerts";
 import { usePortfolioPnL } from "@/hooks/usePortfolioPnL";
+import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
 interface MarketsTabProps {
   portfolioPrices: PortfolioPrice[];
@@ -150,6 +151,10 @@ export function MarketsTab({
 
   const existingSymbols = new Set(portfolioAssets.map((a) => a.symbol));
 
+  // Holds the fetcher so the visibility-aware poller can call it without
+  // re-running the mount effect.
+  const marketPoll = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     async function fetchMarket() {
@@ -167,12 +172,16 @@ export function MarketsTab({
       }
     }
     fetchMarket();
-    const id = setInterval(fetchMarket, 5 * 60 * 1000);
+    marketPoll.current = fetchMarket;
     return () => {
       cancelled = true;
-      clearInterval(id);
     };
   }, []);
+
+  useVisibleInterval(
+    useCallback(() => marketPoll.current?.(), []),
+    5 * 60 * 1000
+  );
 
   // Check alerts when prices update
   useEffect(() => {
