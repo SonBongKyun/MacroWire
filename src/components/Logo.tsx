@@ -72,7 +72,7 @@ export function Logo({
       </span>
       <span
         style={{
-          fontFamily: "var(--font-interface), 'Pretendard Variable', sans-serif",
+          fontFamily: "var(--font-interface)",
           fontSize: dims.fontSize,
           fontWeight: 700,
           color: wordmarkColor,

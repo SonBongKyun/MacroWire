@@ -40,8 +40,10 @@ export default function RootLayout({
   const document = (
     <html lang="ko" className="dark">
       <head>
-        {/* Pretendard is the interface face for Korean and Latin alike. The
-            only other family is the numeral mono, self-hosted by next/font. */}
+        {/* Wanted Sans is the interface face for Korean and Latin alike — one
+            family drawn for UI in both scripts, so a mixed line is not two
+            designers' letterforms. The only other family here is the numeral
+            mono, self-hosted by next/font. */}
         <link
           rel="preconnect"
           href="https://cdn.jsdelivr.net"
@@ -49,7 +51,7 @@ export default function RootLayout({
         />
         <link
           rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+          href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.css"
         />
       </head>
       <body className={`${dataMono.variable} antialiased`}>

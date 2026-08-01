@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { crimsonPro } from "./fonts-editorial";
+import { editorialSerif } from "./fonts-editorial";
 import { Logo } from "@/components/Logo";
 import { PLANS, type PlanKey } from "@/lib/billing/plans";
 
@@ -38,7 +38,7 @@ function dateline(): string {
 export default function LandingPage() {
   return (
     <main
-      className={crimsonPro.variable}
+      className={editorialSerif.variable}
       style={{
         background: PALETTE.obsidian,
         color: PALETTE.paper,
