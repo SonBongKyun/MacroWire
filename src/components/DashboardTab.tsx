@@ -573,7 +573,7 @@ function ArticleVolumeChart({ articles }: { articles: Article[] }) {
 
   return (
     <div ref={containerRef} style={{ width: "100%", marginBottom: 24 }}>
-      <div className="dash-section-title">24H ACTIVITY</div>
+      <div className="dash-section-title">24시간 기사량</div>
       <svg
         width={w}
         height={svgHeight + 18}
@@ -631,21 +631,21 @@ function SourceQualityPanel({ rankings }: { rankings: SourceRank[] }) {
   if (top5.length === 0) {
     return (
       <div>
-        <div className="dash-section-title">SOURCE QUALITY</div>
+        <div className="dash-section-title">소스 품질</div>
         <div style={{ fontSize: 12, color: "var(--muted)" }}>소스 데이터 없음</div>
       </div>
     );
   }
 
   const FRESHNESS_LABELS: Record<string, { text: string; color: string }> = {
-    active: { text: "ACTIVE", color: "var(--success)" },
-    slow: { text: "SLOW", color: "var(--accent)" },
-    stale: { text: "STALE", color: "var(--danger)" },
+    active: { text: "수신 중", color: "var(--success)" },
+    slow: { text: "느림", color: "var(--accent)" },
+    stale: { text: "멈춤", color: "var(--danger)" },
   };
 
   return (
     <div>
-      <div className="dash-section-title">SOURCE QUALITY</div>
+      <div className="dash-section-title">소스 품질</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {top5.map((rank, idx) => {
           const scoreColor =
@@ -771,7 +771,7 @@ function ReadingProgressSection({
   return (
     <>
       <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span>READING PROGRESS</span>
+        <span>읽기 목표</span>
         <button
           onClick={() => setEditingGoals((v) => !v)}
           style={{
@@ -901,10 +901,10 @@ function ReadingProgressSection({
 
 // ── Signal Monitor ──
 const INSIGHT_TYPE_CONFIG: Record<MarketInsight["type"], { color: string; label: string }> = {
-  trend: { color: "#3B82F6", label: "TREND" },
-  alert: { color: "#F59E0B", label: "ALERT" },
-  opportunity: { color: "var(--success)", label: "OPPORTUNITY" },
-  risk: { color: "var(--danger)", label: "RISK" },
+  trend: { color: "#3B82F6", label: "흐름" },
+  alert: { color: "#F59E0B", label: "주의" },
+  opportunity: { color: "var(--success)", label: "기회" },
+  risk: { color: "var(--danger)", label: "위험" },
 };
 
 function AiInsightsPanel({ articles }: { articles: Article[] }) {
@@ -916,9 +916,7 @@ function AiInsightsPanel({ articles }: { articles: Article[] }) {
     <div className="desk-signal-monitor">
       <div
         className="dash-section-title"
-      >
-        SIGNAL MONITOR
-      </div>
+      >신호 모니터</div>
       <div>
         {insights.slice(0, 5).map((insight, i) => {
           const cfg = INSIGHT_TYPE_CONFIG[insight.type];
@@ -1278,9 +1276,9 @@ export default function DashboardTab({
                   textTransform: "uppercase" as const,
                   letterSpacing: "0.16em",
                   color: "var(--muted)",
-                  fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+                  fontFamily: "var(--font-interface)",
                 }}>
-                  ─ {item.label}
+                  {item.label}
                 </span>
                 <span style={{
                   fontSize: 30,
@@ -1353,7 +1351,7 @@ export default function DashboardTab({
           {/* ── Breaking News Stream ── */}
           {breakingArticles.length > 0 && (
             <div className="desk-breaking">
-              <div className="dash-section-title" style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+              <div className="dash-section-title is-lead" style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
                 <span style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -1425,7 +1423,8 @@ export default function DashboardTab({
                         fontSize: 9,
                         fontWeight: 700,
                         color: isFresh ? "var(--danger)" : "color-mix(in srgb, var(--danger) 70%, transparent)",
-                        fontFamily: "var(--font-mono)",
+                        fontFamily: "var(--font-interface)",
+                        fontVariantNumeric: "tabular-nums",
                         flexShrink: 0,
                         paddingTop: 2,
                         minWidth: 44,
@@ -1459,7 +1458,7 @@ export default function DashboardTab({
           )}
 
           {sections.topStories && (<>
-          <div className="dash-section-title">LEAD STORIES</div>
+          <div className="dash-section-title is-lead">주요 기사</div>
 
           {/* Hero article — large, gold-accented */}
           {heroArticle ? (
@@ -1586,7 +1585,8 @@ export default function DashboardTab({
                       whiteSpace: "nowrap",
                       fontSize: 10,
                       color: "var(--muted)",
-                      fontFamily: "var(--font-mono)",
+                      fontFamily: "var(--font-interface)",
+                      fontVariantNumeric: "tabular-nums",
                     }}
                   >
                     {article.sourceName} {timeAgo(article.publishedAt)}
@@ -1606,9 +1606,7 @@ export default function DashboardTab({
           {recommendations.length > 0 && (
             <div className="desk-read-next">
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                <span className="dash-section-title" style={{ marginBottom: 0, flex: 1 }}>
-                  READ NEXT
-                </span>
+                <span className="dash-section-title" style={{ marginBottom: 0, flex: 1 }}>이어 읽기</span>
               </div>
               <div className="desk-read-next-caption">
                 관심 흐름
@@ -1670,7 +1668,8 @@ export default function DashboardTab({
                             whiteSpace: "nowrap",
                             fontSize: 10,
                             color: "var(--muted)",
-                            fontFamily: "var(--font-mono)",
+                            fontFamily: "var(--font-interface)",
+                            fontVariantNumeric: "tabular-nums",
                           }}
                         >
                           {rec.article.sourceName} {timeAgo(rec.article.publishedAt)}
@@ -1729,7 +1728,7 @@ export default function DashboardTab({
                 if (!sections.marketData) return null;
                 return (
                   <div key={sectionId} {...sectionDragProps}>
-                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>MARKET DATA</span>{grip}</div>
+                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>시세</span>{grip}</div>
                     {portfolioLoading ? (
                       <div style={{ fontSize: 12, color: "var(--muted)" }}>로딩...</div>
                     ) : portfolioPrices.length === 0 ? (
@@ -1751,7 +1750,7 @@ export default function DashboardTab({
                 if (!sections.statistics) return null;
                 return (
                   <div key={sectionId} {...sectionDragProps}>
-                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>STATISTICS</span>{grip}</div>
+                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>오늘 집계</span>{grip}</div>
                     <div className="dash-stat-grid">
                       {[{ label: "오늘 기사", value: todayStats.total }, { label: "읽지 않음", value: todayStats.unread }, { label: "저장됨", value: todayStats.saved }, { label: "활성 소스", value: todayStats.sourceCount }].map((stat) => (
                         <div key={stat.label} className="dash-stat-cell">
@@ -1774,7 +1773,7 @@ export default function DashboardTab({
                 if (!sections.trending) return null;
                 return (
                   <div key={sectionId} {...sectionDragProps}>
-                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>TRENDING</span>{grip}</div>
+                    <div className="dash-section-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}><span>많이 다뤄진 주제</span>{grip}</div>
                     {trendingTags.length === 0 ? (
                       <span style={{ fontSize: 12, color: "var(--muted)" }}>태그 데이터 없음</span>
                     ) : (

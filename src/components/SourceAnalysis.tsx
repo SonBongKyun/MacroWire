@@ -123,9 +123,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
           marginBottom: 12,
           fontFamily: "var(--font-heading)",
         }}
-      >
-        SOURCE ANALYSIS
-      </div>
+      >소스 분석</div>
 
       {/* Header row */}
       <div

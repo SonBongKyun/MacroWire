@@ -112,29 +112,29 @@ function StatusBar({ enabledSources, totalSources, articleCount, unreadCount, la
       </span>
       {sep}
       <span className="status-field">
-        SOURCES <b>{enabledSources}</b><span>/{totalSources}</span>
+        소스 <b>{enabledSources}</b><span>/{totalSources}</span>
       </span>
       {sep}
       <span className="status-field">
-        FILED <b>{articleCount}</b>
+        수집 <b>{articleCount}</b>
       </span>
       {unreadCount > 0 && (
         <>
           {sep}
-          <span className="status-unread">UNREAD {unreadCount}</span>
+          <span className="status-unread">안읽음 {unreadCount}</span>
         </>
       )}
       {activeFilterCount > 0 && (
         <>
           {sep}
           <span className="status-filter">
-            {activeFilterCount} FILTER
+            필터 {activeFilterCount}
           </span>
         </>
       )}
       {sep}
       <span className="status-field">
-        LAST FILE <b>{ingestTime}</b>
+        최근 수신 <b>{ingestTime}</b>
       </span>
     </div>
   );

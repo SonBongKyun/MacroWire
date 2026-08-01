@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ibmPlexSans, jetbrainsMono } from "./fonts";
+import { dataMono } from "./fonts";
 import "./globals.css";
 import "./macro-app.css";
 
@@ -40,10 +40,8 @@ export default function RootLayout({
   const document = (
     <html lang="ko" className="dark">
       <head>
-        {/* Pretendard carries Korean text; the Latin interface and data faces
-            are self-hosted by next/font. SUIT used to be loaded here too, but
-            it only ever sat behind Pretendard in the fallback stack — a
-            render-blocking third-party stylesheet for a face that never won. */}
+        {/* Pretendard is the interface face for Korean and Latin alike. The
+            only other family is the numeral mono, self-hosted by next/font. */}
         <link
           rel="preconnect"
           href="https://cdn.jsdelivr.net"
@@ -54,7 +52,7 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
       </head>
-      <body className={`${jetbrainsMono.variable} ${ibmPlexSans.variable} antialiased`}>
+      <body className={`${dataMono.variable} antialiased`}>
         {children}
         {/* Service worker — disabled. Unregister any leftover SW from a prior
             version so cached "/" shells from before the landing/app split

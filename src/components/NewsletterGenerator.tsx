@@ -74,7 +74,7 @@ function generateNewsletterHTML(
 
   <!-- Stories -->
   <tr><td style="padding:24px;">
-    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">TOP STORIES</div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">주요 기사</div>
     ${selected.map((a, i) => {
       const time = new Date(a.publishedAt).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
       const preview = a.summary ? (a.summary.length > 120 ? a.summary.slice(0, 120) + "..." : a.summary) : "";
@@ -93,7 +93,7 @@ function generateNewsletterHTML(
   ${prices && prices.length > 0 ? `
   <!-- Market -->
   <tr><td style="padding:0 24px 24px;">
-    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;padding-top:8px;border-top:2px solid var(--border);">MARKET SNAPSHOT</div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;padding-top:8px;border-top:2px solid var(--border);">시세 요약</div>
     <table width="100%" cellpadding="0" cellspacing="0">
     ${prices.map((p) => {
       const sign = p.change >= 0 ? "+" : "";
@@ -376,7 +376,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
             ) : previewMode === "text" ? (
               <pre
                 style={{
-                  fontFamily: "'Space Mono', monospace",
+                  fontFamily: "var(--font-mono), ui-monospace, monospace",
                   fontSize: 12,
                   color: "var(--foreground)",
                   lineHeight: 1.6,
@@ -410,9 +410,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                     textTransform: "uppercase" as const,
                     marginBottom: 14,
                   }}
-                >
-                  TOP STORIES
-                </div>
+                >주요 기사</div>
                 {selectedArticles.map((a, i) => {
                   const time = new Date(a.publishedAt).toLocaleString("ko-KR", {
                     month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit",
@@ -455,9 +453,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                         textTransform: "uppercase" as const,
                         marginBottom: 10,
                       }}
-                    >
-                      MARKET SNAPSHOT
-                    </div>
+                    >시세 요약</div>
                     {portfolioPrices.map((p) => {
                       const sign = p.change >= 0 ? "+" : "";
                       const color = p.change >= 0 ? "var(--success)" : "var(--danger)";
@@ -467,7 +463,7 @@ export function NewsletterGenerator({ open, onClose, articles, portfolioPrices }
                           style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--border)", fontSize: 12 }}
                         >
                           <span style={{ fontWeight: 600 }}>{p.symbol}</span>
-                          <span style={{ fontFamily: "'Space Mono', monospace" }}>
+                          <span style={{ fontFamily: "var(--font-mono), ui-monospace, monospace" }}>
                             {p.price.toLocaleString()}{" "}
                             <span style={{ color }}>{sign}{p.changePct.toFixed(2)}%</span>
                           </span>

@@ -154,7 +154,7 @@ export function GlobalMacroDashboard() {
 
   return (
     <div className="macro-indicators">
-      <div className="dash-section-title">MACRO INDICATORS</div>
+      <div className="dash-section-title">매크로 지표</div>
 
       <div className="macro-live">
         <div className="macro-subhead">

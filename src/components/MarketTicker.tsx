@@ -110,7 +110,7 @@ export function MarketTicker() {
           LIVE
         </span>
         <span className="text-[8px] text-[var(--border-strong)] mx-0.5">|</span>
-        <span className={`text-[8px] font-bold tracking-wider font-mono ${marketStatus.open ? "text-[var(--success)]" : "text-[var(--muted)]"}`}>
+        <span className={`text-[10px] font-semibold ${marketStatus.open ? "text-[var(--success)]" : "text-[var(--muted)]"}`}>
           {marketStatus.label}
         </span>
       </div>

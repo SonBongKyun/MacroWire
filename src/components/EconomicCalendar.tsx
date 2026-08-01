@@ -63,7 +63,7 @@ export function EconomicCalendar() {
 
   return (
     <div className="econ-cal">
-      <div className="dash-section-title">ECONOMIC CALENDAR</div>
+      <div className="dash-section-title">경제 일정</div>
 
       {countdown && nextEvent && (
         <div className="econ-cal-next">

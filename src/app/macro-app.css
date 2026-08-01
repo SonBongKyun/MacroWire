@@ -3112,7 +3112,7 @@
   .macro-app .article-row-source,
   .macro-app .article-row-tag,
   .macro-app .article-signal-badge,
-  .macro-app .dash-section-title,
+  .macro-app .dash-section-title:not(.is-lead),
   .macro-app .desk-read-next-caption,
   .macro-app .dash-trend-tag,
   .macro-app .dash-trend-count,
@@ -3143,6 +3143,10 @@
 
   .macro-app .article-row-title {
     font-size: 15px;
+  }
+
+  .macro-app .dash-section-title.is-lead {
+    font-size: 17px;
   }
 
   /* The rail carries a timestamp and a source code that just grew. */
@@ -3288,4 +3292,115 @@
 @keyframes tab-loading-slide {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(250%); }
+}
+
+/* ===========================================================================
+   Section headings — hierarchy instead of repetition
+   Twenty-four panels shared one eyebrow: monospace, uppercase, accent tick,
+   hairline rule. Uniform labelling is what makes a screen read as generated
+   rather than edited, so the tick is gone and panels now sit at two levels —
+   a lead heading for the few sections that carry the page, and a quiet label
+   for the reference panels beside them.
+   =========================================================================== */
+
+.macro-app .dash-section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 0;
+  margin-bottom: 10px;
+  padding: 0 0 7px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-interface);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* The accent tick in front of every label. */
+.macro-app .dash-section-title::before {
+  content: none;
+  display: none;
+}
+
+/* Sections that carry the page read as headings, not as labels. */
+.macro-app .dash-section-title.is-lead {
+  margin-bottom: 14px;
+  padding-bottom: 0;
+  color: var(--foreground-bright);
+  border-bottom: 0;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.macro-app .desk-breaking .dash-section-title {
+  color: var(--danger);
+  border-bottom-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
+/* MarketsTab and the report overlays uppercase their own headers inline; with
+   Korean labels that is a no-op, but the wide tracking is not. */
+.macro-app [style*="text-transform: uppercase"],
+.macro-app [style*="text-transform:uppercase"] {
+  text-transform: none !important;
+}
+
+/* ── Fewer effects ──────────────────────────────────────────────────────────
+   Glow, shimmer and pulse were applied evenly to decoration and to status
+   alike. Motion is kept only where it means something — a live feed, a fresh
+   dispatch — and taken off the surfaces that were merely shiny. */
+
+.macro-app .glass-card::before,
+.macro-app .glass-card:hover::before,
+.macro-app .ticker-shimmer::after {
+  content: none;
+  display: none;
+}
+
+.macro-app .glass-card,
+.macro-app .glass-card:hover {
+  box-shadow: none;
+}
+
+.macro-app .skeleton-shimmer,
+.macro-app .card-shimmer {
+  animation: none;
+}
+
+/* ===========================================================================
+   Where the numeral face belongs
+   Roboto Mono has no Hangul, so any Korean label styled as mono rendered half
+   in one face and half in another — the stitched look this pass is undoing.
+   The mono is for values that line up in a column: prices, percentages,
+   counts, clock time. Labels and relative times use the text face, with
+   tabular figures where digits still need to align.
+   =========================================================================== */
+
+.macro-app .wire-brand-meta,
+.macro-app .wire-live,
+.macro-app .wire-search kbd,
+.macro-app .status-unread,
+.macro-app .status-filter,
+.macro-app .econ-cal-date,
+.macro-app .econ-cal-region,
+.macro-app .econ-region-chip,
+.macro-app .article-row-time,
+.macro-app .article-source-code,
+.macro-app .desk-breaking-row > span:first-of-type,
+.macro-app .macro-subhead-stamp {
+  font-family: var(--font-interface);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status bar mixes Korean field names with figures; the face is the text one
+   and only the figures are held to the tabular grid. */
+.macro-app .status-bar {
+  font-family: var(--font-interface);
+}
+
+.macro-app .status-bar b,
+.macro-app .status-clock,
+.macro-app .status-edition {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
 }

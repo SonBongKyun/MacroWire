@@ -43,9 +43,7 @@ export function SentimentGauge({ articles }: SentimentGaugeProps) {
       <div
         className="dash-section-title"
         style={{ marginBottom: 10 }}
-      >
-        MARKET SENTIMENT
-      </div>
+      >시장 심리</div>
 
       {/* Gauge bar */}
       <div
