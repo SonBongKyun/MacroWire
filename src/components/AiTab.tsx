@@ -29,8 +29,8 @@ function timeAgo(dateStr: string): string {
 }
 
 const INSIGHT_COLORS: Record<string, string> = {
-  trend: "#FFB000",
-  risk: "#ef4444",
+  trend: "var(--accent)",
+  risk: "var(--danger)",
   opportunity: "#3b82f6",
   alert: "#f97316",
 };
@@ -52,12 +52,12 @@ const REC_LABELS: Record<string, string> = {
 /* ── confidence bar ── */
 function ConfidenceBar({ value }: { value: number }) {
   return (
-    <div style={{ width: 60, height: 3, background: "#2C2D34", position: "relative" }}>
+    <div style={{ width: 60, height: 3, background: "var(--border)", position: "relative" }}>
       <div
         style={{
           width: `${value}%`,
           height: "100%",
-          background: value > 70 ? "#FFB000" : "#8C8C91",
+          background: value > 70 ? "var(--accent)" : "var(--muted)",
         }}
       />
     </div>
@@ -66,7 +66,7 @@ function ConfidenceBar({ value }: { value: number }) {
 
 /* ── section separator ── */
 function SectionSep() {
-  return <div style={{ borderTop: "1px solid #2C2D34", margin: "20px 0" }} />;
+  return <div style={{ borderTop: "1px solid var(--border)", margin: "20px 0" }} />;
 }
 
 export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfolioPrices }: AiTabProps) {
@@ -123,9 +123,9 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
 
     let mood: string;
     let moodColor: string;
-    if (pos > neg * 1.5) { mood = "긍정"; moodColor = "#22c55e"; }
-    else if (neg > pos * 1.5) { mood = "부정"; moodColor = "#ef4444"; }
-    else { mood = "혼조"; moodColor = "#FFB000"; }
+    if (pos > neg * 1.5) { mood = "긍정"; moodColor = "var(--success)"; }
+    else if (neg > pos * 1.5) { mood = "부정"; moodColor = "var(--danger)"; }
+    else { mood = "혼조"; moodColor = "var(--accent)"; }
 
     return { todayCount: todayArticles.length, pos, neg, neu, breakingCount, topTags, mood, moodColor };
   }, [articles, summaries]);
@@ -248,9 +248,9 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
   }, [articles, summaries]);
 
   const sentimentDotColor = (s: string) => {
-    if (s === "positive") return "#22c55e";
-    if (s === "negative") return "#ef4444";
-    return "#8C8C91";
+    if (s === "positive") return "var(--success)";
+    if (s === "negative") return "var(--danger)";
+    return "var(--muted)";
   };
 
   return (
@@ -260,11 +260,11 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         gridTemplateColumns: "60% 40%",
         height: "100%",
         overflow: "hidden",
-        background: "#08090B",
+        background: "var(--background)",
       }}
     >
       {/* ══════════ LEFT COLUMN ══════════ */}
-      <div style={{ overflowY: "auto", padding: "24px 28px", borderRight: "1px solid #2C2D34" }}>
+      <div style={{ overflowY: "auto", padding: "24px 28px", borderRight: "1px solid var(--border)" }}>
 
         {/* ── AI MARKET BRIEF ── */}
         <div className="dash-section-title">AI MARKET BRIEF</div>
@@ -278,26 +278,26 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                 background: marketBrief.moodColor,
               }}
             />
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#EBEBEB" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--foreground)" }}>
               오늘의 시장: {marketBrief.mood}
             </span>
           </div>
 
           <div style={{ display: "flex", gap: 24, marginBottom: 12 }}>
             <div>
-              <span style={{ fontSize: 10, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.05em" }}>기사</span>
-              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "#EBEBEB" }}>{marketBrief.todayCount}</div>
+              <span style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>기사</span>
+              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "var(--foreground)" }}>{marketBrief.todayCount}</div>
             </div>
             <div>
-              <span style={{ fontSize: 10, color: "#8C8C91", textTransform: "uppercase", letterSpacing: "0.05em" }}>속보</span>
-              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Space Mono', monospace", color: marketBrief.breakingCount > 0 ? "#ef4444" : "#EBEBEB" }}>{marketBrief.breakingCount}</div>
+              <span style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>속보</span>
+              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Space Mono', monospace", color: marketBrief.breakingCount > 0 ? "var(--danger)" : "var(--foreground)" }}>{marketBrief.breakingCount}</div>
             </div>
             <div>
-              <span style={{ fontSize: 10, color: "#22c55e" }}>+{marketBrief.pos}</span>
-              <span style={{ fontSize: 10, color: "#8C8C91", margin: "0 4px" }}>/</span>
-              <span style={{ fontSize: 10, color: "#8C8C91" }}>{marketBrief.neu}</span>
-              <span style={{ fontSize: 10, color: "#8C8C91", margin: "0 4px" }}>/</span>
-              <span style={{ fontSize: 10, color: "#ef4444" }}>-{marketBrief.neg}</span>
+              <span style={{ fontSize: 10, color: "var(--success)" }}>+{marketBrief.pos}</span>
+              <span style={{ fontSize: 10, color: "var(--muted)", margin: "0 4px" }}>/</span>
+              <span style={{ fontSize: 10, color: "var(--muted)" }}>{marketBrief.neu}</span>
+              <span style={{ fontSize: 10, color: "var(--muted)", margin: "0 4px" }}>/</span>
+              <span style={{ fontSize: 10, color: "var(--danger)" }}>-{marketBrief.neg}</span>
             </div>
           </div>
 
@@ -309,12 +309,12 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   style={{
                     fontSize: 10,
                     padding: "2px 8px",
-                    border: "1px solid #2C2D34",
-                    color: "#FFB000",
+                    border: "1px solid var(--border)",
+                    color: "var(--accent)",
                     fontFamily: "'Space Mono', monospace",
                   }}
                 >
-                  {tag} <span style={{ color: "#8C8C91" }}>{count}</span>
+                  {tag} <span style={{ color: "var(--muted)" }}>{count}</span>
                 </span>
               ))}
             </div>
@@ -327,7 +327,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <div className="dash-section-title">SIGNAL MONITOR</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 14 }}>
           {insights.length === 0 && (
-            <div style={{ fontSize: 11, color: "#8C8C91" }}>분석할 데이터가 부족합니다</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>분석할 데이터가 부족합니다</div>
           )}
           {insights.map((insight, i) => (
             <div key={i}>
@@ -344,17 +344,17 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                 <span style={{ fontSize: 9, fontWeight: 700, color: INSIGHT_COLORS[insight.type], letterSpacing: "0.05em" }}>
                   {INSIGHT_LABELS[insight.type]}
                 </span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#EBEBEB" }}>{insight.title}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>{insight.title}</span>
               </div>
-              <div style={{ fontSize: 11, color: "#8C8C91", lineHeight: 1.5, marginLeft: 14 }}>
+              <div style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.5, marginLeft: 14 }}>
                 {insight.description}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, marginLeft: 14 }}>
                 <ConfidenceBar value={insight.confidence} />
-                <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", color: "#8C8C91" }}>
+                <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", color: "var(--muted)" }}>
                   {Math.round(insight.confidence)}%
                 </span>
-                <span style={{ fontSize: 9, color: "#8C8C91" }}>
+                <span style={{ fontSize: 9, color: "var(--muted)" }}>
                   {insight.basedOn.length}건 기반
                 </span>
               </div>
@@ -367,13 +367,13 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                         key={j}
                         style={{
                           fontSize: 10,
-                          color: "#8C8C91",
+                          color: "var(--muted)",
                           cursor: match ? "pointer" : "default",
                           padding: "1px 0",
                         }}
                         onClick={() => match && onSelectArticle(match)}
-                        onMouseEnter={(e) => { if (match) (e.currentTarget.style.color = "#FFB000"); }}
-                        onMouseLeave={(e) => { if (match) (e.currentTarget.style.color = "#8C8C91"); }}
+                        onMouseEnter={(e) => { if (match) (e.currentTarget.style.color = "var(--accent)"); }}
+                        onMouseLeave={(e) => { if (match) (e.currentTarget.style.color = "var(--muted)"); }}
                       >
                         {match ? ">" : "-"} {title.length > 60 ? title.slice(0, 60) + "..." : title}
                       </div>
@@ -391,7 +391,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <div className="dash-section-title">READ NEXT</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
           {recommendations.length === 0 && (
-            <div style={{ fontSize: 11, color: "#8C8C91" }}>추천할 기사가 없습니다</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>추천할 기사가 없습니다</div>
           )}
           {recommendations.map((rec, i) => (
             <div
@@ -403,11 +403,11 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               }}
               onMouseEnter={(e) => {
                 const titleEl = e.currentTarget.querySelector("[data-title]") as HTMLElement;
-                if (titleEl) titleEl.style.color = "#FFB000";
+                if (titleEl) titleEl.style.color = "var(--accent)";
               }}
               onMouseLeave={(e) => {
                 const titleEl = e.currentTarget.querySelector("[data-title]") as HTMLElement;
-                if (titleEl) titleEl.style.color = "#EBEBEB";
+                if (titleEl) titleEl.style.color = "var(--foreground)";
               }}
             >
               <span
@@ -415,8 +415,8 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                   fontSize: 8,
                   fontWeight: 700,
                   padding: "2px 5px",
-                  border: "1px solid #2C2D34",
-                  color: rec.type === "breaking" ? "#ef4444" : "#FFB000",
+                  border: "1px solid var(--border)",
+                  color: rec.type === "breaking" ? "var(--danger)" : "var(--accent)",
                   whiteSpace: "nowrap",
                   letterSpacing: "0.05em",
                   flexShrink: 0,
@@ -426,13 +426,13 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                 {REC_LABELS[rec.type]}
               </span>
               <div>
-                <div data-title style={{ fontSize: 12, fontWeight: 600, color: "#EBEBEB", lineHeight: 1.4, transition: "color 0.15s" }}>
+                <div data-title style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)", lineHeight: 1.4, transition: "color 0.15s" }}>
                   {rec.article.title}
                 </div>
-                <div style={{ fontSize: 10, color: "#8C8C91", marginTop: 2 }}>
+                <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
                   {rec.reason}
                 </div>
-                <div style={{ fontSize: 9, color: "#8C8C91", marginTop: 2, fontFamily: "'Space Mono', monospace" }}>
+                <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2, fontFamily: "'Space Mono', monospace" }}>
                   {rec.article.sourceName} {timeAgo(rec.article.publishedAt)}
                 </div>
               </div>
@@ -447,51 +447,51 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <div style={{ marginTop: 12 }}>
           {/* Horizontal bar */}
           <div style={{ display: "flex", height: 6, width: "100%", marginBottom: 8 }}>
-            <div style={{ width: `${(sentimentBar.neg / sentimentBar.total) * 100}%`, background: "#ef4444" }} />
-            <div style={{ width: `${(sentimentBar.neu / sentimentBar.total) * 100}%`, background: "#8C8C91" }} />
-            <div style={{ width: `${(sentimentBar.pos / sentimentBar.total) * 100}%`, background: "#22c55e" }} />
+            <div style={{ width: `${(sentimentBar.neg / sentimentBar.total) * 100}%`, background: "var(--danger)" }} />
+            <div style={{ width: `${(sentimentBar.neu / sentimentBar.total) * 100}%`, background: "var(--muted)" }} />
+            <div style={{ width: `${(sentimentBar.pos / sentimentBar.total) * 100}%`, background: "var(--success)" }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "'Space Mono', monospace", marginBottom: 14 }}>
-            <span style={{ color: "#ef4444" }}>BEARISH {sentimentBar.neg}</span>
-            <span style={{ color: "#8C8C91" }}>NEUTRAL {sentimentBar.neu}</span>
-            <span style={{ color: "#22c55e" }}>BULLISH {sentimentBar.pos}</span>
+            <span style={{ color: "var(--danger)" }}>BEARISH {sentimentBar.neg}</span>
+            <span style={{ color: "var(--muted)" }}>NEUTRAL {sentimentBar.neu}</span>
+            <span style={{ color: "var(--success)" }}>BULLISH {sentimentBar.pos}</span>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
             {/* Top positive */}
             <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "#22c55e", letterSpacing: "0.05em", marginBottom: 6 }}>TOP BULLISH</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "var(--success)", letterSpacing: "0.05em", marginBottom: 6 }}>TOP BULLISH</div>
               {sentimentBar.topPositive.map(({ article }) => (
                 <div
                   key={article.id}
-                  style={{ fontSize: 10, color: "#EBEBEB", padding: "3px 0", cursor: "pointer", lineHeight: 1.4 }}
+                  style={{ fontSize: 10, color: "var(--foreground)", padding: "3px 0", cursor: "pointer", lineHeight: 1.4 }}
                   onClick={() => onSelectArticle(article)}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#FFB000"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#EBEBEB"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "var(--foreground)"; }}
                 >
                   {article.title.length > 50 ? article.title.slice(0, 50) + "..." : article.title}
                 </div>
               ))}
               {sentimentBar.topPositive.length === 0 && (
-                <div style={{ fontSize: 10, color: "#8C8C91" }}>--</div>
+                <div style={{ fontSize: 10, color: "var(--muted)" }}>--</div>
               )}
             </div>
             {/* Top negative */}
             <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "#ef4444", letterSpacing: "0.05em", marginBottom: 6 }}>TOP BEARISH</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "var(--danger)", letterSpacing: "0.05em", marginBottom: 6 }}>TOP BEARISH</div>
               {sentimentBar.topNegative.map(({ article }) => (
                 <div
                   key={article.id}
-                  style={{ fontSize: 10, color: "#EBEBEB", padding: "3px 0", cursor: "pointer", lineHeight: 1.4 }}
+                  style={{ fontSize: 10, color: "var(--foreground)", padding: "3px 0", cursor: "pointer", lineHeight: 1.4 }}
                   onClick={() => onSelectArticle(article)}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#FFB000"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#EBEBEB"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "var(--foreground)"; }}
                 >
                   {article.title.length > 50 ? article.title.slice(0, 50) + "..." : article.title}
                 </div>
               ))}
               {sentimentBar.topNegative.length === 0 && (
-                <div style={{ fontSize: 10, color: "#8C8C91" }}>--</div>
+                <div style={{ fontSize: 10, color: "var(--muted)" }}>--</div>
               )}
             </div>
           </div>
@@ -505,7 +505,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <div className="dash-section-title">ENTITY TRACKER</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 4 }}>
           {entityTracker.length === 0 && (
-            <div style={{ fontSize: 11, color: "#8C8C91" }}>데이터 없음</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>데이터 없음</div>
           )}
           {entityTracker.map(([name, count]) => (
             <div key={name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -513,7 +513,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                 style={{
                   fontSize: 11,
                   fontWeight: count >= 5 ? 700 : 400,
-                  color: count >= 5 ? "#FFB000" : "#EBEBEB",
+                  color: count >= 5 ? "var(--accent)" : "var(--foreground)",
                   width: 120,
                   flexShrink: 0,
                   overflow: "hidden",
@@ -523,16 +523,16 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               >
                 {name}
               </span>
-              <div style={{ flex: 1, height: 3, background: "#2C2D34", position: "relative" }}>
+              <div style={{ flex: 1, height: 3, background: "var(--border)", position: "relative" }}>
                 <div
                   style={{
                     width: `${(count / maxEntityFreq) * 100}%`,
                     height: "100%",
-                    background: count >= 5 ? "#FFB000" : "#8C8C91",
+                    background: count >= 5 ? "var(--accent)" : "var(--muted)",
                   }}
                 />
               </div>
-              <span style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: "#8C8C91", width: 24, textAlign: "right" }}>
+              <span style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: "var(--muted)", width: 24, textAlign: "right" }}>
                 {count}
               </span>
             </div>
@@ -545,14 +545,14 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <div className="dash-section-title">TOPIC NETWORK</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
           {topicNetwork.length === 0 && (
-            <div style={{ fontSize: 11, color: "#8C8C91" }}>데이터 없음</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>데이터 없음</div>
           )}
           {topicNetwork.map(({ tagA, tagB, count }, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}>
-              <span style={{ color: "#FFB000", fontWeight: 600 }}>{tagA}</span>
-              <span style={{ color: "#8C8C91", fontSize: 10 }}>&harr;</span>
-              <span style={{ color: "#FFB000", fontWeight: 600 }}>{tagB}</span>
-              <span style={{ color: "#8C8C91", fontFamily: "'Space Mono', monospace", fontSize: 10, marginLeft: "auto" }}>
+              <span style={{ color: "var(--accent)", fontWeight: 600 }}>{tagA}</span>
+              <span style={{ color: "var(--muted)", fontSize: 10 }}>&harr;</span>
+              <span style={{ color: "var(--accent)", fontWeight: 600 }}>{tagB}</span>
+              <span style={{ color: "var(--muted)", fontFamily: "'Space Mono', monospace", fontSize: 10, marginLeft: "auto" }}>
                 {count}건
               </span>
             </div>
@@ -565,7 +565,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <div className="dash-section-title">SOURCE INTELLIGENCE</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
           {sourceIntel.length === 0 && (
-            <div style={{ fontSize: 11, color: "#8C8C91" }}>데이터 없음</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>데이터 없음</div>
           )}
           {sourceIntel.map(({ name, count, avgSentiment, topTags }) => (
             <div key={name} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
@@ -581,11 +581,11 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#EBEBEB" }}>{name}</span>
-                  <span style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: "#8C8C91" }}>{count}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "var(--foreground)" }}>{name}</span>
+                  <span style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: "var(--muted)" }}>{count}</span>
                 </div>
                 {topTags.length > 0 && (
-                  <div style={{ fontSize: 9, color: "#8C8C91", marginTop: 2 }}>
+                  <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2 }}>
                     {topTags.join(", ")}
                   </div>
                 )}
@@ -600,7 +600,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
         <div className="dash-section-title">IMPACT RANKING</div>
         <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
           {impactRanking.length === 0 && (
-            <div style={{ fontSize: 11, color: "#8C8C91" }}>데이터 없음</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>데이터 없음</div>
           )}
           {impactRanking.map(({ article, summary }, i) => (
             <div
@@ -609,18 +609,18 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               onClick={() => onSelectArticle(article)}
               onMouseEnter={(e) => {
                 const t = e.currentTarget.querySelector("[data-rank-title]") as HTMLElement;
-                if (t) t.style.color = "#FFB000";
+                if (t) t.style.color = "var(--accent)";
               }}
               onMouseLeave={(e) => {
                 const t = e.currentTarget.querySelector("[data-rank-title]") as HTMLElement;
-                if (t) t.style.color = "#EBEBEB";
+                if (t) t.style.color = "var(--foreground)";
               }}
             >
               <span
                 style={{
                   fontSize: 11,
                   fontFamily: "'Space Mono', monospace",
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   width: 18,
                   textAlign: "right",
                   flexShrink: 0,
@@ -631,7 +631,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   data-rank-title
-                  style={{ fontSize: 11, fontWeight: 500, color: "#EBEBEB", lineHeight: 1.4, transition: "color 0.15s" }}
+                  style={{ fontSize: 11, fontWeight: 500, color: "var(--foreground)", lineHeight: 1.4, transition: "color 0.15s" }}
                 >
                   {article.title}
                 </div>
@@ -642,8 +642,8 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                       fontWeight: 700,
                       padding: "1px 4px",
                       border: "1px solid",
-                      borderColor: summary.impactLevel === "high" ? "#ef4444" : "#FFB000",
-                      color: summary.impactLevel === "high" ? "#ef4444" : "#FFB000",
+                      borderColor: summary.impactLevel === "high" ? "var(--danger)" : "var(--accent)",
+                      color: summary.impactLevel === "high" ? "var(--danger)" : "var(--accent)",
                       letterSpacing: "0.05em",
                     }}
                   >
@@ -657,7 +657,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
                       display: "inline-block",
                     }}
                   />
-                  <span style={{ fontSize: 9, color: "#8C8C91" }}>{article.sourceName}</span>
+                  <span style={{ fontSize: 9, color: "var(--muted)" }}>{article.sourceName}</span>
                 </div>
               </div>
             </div>

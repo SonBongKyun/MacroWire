@@ -22,10 +22,10 @@ export function AnalyticsTab({ articles }: AnalyticsTabProps) {
           </p>
         </div>
         <AnalyticsDashboard articles={articles} />
-        <div style={{ marginTop: 24, padding: "20px", background: "rgba(8,9,11,0.5)", border: "1px solid #2C2D34", borderRadius: 2 }}>
+        <div style={{ marginTop: 24, padding: "20px", background: "color-mix(in srgb, var(--background) 50%, transparent)", border: "1px solid var(--border)", borderRadius: 2 }}>
           <SourceAnalysis articles={articles} />
         </div>
-        <div style={{ marginTop: 24, padding: "20px", background: "rgba(8,9,11,0.5)", border: "1px solid #2C2D34", borderRadius: 2 }}>
+        <div style={{ marginTop: 24, padding: "20px", background: "color-mix(in srgb, var(--background) 50%, transparent)", border: "1px solid var(--border)", borderRadius: 2 }}>
           <CorrelationHeatmap articles={articles} />
         </div>
       </div>

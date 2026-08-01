@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Article } from "@/types";
+import { getEconEvents, toKstDate } from "@/lib/calendar/econ";
 import { computeTagTrends, computeSentimentHeatmap, computeTagBubbles, computeDailyDigest, computeWeeklyReport } from "@/lib/analytics/trends";
 import { analyzeSentiment } from "@/lib/sentiment/sentiment";
 import { TAG_COLORS } from "@/lib/constants/colors";
@@ -14,29 +15,22 @@ interface AnalyticsDashboardProps {
 
 type Tab = "trends" | "heatmap" | "bubbles" | "digest" | "report" | "calendar";
 
-const ECON_EVENTS = [
-  { date: "2026-03-18", title: "FOMC 회의 시작", region: "미국", importance: "high" },
-  { date: "2026-03-19", title: "FOMC 금리 결정", region: "미국", importance: "high" },
-  { date: "2026-03-13", title: "한은 금통위", region: "한국", importance: "high" },
-  { date: "2026-03-10", title: "미국 CPI 발표", region: "미국", importance: "high" },
-  { date: "2026-03-07", title: "미국 고용보고서", region: "미국", importance: "high" },
-  { date: "2026-03-04", title: "한국 CPI 발표", region: "한국", importance: "medium" },
-  { date: "2026-03-05", title: "ECB 금리 결정", region: "유럽", importance: "high" },
-  { date: "2026-03-12", title: "미국 PPI 발표", region: "미국", importance: "medium" },
-  { date: "2026-03-20", title: "일본은행 금리 결정", region: "일본", importance: "high" },
-  { date: "2026-03-25", title: "한국 소비자심리지수", region: "한국", importance: "medium" },
-  { date: "2026-03-27", title: "미국 4Q GDP 최종", region: "미국", importance: "medium" },
-  { date: "2026-03-28", title: "미국 PCE 물가", region: "미국", importance: "high" },
-  { date: "2026-04-02", title: "FOMC 의사록 공개", region: "미국", importance: "medium" },
-  { date: "2026-04-10", title: "미국 CPI 발표", region: "미국", importance: "high" },
-  { date: "2026-04-16", title: "ECB 금리 결정", region: "유럽", importance: "high" },
-];
+// Article tags are Korean, calendar regions are ISO-ish; this bridges the two
+// so "related articles" counting still works off the shared calendar source.
+const REGION_TAGS: Record<string, string> = {
+  KR: "한국",
+  US: "미국",
+  EU: "유럽",
+  JP: "일본",
+  CN: "중국",
+};
 
 const REGION_COLORS: Record<string, string> = {
-  미국: "#FFB000",
-  한국: "#FFB000",
-  유럽: "#8C8C91",
-  일본: "#8C8C91",
+  미국: "var(--accent)",
+  한국: "var(--accent)",
+  유럽: "var(--muted)",
+  일본: "var(--muted)",
+  중국: "var(--muted)",
 };
 
 function timeAgo(dateStr: string): string {
@@ -51,6 +45,24 @@ function timeAgo(dateStr: string): string {
 
 export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: AnalyticsDashboardProps) {
   const [tab, setTab] = useState<Tab>("trends");
+
+  // Time-dependent, so it is resolved after mount to keep SSR and hydration
+  // in agreement — same pattern the desk calendar uses.
+  const [todayKst, setTodayKst] = useState("");
+  useEffect(() => {
+    const sync = () => setTodayKst(toKstDate(new Date()));
+    sync();
+    const id = setInterval(sync, 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const econEvents = useMemo(
+    () =>
+      todayKst
+        ? getEconEvents(new Date(`${todayKst}T00:00:00+09:00`), { lookaheadDays: 45 })
+        : [],
+    [todayKst]
+  );
 
   const trends = useMemo(() => computeTagTrends(articles, 7), [articles]);
   const heatmap = useMemo(() => computeSentimentHeatmap(articles), [articles]);
@@ -168,8 +180,8 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
           <div className="space-y-4">
             <h4 className="text-[12px] font-bold text-[var(--foreground-bright)]">감성 히트맵 (태그 × 시간대)</h4>
             <div className="flex items-center gap-4 text-[9px] text-[var(--muted)]">
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#22c55e" }} /> 긍정</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#ef4444" }} /> 부정</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "var(--success)" }} /> 긍정</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "var(--danger)" }} /> 부정</span>
               <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: "#94a3b8" }} /> 중립</span>
             </div>
             <div className="glass-card p-4 rounded-[var(--radius-md)] overflow-x-auto">
@@ -217,7 +229,7 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
               {bubbles.map((b) => {
                 const maxCount = Math.max(...bubbles.map((x) => x.count), 1);
                 const size = 40 + (b.count / maxCount) * 100;
-                const sentColor = b.positive > b.negative ? "#22c55e" : b.negative > b.positive ? "#ef4444" : "#94a3b8";
+                const sentColor = b.positive > b.negative ? "var(--success)" : b.negative > b.positive ? "var(--danger)" : "#94a3b8";
                 return (
                   <button
                     key={b.tag}
@@ -226,7 +238,7 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
                     style={{
                       width: size,
                       height: size,
-                      backgroundColor: `${b.color}20`,
+                      backgroundColor: `color-mix(in srgb, ${b.color} 13%, transparent)`,
                       border: `2px solid ${sentColor}`,
                     }}
                     title={`${b.tag}: ${b.count}건 (긍정${b.positive} 부정${b.negative} 중립${b.neutral})`}
@@ -249,11 +261,11 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="glass-card p-3 rounded-[var(--radius-md)] text-center">
-                <div className="text-[20px] font-extrabold text-[#22c55e] tabular-nums">{digest.sentimentOverview.positive}</div>
+                <div className="text-[20px] font-extrabold text-[var(--success)] tabular-nums">{digest.sentimentOverview.positive}</div>
                 <div className="text-[10px] text-[var(--muted)]">긍정</div>
               </div>
               <div className="glass-card p-3 rounded-[var(--radius-md)] text-center">
-                <div className="text-[20px] font-extrabold text-[#ef4444] tabular-nums">{digest.sentimentOverview.negative}</div>
+                <div className="text-[20px] font-extrabold text-[var(--danger)] tabular-nums">{digest.sentimentOverview.negative}</div>
                 <div className="text-[10px] text-[var(--muted)]">부정</div>
               </div>
               <div className="glass-card p-3 rounded-[var(--radius-md)] text-center">
@@ -300,11 +312,11 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
                 <div className="text-[10px] text-[var(--muted)]">이번 주 기사</div>
               </div>
               <div className="glass-card p-3 rounded-[var(--radius-md)] text-center">
-                <div className="text-[20px] font-extrabold text-[#22c55e] tabular-nums">{report.sentimentTrend.positive}</div>
+                <div className="text-[20px] font-extrabold text-[var(--success)] tabular-nums">{report.sentimentTrend.positive}</div>
                 <div className="text-[10px] text-[var(--muted)]">긍정</div>
               </div>
               <div className="glass-card p-3 rounded-[var(--radius-md)] text-center">
-                <div className="text-[20px] font-extrabold text-[#ef4444] tabular-nums">{report.sentimentTrend.negative}</div>
+                <div className="text-[20px] font-extrabold text-[var(--danger)] tabular-nums">{report.sentimentTrend.negative}</div>
                 <div className="text-[10px] text-[var(--muted)]">부정</div>
               </div>
               <div className="glass-card p-3 rounded-[var(--radius-md)] text-center">
@@ -325,7 +337,7 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
                       />
                     </div>
                     <span className="text-[10px] tabular-nums text-[var(--foreground)] font-medium w-8 text-right">{t.count}</span>
-                    <span className={`text-[9px] font-bold tabular-nums w-10 text-right ${t.change > 0 ? "text-[#22c55e]" : t.change < 0 ? "text-[#ef4444]" : "text-[var(--muted)]"}`}>
+                    <span className={`text-[9px] font-bold tabular-nums w-10 text-right ${t.change > 0 ? "text-[var(--success)]" : t.change < 0 ? "text-[var(--danger)]" : "text-[var(--muted)]"}`}>
                       {t.change > 0 ? `+${t.change}` : t.change}
                     </span>
                   </div>
@@ -352,22 +364,22 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
             <h4 className="text-[12px] font-bold text-[var(--foreground-bright)]">경제 캘린더</h4>
             <p className="text-[10px] text-[var(--muted)]">주요 경제 일정 및 관련 기사 매칭</p>
             <div className="space-y-2">
-              {ECON_EVENTS
-                .sort((a, b) => a.date.localeCompare(b.date))
-                .map((ev, i) => {
-                  const d = new Date(ev.date);
+              {econEvents
+                .map((ev) => {
+                  const d = ev.at;
+                  const regionTag = REGION_TAGS[ev.region] || ev.region;
                   const isPast = d.getTime() < Date.now();
-                  const isToday = ev.date === new Date().toISOString().slice(0, 10);
+                  const isToday = ev.kstDate === todayKst;
                   const relatedCount = articles.filter((a) => {
                     const diff = Math.abs(new Date(a.publishedAt).getTime() - d.getTime());
                     return diff < 2 * 24 * 60 * 60 * 1000 && (
-                      a.tags.includes(ev.region) || a.title.includes(ev.title.split(" ")[0])
+                      a.tags.includes(regionTag) || a.title.includes(ev.title.split(" ")[0])
                     );
                   }).length;
 
                   return (
                     <div
-                      key={i}
+                      key={ev.id}
                       className={`flex items-center gap-3 p-3 rounded-[var(--radius-md)] glass-card transition-colors ${isToday ? "border-l-[3px] border-l-[var(--accent)]" : ""} ${isPast ? "opacity-60" : ""}`}
                     >
                       <div className="text-center shrink-0 w-12">
@@ -381,8 +393,9 @@ export function AnalyticsDashboard({ articles, onSelectArticle, onTagClick }: An
                           {isToday && <span className="text-[8px] font-bold text-[var(--accent)] px-1.5 py-0.5 rounded-full bg-[var(--accent-surface)]">TODAY</span>}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full" style={{ color: REGION_COLORS[ev.region] || "#6b7280", backgroundColor: `${REGION_COLORS[ev.region] || "#6b7280"}15` }}>{ev.region}</span>
-                          <span className={`text-[8px] font-bold uppercase tracking-wider ${ev.importance === "high" ? "text-[#ef4444]" : "text-[var(--muted)]"}`}>{ev.importance === "high" ? "HIGH" : "MED"}</span>
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full econ-region-chip" style={{ color: REGION_COLORS[regionTag] || "var(--muted)" }}>{regionTag}</span>
+                          <span className="text-[9px] tabular-nums text-[var(--muted)] font-mono">{ev.kstTime}</span>
+                          <span className={`text-[8px] font-bold uppercase tracking-wider ${ev.importance === "high" ? "text-[var(--danger)]" : "text-[var(--muted)]"}`}>{ev.importance === "high" ? "HIGH" : "MED"}</span>
                         </div>
                       </div>
                       {relatedCount > 0 && (

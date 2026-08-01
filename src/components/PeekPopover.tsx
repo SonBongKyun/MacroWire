@@ -23,7 +23,7 @@ export function PeekPopover({ article, position }: PeekPopoverProps) {
       <div className="flex items-center gap-2 mb-2">
         <span
           className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
-          style={{ color: sentiment.color, backgroundColor: `${sentiment.color}18` }}
+          style={{ color: sentiment.color, backgroundColor: `color-mix(in srgb, ${sentiment.color} 9%, transparent)` }}
         >
           {sentiment.label}
         </span>

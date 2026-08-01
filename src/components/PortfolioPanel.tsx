@@ -83,7 +83,7 @@ export function PortfolioPanel({ prices, assets, loading, onAddAsset, onRemoveAs
     <div className="glass-modal w-96 max-h-[600px] overflow-hidden flex flex-col">
       <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
         <h3 className="text-[12px] font-bold text-[var(--foreground-bright)] flex items-center gap-2">
-          <div className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--gold)] flex items-center justify-center">
+          <div className="w-5 h-5 rounded-[var(--radius-xs)] bg-[var(--accent)] flex items-center justify-center">
             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
@@ -216,7 +216,7 @@ export function PortfolioPanel({ prices, assets, loading, onAddAsset, onRemoveAs
         ) : (
           <button
             onClick={() => setShowAdd(true)}
-            className="w-full metal-btn px-3 py-2 text-[10px] font-semibold text-[var(--gold)] flex items-center justify-center gap-1.5"
+            className="w-full metal-btn px-3 py-2 text-[10px] font-semibold text-[var(--accent)] flex items-center justify-center gap-1.5"
           >
             <span>+</span> 종목 추가
           </button>

@@ -15,7 +15,7 @@ interface MultiViewTabsProps {
 
 const TAB_COLORS: Record<string, string> = {
   tag: "var(--accent)",
-  source: "var(--gold)",
+  source: "var(--accent)",
   search: "var(--info)",
   saved: "var(--saved)",
   all: "var(--muted)",

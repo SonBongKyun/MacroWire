@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import type { Quote } from "@/lib/market/quote";
 import type { PortfolioPrice, PortfolioAsset } from "@/hooks/usePortfolio";
 import { PriceChart, MiniSparkline } from "@/components/PriceChart";
 import { usePriceAlerts } from "@/hooks/usePriceAlerts";
@@ -15,13 +16,7 @@ interface MarketsTabProps {
   onRefreshPrices: () => void;
 }
 
-interface MarketItem {
-  symbol: string;
-  label: string;
-  price: number;
-  change: number;
-  changePct: number;
-}
+type MarketItem = Quote;
 
 const POPULAR_SYMBOLS = [
   { symbol: "005930.KS", label: "삼성전자", type: "stock" as const },
@@ -62,10 +57,10 @@ function formatPnL(value: number): string {
 const sectionHeaderStyle: React.CSSProperties = {
   fontSize: 11,
   fontWeight: 700,
-  color: "#8C8C91",
+  color: "var(--muted)",
   textTransform: "uppercase",
   letterSpacing: "0.1em",
-  borderBottom: "1px solid #2C2D34",
+  borderBottom: "1px solid var(--border)",
   paddingBottom: 8,
   marginBottom: 0,
   display: "flex",
@@ -76,20 +71,20 @@ const sectionHeaderStyle: React.CSSProperties = {
 const thStyle: React.CSSProperties = {
   fontSize: 10,
   fontWeight: 600,
-  color: "#8C8C91",
+  color: "var(--muted)",
   textTransform: "uppercase",
   letterSpacing: "0.04em",
   padding: "10px 0",
-  borderBottom: "1px solid #2C2D34",
+  borderBottom: "1px solid var(--border)",
 };
 
 const inputStyle: React.CSSProperties = {
   padding: "6px 10px",
   fontSize: 11,
   backgroundColor: "transparent",
-  border: "1px solid #2C2D34",
+  border: "1px solid var(--border)",
   borderRadius: 2,
-  color: "#EBEBEB",
+  color: "var(--foreground)",
   outline: "none",
 };
 
@@ -97,8 +92,8 @@ const goldBtnStyle: React.CSSProperties = {
   padding: "6px 14px",
   fontSize: 10,
   fontWeight: 700,
-  backgroundColor: "#FFB000",
-  color: "#08090B",
+  backgroundColor: "var(--accent)",
+  color: "var(--background)",
   border: "none",
   borderRadius: 2,
   cursor: "pointer",
@@ -107,7 +102,7 @@ const goldBtnStyle: React.CSSProperties = {
 const cancelBtnStyle: React.CSSProperties = {
   padding: "6px 10px",
   fontSize: 10,
-  color: "#8C8C91",
+  color: "var(--muted)",
   background: "none",
   border: "none",
   cursor: "pointer",
@@ -154,24 +149,6 @@ export function MarketsTab({
   const [posAvgCost, setPosAvgCost] = useState("");
 
   const existingSymbols = new Set(portfolioAssets.map((a) => a.symbol));
-
-  // Generate fake sparkline from price & changePct for visual purposes
-  const fakeSparkline = useMemo(() => {
-    return (price: number, changePct: number): number[] => {
-      if (!price) return [];
-      const startPrice = price / (1 + changePct / 100);
-      const steps = 24;
-      const result: number[] = [startPrice];
-      const diff = price - startPrice;
-      for (let i = 1; i < steps; i++) {
-        const progress = i / (steps - 1);
-        const noise = (Math.sin(i * 2.7 + changePct) * 0.3 + Math.cos(i * 1.3) * 0.2) * Math.abs(diff) * 0.5;
-        result.push(startPrice + diff * progress + noise);
-      }
-      result.push(price);
-      return result;
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -252,17 +229,30 @@ export function MarketsTab({
     setShowPositionForm(false);
   };
 
+  // Placeholder rows so the grid keeps its shape before the first quote lands.
+  const placeholder = (symbol: string, label: string): MarketItem => ({
+    symbol,
+    label,
+    price: 0,
+    previousClose: 0,
+    change: 0,
+    changePct: 0,
+    sparkline: [],
+    asOf: null,
+    currency: null,
+  });
+
   const defaultMarketItems: MarketItem[] = [
-    { symbol: "USDKRW=X", label: "USD/KRW", price: 0, change: 0, changePct: 0 },
-    { symbol: "^KS11", label: "KOSPI", price: 0, change: 0, changePct: 0 },
-    { symbol: "^GSPC", label: "S&P 500", price: 0, change: 0, changePct: 0 },
-    { symbol: "CL=F", label: "WTI", price: 0, change: 0, changePct: 0 },
+    placeholder("USDKRW=X", "USD/KRW"),
+    placeholder("^KS11", "KOSPI"),
+    placeholder("^GSPC", "S&P 500"),
+    placeholder("CL=F", "WTI"),
   ];
 
   const marketItems = marketData.length > 0 ? marketData : defaultMarketItems;
 
   return (
-    <div className="overflow-y-auto h-full" style={{ backgroundColor: "#08090B" }}>
+    <div className="overflow-y-auto h-full" style={{ backgroundColor: "var(--background)" }}>
       <div style={{ padding: "24px 24px 40px", maxWidth: 960, margin: "0 auto" }}>
 
         {/* ── Section 1: Market Indicators ── */}
@@ -272,7 +262,7 @@ export function MarketsTab({
                 <div
                   key={i}
                   style={{
-                    border: "1px solid #2C2D34",
+                    border: "1px solid var(--border)",
                     borderRadius: 2,
                     padding: "14px 16px",
                   }}
@@ -288,7 +278,7 @@ export function MarketsTab({
                   <div
                     key={item.symbol}
                     style={{
-                      border: "1px solid #2C2D34",
+                      border: "1px solid var(--border)",
                       borderRadius: 2,
                       padding: "14px 16px",
                     }}
@@ -296,7 +286,7 @@ export function MarketsTab({
                     <div style={{
                       fontSize: 10,
                       fontWeight: 600,
-                      color: "#8C8C91",
+                      color: "var(--muted)",
                       textTransform: "uppercase",
                       letterSpacing: "0.06em",
                       marginBottom: 6,
@@ -307,7 +297,7 @@ export function MarketsTab({
                       fontSize: 20,
                       fontWeight: 700,
                       fontFamily: "var(--font-mono)",
-                      color: "#EBEBEB",
+                      color: "var(--foreground)",
                       lineHeight: 1.2,
                       marginBottom: 4,
                     }}>
@@ -317,14 +307,14 @@ export function MarketsTab({
                       fontSize: 12,
                       fontWeight: 600,
                       fontFamily: "var(--font-mono)",
-                      color: isUp ? "#16a34a" : "#dc2626",
+                      color: isUp ? "var(--success)" : "var(--danger)",
                     }}>
                       {item.price > 0 ? `${isUp ? "+" : ""}${item.changePct.toFixed(2)}%` : ""}
                     </div>
-                    {item.price > 0 && (
+                    {item.price > 0 && (item.sparkline?.length ?? 0) >= 2 && (
                       <div style={{ marginTop: 6 }}>
                         <MiniSparkline
-                          data={fakeSparkline(item.price, item.changePct)}
+                          data={item.sparkline}
                           width={120}
                           height={36}
                           change={item.changePct}
@@ -343,10 +333,10 @@ export function MarketsTab({
             <div style={{
               fontSize: 11,
               fontWeight: 700,
-              color: "#8C8C91",
+              color: "var(--muted)",
               textTransform: "uppercase",
               letterSpacing: "0.1em",
-              borderBottom: "1px solid #2C2D34",
+              borderBottom: "1px solid var(--border)",
               paddingBottom: 8,
               marginBottom: 12,
               fontFamily: "var(--font-mono)",
@@ -355,7 +345,7 @@ export function MarketsTab({
             </div>
 
             {/* Asset selector */}
-            <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid #2C2D34" }}>
+            <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid var(--border)" }}>
               {portfolioPrices.map((p, idx) => (
                 <button
                   key={p.symbol}
@@ -368,8 +358,8 @@ export function MarketsTab({
                     fontSize: 10,
                     fontWeight: 600,
                     fontFamily: "var(--font-mono)",
-                    color: idx === selectedChartIdx ? "#FFB000" : "#8C8C91",
-                    borderBottom: idx === selectedChartIdx ? "2px solid #FFB000" : "2px solid transparent",
+                    color: idx === selectedChartIdx ? "var(--accent)" : "var(--muted)",
+                    borderBottom: idx === selectedChartIdx ? "2px solid var(--accent)" : "2px solid transparent",
                     textTransform: "uppercase",
                     letterSpacing: "0.04em",
                     marginBottom: -1,
@@ -380,21 +370,19 @@ export function MarketsTab({
               ))}
             </div>
 
-            {/* Chart */}
-            {portfolioPrices[selectedChartIdx] && (
+            {/* Chart — real intraday closes only; no synthesised series. */}
+            {portfolioPrices[selectedChartIdx] &&
+              (portfolioPrices[selectedChartIdx].sparkline?.length ?? 0) >= 2 ? (
               <PriceChart
-                data={
-                  portfolioPrices[selectedChartIdx].sparkline.length >= 2
-                    ? portfolioPrices[selectedChartIdx].sparkline
-                    : fakeSparkline(
-                        portfolioPrices[selectedChartIdx].price,
-                        portfolioPrices[selectedChartIdx].changePct
-                      )
-                }
+                data={portfolioPrices[selectedChartIdx].sparkline}
                 height={180}
                 change={portfolioPrices[selectedChartIdx].changePct}
                 label={portfolioPrices[selectedChartIdx].label}
               />
+            ) : (
+              <div className="markets-chart-empty">
+                이 종목의 일중 시세를 불러오지 못했습니다
+              </div>
             )}
           </div>
         )}
@@ -404,7 +392,7 @@ export function MarketsTab({
           <div style={sectionHeaderStyle}>
             <span>PORTFOLIO</span>
             {portfolioLoading && (
-              <span style={{ fontSize: 9, color: "#8C8C91", fontWeight: 400, textTransform: "none" }} className="animate-pulse">
+              <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400, textTransform: "none" }} className="animate-pulse">
                 로딩...
               </span>
             )}
@@ -418,14 +406,14 @@ export function MarketsTab({
                 <th style={{ ...thStyle, textAlign: "right" }}>현재가</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>변동</th>
                 <th style={{ ...thStyle, textAlign: "right" }}>변동%</th>
-                <th style={{ width: 32, borderBottom: "1px solid #2C2D34" }} />
+                <th style={{ width: 32, borderBottom: "1px solid var(--border)" }} />
               </tr>
             </thead>
             <tbody>
               {portfolioPrices.length > 0 ? (
                 portfolioPrices.map((p) => {
                   const isUp = p.changePct >= 0;
-                  const changeColor = isUp ? "#16a34a" : "#dc2626";
+                  const changeColor = isUp ? "var(--success)" : "var(--danger)";
                   const isHovered = hoveredRow === p.symbol;
                   return (
                     <tr
@@ -437,29 +425,29 @@ export function MarketsTab({
                         transition: "background-color 0.15s",
                       }}
                     >
-                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "var(--foreground)", borderBottom: "1px solid var(--border)" }}>
                         {p.label}
                       </td>
-                      <td style={{ padding: "8px 0", fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91", borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--muted)", borderBottom: "1px solid var(--border)" }}>
                         {p.symbol}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "var(--foreground)", borderBottom: "1px solid var(--border)" }}>
                         {formatPrice(p.price, p.symbol)}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 500, color: changeColor, borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 500, color: changeColor, borderBottom: "1px solid var(--border)" }}>
                         {isUp ? "+" : ""}{p.change.toFixed(2)}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 600, color: changeColor, borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", fontWeight: 600, color: changeColor, borderBottom: "1px solid var(--border)" }}>
                         {isUp ? "+" : ""}{p.changePct.toFixed(2)}%
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid #2C2D34", width: 32 }}>
+                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid var(--border)", width: 32 }}>
                         <button
                           onClick={() => onRemoveAsset(p.symbol)}
                           style={{
                             background: "none",
                             border: "none",
                             cursor: "pointer",
-                            color: "#8C8C91",
+                            color: "var(--muted)",
                             fontSize: 12,
                             fontFamily: "var(--font-mono)",
                             opacity: isHovered ? 1 : 0,
@@ -478,11 +466,11 @@ export function MarketsTab({
                 <tr>
                   <td colSpan={6} style={{ padding: "40px 0", textAlign: "center" }}>
                     {portfolioLoading ? (
-                      <span style={{ fontSize: 11, color: "#8C8C91" }} className="animate-pulse">데이터를 불러오는 중...</span>
+                      <span style={{ fontSize: 11, color: "var(--muted)" }} className="animate-pulse">데이터를 불러오는 중...</span>
                     ) : (
                       <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "#EBEBEB" }}>포트폴리오에 종목을 추가하세요</p>
-                        <p style={{ fontSize: 11, color: "#8C8C91", marginTop: 4 }}>아래 인기 종목에서 바로 추가할 수 있습니다</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>포트폴리오에 종목을 추가하세요</p>
+                        <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>아래 인기 종목에서 바로 추가할 수 있습니다</p>
                       </div>
                     )}
                   </td>
@@ -500,7 +488,7 @@ export function MarketsTab({
                 cursor: "pointer",
                 fontSize: 12,
                 fontWeight: 500,
-                color: "#FFB000",
+                color: "var(--accent)",
                 padding: "10px 0",
                 display: "block",
               }}
@@ -534,7 +522,7 @@ export function MarketsTab({
         <div style={{ marginBottom: 32 }}>
           <div style={sectionHeaderStyle}>
             <span>ALERTS</span>
-            <span style={{ fontSize: 9, color: "#8C8C91", fontWeight: 400, textTransform: "none" }}>
+            <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400, textTransform: "none" }}>
               {alerts.filter((a) => a.active && !a.triggeredAt).length} active
             </span>
           </div>
@@ -547,13 +535,13 @@ export function MarketsTab({
                   <th style={{ ...thStyle, textAlign: "right" }}>목표가</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>방향</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>상태</th>
-                  <th style={{ width: 60, borderBottom: "1px solid #2C2D34" }} />
+                  <th style={{ width: 60, borderBottom: "1px solid var(--border)" }} />
                 </tr>
               </thead>
               <tbody>
                 {alerts.map((alert) => {
                   const isTriggered = !!alert.triggeredAt;
-                  const rowColor = isTriggered ? "#FFB000" : alert.active ? "#EBEBEB" : "#8C8C91";
+                  const rowColor = isTriggered ? "var(--accent)" : alert.active ? "var(--foreground)" : "var(--muted)";
                   return (
                     <tr key={alert.id}>
                       <td style={{
@@ -561,10 +549,10 @@ export function MarketsTab({
                         fontSize: 13,
                         fontWeight: 500,
                         color: rowColor,
-                        borderBottom: "1px solid #2C2D34",
+                        borderBottom: "1px solid var(--border)",
                       }}>
                         {alert.label}
-                        <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91" }}>
+                        <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
                           {alert.symbol}
                         </span>
                       </td>
@@ -575,7 +563,7 @@ export function MarketsTab({
                         fontWeight: 600,
                         fontFamily: "var(--font-mono)",
                         color: rowColor,
-                        borderBottom: "1px solid #2C2D34",
+                        borderBottom: "1px solid var(--border)",
                       }}>
                         {formatPrice(alert.targetPrice, alert.symbol)}
                       </td>
@@ -585,8 +573,8 @@ export function MarketsTab({
                         fontSize: 13,
                         fontFamily: "var(--font-mono)",
                         fontWeight: 600,
-                        color: alert.direction === "above" ? "#16a34a" : "#dc2626",
-                        borderBottom: "1px solid #2C2D34",
+                        color: alert.direction === "above" ? "var(--success)" : "var(--danger)",
+                        borderBottom: "1px solid var(--border)",
                       }}>
                         {alert.direction === "above" ? "▲" : "▼"}
                       </td>
@@ -597,12 +585,12 @@ export function MarketsTab({
                         fontWeight: 600,
                         textTransform: "uppercase",
                         letterSpacing: "0.04em",
-                        color: isTriggered ? "#FFB000" : alert.active ? "#16a34a" : "#8C8C91",
-                        borderBottom: "1px solid #2C2D34",
+                        color: isTriggered ? "var(--accent)" : alert.active ? "var(--success)" : "var(--muted)",
+                        borderBottom: "1px solid var(--border)",
                       }}>
                         {isTriggered ? "TRIGGERED" : alert.active ? "ACTIVE" : "OFF"}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", borderBottom: "1px solid #2C2D34", width: 60, whiteSpace: "nowrap" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", borderBottom: "1px solid var(--border)", width: 60, whiteSpace: "nowrap" }}>
                         {!isTriggered && (
                           <button
                             onClick={() => toggleAlert(alert.id)}
@@ -610,7 +598,7 @@ export function MarketsTab({
                               background: "none",
                               border: "none",
                               cursor: "pointer",
-                              color: "#8C8C91",
+                              color: "var(--muted)",
                               fontSize: 10,
                               fontFamily: "var(--font-mono)",
                               padding: "2px 4px",
@@ -627,7 +615,7 @@ export function MarketsTab({
                             background: "none",
                             border: "none",
                             cursor: "pointer",
-                            color: "#8C8C91",
+                            color: "var(--muted)",
                             fontSize: 12,
                             fontFamily: "var(--font-mono)",
                             padding: "2px 4px",
@@ -644,7 +632,7 @@ export function MarketsTab({
             </table>
           ) : (
             <div style={{ padding: "24px 0", textAlign: "center" }}>
-              <p style={{ fontSize: 12, color: "#8C8C91" }}>설정된 알림이 없습니다</p>
+              <p style={{ fontSize: 12, color: "var(--muted)" }}>설정된 알림이 없습니다</p>
             </div>
           )}
 
@@ -660,7 +648,7 @@ export function MarketsTab({
                 cursor: "pointer",
                 fontSize: 12,
                 fontWeight: 500,
-                color: "#FFB000",
+                color: "var(--accent)",
                 padding: "10px 0",
                 display: "block",
               }}
@@ -675,7 +663,7 @@ export function MarketsTab({
                 style={{ ...selectStyle, flex: 1 }}
               >
                 {portfolioAssets.map((a) => (
-                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#08090B", color: "#EBEBEB" }}>
+                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
                     {a.label}
                   </option>
                 ))}
@@ -693,8 +681,8 @@ export function MarketsTab({
                 onChange={(e) => setAlertDirection(e.target.value as "above" | "below")}
                 style={{ ...selectStyle, width: 80 }}
               >
-                <option value="above" style={{ backgroundColor: "#08090B", color: "#EBEBEB" }}>▲ 이상</option>
-                <option value="below" style={{ backgroundColor: "#08090B", color: "#EBEBEB" }}>▼ 이하</option>
+                <option value="above" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>▲ 이상</option>
+                <option value="below" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>▼ 이하</option>
               </select>
               <button onClick={handleAddAlert} style={goldBtnStyle}>추가</button>
               <button onClick={() => setShowAlertForm(false)} style={cancelBtnStyle}>취소</button>
@@ -711,7 +699,7 @@ export function MarketsTab({
                 fontSize: 11,
                 fontFamily: "var(--font-mono)",
                 fontWeight: 600,
-                color: pnlData.totalPnL >= 0 ? "#16a34a" : "#dc2626",
+                color: pnlData.totalPnL >= 0 ? "var(--success)" : "var(--danger)",
                 textTransform: "none",
               }}>
                 {formatPnL(pnlData.totalPnL)}
@@ -729,43 +717,43 @@ export function MarketsTab({
                   <th style={{ ...thStyle, textAlign: "right" }}>현재가</th>
                   <th style={{ ...thStyle, textAlign: "right" }}>손익</th>
                   <th style={{ ...thStyle, textAlign: "right" }}>손익%</th>
-                  <th style={{ width: 32, borderBottom: "1px solid #2C2D34" }} />
+                  <th style={{ width: 32, borderBottom: "1px solid var(--border)" }} />
                 </tr>
               </thead>
               <tbody>
                 {pnlData.items.map((item) => {
-                  const pnlColor = item.pnl >= 0 ? "#16a34a" : "#dc2626";
+                  const pnlColor = item.pnl >= 0 ? "var(--success)" : "var(--danger)";
                   return (
                     <tr key={item.symbol}>
-                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", fontSize: 13, fontWeight: 500, color: "var(--foreground)", borderBottom: "1px solid var(--border)" }}>
                         {item.label}
-                        <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "#8C8C91" }}>
+                        <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--muted)" }}>
                           {item.symbol}
                         </span>
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "var(--foreground)", borderBottom: "1px solid var(--border)" }}>
                         {item.quantity.toLocaleString()}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "#8C8C91", borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontFamily: "var(--font-mono)", color: "var(--muted)", borderBottom: "1px solid var(--border)" }}>
                         {formatPrice(item.avgCost, item.symbol)}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: "var(--foreground)", borderBottom: "1px solid var(--border)" }}>
                         {item.currentPrice > 0 ? formatPrice(item.currentPrice, item.symbol) : "--"}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid var(--border)" }}>
                         {formatPnL(item.pnl)}
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid #2C2D34" }}>
+                      <td style={{ padding: "8px 0", textAlign: "right", fontSize: 13, fontWeight: 600, fontFamily: "var(--font-mono)", color: pnlColor, borderBottom: "1px solid var(--border)" }}>
                         {item.pnl >= 0 ? "+" : ""}{item.pnlPct.toFixed(2)}%
                       </td>
-                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid #2C2D34", width: 32 }}>
+                      <td style={{ padding: "8px 0", textAlign: "center", borderBottom: "1px solid var(--border)", width: 32 }}>
                         <button
                           onClick={() => removePosition(item.symbol)}
                           style={{
                             background: "none",
                             border: "none",
                             cursor: "pointer",
-                            color: "#8C8C91",
+                            color: "var(--muted)",
                             fontSize: 12,
                             fontFamily: "var(--font-mono)",
                             padding: "2px 4px",
@@ -780,14 +768,14 @@ export function MarketsTab({
                 })}
                 {/* Total row */}
                 <tr>
-                  <td style={{ padding: "10px 0", fontSize: 12, fontWeight: 700, color: "#EBEBEB", borderTop: "1px solid #2C2D34" }}>
+                  <td style={{ padding: "10px 0", fontSize: 12, fontWeight: 700, color: "var(--foreground)", borderTop: "1px solid var(--border)" }}>
                     TOTAL
                   </td>
-                  <td style={{ borderTop: "1px solid #2C2D34" }} />
-                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontFamily: "var(--font-mono)", color: "#8C8C91", borderTop: "1px solid #2C2D34" }}>
+                  <td style={{ borderTop: "1px solid var(--border)" }} />
+                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--muted)", borderTop: "1px solid var(--border)" }}>
                     {pnlData.totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontWeight: 600, fontFamily: "var(--font-mono)", color: "#EBEBEB", borderTop: "1px solid #2C2D34" }}>
+                  <td style={{ padding: "10px 0", textAlign: "right", fontSize: 12, fontWeight: 600, fontFamily: "var(--font-mono)", color: "var(--foreground)", borderTop: "1px solid var(--border)" }}>
                     {pnlData.totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td style={{
@@ -796,8 +784,8 @@ export function MarketsTab({
                     fontSize: 12,
                     fontWeight: 700,
                     fontFamily: "var(--font-mono)",
-                    color: pnlData.totalPnL >= 0 ? "#16a34a" : "#dc2626",
-                    borderTop: "1px solid #2C2D34",
+                    color: pnlData.totalPnL >= 0 ? "var(--success)" : "var(--danger)",
+                    borderTop: "1px solid var(--border)",
                   }}>
                     {formatPnL(pnlData.totalPnL)}
                   </td>
@@ -807,18 +795,18 @@ export function MarketsTab({
                     fontSize: 12,
                     fontWeight: 700,
                     fontFamily: "var(--font-mono)",
-                    color: pnlData.totalReturnPct >= 0 ? "#16a34a" : "#dc2626",
-                    borderTop: "1px solid #2C2D34",
+                    color: pnlData.totalReturnPct >= 0 ? "var(--success)" : "var(--danger)",
+                    borderTop: "1px solid var(--border)",
                   }}>
                     {pnlData.totalReturnPct >= 0 ? "+" : ""}{pnlData.totalReturnPct.toFixed(2)}%
                   </td>
-                  <td style={{ borderTop: "1px solid #2C2D34" }} />
+                  <td style={{ borderTop: "1px solid var(--border)" }} />
                 </tr>
               </tbody>
             </table>
           ) : (
             <div style={{ padding: "24px 0", textAlign: "center" }}>
-              <p style={{ fontSize: 12, color: "#8C8C91" }}>등록된 포지션이 없습니다</p>
+              <p style={{ fontSize: 12, color: "var(--muted)" }}>등록된 포지션이 없습니다</p>
             </div>
           )}
 
@@ -834,7 +822,7 @@ export function MarketsTab({
                 cursor: "pointer",
                 fontSize: 12,
                 fontWeight: 500,
-                color: "#FFB000",
+                color: "var(--accent)",
                 padding: "10px 0",
                 display: "block",
               }}
@@ -849,7 +837,7 @@ export function MarketsTab({
                 style={{ ...selectStyle, flex: 1 }}
               >
                 {portfolioAssets.map((a) => (
-                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "#08090B", color: "#EBEBEB" }}>
+                  <option key={a.symbol} value={a.symbol} style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
                     {a.label}
                   </option>
                 ))}
@@ -880,10 +868,10 @@ export function MarketsTab({
           <div style={{
             fontSize: 11,
             fontWeight: 700,
-            color: "#8C8C91",
+            color: "var(--muted)",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
-            borderBottom: "1px solid #2C2D34",
+            borderBottom: "1px solid var(--border)",
             paddingBottom: 8,
             marginBottom: 12,
           }}>
@@ -907,7 +895,7 @@ export function MarketsTab({
                     padding: "4px 0",
                     fontSize: 12,
                     fontWeight: 500,
-                    color: alreadyAdded ? "#8C8C91" : "#EBEBEB",
+                    color: alreadyAdded ? "var(--muted)" : "var(--foreground)",
                     opacity: alreadyAdded ? 0.5 : 1,
                     display: "flex",
                     alignItems: "center",
@@ -916,7 +904,7 @@ export function MarketsTab({
                 >
                   {s.label}
                   {alreadyAdded && (
-                    <svg style={{ width: 10, height: 10, color: "#16a34a" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <svg style={{ width: 10, height: 10, color: "var(--success)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   )}

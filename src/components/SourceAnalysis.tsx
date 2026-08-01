@@ -105,9 +105,9 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
   }
 
   const sentimentIcon = (s: "bullish" | "bearish" | "neutral") => {
-    if (s === "bullish") return { symbol: "\u25B2", color: "#22c55e" };
-    if (s === "bearish") return { symbol: "\u25BC", color: "#ef4444" };
-    return { symbol: "\u25CF", color: "#8C8C91" };
+    if (s === "bullish") return { symbol: "\u25B2", color: "var(--success)" };
+    if (s === "bearish") return { symbol: "\u25BC", color: "var(--danger)" };
+    return { symbol: "\u25CF", color: "var(--muted)" };
   };
 
   return (
@@ -117,7 +117,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
         style={{
           fontSize: 10,
           fontWeight: 700,
-          color: "#8C8C91",
+          color: "var(--muted)",
           letterSpacing: "0.08em",
           textTransform: "uppercase" as const,
           marginBottom: 12,
@@ -134,7 +134,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
           gridTemplateColumns: "1fr 36px 1fr 48px 40px",
           gap: 8,
           paddingBottom: 6,
-          borderBottom: "1px solid #2C2D34",
+          borderBottom: "1px solid var(--border)",
           marginBottom: 2,
         }}
       >
@@ -144,7 +144,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
             style={{
               fontSize: 9,
               fontWeight: 600,
-              color: "#8C8C91",
+              color: "var(--muted)",
               letterSpacing: "0.05em",
               textTransform: "uppercase",
             }}
@@ -165,7 +165,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
               gridTemplateColumns: "1fr 36px 1fr 48px 40px",
               gap: 8,
               padding: "6px 0",
-              borderBottom: "1px solid rgba(44,45,52,0.5)",
+              borderBottom: "1px solid color-mix(in srgb, var(--border) 50%, transparent)",
               alignItems: "center",
             }}
           >
@@ -174,7 +174,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: "#EBEBEB",
+                color: "var(--foreground)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -207,7 +207,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
                   key={tag}
                   style={{
                     fontSize: 9,
-                    color: "#8C8C91",
+                    color: "var(--muted)",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -222,7 +222,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
                 fontSize: 11,
                 fontFamily: "var(--font-mono)",
                 fontVariantNumeric: "tabular-nums",
-                color: "#EBEBEB",
+                color: "var(--foreground)",
                 textAlign: "right",
               }}
             >
@@ -235,7 +235,7 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
                 style={{
                   flex: 1,
                   height: 3,
-                  background: "#2C2D34",
+                  background: "var(--border)",
                   borderRadius: 1,
                   overflow: "hidden",
                 }}
@@ -246,10 +246,10 @@ export function SourceAnalysis({ articles }: SourceAnalysisProps) {
                     height: "100%",
                     background:
                       src.qualityScore > 60
-                        ? "#FFB000"
+                        ? "var(--accent)"
                         : src.qualityScore > 30
-                          ? "#8C8C91"
-                          : "#ef4444",
+                          ? "var(--muted)"
+                          : "var(--danger)",
                     transition: "width 0.3s ease",
                   }}
                 />

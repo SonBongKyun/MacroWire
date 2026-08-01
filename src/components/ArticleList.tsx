@@ -56,7 +56,7 @@ function timeAgo(dateStr: string): string {
 
 function SkeletonRow() {
   return (
-    <div style={{ padding: "10px 16px", borderBottom: "1px solid #2C2D34" }}>
+    <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--border)" }}>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <div className="skeleton" style={{ width: "70%", height: 14, borderRadius: 2 }} />
         <div className="skeleton" style={{ width: 40, height: 10, borderRadius: 2, marginLeft: "auto" }} />
@@ -259,9 +259,15 @@ export function ArticleList({
   );
 
   return (
+    // Listbox semantics: the container owns focus and j/k navigation, and
+    // aria-activedescendant tells a screen reader which headline is current —
+    // previously the rows were plain divs and announced nothing at all.
     <div
       className="h-full min-h-0 flex-1 flex flex-col overflow-hidden focus:outline-none relative"
       tabIndex={0}
+      role="listbox"
+      aria-label="기사 목록"
+      aria-activedescendant={selectedArticleId ? `article-row-${selectedArticleId}` : undefined}
       onKeyDown={handleKeyDown}
     >
       {/* List */}
@@ -269,7 +275,7 @@ export function ArticleList({
         className="flex-1 overflow-y-auto"
         ref={listRef}
         onScroll={handleListScroll}
-        style={{ backgroundColor: "#08090B" }}
+        style={{ backgroundColor: "var(--background)" }}
       >
         {loading && articles.length === 0 && (
           <>
@@ -318,6 +324,10 @@ export function ArticleList({
                 return (
                   <div
                     key={article.id}
+                    id={`article-row-${article.id}`}
+                    role="option"
+                    aria-selected={isSelected}
+                    aria-label={`${article.title} — ${article.sourceName}, ${timeAgo(article.publishedAt)} 전${isUnread ? ", 읽지 않음" : ""}`}
                     className={[
                       "article-row",
                       `article-row-${density}`,

@@ -71,7 +71,7 @@ function useClock(): string {
   return time;
 }
 
-const STAT_COLORS = ["#FFB000", "#8C8C91", "#FFB000", "#8C8C91"];
+const STAT_COLORS = ["var(--accent)", "var(--muted)", "var(--accent)", "var(--muted)"];
 
 export function TodayPulse({ articles }: TodayPulseProps) {
   const pulse = useMemo(() => computePulse(articles), [articles]);
@@ -147,7 +147,7 @@ export function TodayPulse({ articles }: TodayPulseProps) {
         </div>
 
         {/* Recent 1h highlight */}
-        <div className="flex items-center gap-3 p-4 rounded-[var(--radius-md)] glass-card" style={{ borderLeft: '3px solid var(--gold)' }}>
+        <div className="flex items-center gap-3 p-4 rounded-[var(--radius-md)] glass-card" style={{ borderLeft: '3px solid var(--accent)' }}>
           <div className="flex-1">
             <span className="text-[10px] text-[var(--muted)] font-medium">
               최근 1시간
@@ -156,8 +156,8 @@ export function TodayPulse({ articles }: TodayPulseProps) {
               {animRecent}<span className="text-[12px] font-medium text-[var(--muted)] ml-0.5">건</span>
             </div>
           </div>
-          <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-[var(--gold-surface)] flex items-center justify-center">
-            <svg className="w-4 h-4 text-[var(--gold)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-[var(--accent-surface)] flex items-center justify-center">
+            <svg className="w-4 h-4 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>

@@ -694,7 +694,7 @@ function HomeInner() {
             }}
           >
             {/* Left: Compact Article List */}
-            <div className="overflow-y-auto border-r border-[#2C2D34]">
+            <div className="overflow-y-auto border-r border-[var(--border)]">
               <ArticleList
                 articles={filteredArticles}
                 loading={loading}
@@ -714,7 +714,7 @@ function HomeInner() {
             </div>
 
             {/* Center: Article Detail */}
-            <div className="overflow-y-auto border-r border-[#2C2D34]">
+            <div className="overflow-y-auto border-r border-[var(--border)]">
               {selectedArticle ? (
                 <ArticleDetail
                   article={selectedArticle}
@@ -729,13 +729,13 @@ function HomeInner() {
                   onSelectArticle={selectArticle}
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center h-full" style={{ color: "#8C8C91" }}>
+                <div className="flex flex-col items-center justify-center h-full" style={{ color: "var(--muted)" }}>
                   <div style={{ marginBottom: 12, opacity: 0.3 }}>
                     <svg style={{ width: 36, height: 36 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                     </svg>
                   </div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: "#EBEBEB" }}>기사를 선택하세요</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>기사를 선택하세요</p>
                 </div>
               )}
             </div>

@@ -27,12 +27,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_ICONS: Record<string, { label: string; color: string }> = {
-  policy: { label: "P", color: "#FFB000" },
-  macro: { label: "M", color: "#8C8C91" },
-  global: { label: "G", color: "#FFB000" },
-  fx: { label: "F", color: "#FFB000" },
-  semicon: { label: "S", color: "#8C8C91" },
-  other: { label: "O", color: "#8C8C91" },
+  policy: { label: "P", color: "var(--accent)" },
+  macro: { label: "M", color: "var(--muted)" },
+  global: { label: "G", color: "var(--accent)" },
+  fx: { label: "F", color: "var(--accent)" },
+  semicon: { label: "S", color: "var(--muted)" },
+  other: { label: "O", color: "var(--muted)" },
 };
 
 export function SourcePanel({
@@ -111,8 +111,8 @@ export function SourcePanel({
                 className="tag-pill"
                 style={
                   isActive
-                    ? { color, backgroundColor: `${color}20`, borderColor: `${color}50` }
-                    : { color: "#8C8C91", backgroundColor: "transparent", borderColor: "rgba(255,255,255,0.06)" }
+                    ? { color, backgroundColor: `color-mix(in srgb, ${color} 13%, transparent)`, borderColor: `color-mix(in srgb, ${color} 31%, transparent)` }
+                    : { color: "var(--muted)", backgroundColor: "transparent", borderColor: "rgba(255,255,255,0.06)" }
                 }
               >
                 {tag}

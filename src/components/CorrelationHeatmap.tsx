@@ -93,7 +93,7 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
                   transform: "rotate(-45deg)",
                   fontSize: 9,
                   fontFamily: "var(--font-mono)",
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -118,7 +118,7 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
                   paddingRight: 6,
                   fontSize: 9,
                   fontFamily: "var(--font-mono)",
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                 }}
               >
                 {tag}
@@ -145,8 +145,8 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
                       style={{
                         width: cellSize,
                         height: cellSize,
-                        background: `rgba(255, 176, 0, ${opacity})`,
-                        border: "1px solid rgba(45, 45, 50, 0.5)",
+                        background: `color-mix(in srgb, var(--accent) ${Math.round(opacity * 100)}%, transparent)`,
+                        border: "1px solid var(--border-subtle)",
                         cursor: isDiag ? "default" : "pointer",
                         transition: "background 0.15s ease",
                       }}
@@ -179,12 +179,12 @@ export function CorrelationHeatmap({ articles }: CorrelationHeatmapProps) {
               left: tooltip.x + labelWidth,
               top: tooltip.y + labelWidth,
               transform: "translate(-50%, -100%)",
-              background: "#1B1C22",
-              border: "1px solid #2C2D34",
+              background: "var(--surface-raised)",
+              border: "1px solid var(--border)",
               padding: "4px 8px",
               fontSize: 10,
               fontFamily: "var(--font-mono)",
-              color: "#EBEBEB",
+              color: "var(--foreground)",
               whiteSpace: "nowrap",
               pointerEvents: "none",
               zIndex: 10,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import type { Quote } from "@/lib/market/quote";
 
 export interface PortfolioAsset {
   symbol: string;
@@ -9,14 +10,9 @@ export interface PortfolioAsset {
   addedAt: string;
 }
 
-export interface PortfolioPrice {
-  symbol: string;
-  label: string;
-  price: number;
-  change: number;
-  changePct: number;
-  sparkline: number[];
-}
+// The wire format is owned by /api/portfolio, which shares one quote layer
+// with /api/market so both surfaces report the same daily change.
+export type PortfolioPrice = Quote;
 
 export interface PortfolioStore {
   assets: PortfolioAsset[];

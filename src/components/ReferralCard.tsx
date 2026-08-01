@@ -28,10 +28,10 @@ export function ReferralCard({ code, siteUrl }: { code: string; siteUrl: string 
             flex: 1,
             padding: "8px 12px",
             background: "#15151A",
-            border: "1px solid rgba(245,240,225,0.12)",
+            border: "1px solid color-mix(in srgb, var(--foreground-bright) 12%, transparent)",
             fontSize: 12,
             fontFamily: "var(--font-mono)",
-            color: "#FFB000",
+            color: "var(--accent)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -42,9 +42,9 @@ export function ReferralCard({ code, siteUrl }: { code: string; siteUrl: string 
         <button
           onClick={copy}
           style={{
-            background: copied ? "#22c55e" : "transparent",
-            color: copied ? "#08090B" : "#F5F0E1",
-            border: "1px solid rgba(245,240,225,0.18)",
+            background: copied ? "var(--success)" : "transparent",
+            color: copied ? "var(--background)" : "var(--foreground-bright)",
+            border: "1px solid color-mix(in srgb, var(--foreground-bright) 18%, transparent)",
             padding: "8px 12px",
             fontSize: 11,
             fontFamily: "var(--font-mono)",
@@ -60,8 +60,8 @@ export function ReferralCard({ code, siteUrl }: { code: string; siteUrl: string 
           rel="noopener noreferrer"
           style={{
             background: "transparent",
-            color: "#F5F0E1",
-            border: "1px solid rgba(245,240,225,0.18)",
+            color: "var(--foreground-bright)",
+            border: "1px solid color-mix(in srgb, var(--foreground-bright) 18%, transparent)",
             padding: "8px 12px",
             fontSize: 11,
             fontFamily: "var(--font-mono)",
@@ -72,7 +72,7 @@ export function ReferralCard({ code, siteUrl }: { code: string; siteUrl: string 
           X / TWEET
         </a>
       </div>
-      <div style={{ fontSize: 11, color: "#8C8C91" }}>
+      <div style={{ fontSize: 11, color: "var(--muted)" }}>
         링크 누른 친구가 가입하면 둘 다 1개월 PRO 자동 적용.
       </div>
     </div>

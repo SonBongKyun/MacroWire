@@ -199,7 +199,7 @@ export function PortfolioTab({
       .sort((a, b) => b.pct - a.pct);
   }, [rows, totalValue, portfolioPrices]);
 
-  const pieColors = ["#FFB000", "#8B7A4E", "#5E5332", "#A0C4FF", "#6B8FAD", "#4A6375", "#FF8C8C", "#AD6B6B"];
+  const pieColors = ["var(--accent)", "#8B7A4E", "#5E5332", "#A0C4FF", "#6B8FAD", "#4A6375", "var(--danger)", "#AD6B6B"];
 
   // Holdings edit
   const [editingSymbol, setEditingSymbol] = useState<string | null>(null);
@@ -273,7 +273,7 @@ export function PortfolioTab({
   const sortArrow = (key: SortKey) => {
     if (sortKey !== key) return null;
     return (
-      <span style={{ marginLeft: 2, fontSize: 8, color: "#FFB000" }}>
+      <span style={{ marginLeft: 2, fontSize: 8, color: "var(--accent)" }}>
         {sortDir === "asc" ? "\u25B2" : "\u25BC"}
       </span>
     );
@@ -282,7 +282,7 @@ export function PortfolioTab({
   const colHeaderStyle = (key: SortKey): React.CSSProperties => ({
     fontSize: 9,
     fontWeight: 700,
-    color: sortKey === key ? "#FFB000" : "#8C8C91",
+    color: sortKey === key ? "var(--accent)" : "var(--muted)",
     letterSpacing: "0.06em",
     cursor: "pointer",
     userSelect: "none",
@@ -295,7 +295,7 @@ export function PortfolioTab({
       <div
         style={{
           padding: "16px 24px",
-          borderBottom: "1px solid #2C2D34",
+          borderBottom: "1px solid var(--border)",
           display: "flex",
           alignItems: "center",
           gap: 32,
@@ -307,7 +307,7 @@ export function PortfolioTab({
             style={{
               fontSize: 9,
               fontWeight: 700,
-              color: "#8C8C91",
+              color: "var(--muted)",
               letterSpacing: "0.1em",
               marginBottom: 4,
             }}
@@ -316,18 +316,18 @@ export function PortfolioTab({
           </div>
           <div
             className="font-mono"
-            style={{ fontSize: 28, fontWeight: 700, color: "#FFB000", lineHeight: 1 }}
+            style={{ fontSize: 28, fontWeight: 700, color: "var(--accent)", lineHeight: 1 }}
           >
             {totalValue > 0 ? formatNumber(totalValue) : "--"}
           </div>
         </div>
-        <div style={{ borderLeft: "1px solid #2C2D34", paddingLeft: 24 }}>
+        <div style={{ borderLeft: "1px solid var(--border)", paddingLeft: 24 }}>
           <div
             className="font-heading"
             style={{
               fontSize: 9,
               fontWeight: 700,
-              color: "#8C8C91",
+              color: "var(--muted)",
               letterSpacing: "0.1em",
               marginBottom: 4,
             }}
@@ -340,7 +340,7 @@ export function PortfolioTab({
               style={{
                 fontSize: 16,
                 fontWeight: 700,
-                color: totalPnl >= 0 ? "#4ADE80" : "#F87171",
+                color: totalPnl >= 0 ? "var(--success)" : "var(--danger)",
               }}
             >
               {totalPnl >= 0 ? "+" : ""}
@@ -350,7 +350,7 @@ export function PortfolioTab({
               className="font-mono"
               style={{
                 fontSize: 12,
-                color: totalPnlPct >= 0 ? "#4ADE80" : "#F87171",
+                color: totalPnlPct >= 0 ? "var(--success)" : "var(--danger)",
               }}
             >
               ({totalPnlPct >= 0 ? "+" : ""}
@@ -358,13 +358,13 @@ export function PortfolioTab({
             </span>
           </div>
         </div>
-        <div style={{ borderLeft: "1px solid #2C2D34", paddingLeft: 24 }}>
+        <div style={{ borderLeft: "1px solid var(--border)", paddingLeft: 24 }}>
           <div
             className="font-heading"
             style={{
               fontSize: 9,
               fontWeight: 700,
-              color: "#8C8C91",
+              color: "var(--muted)",
               letterSpacing: "0.1em",
               marginBottom: 4,
             }}
@@ -377,7 +377,7 @@ export function PortfolioTab({
               style={{
                 fontSize: 16,
                 fontWeight: 700,
-                color: dayChange >= 0 ? "#4ADE80" : "#F87171",
+                color: dayChange >= 0 ? "var(--success)" : "var(--danger)",
               }}
             >
               {dayChange >= 0 ? "+" : ""}
@@ -387,7 +387,7 @@ export function PortfolioTab({
               className="font-mono"
               style={{
                 fontSize: 12,
-                color: dayChangePct >= 0 ? "#4ADE80" : "#F87171",
+                color: dayChangePct >= 0 ? "var(--success)" : "var(--danger)",
               }}
             >
               ({dayChangePct >= 0 ? "+" : ""}
@@ -403,9 +403,9 @@ export function PortfolioTab({
             padding: "6px 14px",
             fontSize: 10,
             fontWeight: 600,
-            color: loading ? "#8C8C91" : "#FFB000",
+            color: loading ? "var(--muted)" : "var(--accent)",
             border: "1px solid",
-            borderColor: loading ? "#2C2D34" : "#FFB000",
+            borderColor: loading ? "var(--border)" : "var(--accent)",
             background: "transparent",
             cursor: loading ? "wait" : "pointer",
             fontFamily: "var(--font-heading)",
@@ -430,7 +430,7 @@ export function PortfolioTab({
         {/* Left column: Holdings Table */}
         <div
           style={{
-            borderRight: "1px solid #2C2D34",
+            borderRight: "1px solid var(--border)",
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
@@ -439,7 +439,7 @@ export function PortfolioTab({
           <div
             style={{
               padding: "12px 20px 8px",
-              borderBottom: "1px solid #2C2D34",
+              borderBottom: "1px solid var(--border)",
             }}
           >
             <span
@@ -447,7 +447,7 @@ export function PortfolioTab({
               style={{
                 fontSize: 9,
                 fontWeight: 700,
-                color: "#8C8C91",
+                color: "var(--muted)",
                 letterSpacing: "0.1em",
               }}
             >
@@ -463,7 +463,7 @@ export function PortfolioTab({
               }}
             >
               <thead>
-                <tr style={{ borderBottom: "1px solid #2C2D34" }}>
+                <tr style={{ borderBottom: "1px solid var(--border)" }}>
                   <th
                     style={{ ...colHeaderStyle("label"), padding: "8px 12px", textAlign: "left" }}
                     onClick={() => handleSort("label")}
@@ -515,7 +515,7 @@ export function PortfolioTab({
                     <tr
                       key={row.symbol}
                       style={{
-                        borderBottom: "1px solid #1B1C22",
+                        borderBottom: "1px solid var(--surface-raised)",
                         transition: "background 0.15s",
                       }}
                       onMouseEnter={(e) => {
@@ -525,9 +525,9 @@ export function PortfolioTab({
                         e.currentTarget.style.background = "transparent";
                       }}
                     >
-                      <td style={{ padding: "8px 12px", color: "#EBEBEB", fontWeight: 600 }}>
+                      <td style={{ padding: "8px 12px", color: "var(--foreground)", fontWeight: 600 }}>
                         <div>{row.label}</div>
-                        <div style={{ fontSize: 9, color: "#8C8C91", fontFamily: "var(--font-mono)" }}>
+                        <div style={{ fontSize: 9, color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
                           {row.symbol}
                         </div>
                       </td>
@@ -541,15 +541,15 @@ export function PortfolioTab({
                               width: 60,
                               fontSize: 10,
                               padding: "2px 4px",
-                              background: "#1B1C22",
-                              border: "1px solid #FFB000",
-                              color: "#EBEBEB",
+                              background: "var(--surface-raised)",
+                              border: "1px solid var(--accent)",
+                              color: "var(--foreground)",
                               textAlign: "right",
                               fontFamily: "var(--font-mono)",
                             }}
                           />
                         ) : (
-                          <span className="font-mono" style={{ color: "#EBEBEB" }}>
+                          <span className="font-mono" style={{ color: "var(--foreground)" }}>
                             {row.quantity > 0 ? formatNumber(row.quantity, 2) : "--"}
                           </span>
                         )}
@@ -564,28 +564,28 @@ export function PortfolioTab({
                               width: 70,
                               fontSize: 10,
                               padding: "2px 4px",
-                              background: "#1B1C22",
-                              border: "1px solid #FFB000",
-                              color: "#EBEBEB",
+                              background: "var(--surface-raised)",
+                              border: "1px solid var(--accent)",
+                              color: "var(--foreground)",
                               textAlign: "right",
                               fontFamily: "var(--font-mono)",
                             }}
                           />
                         ) : (
-                          <span className="font-mono" style={{ color: "#EBEBEB" }}>
+                          <span className="font-mono" style={{ color: "var(--foreground)" }}>
                             {row.avgCost > 0 ? formatNumber(row.avgCost) : "--"}
                           </span>
                         )}
                       </td>
                       <td
                         className="font-mono"
-                        style={{ padding: "8px 8px", textAlign: "right", color: "#EBEBEB" }}
+                        style={{ padding: "8px 8px", textAlign: "right", color: "var(--foreground)" }}
                       >
                         {formatNumber(row.price, 2)}
                       </td>
                       <td
                         className="font-mono"
-                        style={{ padding: "8px 8px", textAlign: "right", color: "#EBEBEB" }}
+                        style={{ padding: "8px 8px", textAlign: "right", color: "var(--foreground)" }}
                       >
                         {row.currentValue > 0 ? formatNumber(row.currentValue) : "--"}
                       </td>
@@ -594,7 +594,7 @@ export function PortfolioTab({
                         style={{
                           padding: "8px 8px",
                           textAlign: "right",
-                          color: row.pnl >= 0 ? "#4ADE80" : "#F87171",
+                          color: row.pnl >= 0 ? "var(--success)" : "var(--danger)",
                         }}
                       >
                         {row.quantity > 0 ? (
@@ -609,12 +609,12 @@ export function PortfolioTab({
                             </div>
                           </>
                         ) : (
-                          <span style={{ color: "#8C8C91" }}>--</span>
+                          <span style={{ color: "var(--muted)" }}>--</span>
                         )}
                       </td>
                       <td
                         className="font-mono"
-                        style={{ padding: "8px 12px", textAlign: "right", color: "#8C8C91" }}
+                        style={{ padding: "8px 12px", textAlign: "right", color: "var(--muted)" }}
                       >
                         {row.currentValue > 0 ? weight.toFixed(1) + "%" : "--"}
                       </td>
@@ -624,7 +624,7 @@ export function PortfolioTab({
                             onClick={saveEdit}
                             style={{
                               fontSize: 9,
-                              color: "#FFB000",
+                              color: "var(--accent)",
                               background: "none",
                               border: "none",
                               cursor: "pointer",
@@ -638,7 +638,7 @@ export function PortfolioTab({
                             onClick={() => startEdit(row.symbol)}
                             style={{
                               fontSize: 9,
-                              color: "#8C8C91",
+                              color: "var(--muted)",
                               background: "none",
                               border: "none",
                               cursor: "pointer",
@@ -665,15 +665,15 @@ export function PortfolioTab({
                 {sortedRows.length > 0 && (
                   <tr
                     style={{
-                      borderTop: "2px solid #2C2D34",
-                      background: "rgba(255,176,0,0.03)",
+                      borderTop: "2px solid var(--border)",
+                      background: "color-mix(in srgb, var(--accent) 3%, transparent)",
                     }}
                   >
                     <td
                       style={{
                         padding: "10px 12px",
                         fontWeight: 700,
-                        color: "#FFB000",
+                        color: "var(--accent)",
                         fontSize: 11,
                       }}
                     >
@@ -686,7 +686,7 @@ export function PortfolioTab({
                         padding: "10px 8px",
                         textAlign: "right",
                         fontWeight: 700,
-                        color: "#FFB000",
+                        color: "var(--accent)",
                       }}
                     >
                       {totalValue > 0 ? formatNumber(totalValue) : "--"}
@@ -697,7 +697,7 @@ export function PortfolioTab({
                         padding: "10px 8px",
                         textAlign: "right",
                         fontWeight: 700,
-                        color: totalPnl >= 0 ? "#4ADE80" : "#F87171",
+                        color: totalPnl >= 0 ? "var(--success)" : "var(--danger)",
                       }}
                     >
                       {totalCost > 0 ? (
@@ -720,7 +720,7 @@ export function PortfolioTab({
                       style={{
                         padding: "10px 12px",
                         textAlign: "right",
-                        color: "#FFB000",
+                        color: "var(--accent)",
                         fontWeight: 700,
                       }}
                     >
@@ -744,13 +744,13 @@ export function PortfolioTab({
         >
           <div style={{ flex: 1, overflowY: "auto" }}>
             {/* Allocation section */}
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid #2C2D34" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
               <div
                 className="font-heading"
                 style={{
                   fontSize: 9,
                   fontWeight: 700,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   letterSpacing: "0.1em",
                   marginBottom: 12,
                 }}
@@ -793,7 +793,7 @@ export function PortfolioTab({
                       );
                     });
                   })()}
-                  <circle cx="50" cy="50" r="22" fill="#08090B" />
+                  <circle cx="50" cy="50" r="22" fill="var(--background)" />
                 </svg>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
                   {allocation.slice(0, 6).map((item, i) => (
@@ -814,8 +814,8 @@ export function PortfolioTab({
                           flexShrink: 0,
                         }}
                       />
-                      <span style={{ color: "#EBEBEB", flex: 1 }}>{item.label}</span>
-                      <span className="font-mono" style={{ color: "#8C8C91" }}>
+                      <span style={{ color: "var(--foreground)", flex: 1 }}>{item.label}</span>
+                      <span className="font-mono" style={{ color: "var(--muted)" }}>
                         {item.pct.toFixed(1)}%
                       </span>
                     </div>
@@ -825,13 +825,13 @@ export function PortfolioTab({
             </div>
 
             {/* Alerts section */}
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid #2C2D34" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
               <div
                 className="font-heading"
                 style={{
                   fontSize: 9,
                   fontWeight: 700,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   letterSpacing: "0.1em",
                   marginBottom: 10,
                 }}
@@ -839,7 +839,7 @@ export function PortfolioTab({
                 ALERTS
               </div>
               {alerts.length === 0 && (
-                <div style={{ fontSize: 10, color: "#8C8C91", marginBottom: 8 }}>
+                <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 8 }}>
                   설정된 알림이 없습니다
                 </div>
               )}
@@ -859,7 +859,7 @@ export function PortfolioTab({
                       alignItems: "center",
                       gap: 8,
                       padding: "6px 0",
-                      borderBottom: "1px solid #1B1C22",
+                      borderBottom: "1px solid var(--surface-raised)",
                       fontSize: 10,
                     }}
                   >
@@ -868,14 +868,14 @@ export function PortfolioTab({
                         width: 6,
                         height: 6,
                         borderRadius: "50%",
-                        background: triggered ? "#4ADE80" : "#8C8C91",
+                        background: triggered ? "var(--success)" : "var(--muted)",
                         flexShrink: 0,
                       }}
                     />
-                    <span style={{ color: "#EBEBEB", flex: 1 }}>
+                    <span style={{ color: "var(--foreground)", flex: 1 }}>
                       {alert.label}
                     </span>
-                    <span className="font-mono" style={{ color: "#8C8C91" }}>
+                    <span className="font-mono" style={{ color: "var(--muted)" }}>
                       {alert.direction === "above" ? ">" : "<"}{" "}
                       {formatNumber(alert.targetPrice, 2)}
                     </span>
@@ -883,7 +883,7 @@ export function PortfolioTab({
                       onClick={() => removeAlert(alert.id)}
                       style={{
                         fontSize: 9,
-                        color: "#8C8C91",
+                        color: "var(--muted)",
                         background: "none",
                         border: "none",
                         cursor: "pointer",
@@ -909,9 +909,9 @@ export function PortfolioTab({
                   style={{
                     fontSize: 9,
                     padding: "3px 4px",
-                    background: "#1B1C22",
-                    border: "1px solid #2C2D34",
-                    color: "#EBEBEB",
+                    background: "var(--surface-raised)",
+                    border: "1px solid var(--border)",
+                    color: "var(--foreground)",
                     flex: 1,
                   }}
                 >
@@ -928,9 +928,9 @@ export function PortfolioTab({
                   style={{
                     fontSize: 9,
                     padding: "3px 4px",
-                    background: "#1B1C22",
-                    border: "1px solid #2C2D34",
-                    color: "#EBEBEB",
+                    background: "var(--surface-raised)",
+                    border: "1px solid var(--border)",
+                    color: "var(--foreground)",
                     width: 36,
                   }}
                 >
@@ -945,9 +945,9 @@ export function PortfolioTab({
                   style={{
                     fontSize: 9,
                     padding: "3px 4px",
-                    background: "#1B1C22",
-                    border: "1px solid #2C2D34",
-                    color: "#EBEBEB",
+                    background: "var(--surface-raised)",
+                    border: "1px solid var(--border)",
+                    color: "var(--foreground)",
                     width: 60,
                     fontFamily: "var(--font-mono)",
                   }}
@@ -957,9 +957,9 @@ export function PortfolioTab({
                   style={{
                     fontSize: 9,
                     padding: "3px 8px",
-                    background: "rgba(255,176,0,0.1)",
-                    border: "1px solid #FFB000",
-                    color: "#FFB000",
+                    background: "color-mix(in srgb, var(--accent) 10%, transparent)",
+                    border: "1px solid var(--accent)",
+                    color: "var(--accent)",
                     cursor: "pointer",
                     fontWeight: 700,
                   }}
@@ -976,7 +976,7 @@ export function PortfolioTab({
                 style={{
                   fontSize: 9,
                   fontWeight: 700,
-                  color: "#8C8C91",
+                  color: "var(--muted)",
                   letterSpacing: "0.1em",
                   marginBottom: 10,
                 }}
@@ -995,7 +995,7 @@ export function PortfolioTab({
                     <div
                       style={{
                         fontSize: 10,
-                        color: "#EBEBEB",
+                        color: "var(--foreground)",
                         fontWeight: 600,
                         marginBottom: 3,
                       }}
@@ -1011,18 +1011,18 @@ export function PortfolioTab({
                         width: "100%",
                         fontSize: 10,
                         padding: "4px 8px",
-                        background: "#1B1C22",
-                        border: "1px solid #2C2D34",
-                        color: "#EBEBEB",
+                        background: "var(--surface-raised)",
+                        border: "1px solid var(--border)",
+                        color: "var(--foreground)",
                         resize: "vertical",
                         fontFamily: "var(--font-body)",
                         outline: "none",
                       }}
                       onFocus={(e) => {
-                        e.currentTarget.style.borderColor = "#FFB000";
+                        e.currentTarget.style.borderColor = "var(--accent)";
                       }}
                       onBlur={(e) => {
-                        e.currentTarget.style.borderColor = "#2C2D34";
+                        e.currentTarget.style.borderColor = "var(--border)";
                       }}
                     />
                   </div>

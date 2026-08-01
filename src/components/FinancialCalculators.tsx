@@ -29,9 +29,9 @@ interface Rates {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "#1B1C22",
-  border: "1px solid #2C2D34",
-  color: "#EBEBEB",
+  background: "var(--surface-raised)",
+  border: "1px solid var(--border)",
+  color: "var(--foreground)",
   fontSize: 13,
   fontFamily: "var(--font-mono)",
   fontVariantNumeric: "tabular-nums",
@@ -41,14 +41,14 @@ const inputStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = {
   fontSize: 10,
-  color: "#8C8C91",
+  color: "var(--muted)",
   marginBottom: 3,
   display: "block",
 };
 
 const resultLabelStyle: React.CSSProperties = {
   fontSize: 10,
-  color: "#8C8C91",
+  color: "var(--muted)",
 };
 
 const resultValueStyle: React.CSSProperties = {
@@ -77,7 +77,7 @@ function ReturnCalculator() {
   }, [buyPrice, sellPrice, quantity]);
 
   const isProfit = result ? result.profit >= 0 : true;
-  const valueColor = isProfit ? "#22c55e" : "#ef4444";
+  const valueColor = isProfit ? "var(--success)" : "var(--danger)";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -115,7 +115,7 @@ function ReturnCalculator() {
       {result && (
         <div
           style={{
-            borderTop: "1px solid #2C2D34",
+            borderTop: "1px solid var(--border)",
             paddingTop: 10,
             display: "flex",
             flexDirection: "column",
@@ -138,7 +138,7 @@ function ReturnCalculator() {
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={resultLabelStyle}>손익비</span>
-            <span style={{ ...resultValueStyle, color: "#EBEBEB" }}>
+            <span style={{ ...resultValueStyle, color: "var(--foreground)" }}>
               {result.plRatio.toFixed(4)}
             </span>
           </div>
@@ -236,7 +236,7 @@ function CompoundCalculator() {
       {result && (
         <div
           style={{
-            borderTop: "1px solid #2C2D34",
+            borderTop: "1px solid var(--border)",
             paddingTop: 10,
             display: "flex",
             flexDirection: "column",
@@ -264,12 +264,12 @@ function CompoundCalculator() {
                   <>
                     <defs>
                       <linearGradient id="compound-grad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#FFB000" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#FFB000" stopOpacity={0.02} />
+                        <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.02} />
                       </linearGradient>
                     </defs>
                     <path d={areaD} fill="url(#compound-grad)" />
-                    <path d={pathD} fill="none" stroke="#FFB000" strokeWidth={1.5} />
+                    <path d={pathD} fill="none" stroke="var(--accent)" strokeWidth={1.5} />
                   </>
                 );
               })()}
@@ -278,19 +278,19 @@ function CompoundCalculator() {
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={resultLabelStyle}>최종 금액</span>
-            <span style={{ ...resultValueStyle, color: "#FFB000" }}>
+            <span style={{ ...resultValueStyle, color: "var(--accent)" }}>
               {result.finalAmount.toLocaleString("ko-KR", { maximumFractionDigits: 0 })}
             </span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={resultLabelStyle}>총 이자</span>
-            <span style={{ ...resultValueStyle, color: "#22c55e" }}>
+            <span style={{ ...resultValueStyle, color: "var(--success)" }}>
               +{result.totalInterest.toLocaleString("ko-KR", { maximumFractionDigits: 0 })}
             </span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={resultLabelStyle}>원금 대비</span>
-            <span style={{ ...resultValueStyle, color: "#EBEBEB" }}>
+            <span style={{ ...resultValueStyle, color: "var(--foreground)" }}>
               {result.multiple.toFixed(2)}x
             </span>
           </div>
@@ -358,7 +358,7 @@ function ExchangeCalculator() {
 
   if (loading) {
     return (
-      <div style={{ fontSize: 12, color: "#8C8C91", padding: "20px 0", textAlign: "center" }}>
+      <div style={{ fontSize: 12, color: "var(--muted)", padding: "20px 0", textAlign: "center" }}>
         환율 데이터 로딩...
       </div>
     );
@@ -386,7 +386,7 @@ function ExchangeCalculator() {
             display: "flex",
             alignItems: "flex-end",
             paddingBottom: 8,
-            color: "#8C8C91",
+            color: "var(--muted)",
             fontSize: 14,
             cursor: "pointer",
           }}
@@ -427,7 +427,7 @@ function ExchangeCalculator() {
       {result !== null && (
         <div
           style={{
-            borderTop: "1px solid #2C2D34",
+            borderTop: "1px solid var(--border)",
             paddingTop: 10,
             display: "flex",
             flexDirection: "column",
@@ -436,17 +436,17 @@ function ExchangeCalculator() {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={resultLabelStyle}>변환 결과</span>
-            <span style={{ ...resultValueStyle, color: "#FFB000", fontSize: 16 }}>
+            <span style={{ ...resultValueStyle, color: "var(--accent)", fontSize: 16 }}>
               {result.toLocaleString("ko-KR", {
                 maximumFractionDigits: toCurrency === "JPY" || toCurrency === "KRW" ? 0 : 2,
               })}{" "}
-              <span style={{ fontSize: 10, color: "#8C8C91" }}>{toCurrency}</span>
+              <span style={{ fontSize: 10, color: "var(--muted)" }}>{toCurrency}</span>
             </span>
           </div>
           {currentRate !== null && (
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={resultLabelStyle}>현재 환율</span>
-              <span style={{ ...resultValueStyle, fontSize: 11, color: "#8C8C91" }}>
+              <span style={{ ...resultValueStyle, fontSize: 11, color: "var(--muted)" }}>
                 1 {fromCurrency} ={" "}
                 {currentRate.toLocaleString("ko-KR", {
                   maximumFractionDigits: toCurrency === "JPY" || toCurrency === "KRW" ? 0 : 4,
@@ -455,7 +455,7 @@ function ExchangeCalculator() {
               </span>
             </div>
           )}
-          <div style={{ fontSize: 9, color: "#8C8C91", marginTop: 2 }}>
+          <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2 }}>
             {CURRENCY_NAMES[fromCurrency]} → {CURRENCY_NAMES[toCurrency]}
           </div>
         </div>
@@ -480,8 +480,8 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
         width: 360,
         maxHeight: "80vh",
         overflowY: "auto",
-        background: "#08090B",
-        border: "1px solid #2C2D34",
+        background: "var(--background)",
+        border: "1px solid var(--border)",
         boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
       }}
     >
@@ -492,14 +492,14 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
           alignItems: "center",
           justifyContent: "space-between",
           padding: "10px 14px",
-          borderBottom: "1px solid #2C2D34",
+          borderBottom: "1px solid var(--border)",
         }}
       >
         <span
           style={{
             fontSize: 11,
             fontWeight: 700,
-            color: "#FFB000",
+            color: "var(--accent)",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
           }}
@@ -511,7 +511,7 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
           style={{
             background: "none",
             border: "none",
-            color: "#8C8C91",
+            color: "var(--muted)",
             fontSize: 14,
             cursor: "pointer",
             padding: "2px 4px",
@@ -526,7 +526,7 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
       <div
         style={{
           display: "flex",
-          borderBottom: "1px solid #2C2D34",
+          borderBottom: "1px solid var(--border)",
         }}
       >
         {TABS.map((tab) => (
@@ -537,8 +537,8 @@ export function FinancialCalculators({ open, onClose }: FinancialCalculatorsProp
               flex: 1,
               background: "none",
               border: "none",
-              borderBottom: activeTab === tab.id ? "2px solid #FFB000" : "2px solid transparent",
-              color: activeTab === tab.id ? "#FFB000" : "#8C8C91",
+              borderBottom: activeTab === tab.id ? "2px solid var(--accent)" : "2px solid transparent",
+              color: activeTab === tab.id ? "var(--accent)" : "var(--muted)",
               fontSize: 11,
               fontWeight: 600,
               padding: "8px 0",

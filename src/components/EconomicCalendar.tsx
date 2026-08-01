@@ -1,61 +1,37 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-
-interface EconEvent {
-  date: string;
-  time: string;
-  title: string;
-  region: string;
-  importance: "high" | "medium";
-}
-
-const EVENTS: EconEvent[] = [
-  { date: "2026-03-23", time: "09:00", title: "한국 GDP 성장률", region: "KR", importance: "high" },
-  { date: "2026-03-24", time: "21:30", title: "미국 내구재 주문", region: "US", importance: "medium" },
-  { date: "2026-03-25", time: "10:00", title: "한국 소비자신뢰지수", region: "KR", importance: "medium" },
-  { date: "2026-03-25", time: "23:00", title: "미국 소비자신뢰지수", region: "US", importance: "high" },
-  { date: "2026-03-26", time: "09:00", title: "일본 BOJ 회의록", region: "JP", importance: "medium" },
-  { date: "2026-03-26", time: "21:30", title: "미국 GDP 확정치", region: "US", importance: "high" },
-  { date: "2026-03-27", time: "08:00", title: "한국 산업생산", region: "KR", importance: "medium" },
-  { date: "2026-03-27", time: "21:30", title: "미국 PCE 물가지수", region: "US", importance: "high" },
-  { date: "2026-03-28", time: "09:00", title: "중국 PMI 제조업", region: "CN", importance: "high" },
-  { date: "2026-03-28", time: "15:00", title: "유럽 HICP 인플레이션", region: "EU", importance: "high" },
-  { date: "2026-03-31", time: "09:00", title: "한국 수출입 동향", region: "KR", importance: "high" },
-  { date: "2026-03-31", time: "22:00", title: "미국 ISM 제조업 PMI", region: "US", importance: "high" },
-];
-
-const REGION_LABELS: Record<string, string> = {
-  KR: "KR",
-  US: "US",
-  JP: "JP",
-  CN: "CN",
-  EU: "EU",
-};
-
-const REGION_COLORS: Record<string, string> = {
-  KR: "#FFB000",
-  US: "#FFB000",
-  JP: "#8C8C91",
-  CN: "#8C8C91",
-  EU: "#8C8C91",
-};
+import { Clock } from "lucide-react";
+import {
+  getEconEvents,
+  getNextEconEvent,
+  groupEconEventsByDay,
+  toKstDate,
+  type EconEvent,
+} from "@/lib/calendar/econ";
 
 const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
 
 function formatDateHeader(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  const month = d.getMonth() + 1;
-  const day = d.getDate();
-  const dayName = DAY_NAMES[d.getDay()];
-  return `${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")} (${dayName})`;
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  const month = d.getUTCMonth() + 1;
+  const day = d.getUTCDate();
+  return `${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")} (${DAY_NAMES[d.getUTCDay()]})`;
 }
 
-function getEventDateTime(ev: EconEvent): Date {
-  return new Date(`${ev.date}T${ev.time}:00+09:00`);
+function formatCountdown(ms: number): string {
+  const totalMinutes = Math.floor(ms / 60_000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return `${days}일 ${hours}시간`;
+  if (hours > 0) return `${hours}시간 ${minutes}분`;
+  return `${minutes}분`;
 }
 
 export function EconomicCalendar() {
+  // Rendered null-first so the server markup and the hydrated markup agree —
+  // everything here depends on the current time.
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -64,236 +40,86 @@ export function EconomicCalendar() {
     return () => clearInterval(id);
   }, []);
 
-  const today = now
-    ? new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10)
-    : "";
+  // Recompute on the minute is wasteful for the expansion itself, so key the
+  // event list off the day and let only the countdown tick.
+  const today = now ? toKstDate(now) : "";
+  const events = useMemo<EconEvent[]>(
+    () => (today ? getEconEvents(new Date(`${today}T00:00:00+09:00`)) : []),
+    [today]
+  );
 
-  // Group events by date, sorted
-  const grouped = useMemo(() => {
-    const sorted = [...EVENTS].sort((a, b) => {
-      const cmp = a.date.localeCompare(b.date);
-      if (cmp !== 0) return cmp;
-      return a.time.localeCompare(b.time);
-    });
+  const groups = useMemo(() => groupEconEventsByDay(events), [events]);
+  const nextEvent = useMemo(
+    () => (now ? getNextEconEvent(events, now) : null),
+    [events, now]
+  );
 
-    const groups: { date: string; events: EconEvent[] }[] = [];
-    for (const ev of sorted) {
-      const last = groups[groups.length - 1];
-      if (last && last.date === ev.date) {
-        last.events.push(ev);
-      } else {
-        groups.push({ date: ev.date, events: [ev] });
-      }
-    }
-    return groups;
-  }, []);
-
-  // Find next upcoming event for countdown
-  const nextEvent = useMemo(() => {
-    if (!now) return null;
-    const nowMs = now.getTime();
-    for (const ev of EVENTS) {
-      const evTime = getEventDateTime(ev).getTime();
-      if (evTime > nowMs) return ev;
-    }
-    return null;
-  }, [now]);
-
-  const countdown = useMemo(() => {
-    if (!nextEvent || !now) return null;
-    const diff = getEventDateTime(nextEvent).getTime() - now.getTime();
-    if (diff <= 0) return null;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
-      return `${days}일 ${hours % 24}시간`;
-    }
-    return `${hours}시간 ${mins}분`;
-  }, [nextEvent, now]);
+  const countdown =
+    nextEvent && now ? formatCountdown(nextEvent.at.getTime() - now.getTime()) : null;
 
   return (
-    <div>
+    <div className="econ-cal">
       <div className="dash-section-title">ECONOMIC CALENDAR</div>
 
-      {/* Countdown */}
       {countdown && nextEvent && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "8px 10px",
-            marginBottom: 10,
-            background: "rgba(255,176,0,0.06)",
-            border: "1px solid rgba(255,176,0,0.15)",
-            borderRadius: 2,
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFB000" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-          </svg>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 600,
-                color: "#FFB000",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {nextEvent.title}
-            </div>
-            <div
-              style={{
-                fontSize: 9,
-                color: "var(--muted)",
-                marginTop: 1,
-              }}
-            >
-              다음 이벤트까지{" "}
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontVariantNumeric: "tabular-nums",
-                  color: "#FFB000",
-                  fontWeight: 700,
-                }}
-              >
-                {countdown}
-              </span>
+        <div className="econ-cal-next">
+          <Clock size={14} aria-hidden="true" />
+          <div className="econ-cal-next-body">
+            <div className="econ-cal-next-title">{nextEvent.title}</div>
+            <div className="econ-cal-next-meta">
+              다음 지표까지 <b>{countdown}</b>
             </div>
           </div>
         </div>
       )}
 
-      {/* Events grouped by date */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        {grouped.map((group) => {
+      {now && groups.length === 0 && (
+        <p className="econ-cal-empty">향후 30일간 예정된 주요 지표가 없습니다.</p>
+      )}
+
+      <div className="econ-cal-days">
+        {groups.map((group) => {
           const isToday = group.date === today;
           const isPast = group.date < today;
 
           return (
             <div key={group.date}>
-              {/* Date header */}
               <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  fontFamily: "var(--font-mono)",
-                  fontVariantNumeric: "tabular-nums",
-                  color: isToday ? "#FFB000" : isPast ? "var(--muted)" : "var(--foreground-secondary)",
-                  padding: "10px 0 4px",
-                  letterSpacing: "0.02em",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
+                className={`econ-cal-date ${isToday ? "is-today" : ""} ${isPast ? "is-past" : ""}`}
               >
                 {formatDateHeader(group.date)}
-                {isToday && (
-                  <span
-                    style={{
-                      fontSize: 8,
-                      fontWeight: 700,
-                      color: "#08090B",
-                      background: "#FFB000",
-                      padding: "1px 5px",
-                      borderRadius: 2,
-                      letterSpacing: "0.04em",
-                      fontFamily: "var(--font-heading)",
-                    }}
-                  >
-                    TODAY
-                  </span>
-                )}
+                {isToday && <span className="econ-cal-today-badge">TODAY</span>}
               </div>
 
-              {/* Events for this date */}
               {group.events.map((ev, idx) => {
-                const evPast = isPast || Boolean(
-                  now && isToday && getEventDateTime(ev).getTime() < now.getTime()
-                );
-                const regionColor = REGION_COLORS[ev.region] || "#8C8C91";
-
+                const isDone = Boolean(now && ev.at.getTime() < now.getTime());
                 return (
                   <div
-                    key={`${ev.date}-${ev.time}-${ev.title}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "7px 0 7px 8px",
-                      borderBottom: idx < group.events.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                      borderLeft: isToday
-                        ? "3px solid #FFB000"
-                        : "3px solid transparent",
-                      opacity: evPast ? 0.45 : 1,
-                      transition: "opacity 0.2s",
-                    }}
+                    key={ev.id}
+                    className={[
+                      "econ-cal-row",
+                      `is-${ev.importance}`,
+                      isToday ? "is-today" : "",
+                      isDone ? "is-done" : "",
+                      idx < group.events.length - 1 ? "has-rule" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                   >
-                    {/* Importance dot */}
-                    <span
-                      style={{
-                        width: 5,
-                        height: 5,
-                        borderRadius: "50%",
-                        background: ev.importance === "high" ? "#FFB000" : "#8C8C91",
-                        flexShrink: 0,
-                        opacity: ev.importance === "high" ? 1 : 0.5,
-                      }}
-                    />
-
-                    {/* Time */}
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontFamily: "var(--font-mono)",
-                        fontVariantNumeric: "tabular-nums",
-                        color: evPast ? "var(--muted)" : "var(--foreground-secondary)",
-                        fontWeight: 500,
-                        width: 40,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {ev.time}
-                    </span>
-
-                    {/* Title */}
-                    <span
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 500,
-                        color: evPast ? "var(--muted)" : "var(--foreground-bright)",
-                        flex: 1,
-                        minWidth: 0,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <span className="econ-cal-dot" aria-hidden="true" />
+                    <span className="econ-cal-time">{ev.kstTime}</span>
+                    <span className="econ-cal-title">
                       {ev.title}
+                      {ev.precision === "estimated" && (
+                        <span
+                          className="econ-cal-estimate"
+                          title="공표 규칙으로 계산한 예상일입니다. 기관 사정에 따라 하루 정도 달라질 수 있습니다."
+                        >
+                          추정
+                        </span>
+                      )}
                     </span>
-
-                    {/* Region badge */}
-                    <span
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 700,
-                        padding: "2px 6px",
-                        borderRadius: 2,
-                        color: regionColor,
-                        background: `${regionColor}15`,
-                        flexShrink: 0,
-                        letterSpacing: "0.03em",
-                        fontFamily: "var(--font-mono)",
-                      }}
-                    >
-                      {REGION_LABELS[ev.region] || ev.region}
-                    </span>
+                    <span className={`econ-cal-region region-${ev.region}`}>{ev.region}</span>
                   </div>
                 );
               })}
@@ -301,6 +127,12 @@ export function EconomicCalendar() {
           );
         })}
       </div>
+
+      {groups.length > 0 && (
+        <p className="econ-cal-note">
+          반복 지표는 공표 규칙 기반 예상일 · 시각은 KST · 공휴일 미반영
+        </p>
+      )}
     </div>
   );
 }
