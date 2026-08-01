@@ -21,6 +21,8 @@ export const TAG_COLORS: Record<string, string> = {
   반도체: "#14b8a6",  // teal
   AI: "#22c55e",      // vivid green
   지정학: "#a855f7",  // purple
+  원자재: "#d4a017",  // brass
+  증시: "#38bdf8",    // sky
 };
 
 /** Muted variants for chart backgrounds and analytics */
@@ -42,6 +44,8 @@ export const TAG_COLORS_MUTED: Record<string, string> = {
   반도체: "#0d9488",
   AI: "#16a34a",
   지정학: "#9333ea",
+  원자재: "#b8860b",
+  증시: "#0284c7",
 };
 
 export const TAG_FALLBACK_COLOR = "#64748b";

@@ -22,9 +22,14 @@ const TAG_SIGNALS: Record<
   수출입: { weight: 18, reason: "무역", evidence: true },
   재정: { weight: 18, reason: "재정정책", evidence: true },
   에너지: { weight: 17, reason: "원자재", evidence: true },
+  원자재: { weight: 16, reason: "원자재", evidence: true },
   가계부채: { weight: 20, reason: "금융안정", evidence: true },
   부동산: { weight: 14, reason: "부동산", evidence: true },
   경기: { weight: 8, reason: "경기", evidence: false },
+  // Equity moves are colour, not a macro cause on their own — weighted low and
+  // deliberately not counted as evidence, so "증시 급락" alone stays general
+  // while "금리 급등에 증시 급락" is promoted by the rates signal.
+  증시: { weight: 7, reason: "시장", evidence: false },
   반도체: { weight: 12, reason: "산업", evidence: false },
   AI: { weight: 6, reason: "산업", evidence: false },
   지정학: { weight: 10, reason: "지정학", evidence: false },
@@ -59,6 +64,11 @@ const TEXT_SIGNALS: Array<{ pattern: RegExp; weight: number; reason: string }> =
   {
     pattern: /(국제유가|원유|천연가스|opec|브렌트|wti|에너지\s*(가격|공급)|crude oil|natural gas)/i,
     weight: 28,
+    reason: "원자재",
+  },
+  {
+    pattern: /(금\s*값|금\s*가격|국제\s*금값|귀금속|은\s*값|구리\s*값|곡물\s*(가격|수급)|gold price|bullion|copper price)/i,
+    weight: 24,
     reason: "원자재",
   },
   {

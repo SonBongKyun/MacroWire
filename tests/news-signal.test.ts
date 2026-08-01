@@ -100,3 +100,38 @@ test("keeps AI and semiconductor stories when the title contains market evidence
   assert.notEqual(signal.tier, "general");
   assert.ok(signal.reasons.includes("AI 산업"));
 });
+
+test("commodity headlines beyond oil and gas now register", () => {
+  // The 원자재 tag and the precious-metal text signal were added when the
+  // Investing 원자재 feed landed almost entirely untagged.
+  const grain = classifyArticleSignal(article({
+    sourceName: "Investing 원자재",
+    title: "시카고 밀, 3개월 만에 월간 첫 상승",
+    tags: ["원자재"],
+  }));
+  assert.ok(grain.score > 4, `expected a score above the floor, got ${grain.score}`);
+  assert.ok(grain.reasons.includes("원자재"));
+
+  const gold = classifyArticleSignal(article({
+    sourceName: "Investing 원자재",
+    title: "국제 금값 온스당 4,100달러 돌파",
+    tags: ["원자재"],
+  }));
+  assert.equal(gold.tier, "important");
+});
+
+test("equity moves alone stay general, but promote when a macro cause is present", () => {
+  const equityOnly = classifyArticleSignal(article({
+    sourceName: "Investing 분석",
+    title: "연이틀 서킷브레이커 발동된 증시 : 개인의 투매가 나온 폭락장",
+    tags: ["증시"],
+  }));
+  assert.equal(equityOnly.tier, "general", "an equity selloff on its own is market colour");
+
+  const withCause = classifyArticleSignal(article({
+    sourceName: "Investing 분석",
+    title: "국채 금리 급등에 증시 급락…연준 인하 기대 후퇴",
+    tags: ["증시", "금리"],
+  }));
+  assert.notEqual(withCause.tier, "general", "a rates-driven selloff is a macro signal");
+});
