@@ -23,6 +23,7 @@ import { ToastProvider, useToast } from "@/components/Toast";
 import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ALL_TAGS } from "@/lib/tagging/tagger";
 
 // Everything below is reachable only after a tap — a secondary tab, an
 // overlay, or split view. Loading it all up front made the first paint on a
@@ -489,7 +490,7 @@ function HomeInner() {
     }
   }, [refreshNews, markAllRead, exportSaved, toggleDarkMode]);
 
-  const allTags = ["금리", "물가", "연준", "환율", "미국", "중국", "일본", "유럽", "수출입", "경기", "부동산", "가계부채", "재정", "에너지", "반도체", "AI", "지정학"];
+  const allTags = ALL_TAGS;
 
   // Filtered articles
   const REGION_TAGS: Record<string, string[]> = {

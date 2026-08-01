@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { crimsonPro } from "./fonts-editorial";
 import { Logo } from "@/components/Logo";
@@ -80,60 +81,17 @@ export default function LandingPage() {
 
 function Masthead() {
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 30,
-        background: "rgba(8,9,11,0.85)",
-        backdropFilter: "blur(12px)",
-        borderBottom: `1px solid ${PALETTE.ruleStrong}`,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1280,
-          margin: "0 auto",
-          padding: "16px 32px",
-          display: "grid",
-          gridTemplateColumns: "auto 1fr auto",
-          alignItems: "center",
-          gap: 32,
-        }}
-      >
+    <header className="mw-landing-masthead">
+      <div className="mw-landing-masthead-inner">
         <Logo size="sm" caption />
 
-        <nav
-          style={{
-            display: "flex",
-            gap: 28,
-            justifyContent: "center",
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: PALETTE.paperDim,
-          }}
-        >
+        <nav className="mw-landing-masthead-nav">
           <a href="#filings" className="bul-link">FILINGS</a>
           <a href="#schedule" className="bul-link">SCHEDULE</a>
           <a href="#callsheet" className="bul-link">SUBSCRIBE</a>
         </nav>
 
-        <Link
-          href="/app"
-          style={{
-            padding: "10px 22px",
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: PALETTE.obsidian,
-            background: PALETTE.accent,
-            borderRadius: 0,
-          }}
-        >
+        <Link href="/app" className="mw-landing-masthead-cta">
           ENTER TERMINAL →
         </Link>
       </div>
@@ -147,108 +105,46 @@ function Masthead() {
 
 function HeroDispatch() {
   return (
-    <section
-      style={{
-        maxWidth: 1280,
-        margin: "0 auto",
-        padding: "80px 32px 48px",
-      }}
-    >
-      {/* Top dateline — wire-service stamp */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          paddingBottom: 16,
-          marginBottom: 48,
-          borderBottom: `1px solid ${PALETTE.rule}`,
-          fontFamily: "var(--font-mono)",
-          fontSize: 11,
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: PALETTE.paperDim,
-        }}
-      >
-        <span style={{ color: PALETTE.accent }}>● LIVE</span>
-        <Sep />
-        <span>{dateline()}</span>
-        <Sep />
-        <span>SEOUL</span>
-        <Sep />
-        <span>WIRE №{dispatchToday()}</span>
-        <span style={{ marginLeft: "auto", color: PALETTE.paperDim }}>EST. 2026</span>
-      </div>
+    <section className="mw-landing-hero">
+      <Image
+        src="/images/macrowire-wire-desk.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="mw-landing-hero-image"
+      />
+      <div className="mw-landing-hero-shade" aria-hidden="true" />
 
-      {/* Headline — Anton condensed, paper-cream, left-aligned */}
-      <h1
-        style={{
-          fontFamily: "var(--font-interface)",
-          fontSize: "clamp(72px, 10vw, 156px)",
-          fontWeight: 900, // Pretendard 900 for Korean; Anton ignores (single-weight)
-          lineHeight: 0.92,
-          letterSpacing: "-0.01em",
-          color: PALETTE.paper,
-          margin: "0 0 32px",
-          textWrap: "balance",
-        }}
-      >
-        매크로 경제,<br />
-        <span style={{ color: PALETTE.accent }}>분 단위</span> 와이어로.
-      </h1>
+      <div className="mw-landing-hero-inner">
+        <div className="mw-landing-hero-dateline">
+          <span style={{ color: PALETTE.accent }}>● LIVE</span>
+          <Sep />
+          <span>{dateline()}</span>
+          <Sep />
+          <span>SEOUL</span>
+          <Sep />
+          <span>WIRE №{dispatchToday()}</span>
+          <span style={{ marginLeft: "auto" }}>EST. 2026</span>
+        </div>
 
-      {/* Subhead — serif editorial deck */}
-      <p
-        style={{
-          fontFamily: "var(--font-serif), 'Crimson Pro', serif",
-          fontSize: "clamp(18px, 2vw, 22px)",
-          fontWeight: 400,
-          fontStyle: "italic",
-          lineHeight: 1.5,
-          color: PALETTE.paperDim,
-          maxWidth: 720,
-          marginBottom: 48,
-          letterSpacing: "0",
-        }}
-      >
-        30개 이상의 공개 RSS 소스를 한 화면에 모으는 매크로 디스패치. 정책·시장·기업 뉴스를 빠르게 훑고 중요한 흐름에 집중하는 와이어 피드.
-      </p>
-
-      {/* Dual CTA — solid accent + outlined paper */}
-      <div style={{ display: "flex", gap: 0, flexWrap: "wrap", alignItems: "center" }}>
-        <Link
-          href="/app"
-          style={{
-            padding: "18px 28px",
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: PALETTE.obsidian,
-            background: PALETTE.accent,
-            borderRadius: 0,
-          }}
-        >
-          무료로 시작 →
-        </Link>
-        <a
-          href="#filings"
-          style={{
-            padding: "18px 28px",
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            fontWeight: 600,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: PALETTE.paper,
-            border: `1px solid ${PALETTE.ruleStrong}`,
-            borderLeft: "none",
-            borderRadius: 0,
-          }}
-        >
-          기능 둘러보기
-        </a>
+        <div className="mw-landing-hero-copy">
+          <h1 className="mw-landing-hero-title">
+            매크로 경제,<br />
+            <span style={{ color: PALETTE.accent }}>분 단위</span> 와이어로.
+          </h1>
+          <p className="mw-landing-hero-deck">
+            30개 이상의 공개 RSS 소스를 한 화면에 모으는 매크로 디스패치. 정책·시장·기업 뉴스를 빠르게 훑고 중요한 흐름에 집중하는 와이어 피드.
+          </p>
+          <div className="mw-landing-hero-actions">
+            <Link href="/app" className="mw-landing-hero-primary">
+              무료로 시작 →
+            </Link>
+            <a href="#filings" className="mw-landing-hero-secondary">
+              기능 둘러보기
+            </a>
+          </div>
+        </div>
       </div>
     </section>
   );

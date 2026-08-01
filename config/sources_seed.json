@@ -1,42 +1,207 @@
 [
-  { "name": "연합뉴스 경제",    "feedUrl": "https://www.yna.co.kr/rss/economy.xml",            "category": "macro" },
-  { "name": "연합뉴스 세계",    "feedUrl": "https://www.yna.co.kr/rss/international.xml",      "category": "global" },
-  { "name": "연합뉴스 정치",    "feedUrl": "https://www.yna.co.kr/rss/politics.xml",           "category": "policy" },
-  { "name": "한국경제 경제",    "feedUrl": "https://www.hankyung.com/feed/economy",             "category": "macro" },
-  { "name": "한국경제 국제",    "feedUrl": "https://www.hankyung.com/feed/international",       "category": "global" },
-  { "name": "한국경제 정치",    "feedUrl": "https://www.hankyung.com/feed/politics",            "category": "policy" },
-  { "name": "매일경제 경제",    "feedUrl": "https://www.mk.co.kr/rss/30100041/",               "category": "macro" },
-  { "name": "매일경제 국제",    "feedUrl": "https://www.mk.co.kr/rss/30300018/",               "category": "global" },
-  { "name": "매일경제 증권",    "feedUrl": "https://www.mk.co.kr/rss/30200030/",               "category": "fx" },
-  { "name": "서울경제 경제",    "feedUrl": "https://www.sedaily.com/RSS/Economy",               "category": "macro" },
-  { "name": "서울경제 국제",    "feedUrl": "https://www.sedaily.com/RSS/International",         "category": "global" },
-  { "name": "전자신문 반도체",  "feedUrl": "https://rss.etnews.com/Section901.xml",             "category": "semicon" },
-  { "name": "전자신문 AI",      "feedUrl": "https://rss.etnews.com/Section904.xml",             "category": "semicon" },
-  { "name": "Federal Reserve",  "feedUrl": "https://www.federalreserve.gov/feeds/press_all.xml","category": "policy" },
-  { "name": "ECB Press",        "feedUrl": "https://www.ecb.europa.eu/rss/press.html",         "category": "policy" },
-  { "name": "CNBC Economy",     "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258", "category": "macro" },
-  { "name": "Investing.com",    "feedUrl": "https://www.investing.com/rss/news.rss",           "category": "fx" },
-
-  { "name": "연합뉴스 속보",       "feedUrl": "https://www.yna.co.kr/rss/news.xml",                                                     "category": "속보" },
-  { "name": "CNBC Breaking",       "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839135",    "category": "속보" },
-  { "name": "Hacker News",         "feedUrl": "https://hnrss.org/frontpage",                                                            "category": "community" },
-  { "name": "r/wallstreetbets",    "feedUrl": "https://old.reddit.com/r/wallstreetbets/.rss",                                            "category": "community" },
-  { "name": "r/CryptoCurrency",    "feedUrl": "https://old.reddit.com/r/CryptoCurrency/.rss",                                            "category": "community" },
-  { "name": "r/StockMarket",       "feedUrl": "https://old.reddit.com/r/StockMarket/.rss",                                               "category": "community" },
-
-  { "name": "서울경제 금융",       "feedUrl": "https://www.sedaily.com/RSS/Finance",                                                     "category": "금융" },
-
-  { "name": "CNBC Top News",       "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114",    "category": "글로벌" },
-  { "name": "MarketWatch Top",     "feedUrl": "https://feeds.content.dowjones.io/public/rss/mw_topstories",                              "category": "글로벌" },
-  { "name": "MarketWatch Markets", "feedUrl": "https://feeds.content.dowjones.io/public/rss/mw_marketpulse",                             "category": "글로벌" },
-  { "name": "Financial Times",     "feedUrl": "https://www.ft.com/rss/home",                                                             "category": "글로벌" },
-  { "name": "FT Alphaville",       "feedUrl": "https://www.ft.com/alphaville?format=rss",                                                "category": "글로벌" },
-  { "name": "WSJ Markets",         "feedUrl": "https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",                            "category": "글로벌" },
-  { "name": "Bloomberg Markets",   "feedUrl": "https://feeds.bloomberg.com/markets/news.rss",                                            "category": "글로벌" },
-  { "name": "BBC Business",        "feedUrl": "http://feeds.bbci.co.uk/news/business/rss.xml",                                           "category": "글로벌" },
-  { "name": "The Economist",       "feedUrl": "https://www.economist.com/finance-and-economics/rss.xml",                                  "category": "글로벌" },
-  { "name": "South China Morning Post", "feedUrl": "https://www.scmp.com/rss/91/feed",                                                    "category": "글로벌" },
-  { "name": "Nikkei Asia",         "feedUrl": "https://asia.nikkei.com/rss/feed/nar",                                                    "category": "글로벌" },
-
-  { "name": "CoinDesk",            "feedUrl": "https://www.coindesk.com/arc/outboundfeeds/rss/",                                         "category": "크립토" }
+  {
+    "name": "연합뉴스 경제",
+    "feedUrl": "https://www.yna.co.kr/rss/economy.xml",
+    "category": "거시"
+  },
+  {
+    "name": "연합뉴스 세계",
+    "feedUrl": "https://www.yna.co.kr/rss/international.xml",
+    "category": "글로벌"
+  },
+  {
+    "name": "연합뉴스 정치",
+    "feedUrl": "https://www.yna.co.kr/rss/politics.xml",
+    "category": "정책"
+  },
+  {
+    "name": "한국경제 경제",
+    "feedUrl": "https://www.hankyung.com/feed/economy",
+    "category": "거시"
+  },
+  {
+    "name": "한국경제 국제",
+    "feedUrl": "https://www.hankyung.com/feed/international",
+    "category": "글로벌"
+  },
+  {
+    "name": "한국경제 정치",
+    "feedUrl": "https://www.hankyung.com/feed/politics",
+    "category": "정책"
+  },
+  {
+    "name": "매일경제 경제",
+    "feedUrl": "https://www.mk.co.kr/rss/30100041/",
+    "category": "거시"
+  },
+  {
+    "name": "매일경제 국제",
+    "feedUrl": "https://www.mk.co.kr/rss/30300018/",
+    "category": "글로벌"
+  },
+  {
+    "name": "매일경제 증권",
+    "feedUrl": "https://www.mk.co.kr/rss/30200030/",
+    "category": "외환"
+  },
+  {
+    "name": "서울경제 경제",
+    "feedUrl": "https://www.sedaily.com/RSS/Economy",
+    "category": "거시"
+  },
+  {
+    "name": "서울경제 국제",
+    "feedUrl": "https://www.sedaily.com/RSS/International",
+    "category": "글로벌"
+  },
+  {
+    "name": "전자신문 반도체",
+    "feedUrl": "https://rss.etnews.com/Section901.xml",
+    "category": "산업"
+  },
+  {
+    "name": "전자신문 AI",
+    "feedUrl": "https://rss.etnews.com/Section904.xml",
+    "category": "산업"
+  },
+  {
+    "name": "Federal Reserve",
+    "feedUrl": "https://www.federalreserve.gov/feeds/press_all.xml",
+    "category": "정책"
+  },
+  {
+    "name": "ECB Press",
+    "feedUrl": "https://www.ecb.europa.eu/rss/press.html",
+    "category": "정책"
+  },
+  {
+    "name": "CNBC Economy",
+    "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258",
+    "category": "거시"
+  },
+  {
+    "name": "연합뉴스 속보",
+    "feedUrl": "https://www.yna.co.kr/rss/news.xml",
+    "category": "속보"
+  },
+  {
+    "name": "CNBC Breaking",
+    "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839135",
+    "category": "속보"
+  },
+  {
+    "name": "Hacker News",
+    "feedUrl": "https://hnrss.org/frontpage",
+    "category": "커뮤니티"
+  },
+  {
+    "name": "r/wallstreetbets",
+    "feedUrl": "https://old.reddit.com/r/wallstreetbets/.rss",
+    "category": "커뮤니티"
+  },
+  {
+    "name": "r/CryptoCurrency",
+    "feedUrl": "https://old.reddit.com/r/CryptoCurrency/.rss",
+    "category": "커뮤니티"
+  },
+  {
+    "name": "r/StockMarket",
+    "feedUrl": "https://old.reddit.com/r/StockMarket/.rss",
+    "category": "커뮤니티"
+  },
+  {
+    "name": "서울경제 금융",
+    "feedUrl": "https://www.sedaily.com/RSS/Finance",
+    "category": "금융"
+  },
+  {
+    "name": "CNBC Top News",
+    "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114",
+    "category": "글로벌"
+  },
+  {
+    "name": "MarketWatch Top",
+    "feedUrl": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+    "category": "글로벌"
+  },
+  {
+    "name": "MarketWatch Markets",
+    "feedUrl": "https://feeds.content.dowjones.io/public/rss/mw_marketpulse",
+    "category": "글로벌"
+  },
+  {
+    "name": "Financial Times",
+    "feedUrl": "https://www.ft.com/rss/home",
+    "category": "글로벌"
+  },
+  {
+    "name": "FT Alphaville",
+    "feedUrl": "https://www.ft.com/alphaville?format=rss",
+    "category": "글로벌"
+  },
+  {
+    "name": "WSJ Markets",
+    "feedUrl": "https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",
+    "category": "글로벌"
+  },
+  {
+    "name": "Bloomberg Markets",
+    "feedUrl": "https://feeds.bloomberg.com/markets/news.rss",
+    "category": "글로벌"
+  },
+  {
+    "name": "BBC Business",
+    "feedUrl": "http://feeds.bbci.co.uk/news/business/rss.xml",
+    "category": "글로벌"
+  },
+  {
+    "name": "The Economist",
+    "feedUrl": "https://www.economist.com/finance-and-economics/rss.xml",
+    "category": "글로벌"
+  },
+  {
+    "name": "South China Morning Post",
+    "feedUrl": "https://www.scmp.com/rss/91/feed",
+    "category": "글로벌"
+  },
+  {
+    "name": "Nikkei Asia",
+    "feedUrl": "https://asia.nikkei.com/rss/feed/nar",
+    "category": "글로벌"
+  },
+  {
+    "name": "CoinDesk",
+    "feedUrl": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+    "category": "크립토"
+  },
+  {
+    "name": "Investing 경제지표",
+    "feedUrl": "https://kr.investing.com/rss/news_95.rss",
+    "category": "거시"
+  },
+  {
+    "name": "Investing 경제",
+    "feedUrl": "https://kr.investing.com/rss/news_14.rss",
+    "category": "거시"
+  },
+  {
+    "name": "Investing 외환",
+    "feedUrl": "https://kr.investing.com/rss/news_1.rss",
+    "category": "외환"
+  },
+  {
+    "name": "Investing 원자재",
+    "feedUrl": "https://kr.investing.com/rss/news_11.rss",
+    "category": "원자재"
+  },
+  {
+    "name": "Investing 채권",
+    "feedUrl": "https://kr.investing.com/rss/bonds.rss",
+    "category": "채권"
+  },
+  {
+    "name": "Investing 분석",
+    "feedUrl": "https://kr.investing.com/rss/286.rss",
+    "category": "분석"
+  }
 ]
