@@ -24,11 +24,11 @@ interface DigestData {
 }
 
 const colors = {
-  bg: "#08090B",
-  panel: "#0D0D0F",
-  text: "#F5F0E1",
+  bg: "#0B0E11",
+  panel: "#11161A",
+  text: "#EDEAE0",
   dim: "#8C8C91",
-  accent: "#FFB000",
+  accent: "#72AEF8",
   border: "rgba(245,240,225,0.10)",
 };
 
@@ -72,10 +72,10 @@ export function renderDigestHTML(d: DigestData): string {
             ${escapeHtml(s.title)}
           </h3>
         </a>
-        <p style="margin: 0 0 12px; font-size: 14px; line-height: 1.55; color: #C9C4B6;">
+        <p style="margin: 0 0 12px; font-size: 14px; line-height: 1.55; color: #A9A79E;">
           <strong style="color: ${colors.accent};">${t.why}.</strong> ${escapeHtml(s.why)}
         </p>
-        <div style="padding: 10px 14px; background: rgba(255,176,0,0.06); border-left: 3px solid ${colors.accent}; font-size: 12px; line-height: 1.5; color: ${colors.accent};">
+        <div style="padding: 10px 14px; background: rgba(114,174,248,0.08); border-left: 3px solid ${colors.accent}; font-size: 12px; line-height: 1.5; color: ${colors.accent};">
           <strong>${t.trade.toUpperCase()}</strong> — ${escapeHtml(s.tradeImplication)}
         </div>
       </td>
@@ -119,7 +119,7 @@ export function renderDigestHTML(d: DigestData): string {
           </tr>
           ${
             d.summary
-              ? `<tr><td style="padding:0 0 28px;font-size:16px;line-height:1.6;color:#C9C4B6;">${escapeHtml(d.summary)}</td></tr>`
+              ? `<tr><td style="padding:0 0 28px;font-size:16px;line-height:1.6;color:#A9A79E;">${escapeHtml(d.summary)}</td></tr>`
               : ""
           }
           ${storyBlocks}

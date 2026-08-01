@@ -1,20 +1,26 @@
 import Link from "next/link";
 import { crimsonPro } from "./fonts-editorial";
 import { Logo } from "@/components/Logo";
+import { PLANS, type PlanKey } from "@/lib/billing/plans";
 
 /* ════════════════════════════════════════════════════════════════
    MacroWire — BULLETIN edition landing page
    Reference language: Reuters Wire / AP Bulletin / FT.com / NYT teletype
    ════════════════════════════════════════════════════════════════ */
 
+/**
+ * The bulletin palette. Cream on obsidian is the landing page's own voice and
+ * stays; the accent is the one the workbench uses, so the marketing page and
+ * the product are recognisably the same thing.
+ */
 const PALETTE = {
-  obsidian: "#08090B",
-  ink: "#0E0F12",
-  paper: "#F5F0E1",
-  paperDim: "#C9C4B6",
-  amber: "#FFB000",
-  rule: "rgba(245,240,225,0.10)",
-  ruleStrong: "rgba(245,240,225,0.18)",
+  obsidian: "#0B0E11",
+  ink: "#11161A",
+  paper: "#EDEAE0",
+  paperDim: "#A9A79E",
+  accent: "#72AEF8",
+  rule: "rgba(237,234,224,0.10)",
+  ruleStrong: "rgba(237,234,224,0.18)",
 } as const;
 
 function dispatchToday(): string {
@@ -124,7 +130,7 @@ function Masthead() {
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: PALETTE.obsidian,
-            background: PALETTE.amber,
+            background: PALETTE.accent,
             borderRadius: 0,
           }}
         >
@@ -164,7 +170,7 @@ function HeroDispatch() {
           color: PALETTE.paperDim,
         }}
       >
-        <span style={{ color: PALETTE.amber }}>● LIVE</span>
+        <span style={{ color: PALETTE.accent }}>● LIVE</span>
         <Sep />
         <span>{dateline()}</span>
         <Sep />
@@ -177,19 +183,18 @@ function HeroDispatch() {
       {/* Headline — Anton condensed, paper-cream, left-aligned */}
       <h1
         style={{
-          fontFamily: "var(--font-display-condensed), 'Anton', 'Pretendard Variable', sans-serif",
+          fontFamily: "var(--font-interface)",
           fontSize: "clamp(72px, 10vw, 156px)",
           fontWeight: 900, // Pretendard 900 for Korean; Anton ignores (single-weight)
           lineHeight: 0.92,
           letterSpacing: "-0.01em",
           color: PALETTE.paper,
-          textTransform: "uppercase",
           margin: "0 0 32px",
           textWrap: "balance",
         }}
       >
         매크로 경제,<br />
-        <span style={{ color: PALETTE.amber }}>분 단위</span> 와이어로.
+        <span style={{ color: PALETTE.accent }}>분 단위</span> 와이어로.
       </h1>
 
       {/* Subhead — serif editorial deck */}
@@ -209,7 +214,7 @@ function HeroDispatch() {
         30개 이상의 공개 RSS 소스를 한 화면에 모으는 매크로 디스패치. 정책·시장·기업 뉴스를 빠르게 훑고 중요한 흐름에 집중하는 와이어 피드.
       </p>
 
-      {/* Dual CTA — solid amber + outlined paper */}
+      {/* Dual CTA — solid accent + outlined paper */}
       <div style={{ display: "flex", gap: 0, flexWrap: "wrap", alignItems: "center" }}>
         <Link
           href="/app"
@@ -221,7 +226,7 @@ function HeroDispatch() {
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: PALETTE.obsidian,
-            background: PALETTE.amber,
+            background: PALETTE.accent,
             borderRadius: 0,
           }}
         >
@@ -259,9 +264,9 @@ function Sep() {
 
 function Bylines() {
   const stats: [string, string, string][] = [
-    ["30+", "공개 소스", "연합 · WSJ · CNBC · 매경 · 한경 외"],
-    ["상시", "수집 상태", "고신호 우선 큐 + 정기 전체 갱신"],
-    ["₩0", "AI 비용", "기기 안에서 동작하는 로컬 모델"],
+    ["36", "공개 소스", "연합 · WSJ · CNBC · 매경 · 한경 외"],
+    ["KST", "기준 시각", "국내·해외 지표를 한국 시간으로 정렬"],
+    ["5분", "속보 큐 주기", "전체 피드는 매시 갱신 · 목표 주기"],
   ];
   return (
     <section
@@ -289,12 +294,12 @@ function Bylines() {
           >
             <div
               style={{
-                fontFamily: "var(--font-display-condensed), sans-serif",
+                fontFamily: "var(--font-interface)",
                 fontSize: "clamp(44px, 5vw, 72px)",
                 fontWeight: 400,
                 lineHeight: 0.95,
                 letterSpacing: "-0.02em",
-                color: PALETTE.amber,
+                color: PALETTE.accent,
                 marginBottom: 12,
               }}
             >
@@ -345,10 +350,10 @@ function FilingsGrid() {
     },
     {
       no: "02",
-      label: "ON-DEVICE A.I.",
-      title: "로컬 요약 · 감성",
-      kicker: "외부 API 비용 없이, 기사가 도착하는 그 순간 분류.",
-      body: "TF-IDF + Jaccard 유사도로 비슷한 기사를 자동 묶음. 키워드 기반 감성 분석으로 호재 · 악재 · 중립을 즉석 라벨링. 서버 비용 0원, 데이터 외부 송출 0건.",
+      label: "SIGNAL FIRST",
+      title: "분류는 즉시, 해설은 AI로",
+      kicker: "무엇이 중요한지는 규칙으로, 왜 중요한지는 모델로.",
+      body: "클러스터링(TF-IDF · Jaccard)과 감성 라벨링은 서버에서 규칙 기반으로 즉시 처리합니다. \"왜 중요한가\"를 정리하는 인사이트와 일일 리캡은 Claude가 담당하며, 이때 기사 제목과 요약이 Anthropic API로 전송됩니다.",
     },
     {
       no: "03",
@@ -396,10 +401,10 @@ function FilingsGrid() {
                 fontSize: 10,
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
-                color: PALETTE.amber,
+                color: PALETTE.accent,
               }}
             >
-              <span style={{ fontSize: 36, fontFamily: "var(--font-display-condensed)", color: PALETTE.amber, letterSpacing: "-0.02em", lineHeight: 1 }}>
+              <span style={{ fontSize: 36, fontFamily: "var(--font-interface)", color: PALETTE.accent, letterSpacing: "-0.02em", lineHeight: 1 }}>
                 №{f.no}
               </span>
               <span style={{ color: PALETTE.paperDim }}>{f.label}</span>
@@ -425,7 +430,7 @@ function FilingsGrid() {
                 fontStyle: "italic",
                 fontSize: 16,
                 lineHeight: 1.5,
-                color: PALETTE.amber,
+                color: PALETTE.accent,
                 marginBottom: 16,
               }}
             >
@@ -460,7 +465,7 @@ function PullQuote() {
           fontSize: 11,
           letterSpacing: "0.16em",
           textTransform: "uppercase",
-          color: PALETTE.amber,
+          color: PALETTE.accent,
           marginBottom: 24,
         }}
       >
@@ -479,7 +484,7 @@ function PullQuote() {
         }}
       >
         &ldquo;블룸버그 터미널의 정보 밀도를{" "}
-        <span style={{ color: PALETTE.amber, fontStyle: "normal", fontFamily: "var(--font-display-condensed)", textTransform: "uppercase" }}>
+        <span style={{ color: PALETTE.accent, fontStyle: "normal", fontFamily: "var(--font-interface)", textTransform: "uppercase" }}>
           공개 뉴스 와이어의 흐름
         </span>
         로, 무료로.&rdquo;
@@ -505,27 +510,29 @@ function PullQuote() {
    SCHEDULE — pricing presented as a publishing schedule
    ────────────────────────────────────── */
 
+const PLAN_BLURBS: Record<PlanKey, string> = {
+  free: "개인 모니터링용 핵심 기능",
+  pro: "전문 트레이더 · 매크로 리서처용",
+  elite: "데스크 단위 리서치 · API 연동",
+};
+
 function Schedule() {
-  const tiers = [
-    {
-      name: "FREE",
-      price: "₩0",
+  // Copied plan tables drift from the gate that actually enforces them: this
+  // page promised 50 AI summaries a day against a limit of 3, and "60+ 소스"
+  // against a catalogue of 36. The table is now rendered from the same PLANS
+  // object the billing gate reads, so the two cannot disagree again.
+  const tiers = (Object.keys(PLANS) as PlanKey[]).map((key) => {
+    const plan = PLANS[key];
+    return {
+      name: plan.name,
+      price: `₩${plan.priceKRW.toLocaleString("ko-KR")}`,
       period: "PER MONTH",
-      desc: "개인 모니터링용 핵심 기능 전부",
-      features: ["기본 30개 신뢰 소스", "24시간 분석 범위", "워치리스트 5종목", "기본 시장 데이터 (5분 지연)", "AI 요약 일 50건"],
-      cta: "지금 시작",
-      flagship: false,
-    },
-    {
-      name: "PRO",
-      price: "₩9,900",
-      period: "PER MONTH",
-      desc: "전문 트레이더 · 매크로 리서처용",
-      features: ["전체 60+ 소스 + 속보 우선 큐", "무제한 분석 + 7일 · 30일 추세", "워치리스트 · 포트폴리오 무제한", "실시간 시장 데이터", "AI 무제한 + 주간 리포트", "푸시 · 이메일 속보 알림"],
-      cta: "PRO 구독",
-      flagship: true,
-    },
-  ];
+      desc: PLAN_BLURBS[key],
+      features: plan.bullets.map((b) => b.ko),
+      cta: plan.priceKRW === 0 ? "지금 시작" : `${plan.name} 구독`,
+      flagship: Boolean(plan.highlight),
+    };
+  });
   return (
     <section
       id="schedule"
@@ -540,7 +547,7 @@ function Schedule() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: 0,
           borderTop: `1px solid ${PALETTE.ruleStrong}`,
         }}
@@ -550,7 +557,7 @@ function Schedule() {
             key={t.name}
             style={{
               padding: "40px 32px",
-              borderRight: i === 0 ? `1px solid ${PALETTE.rule}` : "none",
+              borderRight: i < tiers.length - 1 ? `1px solid ${PALETTE.rule}` : "none",
               borderBottom: `1px solid ${PALETTE.ruleStrong}`,
               background: t.flagship ? `linear-gradient(180deg, ${PALETTE.ink} 0%, transparent 100%)` : "transparent",
               position: "relative",
@@ -567,7 +574,7 @@ function Schedule() {
                   fontSize: 10,
                   fontWeight: 700,
                   color: PALETTE.obsidian,
-                  background: PALETTE.amber,
+                  background: PALETTE.accent,
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                 }}
@@ -583,7 +590,7 @@ function Schedule() {
                 fontWeight: 700,
                 letterSpacing: "0.20em",
                 textTransform: "uppercase",
-                color: t.flagship ? PALETTE.amber : PALETTE.paperDim,
+                color: t.flagship ? PALETTE.accent : PALETTE.paperDim,
                 marginBottom: 28,
               }}
             >
@@ -600,7 +607,7 @@ function Schedule() {
             >
               <span
                 style={{
-                  fontFamily: "var(--font-display-condensed), sans-serif",
+                  fontFamily: "var(--font-interface)",
                   fontSize: 64,
                   fontWeight: 400,
                   letterSpacing: "-0.02em",
@@ -645,13 +652,13 @@ function Schedule() {
                   <span
                     style={{
                       fontFamily: "var(--font-mono)",
-                      color: t.flagship ? PALETTE.amber : PALETTE.paperDim,
+                      color: t.flagship ? PALETTE.accent : PALETTE.paperDim,
                       fontSize: 11,
                       flexShrink: 0,
                       paddingTop: 2,
                     }}
                   >
-                    {t.flagship ? "✓" : "·"}
+                    ✓
                   </span>
                   {f}
                 </li>
@@ -670,7 +677,7 @@ function Schedule() {
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
                 color: t.flagship ? PALETTE.obsidian : PALETTE.paper,
-                background: t.flagship ? PALETTE.amber : "transparent",
+                background: t.flagship ? PALETTE.accent : "transparent",
                 border: t.flagship ? "none" : `1px solid ${PALETTE.ruleStrong}`,
                 borderRadius: 0,
               }}
@@ -685,7 +692,7 @@ function Schedule() {
 }
 
 /* ──────────────────────────────────────
-   CALL SHEET — final amber CTA card
+   CALL SHEET — final accent CTA card
    ────────────────────────────────────── */
 
 function CallSheet() {
@@ -702,7 +709,7 @@ function CallSheet() {
         style={{
           padding: "80px 48px",
           background: PALETTE.ink,
-          borderTop: `2px solid ${PALETTE.amber}`,
+          borderTop: `2px solid ${PALETTE.accent}`,
           borderBottom: `1px solid ${PALETTE.ruleStrong}`,
           display: "grid",
           gridTemplateColumns: "1fr auto",
@@ -717,7 +724,7 @@ function CallSheet() {
               fontSize: 11,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              color: PALETTE.amber,
+              color: PALETTE.accent,
               marginBottom: 20,
             }}
           >
@@ -725,7 +732,7 @@ function CallSheet() {
           </div>
           <h2
             style={{
-              fontFamily: "var(--font-display-condensed), 'Anton', 'Pretendard Variable', sans-serif",
+              fontFamily: "var(--font-interface)",
               fontSize: "clamp(40px, 5vw, 72px)",
               fontWeight: 900,
               lineHeight: 0.95,
@@ -750,7 +757,7 @@ function CallSheet() {
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: PALETTE.obsidian,
-            background: PALETTE.amber,
+            background: PALETTE.accent,
             borderRadius: 0,
             whiteSpace: "nowrap",
           }}
@@ -816,9 +823,9 @@ function SectionHeader({ no, label, subtitle }: { no: string; label: string; sub
     >
       <span
         style={{
-          fontFamily: "var(--font-display-condensed), sans-serif",
+          fontFamily: "var(--font-interface)",
           fontSize: 56,
-          color: PALETTE.amber,
+          color: PALETTE.accent,
           letterSpacing: "-0.02em",
           lineHeight: 1,
         }}

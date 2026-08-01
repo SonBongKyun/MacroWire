@@ -60,14 +60,14 @@ export default async function MacroLandingEn() {
       className={crimsonPro.variable}
       style={{
         minHeight: "100dvh",
-        background: "#08090B",
-        color: "#F5F0E1",
+        background: "#0B0E11",
+        color: "#EDEAE0",
         padding: "60px 24px 96px",
         fontFamily: "var(--font-mono)",
       }}
     >
       <article style={{ maxWidth: 760, margin: "0 auto" }}>
-        <Link href="/" style={{ fontSize: 11, color: "#FFB000", letterSpacing: "0.10em", textDecoration: "none", display: "inline-block", marginBottom: 32 }}>
+        <Link href="/" style={{ fontSize: 11, color: "#72AEF8", letterSpacing: "0.10em", textDecoration: "none", display: "inline-block", marginBottom: 32 }}>
           ← MACROWIRE
         </Link>
 
@@ -80,25 +80,25 @@ export default async function MacroLandingEn() {
         </h1>
 
         {recap?.summary && (
-          <p style={{ fontFamily: "var(--font-serif), Crimson Pro, serif", fontSize: 20, lineHeight: 1.55, color: "#C9C4B6", marginBottom: 40 }}>
+          <p style={{ fontFamily: "var(--font-serif), Crimson Pro, serif", fontSize: 20, lineHeight: 1.55, color: "#A9A79E", marginBottom: 40 }}>
             {recap.summary}
           </p>
         )}
 
         {recap ? (
           <section style={{ marginTop: 40 }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.20em", color: "#FFB000", marginBottom: 20 }}>TOP 3 STORIES</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.20em", color: "#72AEF8", marginBottom: 20 }}>TOP 3 STORIES</div>
             <ol style={{ margin: 0, padding: 0, listStyle: "none" }}>
               {(recap.topStories as unknown as TopStory[]).map((s, i) => (
-                <li key={s.articleId} style={{ marginBottom: 36, paddingBottom: 28, borderBottom: "1px solid rgba(245,240,225,0.08)" }}>
+                <li key={s.articleId} style={{ marginBottom: 36, paddingBottom: 28, borderBottom: "1px solid rgba(237,234,224,0.10)" }}>
                   <div style={{ fontSize: 11, color: "#8C8C91", letterSpacing: "0.10em", marginBottom: 8 }}>
                     #{i + 1} · {s.sourceName}
                   </div>
-                  <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 22, lineHeight: 1.35, color: "#F5F0E1", textDecoration: "none", fontWeight: 600 }}>
+                  <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 22, lineHeight: 1.35, color: "#EDEAE0", textDecoration: "none", fontWeight: 600 }}>
                     {s.title}
                   </a>
-                  <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.65, color: "#C9C4B6" }}>{s.why}</p>
-                  <div style={{ marginTop: 12, padding: "10px 14px", background: "rgba(255,176,0,0.06)", borderLeft: "2px solid #FFB000", fontSize: 13, lineHeight: 1.5, color: "#FFB000" }}>
+                  <p style={{ marginTop: 12, fontSize: 15, lineHeight: 1.65, color: "#A9A79E" }}>{s.why}</p>
+                  <div style={{ marginTop: 12, padding: "10px 14px", background: "rgba(114,174,248,0.08)", borderLeft: "2px solid #72AEF8", fontSize: 13, lineHeight: 1.5, color: "#72AEF8" }}>
                     <strong>TRADE IMPLICATION</strong> — {s.tradeImplication}
                   </div>
                 </li>
@@ -109,15 +109,15 @@ export default async function MacroLandingEn() {
           <p style={{ fontSize: 14, color: "#8C8C91" }}>Today&apos;s recap isn&apos;t ready yet. Check back shortly.</p>
         )}
 
-        <section style={{ marginTop: 48, padding: "32px", background: "#0D0D0F", border: "1px solid rgba(245,240,225,0.12)" }}>
-          <div style={{ fontSize: 11, letterSpacing: "0.16em", color: "#FFB000", marginBottom: 8 }}>MACROWIRE — JOIN THE WIRE</div>
+        <section style={{ marginTop: 48, padding: "32px", background: "#11161A", border: "1px solid rgba(237,234,224,0.18)" }}>
+          <div style={{ fontSize: 11, letterSpacing: "0.16em", color: "#72AEF8", marginBottom: 8 }}>MACROWIRE — JOIN THE WIRE</div>
           <h2 style={{ fontFamily: "var(--font-display-condensed)", fontSize: 28, lineHeight: 1.2, margin: "0 0 12px" }}>
             The desk every macro trader needs.
           </h2>
-          <p style={{ fontSize: 14, color: "#C9C4B6", marginBottom: 20 }}>
+          <p style={{ fontSize: 14, color: "#A9A79E", marginBottom: 20 }}>
             A continuously collected global macro wire. Claude tells you why each story matters.
           </p>
-          <Link href="/sign-up" style={{ display: "inline-block", padding: "10px 18px", background: "#FFB000", color: "#08090B", fontWeight: 700, fontSize: 12, letterSpacing: "0.10em", textDecoration: "none" }}>
+          <Link href="/sign-up" style={{ display: "inline-block", padding: "10px 18px", background: "#72AEF8", color: "#0B0E11", fontWeight: 700, fontSize: 12, letterSpacing: "0.10em", textDecoration: "none" }}>
             START FREE
           </Link>
         </section>
