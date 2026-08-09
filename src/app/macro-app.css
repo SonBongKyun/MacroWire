@@ -4106,3 +4106,20 @@
     font-size: 15px;
   }
 }
+
+/* Corroboration count. Deliberately quieter than the source chip — it is a
+   qualifier on the story, not a label for it. */
+.macro-app .article-row-coverage {
+  display: inline-flex;
+  height: 17px;
+  align-items: center;
+  padding: 0 6px;
+  flex-shrink: 0;
+  color: var(--accent-light);
+  background: var(--accent-surface);
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+}

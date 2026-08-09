@@ -17,7 +17,7 @@ const STOP_WORDS = new Set([
 ]);
 
 /** Extract meaningful keywords from a title */
-function extractKeywords(title: string): Set<string> {
+export function extractKeywords(title: string): Set<string> {
   const words = title
     .replace(/[^\w\uAC00-\uD7A3\s]/g, " ")
     .split(/\s+/)
@@ -26,7 +26,7 @@ function extractKeywords(title: string): Set<string> {
 }
 
 /** Count overlapping keywords between two sets */
-function keywordOverlap(a: Set<string>, b: Set<string>): number {
+export function keywordOverlap(a: Set<string>, b: Set<string>): number {
   let count = 0;
   for (const w of a) {
     if (b.has(w)) count++;
