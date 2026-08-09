@@ -12,6 +12,9 @@ const isProtected = createRouteMatcher([
   "/api/articles/batch-read",
   "/api/articles/batch-save",
   "/api/webhook",
+  // The open app drives its own breaking refresh; sign-in keeps that off a
+  // public URL. See src/app/api/live/pulse/route.ts.
+  "/api/live/pulse",
 ]);
 
 // Routes that bypass Clerk entirely (cron, webhooks).
