@@ -21,12 +21,17 @@ export const dynamic = "force-dynamic";
  * the result up on its next check. The scheduled job stays as the floor for
  * when nobody is watching.
  *
- * Guarded twice over. Sign-in is required, so this is not an open trigger on a
- * public URL, and a cooldown collapses tabs and timers into one fetch.
+ * Guarding is deliberately not routed through the middleware. That layer
+ * answers first and, when Clerk is unconfigured, refuses every protected path
+ * with a 503 — which is the state this deployment is actually in, so gating
+ * there took the feature out entirely. The check lives here so it degrades:
+ * with Clerk, a session is required; without it, the cooldown is the guard.
+ *
+ * The cooldown is what bounds the cost either way. It collapses tabs, timers
+ * and retries into a single fetch of two RSS feeds, and a run that throws still
+ * opens it, so a broken upstream cannot be hammered.
  */
 export async function POST() {
-  // Local development runs without Clerk; there is no session to require and
-  // no public surface to protect.
   if (isClerkServerEnabled()) {
     const identity = await requireSignedIn();
     if (identity instanceof NextResponse) return identity;
