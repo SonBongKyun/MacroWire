@@ -3801,3 +3801,156 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===========================================================================
+   Live wire
+   A standing strip under the ticker, not a toast. The old bar announced new
+   articles for three seconds and vanished, which is useless to someone
+   glancing over from another window — the whole point of leaving the desk open.
+   =========================================================================== */
+
+.macro-app .livewire {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 16px;
+  flex: 0 0 auto;
+  background: var(--surface-flat);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 11px;
+}
+
+.macro-app .livewire.has-pending {
+  background: var(--accent-surface);
+  border-bottom-color: var(--border-accent);
+}
+
+.macro-app .livewire-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  font-weight: 650;
+}
+
+.macro-app .livewire-state.is-live {
+  color: var(--success);
+}
+
+.macro-app .livewire-state.is-down {
+  color: var(--muted);
+}
+
+.macro-app .livewire-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.macro-app .livewire-state.is-live .livewire-dot {
+  animation: livewire-pulse 2s ease-in-out infinite;
+}
+
+@keyframes livewire-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.macro-app .livewire-idle {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.macro-app .livewire-load {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  color: var(--background);
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.macro-app .livewire-load:hover {
+  background: var(--accent-light);
+}
+
+.macro-app .livewire-breaking {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  color: #fff;
+  background: var(--danger);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.macro-app .livewire-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-app .livewire-spacer {
+  flex: 1;
+}
+
+.macro-app .livewire-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+}
+
+.macro-app .livewire-toggle:hover {
+  color: var(--foreground);
+  border-color: var(--border-strong);
+}
+
+.macro-app .livewire-toggle.is-on {
+  color: var(--accent);
+  border-color: var(--border-accent);
+  background: var(--accent-surface);
+}
+
+@media (max-width: 768px) {
+  .macro-app .livewire {
+    height: 44px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  /* The standing copy is the first thing worth dropping on a narrow screen. */
+  .macro-app .livewire-idle {
+    display: none;
+  }
+
+  .macro-app .livewire-toggle {
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+  }
+
+  .macro-app .livewire-load {
+    min-height: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .macro-app .livewire-state.is-live .livewire-dot {
+    animation: none;
+  }
+}

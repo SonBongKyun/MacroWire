@@ -24,6 +24,8 @@ import { ArticleList } from "@/components/ArticleList";
 import { ArticleDetail } from "@/components/ArticleDetail";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ALL_TAGS } from "@/lib/tagging/tagger";
+import { useLiveWire } from "@/hooks/useLiveWire";
+import { LiveWireBar } from "@/components/LiveWireBar";
 
 // Everything below is reachable only after a tap — a secondary tab, an
 // overlay, or split view. Loading it all up front made the first paint on a
@@ -185,10 +187,7 @@ function HomeInner() {
   const [showHelp, setShowHelp] = useState(false);
   const [newArticleCount, setNewArticleCount] = useState(0);
   const [newArticleIds, setNewArticleIds] = useState<string[]>([]);
-  const [showNewArticlesBar, setShowNewArticlesBar] = useState(false);
-  const [newArticlesBarCount, setNewArticlesBarCount] = useState(0);
   const prevArticleIds = useRef<Set<string>>(new Set());
-  const newArticlesBarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Hooks
   const { store: collectionStore, assignArticle, createCollection, getCollection } = useCollections();
@@ -217,6 +216,33 @@ function HomeInner() {
   const [alertFeedOpen, setAlertFeedOpen] = useState(false);
   const [financialCalcOpen, setFinancialCalcOpen] = useState(false);
   const themeToggleRef = useRef<HTMLButtonElement>(null);
+
+  // ── Live wire ──────────────────────────────────────────────────────────────
+  // Desktop notifications are opt-in and the browser permission is separate
+  // from the toggle, so both are tracked here.
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    setNotifyEnabled(Notification.permission === "granted");
+  }, []);
+
+  const toggleNotify = useCallback(async () => {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      showToast("이 브라우저는 데스크톱 알림을 지원하지 않습니다", "error");
+      return;
+    }
+    if (notifyEnabled) {
+      setNotifyEnabled(false);
+      return;
+    }
+    if (Notification.permission === "denied") {
+      showToast("브라우저 설정에서 알림을 허용해주세요", "error");
+      return;
+    }
+    const granted = (await Notification.requestPermission()) === "granted";
+    setNotifyEnabled(granted);
+    if (!granted) showToast("알림 권한이 거부되었습니다", "error");
+  }, [notifyEnabled, showToast]);
 
   // Persist active tab
   useEffect(() => {
@@ -284,24 +310,14 @@ function HomeInner() {
       if (append) {
         setArticles((prev) => [...prev, ...items]);
       } else {
+        // Arrival is announced by the live wire, which knows about articles the
+        // moment they land rather than whenever this list happens to refetch.
+        // All this still does is mark which rows are new.
         if (announceNew && prevArticleIds.current.size > 0) {
           const newOnes = items.filter((a: Article) => !prevArticleIds.current.has(a.id));
           if (newOnes.length > 0) {
             setNewArticleCount((prev) => prev + newOnes.length);
             setNewArticleIds((prev) => [...prev, ...newOnes.map((a: Article) => a.id)]);
-            // Show gold notification bar
-            setNewArticlesBarCount(newOnes.length);
-            setShowNewArticlesBar(true);
-            if (newArticlesBarTimer.current) clearTimeout(newArticlesBarTimer.current);
-            newArticlesBarTimer.current = setTimeout(() => setShowNewArticlesBar(false), 3000);
-            if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-              const matched = newOnes.filter((a: Article) => notifications.checkArticle(a));
-              if (matched.length > 0) {
-                notifications.sendNotification("MacroWire 알림", matched.length === 1 ? matched[0].title : `관심 기사 ${matched.length}건: ${matched[0].title}`);
-              } else {
-                new Notification("MacroWire", { body: `새 기사 ${newOnes.length}건이 도착했습니다`, icon: "/icon.svg", tag: "macro-wire-new" });
-              }
-            }
           }
         }
         prevArticleIds.current = new Set(items.map((a: Article) => a.id));
@@ -328,6 +344,18 @@ function HomeInner() {
       if (!silent) setLoading(false);
     }
   }, [buildQuery, nextCursor]);
+
+  const liveWire = useLiveWire({
+    // Nothing is fetched on arrival — the reader decides when the list moves
+    // under them. The bar just says how much is waiting.
+    onArrival: () => {},
+  });
+
+  const loadPending = useCallback(() => {
+    liveWire.acknowledge();
+    fetchArticles({ announceNew: true });
+    setActiveMainTab("news");
+  }, [liveWire, fetchArticles]);
 
   // Refresh the browser view. Source ingestion runs in protected background jobs.
   const refreshNews = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
@@ -625,19 +653,19 @@ function HomeInner() {
         <MarketTicker />
       </div>
 
-      {/* New articles notification bar */}
-      {showNewArticlesBar && newArticlesBarCount > 0 && (
-        <div
-          className="new-articles-bar"
-          onClick={() => {
-            setShowNewArticlesBar(false);
-            setActiveMainTab("news");
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        >
-          {newArticlesBarCount}건의 새 기사가 도착했습니다
-        </div>
-      )}
+      {/* Live wire — persistent, because a bar that hides itself after three
+          seconds is no use to someone glancing over from another window. */}
+      <LiveWireBar
+        pending={liveWire.pending}
+        pendingBreaking={liveWire.pendingBreaking}
+        connected={liveWire.connected}
+        checkedAt={liveWire.checkedAt}
+        soundOn={notifications.store.soundEnabled}
+        notifyOn={notifyEnabled}
+        onLoad={loadPending}
+        onToggleSound={notifications.toggleSound}
+        onToggleNotify={toggleNotify}
+      />
 
       {/* Tab Content */}
       <ErrorBoundary key={activeMainTab}>
