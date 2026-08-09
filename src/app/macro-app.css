@@ -3954,3 +3954,155 @@
     animation: none;
   }
 }
+
+/* ===========================================================================
+   Article row — readability pass
+   The row was a three-column grid: a 58px rail holding an 8px timestamp and a
+   two-letter source code, the body, and a 42px impact column. Roughly a
+   hundred pixels of chrome before the headline started, and the headline
+   itself was clamped to one line with an ellipsis.
+   Now it is one column: a quiet metadata line, then the headline with room to
+   wrap. Same information, ordered the way it gets read.
+   =========================================================================== */
+
+.macro-app .article-row {
+  display: block;
+  padding: 0;
+}
+
+.macro-app .article-row-body {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 16px;
+}
+
+.macro-app .article-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* The outlet, tinted so a familiar name registers before it is read. */
+.macro-app .article-row-source {
+  max-width: 190px;
+  padding: 1px 7px;
+  overflow: hidden;
+  color: var(--source-color, var(--muted));
+  background: color-mix(in srgb, var(--source-color, var(--muted)) 13%, transparent);
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.macro-app .article-row-metaspacer {
+  flex: 1;
+}
+
+.macro-app .article-row-time {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-family: var(--font-interface);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-app .article-row-impact {
+  display: inline-flex;
+  min-width: 22px;
+  height: 17px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex-shrink: 0;
+  color: var(--muted);
+  background: var(--surface-raised);
+  border: 0;
+  border-radius: 3px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The headline is the row. Two lines, and the size the eye actually wants. */
+.macro-app .article-row-title {
+  display: -webkit-box;
+  /* The old rule made this a growing flex item, so a one-line headline still
+     reserved two lines and every row looked the same height regardless of
+     content. It sizes to its text now; the body centres it. */
+  flex: 0 0 auto;
+  overflow: hidden;
+  margin: 0;
+  color: var(--foreground) !important;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  text-overflow: unset;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.macro-app .article-row.is-unread .article-row-title {
+  color: var(--foreground-bright) !important;
+  font-weight: 650;
+}
+
+.macro-app .article-row.article-row-compact .article-row-title {
+  font-size: 13.5px;
+  -webkit-line-clamp: 1;
+}
+
+.macro-app .article-row.article-row-compact .article-row-body {
+  gap: 4px;
+  padding: 8px 16px;
+}
+
+.macro-app .article-row-tags {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* The unread dot leads the metadata line instead of floating over the rail. */
+.macro-app .article-unread-marker {
+  position: static;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  background: var(--accent);
+  border: 0;
+  border-radius: 50%;
+}
+
+.macro-app .article-row.is-breaking .article-unread-marker {
+  background: var(--danger);
+}
+
+.macro-app .article-breaking-badge,
+.macro-app .article-signal-badge {
+  height: 17px;
+  padding: 0 6px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  font-family: var(--font-interface);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+}
+
+@media (max-width: 768px) {
+  .macro-app .article-row-body {
+    padding: 10px 12px;
+  }
+
+  .macro-app .article-row-title {
+    font-size: 15px;
+  }
+}

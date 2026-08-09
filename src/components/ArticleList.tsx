@@ -37,8 +37,8 @@ interface ArticleListProps {
   density?: "compact" | "comfortable";
 }
 
-const ROW_HEIGHT_COMPACT = 64;
-const ROW_HEIGHT_COMFORTABLE = 84;
+const ROW_HEIGHT_COMPACT = 76;
+const ROW_HEIGHT_COMFORTABLE = 104;
 const BUFFER_COUNT = 10;
 
 function timeAgo(dateStr: string): string {
@@ -52,6 +52,27 @@ function timeAgo(dateStr: string): string {
   if (hrs < 24) return `${hrs}시간`;
   const days = Math.floor(hrs / 24);
   return `${days}일`;
+}
+
+/**
+ * A stable hue per source.
+ *
+ * Outlet names were rendered as a two-letter monospace code in a side rail,
+ * which is unreadable at a glance and told you nothing until you decoded it.
+ * A tinted chip carrying the real name is recognisable peripherally, which is
+ * how a wire actually gets scanned.
+ */
+const SOURCE_TINTS = [
+  "#7fb3f5", "#69c9a4", "#e0a35f", "#c98fd4",
+  "#5fc4c9", "#e0857f", "#a5b45f", "#8f9ee0",
+];
+
+function sourceColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  }
+  return SOURCE_TINTS[hash % SOURCE_TINTS.length];
 }
 
 function SkeletonRow() {
@@ -317,10 +338,6 @@ export function ArticleList({
                 const articleSignal = classifyArticleSignal(article);
                 const isBreaking = articleSignal.isBreaking;
                 const impactScore = getScore(article.id)?.impactScore ?? 0;
-                const sourceCode = article.sourceName
-                  .replace(/[^A-Za-z가-힣]/g, "")
-                  .slice(0, 2)
-                  .toUpperCase();
                 return (
                   <div
                     key={article.id}
@@ -342,17 +359,19 @@ export function ArticleList({
                     onMouseEnter={(e) => handleRowMouseEnter(e, article)}
                     onMouseLeave={handleRowMouseLeave}
                   >
-                    <div className="article-row-rail">
-                      <span className="article-row-time">{timeAgo(article.publishedAt)}</span>
-                      <span className="article-source-code">{sourceCode || "MW"}</span>
-                      {isUnread && <span className="article-unread-marker" />}
-                    </div>
-
                     <div className="article-row-body">
-                      <div className="article-row-titleline">
-                        {isBreaking && (
-                          <span className="article-breaking-badge">속보</span>
-                        )}
+                      {/* Metadata first, headline second — the arrangement a
+                          wire reader scans fastest: who filed it and when, then
+                          what it says. */}
+                      <div className="article-row-meta">
+                        {isUnread && <span className="article-unread-marker" aria-hidden="true" />}
+                        <span
+                          className="article-row-source"
+                          style={{ "--source-color": sourceColor(article.sourceName) } as React.CSSProperties}
+                        >
+                          {article.sourceName}
+                        </span>
+                        {isBreaking && <span className="article-breaking-badge">속보</span>}
                         {articleSignal.tier === "critical" && (
                           <span
                             className="article-signal-badge"
@@ -361,16 +380,19 @@ export function ArticleList({
                             S{articleSignal.score}
                           </span>
                         )}
-                        <p className="article-row-title">
-                          {article.title}
-                        </p>
+                        <span className="article-row-metaspacer" />
+                        {impactScore > 0 && (
+                          <span className="article-row-impact" title={`영향도 ${impactScore}`}>
+                            {impactScore}
+                          </span>
+                        )}
+                        <span className="article-row-time">{timeAgo(article.publishedAt)} 전</span>
                       </div>
 
-                      {density === "comfortable" && (
-                        <div className="article-row-subline">
-                          <span className="article-row-source">{article.sourceName}</span>
-                          <span className="article-row-rule" />
-                          <div className="article-row-tags">
+                      <p className="article-row-title">{article.title}</p>
+
+                      {density === "comfortable" && article.tags.length > 0 && (
+                        <div className="article-row-tags">
                           {article.tags.slice(0, 3).map((tag) => {
                             if (tag === "속보") return null;
                             const color = TAG_COLORS[tag] || "#64748b";
@@ -385,14 +407,8 @@ export function ArticleList({
                               </button>
                             );
                           })}
-                          </div>
                         </div>
                       )}
-                    </div>
-
-                    <div className="article-row-impact" title={`영향도 ${impactScore}`}>
-                      <b>{impactScore}</b>
-                      <span>IMP</span>
                     </div>
                   </div>
                 );
