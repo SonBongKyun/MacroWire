@@ -8,6 +8,7 @@ import { useArticleScoring } from "@/hooks/useArticleScoring";
 import { PeekPopover } from "@/components/PeekPopover";
 import { EmptyState } from "@/components/EmptyState";
 import { classifyArticleSignal } from "@/lib/news/signal";
+import { computeCoverage } from "@/lib/clustering/coverage";
 
 type ReadFilter = "all" | "unread" | "read";
 type ViewMode = "list" | "card";
@@ -199,6 +200,9 @@ export function ArticleList({
         : articles.filter((a) => a.isRead);
 
   const newIds = useMemo(() => new Set(newArticleIds), [newArticleIds]);
+  // How many outlets are on each story. Computed once per list rather than
+  // per row — it is O(n²) over titles.
+  const coverage = useMemo(() => computeCoverage(articles), [articles]);
   const rowHeight = density === "compact" ? ROW_HEIGHT_COMPACT : ROW_HEIGHT_COMFORTABLE;
 
   // Measure container height on mount and resize
@@ -380,6 +384,18 @@ export function ArticleList({
                             S{articleSignal.score}
                           </span>
                         )}
+                        {(() => {
+                          const cov = coverage.get(article.id);
+                          if (!cov) return null;
+                          return (
+                            <span
+                              className="article-row-coverage"
+                              title={`같은 사안 보도: ${cov.names.join(", ")}`}
+                            >
+                              {cov.outlets}개 매체
+                            </span>
+                          );
+                        })()}
                         <span className="article-row-metaspacer" />
                         {impactScore > 0 && (
                           <span className="article-row-impact" title={`영향도 ${impactScore}`}>
