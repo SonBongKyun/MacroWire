@@ -102,3 +102,76 @@ test("an empty or single-article list is handled", () => {
   assert.equal(computeCoverage([]).size, 0);
   assert.equal(computeCoverage([article({})]).size, 0);
 });
+
+/*
+ * The cases below are real false positives observed on production after the
+ * first release: English headlines matched on "of", "as", "to" and "hit"
+ * because the stop-word list was Korean-only.
+ */
+
+test("English headlines do not match on function words", () => {
+  const hongKong = article({
+    sourceName: "South China Morning Post",
+    title: "8% of owners at fire-hit Hong Kong estate yet to accept buy-back as deadline nears",
+    tags: ["중국"],
+  });
+  const israel = article({
+    sourceName: "CNBC Top News",
+    title: "Matter of pure force: US, Israeli physical presence as leverage",
+    tags: ["중국"],
+  });
+  assert.equal(
+    computeCoverage([hongKong, israel]).size,
+    0,
+    'shared "of" and "as" is not a shared story'
+  );
+});
+
+test("a three-letter overlap is not corroboration", () => {
+  const fire = article({
+    sourceName: "South China Morning Post",
+    title: "8% of owners at fire-hit Hong Kong estate yet to accept buy-back",
+    tags: ["중국"],
+  });
+  const typhoon = article({
+    sourceName: "CNBC Top News",
+    title: "Typhoon Dolphin set to hit China's eastern coast",
+    tags: ["중국"],
+  });
+  assert.equal(computeCoverage([fire, typhoon]).size, 0, '"hit" and "to" is coincidence');
+});
+
+test("a common country name alone does not group unrelated stories", () => {
+  const typhoon = article({
+    sourceName: "CNBC Top News",
+    title: "Typhoon Dolphin set to hit China's eastern coast",
+    tags: ["중국"],
+  });
+  const brain = article({
+    sourceName: "South China Morning Post",
+    title: "China races to develop brain-computer interface technology",
+    tags: ["중국"],
+  });
+  assert.equal(computeCoverage([typhoon, brain]).size, 0);
+});
+
+test("genuine English corroboration still registers", () => {
+  const a = article({
+    sourceName: "Reuters",
+    title: "Federal Reserve cuts benchmark interest rate by 25 basis points",
+    tags: ["연준"],
+  });
+  const b = article({
+    sourceName: "Bloomberg Markets",
+    title: "Federal Reserve delivers quarter-point interest rate cut",
+    tags: ["연준"],
+  });
+  const cov = computeCoverage([a, b]);
+  assert.equal(cov.get(a.id)?.outlets, 2, "real shared subject matter should still group");
+});
+
+test("keyword matching ignores case", () => {
+  const a = article({ sourceName: "Reuters", title: "FEDERAL RESERVE cuts INTEREST rate", tags: ["연준"] });
+  const b = article({ sourceName: "CNBC Economy", title: "Federal Reserve trims interest rate", tags: ["연준"] });
+  assert.equal(computeCoverage([a, b]).get(a.id)?.outlets, 2);
+});

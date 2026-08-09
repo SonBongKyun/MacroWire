@@ -7,22 +7,53 @@ export interface ArticleCluster {
   articles: Article[];
 }
 
-// Common Korean stop-words to ignore during similarity check
+// Function words carry no topic. This list was Korean-only, so English
+// headlines matched each other on "of", "to" and "as" — which put a Hong Kong
+// fire, a typhoon landfall and a brain-computer story into one group.
 const STOP_WORDS = new Set([
+  // Korean particles and filler
   "의", "가", "이", "은", "는", "을", "를", "에", "와", "과",
   "도", "로", "으로", "에서", "까지", "부터", "한", "할", "하는",
   "및", "등", "것", "수", "위", "중", "각", "더", "또", "그",
   "이번", "올해", "내년", "전년", "대비", "관련", "대한", "통해",
   "위한", "따른", "대해", "있는", "없는", "하고", "된다", "했다",
+  // English function words
+  "the", "and", "for", "with", "from", "that", "this", "into", "over",
+  "after", "before", "amid", "says", "said", "will", "may", "can", "but",
+  "not", "its", "his", "her", "their", "have", "has", "had", "are", "was",
+  "were", "been", "who", "how", "why", "what", "when", "where", "than",
+  "then", "out", "off", "new", "more", "most", "some", "all", "one", "two",
 ]);
+
+/**
+ * Latin words shorter than this are almost always function words. Korean is
+ * denser — two syllables is usually a whole concept — so it keeps a lower bar.
+ */
+const MIN_LATIN_LENGTH = 3;
+const HANGUL = /[가-힣]/;
 
 /** Extract meaningful keywords from a title */
 export function extractKeywords(title: string): Set<string> {
   const words = title
-    .replace(/[^\w\uAC00-\uD7A3\s]/g, " ")
+    .replace(/[^\w가-힣\s]/g, " ")
     .split(/\s+/)
-    .filter((w) => w.length >= 2 && !STOP_WORDS.has(w));
+    .map((w) => w.toLowerCase())
+    .filter((w) => {
+      if (STOP_WORDS.has(w)) return false;
+      if (HANGUL.test(w)) return w.length >= 2;
+      return w.length >= MIN_LATIN_LENGTH;
+    });
   return new Set(words);
+}
+
+/**
+ * A token distinctive enough to anchor a match on its own.
+ *
+ * Two three-letter overlaps ("hit", "set") are coincidence; a real match needs
+ * at least one substantial word behind it.
+ */
+export function isStrongKeyword(word: string): boolean {
+  return HANGUL.test(word) ? word.length >= 2 : word.length >= 4;
 }
 
 /** Count overlapping keywords between two sets */
