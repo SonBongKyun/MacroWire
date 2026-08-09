@@ -15,7 +15,7 @@
  */
 
 import type { Article } from "@/types";
-import { extractKeywords, keywordOverlap } from "./cluster";
+import { extractKeywords, isStrongKeyword } from "./cluster";
 
 export interface Coverage {
   /** Distinct outlets carrying this story, this article's own included. */
@@ -63,7 +63,11 @@ export function computeCoverage(articles: Article[]): Map<string, Coverage> {
       if (!anchor.tags.some((tag) => candidate.tags.includes(tag))) continue;
 
       const candidateWords = keywords.get(candidate.id)!;
-      if (keywordOverlap(anchorWords, candidateWords) < MIN_SHARED_KEYWORDS) continue;
+      const shared = [...anchorWords].filter((w) => candidateWords.has(w));
+      if (shared.length < MIN_SHARED_KEYWORDS) continue;
+      // Two short overlaps are coincidence. Corroboration needs a real word in
+      // common, not just headline scaffolding.
+      if (!shared.some(isStrongKeyword)) continue;
 
       group.push(candidate);
     }
