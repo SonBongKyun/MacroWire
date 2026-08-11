@@ -67,12 +67,14 @@
   {
     "name": "Federal Reserve",
     "feedUrl": "https://www.federalreserve.gov/feeds/press_all.xml",
-    "category": "정책"
+    "category": "정책",
+    "tier": "T0"
   },
   {
     "name": "ECB Press",
     "feedUrl": "https://www.ecb.europa.eu/rss/press.html",
-    "category": "정책"
+    "category": "정책",
+    "tier": "T0"
   },
   {
     "name": "CNBC Economy",
@@ -82,32 +84,38 @@
   {
     "name": "연합뉴스 속보",
     "feedUrl": "https://www.yna.co.kr/rss/news.xml",
-    "category": "속보"
+    "category": "속보",
+    "tier": "T1"
   },
   {
     "name": "CNBC Breaking",
     "feedUrl": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839135",
-    "category": "속보"
+    "category": "속보",
+    "tier": "T1"
   },
   {
     "name": "Hacker News",
     "feedUrl": "https://hnrss.org/frontpage",
-    "category": "커뮤니티"
+    "category": "커뮤니티",
+    "tier": "T3"
   },
   {
     "name": "r/wallstreetbets",
     "feedUrl": "https://old.reddit.com/r/wallstreetbets/.rss",
-    "category": "커뮤니티"
+    "category": "커뮤니티",
+    "tier": "T3"
   },
   {
     "name": "r/CryptoCurrency",
     "feedUrl": "https://old.reddit.com/r/CryptoCurrency/.rss",
-    "category": "커뮤니티"
+    "category": "커뮤니티",
+    "tier": "T3"
   },
   {
     "name": "r/StockMarket",
     "feedUrl": "https://old.reddit.com/r/StockMarket/.rss",
-    "category": "커뮤니티"
+    "category": "커뮤니티",
+    "tier": "T3"
   },
   {
     "name": "서울경제 금융",
@@ -147,7 +155,8 @@
   {
     "name": "Bloomberg Markets",
     "feedUrl": "https://feeds.bloomberg.com/markets/news.rss",
-    "category": "글로벌"
+    "category": "글로벌",
+    "tier": "T1"
   },
   {
     "name": "BBC Business",
@@ -202,7 +211,8 @@
   {
     "name": "Investing 분석",
     "feedUrl": "https://kr.investing.com/rss/286.rss",
-    "category": "분석"
+    "category": "분석",
+    "tier": "T3"
   },
   {
     "name": "Investing.com",

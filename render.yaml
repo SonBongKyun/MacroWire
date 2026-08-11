@@ -1,0 +1,19 @@
+services:
+  - type: worker
+    name: macrowire-wire-worker
+    runtime: node
+    buildCommand: npm ci
+    preDeployCommand: npx prisma migrate deploy
+    startCommand: npm run worker:wire
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: WIRE_WORKER_CONCURRENCY
+        value: "4"
+      - key: WIRE_LOOP_INTERVAL_MS
+        value: "1000"

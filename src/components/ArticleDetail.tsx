@@ -1,15 +1,20 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { CheckCheck, ChevronRight, Plus, Radar, Trash2 } from "lucide-react";
-import type { Article } from "@/types";
-import { analyzeSentiment } from "@/lib/sentiment/sentiment";
-import { RelatedArticles } from "@/components/RelatedArticles";
-import { ArticleSummary } from "@/components/ArticleSummary";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  CheckCheck,
+  ChevronRight,
+  ExternalLink,
+  FileText,
+  Plus,
+  Radar,
+  RefreshCw,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
+import type { Article, ArticleEnrichmentResult } from "@/types";
 import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleNotes } from "@/hooks/useArticleNotes";
-import { generateSmartSummary } from "@/lib/ai/summarizer";
-import type { SmartSummary } from "@/lib/ai/summarizer";
 import { classifyArticleSignal } from "@/lib/news/signal";
 
 interface ArticleDetailProps {
@@ -26,8 +31,7 @@ interface ArticleDetailProps {
 }
 
 function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("ko-KR", {
+  return new Date(dateStr).toLocaleDateString("ko-KR", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -44,22 +48,156 @@ function formatTime(dateStr: string): string {
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
+  const mins = Math.max(0, Math.floor(diff / 60_000));
   if (mins < 1) return "방금";
   if (mins < 60) return `${mins}분 전`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}시간 전`;
-  return `${Math.floor(hrs / 24)}일 전`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}시간 전`;
+  return `${Math.floor(hours / 24)}일 전`;
 }
 
-/** Estimate reading time in minutes based on Korean text */
-function estimateReadingTime(text: string): number {
-  // Korean reading speed ~500 chars/min; English ~200 words/min
-  const koreanChars = (text.match(/[\uac00-\ud7a3]/g) || []).length;
-  const words = text.split(/\s+/).filter(Boolean).length;
-  const koreanMins = koreanChars / 500;
-  const englishMins = (words - koreanChars * 0.5) / 200;
-  return Math.max(1, Math.round(koreanMins + Math.max(0, englishMins)));
+function evidenceLabel(kind: string): string {
+  if (kind === "official") return "공식 발표";
+  if (kind === "rss") return "RSS";
+  if (kind === "metadata") return "공개 metadata";
+  if (kind === "coverage") return "관련 보도";
+  return "규칙 분석";
+}
+
+function EventSections({
+  article,
+  enrichment,
+  articles,
+  onSelectArticle,
+}: {
+  article: Article;
+  enrichment: ArticleEnrichmentResult | null;
+  articles: Article[];
+  onSelectArticle?: (article: Article) => void;
+}) {
+  const localArticles = useMemo(
+    () => new Map(articles.map((item) => [item.id, item])),
+    [articles],
+  );
+  const hasFacts = Boolean(enrichment?.keyFacts.length);
+  const hasNumbers = Boolean(enrichment?.keyNumbers.length);
+  const hasCoverage = Boolean(enrichment && enrichment.coverage.articles.length > 0);
+
+  return (
+    <div className="event-detail-stack">
+      {hasFacts && (
+        <section className="event-section" aria-labelledby="what-happened-heading">
+          <div className="event-section-heading">
+            <span className="event-section-index">01</span>
+            <h3 id="what-happened-heading">WHAT HAPPENED</h3>
+          </div>
+          <ul className="event-facts">
+            {enrichment!.keyFacts.map((fact, index) => (
+              <li key={`${fact.text}-${index}`}>
+                <span className="event-fact-mark" aria-hidden="true" />
+                <div>
+                  <p>{fact.text}</p>
+                  <span>{evidenceLabel(fact.sourceKind)} · {fact.sourceLabel}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {hasNumbers && (
+        <section className="event-section" aria-labelledby="key-numbers-heading">
+          <div className="event-section-heading">
+            <span className="event-section-index">02</span>
+            <h3 id="key-numbers-heading">KEY NUMBERS</h3>
+          </div>
+          <dl className="event-numbers">
+            {enrichment!.keyNumbers.map((number, index) => (
+              <div key={`${number.value}-${index}`} title={number.context}>
+                <dt>{number.label}</dt>
+                <dd>{number.value}</dd>
+                <span>{number.sourceLabel}</span>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      {enrichment?.whyItMatters && (
+        <section className="event-section" aria-labelledby="why-it-matters-heading">
+          <div className="event-section-heading">
+            <span className="event-section-index">03</span>
+            <h3 id="why-it-matters-heading">WHY IT MATTERS</h3>
+            <span className="analysis-disclosure">Analysis · rules</span>
+          </div>
+          <p className="event-analysis">{enrichment.whyItMatters}</p>
+        </section>
+      )}
+
+      {hasCoverage && (
+        <section className="event-section" aria-labelledby="related-coverage-heading">
+          <div className="event-section-heading">
+            <span className="event-section-index">04</span>
+            <h3 id="related-coverage-heading">RELATED COVERAGE</h3>
+            <span className="coverage-confirmed">
+              CONFIRMED BY {enrichment!.coverage.count} SOURCES
+            </span>
+          </div>
+          <div className="coverage-outlets" aria-label="확인 매체">
+            {enrichment!.coverage.outlets.map((outlet) => <span key={outlet}>{outlet}</span>)}
+          </div>
+          <div className="coverage-list">
+            {enrichment!.coverage.articles.map((related) => {
+              const local = localArticles.get(related.id);
+              return (
+                <article key={related.id} className="coverage-row">
+                  <div>
+                    <span>{related.sourceName} · {timeAgo(related.publishedAt)}</span>
+                    <p>{related.title}</p>
+                  </div>
+                  <div className="coverage-row-actions">
+                    {local && onSelectArticle && (
+                      <button onClick={() => onSelectArticle(local)}>내부 보기</button>
+                    )}
+                    <a href={related.url} target="_blank" rel="noopener noreferrer" aria-label={`${related.sourceName} 원문 열기`}>
+                      <ExternalLink size={13} />
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {enrichment && (
+        <section className="event-section provenance-section" aria-labelledby="provenance-heading">
+          <div className="event-section-heading">
+            <ShieldCheck size={13} aria-hidden="true" />
+            <h3 id="provenance-heading">PROVENANCE</h3>
+          </div>
+          <dl>
+            <div>
+              <dt>Source</dt>
+              <dd>{article.sourceName}{article.sourceTier === "T0" ? " official release" : " RSS feed"}</dd>
+            </div>
+            <div>
+              <dt>Data used</dt>
+              <dd>
+                {[...new Set(enrichment.contentSources.map((source) => evidenceLabel(source.kind)))].join(" + ") || "확인 가능한 공개 데이터 없음"}
+              </dd>
+            </div>
+            {enrichment.analysisKind && (
+              <div>
+                <dt>Analysis</dt>
+                <dd>위 출처에서 확인된 신호를 규칙 기반으로 해석</dd>
+              </div>
+            )}
+          </dl>
+        </section>
+      )}
+    </div>
+  );
 }
 
 export function ArticleDetail({
@@ -75,690 +213,312 @@ export function ArticleDetail({
   onSelectArticle,
 }: ArticleDetailProps) {
   const [toast, setToast] = useState<string | null>(null);
-  const [toastExiting, setToastExiting] = useState(false);
   const [newCollectionInput, setNewCollectionInput] = useState("");
   const [readProgress, setReadProgress] = useState(0);
   const [notesOpen, setNotesOpen] = useState(false);
   const [highlightInput, setHighlightInput] = useState("");
   const [fullscreen, setFullscreen] = useState(false);
+  const [enrichment, setEnrichment] = useState<ArticleEnrichmentResult | null>(null);
+  const [enrichmentLoading, setEnrichmentLoading] = useState(false);
+  const [enrichmentError, setEnrichmentError] = useState(false);
+  const [enrichmentAttempt, setEnrichmentAttempt] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Article notes hook
   const articleNotes = useArticleNotes();
+
   const currentNote = article ? articleNotes.getNote(article.id) : null;
+  const articleId = article?.id ?? null;
   const noteText = currentNote?.text || "";
   const highlights = currentNote?.highlights || [];
-
-  const setNoteText = useCallback(
-    (text: string) => {
-      if (article) articleNotes.saveNote(article.id, text);
-    },
-    [article, articleNotes]
-  );
-
-  // ESC to close fullscreen
-  useEffect(() => {
-    if (!fullscreen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFullscreen(false);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [fullscreen]);
-
-  // Reset scroll on article change
-  useEffect(() => {
-    setReadProgress(0);
-    if (scrollRef.current) scrollRef.current.scrollTop = 0;
-  }, [article?.id]);
-
   const hasNote = noteText.trim().length > 0 || highlights.length > 0;
 
-  // Count articles per tag for tooltip
   const tagCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const a of articles) {
-      for (const t of a.tags) {
-        counts[t] = (counts[t] || 0) + 1;
-      }
+    for (const item of articles) {
+      for (const tag of item.tags) counts[tag] = (counts[tag] || 0) + 1;
     }
     return counts;
   }, [articles]);
 
-  // Auto-generate smart summary for selected article
-  const smartSummary: SmartSummary | null = useMemo(() => {
-    if (!article) return null;
-    return generateSmartSummary(article);
-  }, [article]);
-
-  const articleSignal = useMemo(
+  const fallbackSignal = useMemo(
     () => (article ? classifyArticleSignal(article) : null),
-    [article]
+    [article],
   );
+  const importance = enrichment?.importance ?? {
+    tier: article?.importanceTier ?? (fallbackSignal?.tier === "important" ? "major" : fallbackSignal?.tier ?? "general"),
+    score: article?.importanceScore ?? fallbackSignal?.score ?? 0,
+    reasons: article?.importanceReasons ?? fallbackSignal?.reasons ?? [],
+  };
 
   const nextUnreadArticle = useMemo(() => {
     if (!article || articles.length < 2) return null;
     const currentIndex = articles.findIndex((item) => item.id === article.id);
-    if (currentIndex < 0) return articles.find((item) => !item.isRead) || null;
-
     for (let offset = 1; offset < articles.length; offset++) {
-      const candidate = articles[(currentIndex + offset) % articles.length];
+      const candidate = articles[(Math.max(0, currentIndex) + offset) % articles.length];
       if (!candidate.isRead) return candidate;
     }
     return null;
   }, [article, articles]);
 
-  const handleScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const pct = el.scrollHeight - el.clientHeight;
-    setReadProgress(pct > 0 ? Math.min(1, el.scrollTop / pct) : 0);
-  }, []);
+  useEffect(() => {
+    if (!articleId) return;
+    const controller = new AbortController();
+    // Reset stale detail state before starting the selected article's lazy request.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEnrichment(null);
+    setEnrichmentError(false);
+    setEnrichmentLoading(true);
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setToastExiting(false);
-    setTimeout(() => {
-      setToastExiting(true);
-      setTimeout(() => setToast(null), 200);
-    }, 1500);
+    fetch(`/api/articles/${articleId}/enrich`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.json() as Promise<ArticleEnrichmentResult>;
+      })
+      .then(setEnrichment)
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") setEnrichmentError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setEnrichmentLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [articleId, enrichmentAttempt]);
+
+  useEffect(() => {
+    // The component stays mounted across selections, so its reading state must
+    // be explicitly reset together with the imperative scroll container.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setReadProgress(0);
+    setNotesOpen(false);
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [articleId]);
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [fullscreen]);
+
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast(null), 1_700);
   }, []);
 
   const copyUrl = useCallback(() => {
     if (!article) return;
-    navigator.clipboard.writeText(article.url).then(() => {
-      showToast("URL이 복사되었습니다");
-    });
-  }, [article, showToast]);
-
-  const copyTitleAndUrl = useCallback(() => {
-    if (!article) return;
-    const text = `${article.title}\n${article.url}`;
-    navigator.clipboard.writeText(text).then(() => {
-      showToast("제목 + URL이 복사되었습니다");
-    });
+    navigator.clipboard.writeText(article.url).then(() => showToast("URL을 복사했습니다"));
   }, [article, showToast]);
 
   const shareArticle = useCallback(() => {
     if (!article) return;
-    const text = `${article.title}\n${article.url}\n\nvia MacroWire`;
-    navigator.clipboard.writeText(text).then(() => {
-      showToast("공유 텍스트가 복사되었습니다");
-    });
+    navigator.clipboard.writeText(`${article.title}\n${article.url}\n\nvia MacroWire`)
+      .then(() => showToast("공유 텍스트를 복사했습니다"));
   }, [article, showToast]);
 
   const handleReadAndNext = useCallback(() => {
     if (!article) return;
     if (!article.isRead) onToggleRead(article);
-
-    if (nextUnreadArticle && onSelectArticle) {
-      onSelectArticle(nextUnreadArticle);
-      showToast("읽음 처리 후 다음 기사로 이동했습니다");
-      return;
-    }
-
-    showToast(article.isRead ? "다음 미확인 기사가 없습니다" : "모든 기사를 확인했습니다");
-  }, [
-    article,
-    nextUnreadArticle,
-    onSelectArticle,
-    onToggleRead,
-    showToast,
-  ]);
+    if (nextUnreadArticle && onSelectArticle) onSelectArticle(nextUnreadArticle);
+  }, [article, nextUnreadArticle, onSelectArticle, onToggleRead]);
 
   if (!article) {
     return (
-      <aside className="shrink-0 flex flex-col items-center justify-center gap-4 select-none" style={{ width: "100%", height: "100%" }}>
-        <div style={{ opacity: 0.3 }}>
-          <svg style={{ width: 40, height: 40, color: "var(--muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-          </svg>
-        </div>
-        <div style={{ textAlign: "center", padding: "0 32px" }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>기사를 선택하세요</p>
-          <p style={{ fontSize: 11, color: "var(--muted)", marginTop: 8, lineHeight: 1.6 }}>
-            목록에서 헤드라인을 선택하면 상세 정보가 표시됩니다.
-          </p>
-        </div>
+      <aside className="article-detail-empty">
+        <FileText size={32} aria-hidden="true" />
+        <strong>기사를 선택하세요</strong>
+        <p>헤드라인을 선택하면 사건의 핵심과 확인 출처가 표시됩니다.</p>
       </aside>
     );
   }
 
+  const coverageCount = enrichment?.coverage.count ?? 1;
+  const sourceTier = article.sourceTier ?? "T2";
+
   return (
-    <aside key={article.id} className="shrink-0 flex flex-col overflow-hidden relative detail-enter" style={{ width: "100%", height: "100%" }}>
-      {/* Reading progress bar */}
+    <aside className="article-event-detail detail-enter" aria-label="기사 상세">
       <div className="reading-progress" style={{ width: `${readProgress * 100}%` }} />
 
-      {/* Header */}
-      <div className="p-5 pb-4 border-b border-[var(--border)]">
-        {/* Source badge */}
-        <div className="flex items-center gap-2.5 mb-3">
-          <div className="source-badge">
-            <span className="source-badge-initial">{article.sourceName.charAt(0).toUpperCase()}</span>
-            <span className="source-badge-name">{article.sourceName}</span>
-          </div>
-          <div className="flex-1" />
-          {/* Status badges */}
-          <div className="flex items-center gap-1.5">
-            {articleSignal && articleSignal.tier !== "general" && (
-              <span
-                className={`detail-signal-badge is-${articleSignal.tier}`}
-                title={articleSignal.reasons.join(", ")}
-              >
-                <Radar size={10} />
-                {articleSignal.tier === "critical" ? "핵심" : "주요"} {articleSignal.score}
-              </span>
-            )}
-            {(() => {
-              const s = analyzeSentiment(article.title, article.summary);
-              return (
-                <span
-                  className="text-[9px] font-semibold px-1.5 py-0.5 rounded-[2px]"
-                  style={{ color: s.color, backgroundColor: `color-mix(in srgb, ${s.color} 9%, transparent)` }}
-                >
-                  {s.label}
-                </span>
-              );
-            })()}
-            {article.isRead && (
-              <span className="text-[9px] font-semibold text-[var(--muted)]">
-                읽음
-              </span>
-            )}
-            {article.isSaved && (
-              <span className="text-[9px] font-semibold text-[var(--accent)]">
-                ★ 저장됨
-              </span>
-            )}
-            {hasNote && (
-              <span className="text-[9px] font-semibold text-[var(--foreground-secondary)]">
-                메모
-              </span>
-            )}
-            <span className="reading-time-badge">
-              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              {estimateReadingTime((article.title || "") + " " + (article.summary || ""))}분
-            </span>
-          </div>
-        </div>
-
-        {/* Reading progress indicator */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] text-[var(--muted)] tabular-nums font-medium flex items-center gap-2 ml-auto">
-            {readProgress > 0 && readProgress < 1 && (
-              <span className="text-[9px] text-[var(--accent)] font-semibold">{Math.round(readProgress * 100)}%</span>
-            )}
-            {readProgress >= 1 && (
-              <span className="text-[9px] text-[var(--success)] font-semibold flex items-center gap-0.5">
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                완독
-              </span>
-            )}
-            {timeAgo(article.publishedAt)}
+      <header className="event-detail-header">
+        <div className="event-kicker" aria-label="기사 메타데이터">
+          <span>{article.sourceName}</span>
+          <i aria-hidden="true" />
+          <span>{timeAgo(article.publishedAt)}</span>
+          <i aria-hidden="true" />
+          <span className={`importance-label is-${importance.tier}`} title={importance.reasons.join(" · ")}>
+            <Radar size={11} /> {importance.tier.toUpperCase()} {importance.score}
           </span>
+          <i aria-hidden="true" />
+          <span>{coverageCount > 1 ? `${coverageCount} SOURCES` : "1 SOURCE"}</span>
         </div>
-
-        {/* Title */}
-        <h2 className="text-[18px] font-heading font-extrabold leading-[1.45] text-[var(--foreground-bright)] mb-3 tracking-[-0.01em]" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
-          {article.title}
-        </h2>
-
-        {/* Meta row */}
-        <div className="flex items-center gap-2 text-[11px]">
-          <span className="text-[var(--muted)] tabular-nums">
-            {formatDate(article.publishedAt)} {formatTime(article.publishedAt)}
-          </span>
+        <h2>{article.title}</h2>
+        <div className="event-byline">
+          <span>{sourceTier} · {formatDate(article.publishedAt)} {formatTime(article.publishedAt)}</span>
+          {enrichment?.entities.map((entity) => <span key={entity} className="event-entity">{entity}</span>)}
         </div>
+      </header>
 
-        {/* Tags */}
+      <div
+        className="event-detail-scroll"
+        ref={scrollRef}
+        onScroll={() => {
+          const element = scrollRef.current;
+          if (!element) return;
+          const distance = element.scrollHeight - element.clientHeight;
+          setReadProgress(distance > 0 ? Math.min(1, element.scrollTop / distance) : 0);
+        }}
+      >
+        {enrichmentLoading && (
+          <div className="enrichment-status"><RefreshCw size={13} className="animate-spin" /> 공개 근거와 관련 보도를 확인하는 중</div>
+        )}
+
+        {enrichmentError && (
+          <div className="enrichment-status is-error">
+            <span>상세 보강에 실패했습니다. 확보된 RSS 발췌만 표시합니다.</span>
+            <button onClick={() => setEnrichmentAttempt((value) => value + 1)}>다시 확인</button>
+          </div>
+        )}
+
+        {!enrichment && !enrichmentLoading && article.summary && (
+          <section className="event-section raw-excerpt">
+            <div className="event-section-heading"><h3>RSS EXCERPT</h3></div>
+            <p>{article.summary}</p>
+          </section>
+        )}
+
+        {enrichment && enrichment.keyFacts.length === 0 && (
+          <div className="enrichment-status is-minimal">
+            이 기사에는 확인 가능한 발췌나 공개 metadata가 없습니다. 없는 사실은 보충하지 않았습니다.
+          </div>
+        )}
+
+        <EventSections
+          article={article}
+          enrichment={enrichment}
+          articles={articles}
+          onSelectArticle={onSelectArticle}
+        />
+
         {article.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {article.tags.map((tag) => {
-              const color = TAG_COLORS[tag] || "#475569";
-              return (
-                <button
-                  key={tag}
-                  className="tag-pill tag-pill-lg"
-                  style={{ color, backgroundColor: `color-mix(in srgb, ${color} 8%, transparent)`, borderColor: `color-mix(in srgb, ${color} 19%, transparent)` }}
-                  onClick={() => onTagClick?.(tag)}
-                  title={`${tag} — ${tagCounts[tag] || 0}건`}
-                >
-                  {tag}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Summary */}
-      <div className="flex-1 overflow-y-auto p-5" ref={scrollRef} onScroll={handleScroll}>
-        {article.summary ? (
-          <div className="space-y-4">
-            <h3 className="section-label">
-              요약
-            </h3>
-            <p className="article-summary text-[13px] leading-[1.8] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
-              {article.summary}
-            </p>
-            <ArticleSummary title={article.title} summary={article.summary} url={article.url} />
-
-            {/* AI Smart Summary */}
-            {smartSummary && (
-              <div className="detail-analysis">
-                <div className="detail-analysis-label">
-                  <Radar size={12} />
-                  신호 분석
-                </div>
-
-                <div className="detail-analysis-meta">
-                  {/* Key Entities */}
-                  {smartSummary.keyEntities.length > 0 && smartSummary.keyEntities.map((entity) => (
-                    <span key={entity} className="detail-entity">
-                      {entity}
-                    </span>
-                  ))}
-
-                  {/* Impact Level Badge */}
-                  <span
-                    className={`detail-impact is-${smartSummary.impactLevel}`}
+          <section className="event-section event-tags" aria-labelledby="event-tags-heading">
+            <div className="event-section-heading"><h3 id="event-tags-heading">TAGS</h3></div>
+            <div>
+              {article.tags.map((tag) => {
+                const color = TAG_COLORS[tag] || "#718096";
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => onTagClick?.(tag)}
+                    style={{ color, borderColor: `color-mix(in srgb, ${color} 38%, transparent)` }}
+                    title={`${tag} · ${tagCounts[tag] || 0}건`}
                   >
-                    {smartSummary.impactLevel === "high" ? "영향 큼" : smartSummary.impactLevel === "medium" ? "보통" : "낮음"}
-                  </span>
-
-                  {/* Sentiment Indicator */}
-                  <span className="detail-sentiment">
-                    <span className={`detail-sentiment-dot is-${smartSummary.sentiment}`} />
-                    {smartSummary.sentiment === "positive" ? "긍정" : smartSummary.sentiment === "negative" ? "부정" : "중립"}
-                  </span>
-                </div>
-
-                {/* Related Topics */}
-                {smartSummary.relatedTopics.length > 0 && (
-                  <div className="detail-topics">
-                    {smartSummary.relatedTopics.map((topic) => (
-                      <button
-                        key={topic}
-                        onClick={() => onTagClick?.(topic)}
-                        className="detail-topic"
-                      >
-                        #{topic}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="detail-divider mt-4" />
-            <div className="flex items-center gap-2 pt-1">
-              <span className="text-[9px] text-[var(--muted)] font-medium">발행일</span>
-              <span className="text-[10px] text-[var(--foreground-secondary)] tabular-nums">
-                {formatDate(article.publishedAt)} {formatTime(article.publishedAt)}
-              </span>
+                    {tag}
+                  </button>
+                );
+              })}
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-28 gap-3">
-            <div className="empty-state-icon" style={{ width: 40, height: 40, borderRadius: 12 }}>
-              <svg className="w-5 h-5 text-[var(--border-strong)] opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
-              </svg>
-            </div>
-            <p className="text-[11px] text-[var(--muted)]">
-              요약 정보가 없습니다
-            </p>
-            <ArticleSummary title={article.title} summary={article.summary} url={article.url} />
-          </div>
+          </section>
         )}
 
-        {/* Notes & Highlights section */}
-        <div className="mt-4">
-          <button
-            onClick={() => setNotesOpen((v) => !v)}
-            className="flex items-center gap-1.5 w-full text-left group"
-          >
-            <ChevronRight size={13} className={`text-[var(--muted)] transition-transform ${notesOpen ? "rotate-90" : ""}`} />
-            <span className="section-label" style={{ marginBottom: 0 }}>메모 &amp; 하이라이트</span>
-            {hasNote && (
-              <span className="text-[9px] text-[var(--accent)] font-semibold">
-                {(noteText.trim() ? 1 : 0) + highlights.length}
-              </span>
-            )}
+        <section className="event-section event-notes">
+          <button className="event-notes-toggle" onClick={() => setNotesOpen((value) => !value)}>
+            <ChevronRight size={13} className={notesOpen ? "rotate-90" : ""} />
+            <span>NOTES</span>
+            {hasNote && <b>{(noteText.trim() ? 1 : 0) + highlights.length}</b>}
           </button>
           {notesOpen && (
-            <div className="mt-2 space-y-3">
+            <div className="event-notes-body">
               <textarea
                 rows={3}
                 value={noteText}
-                onChange={(e) => setNoteText(e.target.value)}
-                placeholder="이 기사에 대한 메모..."
-                className="w-full bg-[var(--surface-active)] border border-[var(--border)] px-3 py-2 text-[12px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] resize-none metal-inset"
-                style={{ fontSize: 12 }}
+                onChange={(event) => articleNotes.saveNote(article.id, event.target.value)}
+                placeholder="이 사건에 대한 메모"
               />
-
-              {/* Highlights */}
-              {highlights.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wider">하이라이트</span>
-                  {highlights.map((h, i) => (
-                    <div
-                      key={i}
-                      className="detail-highlight"
-                    >
-                      {h}
-                      <button
-                        onClick={() => article && articleNotes.removeHighlight(article.id, h)}
-                        className="detail-highlight-remove"
-                        title="삭제"
-                        aria-label="하이라이트 삭제"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  ))}
+              {highlights.map((highlight) => (
+                <div className="detail-highlight" key={highlight}>
+                  {highlight}
+                  <button onClick={() => articleNotes.removeHighlight(article.id, highlight)} aria-label="하이라이트 삭제">
+                    <Trash2 size={12} />
+                  </button>
                 </div>
-              )}
-
-              {/* Add highlight input */}
-              <div className="flex items-center gap-1.5">
+              ))}
+              <div className="event-highlight-input">
                 <input
-                  type="text"
                   value={highlightInput}
-                  onChange={(e) => setHighlightInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && highlightInput.trim() && article) {
+                  onChange={(event) => setHighlightInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && highlightInput.trim()) {
                       articleNotes.addHighlight(article.id, highlightInput.trim());
                       setHighlightInput("");
                     }
                   }}
-                  placeholder="하이라이트 추가..."
-                  className="flex-1 bg-[var(--surface-active)] border border-[var(--border)] px-2.5 py-1.5 text-[11px] text-[var(--foreground)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] metal-inset"
-                  style={{ fontSize: 11 }}
+                  placeholder="하이라이트 추가"
                 />
                 <button
                   onClick={() => {
-                    if (highlightInput.trim() && article) {
-                      articleNotes.addHighlight(article.id, highlightInput.trim());
-                      setHighlightInput("");
-                    }
+                    if (!highlightInput.trim()) return;
+                    articleNotes.addHighlight(article.id, highlightInput.trim());
+                    setHighlightInput("");
                   }}
-                  className="detail-add-highlight"
-                  aria-label="하이라이트 추가"
                 >
-                  <Plus size={13} />
-                  <span>추가</span>
+                  <Plus size={13} /> 추가
                 </button>
               </div>
             </div>
           )}
-        </div>
-
-        {/* Related Articles (#7) */}
-        {articles.length > 0 && onSelectArticle && (
-          <RelatedArticles
-            article={article}
-            articles={articles}
-            onSelectArticle={onSelectArticle}
-          />
-        )}
+        </section>
       </div>
 
-      {/* Collection picker (when article is saved) */}
       {article.isSaved && onCollectionChange && (
-        <div className="px-4 py-2.5 border-t border-[var(--border-subtle)] bg-[var(--accent-surface)]">
-          <div className="flex items-center gap-2">
-            <svg className="w-3 h-3 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-            </svg>
-            <select
-              value={collectionName}
-              onChange={(e) => onCollectionChange(article.id, e.target.value)}
-              className="flex-1 bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius-sm)] px-2 py-1 text-[10px] text-[var(--foreground)] focus:outline-none focus:border-[var(--accent-light)] metal-inset"
-            >
-              <option value="">분류 없음</option>
-              {collectionNames.map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-            <div className="flex items-center gap-1">
-              <input
-                type="text"
-                value={newCollectionInput}
-                onChange={(e) => setNewCollectionInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && newCollectionInput.trim()) {
-                    onCreateCollection?.(newCollectionInput.trim());
-                    onCollectionChange(article.id, newCollectionInput.trim());
-                    setNewCollectionInput("");
-                  }
-                }}
-                placeholder="새 컬렉션…"
-                className="w-20 bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius-sm)] px-2 py-1 text-[10px] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--accent-light)] metal-inset"
-              />
-              <button
-                onClick={() => {
-                  if (newCollectionInput.trim()) {
-                    onCreateCollection?.(newCollectionInput.trim());
-                    onCollectionChange(article.id, newCollectionInput.trim());
-                    setNewCollectionInput("");
-                  }
-                }}
-                className="w-6 h-6 flex items-center justify-center rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--accent)] text-xs"
-                title="컬렉션 추가"
-              >
-                +
-              </button>
-            </div>
-          </div>
+        <div className="event-collection-row">
+          <select value={collectionName} onChange={(event) => onCollectionChange(article.id, event.target.value)}>
+            <option value="">분류 없음</option>
+            {collectionNames.map((name) => <option key={name} value={name}>{name}</option>)}
+          </select>
+          <input value={newCollectionInput} onChange={(event) => setNewCollectionInput(event.target.value)} placeholder="새 컬렉션" />
+          <button onClick={() => {
+            const name = newCollectionInput.trim();
+            if (!name) return;
+            onCreateCollection?.(name);
+            onCollectionChange(article.id, name);
+            setNewCollectionInput("");
+          }}>+</button>
         </div>
       )}
 
-      {/* Actions */}
-      <div className="article-detail-actions p-4 border-t border-[var(--border)] flex gap-2 bg-[var(--surface)]">
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[11px] font-bold btn-primary"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-          원문 보기
+      <footer className="event-detail-actions">
+        <a href={article.url} target="_blank" rel="noopener noreferrer" className="event-original-cta">
+          <span>OPEN ORIGINAL</span>
+          <small>{article.sourceName}</small>
+          <ExternalLink size={14} />
         </a>
-        {onSelectArticle && (
-          <button
-            onClick={handleReadAndNext}
-            className="detail-next-action"
-            title={nextUnreadArticle ? "읽음 처리 후 다음 미확인 기사로 이동" : "읽음 처리"}
-          >
-            <CheckCheck size={15} />
-            <span>{nextUnreadArticle ? "읽고 다음" : "읽음 완료"}</span>
-          </button>
-        )}
-        {/* Fullscreen reading mode */}
-        <button
-          onClick={() => setFullscreen(true)}
-          className="px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
-          title="전체 화면"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-          </svg>
-        </button>
-        {/* Copy URL */}
-        <button
-          onClick={copyUrl}
-          className="px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
-          title="URL 복사"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-          </svg>
-        </button>
-        {/* Copy title + URL */}
-        <button
-          onClick={copyTitleAndUrl}
-          className="px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
-          title="제목 + URL 복사"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-          </svg>
-        </button>
-        {/* Share */}
-        <button
-          onClick={shareArticle}
-          className="px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
-          title="공유"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-          </svg>
-        </button>
-        <button
-          onClick={() => onToggleRead(article)}
-          className={`px-3 py-2 text-[11px] font-medium rounded-[var(--radius-sm)] metal-btn transition-colors ${
-            article.isRead
-              ? "text-[var(--muted)] hover:text-[var(--foreground)]"
-              : "!border-[var(--accent)] text-[var(--accent)]"
-          }`}
-          title={article.isRead ? "읽지 않음으로 표시" : "읽음으로 표시"}
-        >
-          {article.isRead ? (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 19V5a2 2 0 012-2h14a2 2 0 012 2v14l-3.5-2L14 19l-2.5-2L9 19l-2.5-2L3 19z" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          )}
-        </button>
-        <button
-          onClick={() => onToggleSave(article)}
-          className={`px-3 py-2 text-sm font-medium rounded-[var(--radius-sm)] metal-btn transition-colors ${
-            article.isSaved
-              ? "!border-[var(--accent)] text-[var(--accent)]"
-              : "text-[var(--muted)] hover:text-[var(--accent)] hover:!border-[var(--accent)]"
-          }`}
-          title={article.isSaved ? "저장 해제" : "저장"}
-        >
-          {article.isSaved ? "★" : "☆"}
-        </button>
-      </div>
+        <button onClick={handleReadAndNext} title="읽음 처리 후 다음 기사"><CheckCheck size={15} /></button>
+        <button onClick={() => setFullscreen(true)} title="전체 화면"><FileText size={15} /></button>
+        <button onClick={copyUrl} title="URL 복사">URL</button>
+        <button onClick={shareArticle} title="공유">공유</button>
+        <button onClick={() => onToggleRead(article)} className={article.isRead ? "is-active" : ""} title="읽음 전환">✓</button>
+        <button onClick={() => onToggleSave(article)} className={article.isSaved ? "is-active" : ""} title="저장 전환">★</button>
+      </footer>
 
-      {/* Toast */}
-      {toast && (
-        <div className={`absolute bottom-16 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-[var(--radius-md)] bg-[var(--foreground-bright)] text-white text-[11px] font-medium shadow-lg ${toastExiting ? "toast-exit" : "toast-enter"}`}>
-          <div className="flex items-center gap-2">
-            <svg className="w-3.5 h-3.5 text-[var(--success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            {toast}
-          </div>
-        </div>
-      )}
+      {toast && <div className="event-detail-toast">{toast}</div>}
 
-      {/* Fullscreen reading overlay */}
       {fullscreen && (
-        <div
-          className="fullscreen-overlay"
-          onClick={(e) => { if (e.target === e.currentTarget) setFullscreen(false); }}
-        >
-          <div className="fullscreen-reader">
-            {/* Close button */}
-            <button
-              onClick={() => setFullscreen(false)}
-              className="fullscreen-close"
-              title="닫기 (ESC)"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            {/* Source badge */}
-            <div className="flex items-center gap-2.5 mb-5">
-              <div className="source-badge">
-                <span className="source-badge-initial">{article.sourceName.charAt(0).toUpperCase()}</span>
-                <span className="source-badge-name">{article.sourceName}</span>
-              </div>
-              <span className="text-[12px] text-[var(--muted)] tabular-nums">
-                {formatDate(article.publishedAt)} {formatTime(article.publishedAt)}
-              </span>
-            </div>
-
-            {/* Title */}
-            <h1 className="text-[24px] font-heading font-extrabold leading-[1.4] text-[var(--foreground-bright)] mb-4 tracking-[-0.02em]">
-              {article.title}
-            </h1>
-
-            {/* Tags */}
-            {article.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {article.tags.map((tag) => {
-                  const color = TAG_COLORS[tag] || "#475569";
-                  return (
-                    <span
-                      key={tag}
-                      className="tag-pill tag-pill-lg"
-                      style={{ color, backgroundColor: `color-mix(in srgb, ${color} 8%, transparent)`, borderColor: `color-mix(in srgb, ${color} 19%, transparent)` }}
-                    >
-                      {tag}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
-            <div className="detail-divider mb-6" />
-
-            {/* Summary */}
-            {article.summary && (
-              <div className="mb-6">
-                <h3 className="section-label mb-3">요약</h3>
-                <p className="text-[13px] leading-[1.8] text-[var(--foreground)] selection:bg-[var(--accent-surface)]">
-                  {article.summary}
-                </p>
-              </div>
-            )}
-
-            {/* Actions at bottom */}
-            <div className="detail-divider mb-5" />
-            <div className="flex gap-2">
-              <a
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 text-[12px] font-bold btn-primary"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                원문 보기
-              </a>
-              <button
-                onClick={copyUrl}
-                className="px-4 py-2 text-[12px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
-                title="URL 복사"
-              >
-                URL 복사
-              </button>
-              <button
-                onClick={shareArticle}
-                className="px-4 py-2 text-[12px] font-medium rounded-[var(--radius-sm)] metal-btn text-[var(--muted)] hover:text-[var(--foreground)]"
-                title="공유"
-              >
-                공유
-              </button>
-            </div>
+        <div className="fullscreen-overlay" onClick={(event) => event.target === event.currentTarget && setFullscreen(false)}>
+          <div className="fullscreen-reader event-fullscreen-reader">
+            <button className="fullscreen-close" onClick={() => setFullscreen(false)} aria-label="전체 화면 닫기">×</button>
+            <div className="event-kicker"><span>{article.sourceName}</span><i /><span>{formatDate(article.publishedAt)}</span></div>
+            <h1>{article.title}</h1>
+            <EventSections article={article} enrichment={enrichment} articles={articles} onSelectArticle={onSelectArticle} />
+            <a href={article.url} target="_blank" rel="noopener noreferrer" className="event-original-cta">
+              <span>OPEN ORIGINAL</span><small>{article.sourceName}</small><ExternalLink size={14} />
+            </a>
           </div>
         </div>
       )}

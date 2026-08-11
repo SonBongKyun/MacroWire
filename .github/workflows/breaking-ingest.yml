@@ -1,9 +1,9 @@
-name: breaking-ingest
+name: breaking-ingest-fallback
 
 on:
   schedule:
-    # Best-effort five-minute schedule. GitHub may delay scheduled runs
-    # substantially during periods of high demand.
+    # Safety net only. The Render long-running worker is the primary ingest
+    # path; GitHub schedules can be delayed and do not provide wire latency.
     - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
@@ -29,5 +29,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run breaking ingest directly against Neon
+      - name: Run T0/T1 fallback ingest directly against Neon
         run: npx tsx scripts/breaking-once.ts

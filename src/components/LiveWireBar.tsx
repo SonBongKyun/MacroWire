@@ -7,7 +7,7 @@ interface LiveWireBarProps {
   pending: number;
   pendingBreaking: number;
   connected: boolean;
-  checkedAt: number | null;
+  workerStatus: "healthy" | "degraded" | "stale" | "unconfigured" | "unknown";
   soundOn: boolean;
   notifyOn: boolean;
   onLoad: () => void;
@@ -58,7 +58,7 @@ export function LiveWireBar({
   pending,
   pendingBreaking,
   connected,
-  checkedAt,
+  workerStatus,
   soundOn,
   notifyOn,
   onLoad,
@@ -99,13 +99,31 @@ export function LiveWireBar({
     };
   }, [pending]);
 
-  const stale = checkedAt !== null && Date.now() - checkedAt > 45_000;
+  // Failed head checks already flip `connected`; worker freshness is reported
+  // independently by the health pulse, so render stays deterministic.
+  const headLive = connected;
+  const statusClass = !headLive || workerStatus === "stale" || workerStatus === "unknown"
+    ? "is-down"
+    : workerStatus === "degraded" || workerStatus === "unconfigured"
+      ? "is-warn"
+      : "is-live";
+  const statusLabel = !headLive
+    ? "연결 끊김"
+    : workerStatus === "degraded"
+      ? "DEGRADED"
+      : workerStatus === "stale"
+        ? "WORKER STALE"
+        : workerStatus === "unconfigured"
+          ? "FALLBACK"
+          : workerStatus === "unknown"
+            ? "CHECKING"
+            : "LIVE";
 
   return (
     <div className={`livewire ${pending > 0 ? "has-pending" : ""}`} role="status" aria-live="polite">
-      <span className={`livewire-state ${connected && !stale ? "is-live" : "is-down"}`}>
+      <span className={`livewire-state ${statusClass}`}>
         <span className="livewire-dot" aria-hidden="true" />
-        {connected && !stale ? "LIVE" : "연결 끊김"}
+        {statusLabel}
       </span>
 
       {pending > 0 ? (

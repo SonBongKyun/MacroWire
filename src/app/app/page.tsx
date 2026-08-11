@@ -659,7 +659,7 @@ function HomeInner() {
         pending={liveWire.pending}
         pendingBreaking={liveWire.pendingBreaking}
         connected={liveWire.connected}
-        checkedAt={liveWire.checkedAt}
+        workerStatus={liveWire.workerStatus}
         soundOn={notifications.store.soundEnabled}
         notifyOn={notifyEnabled}
         onLoad={loadPending}

@@ -1,10 +1,12 @@
 import { prisma } from "../db/prisma";
 import sourcesData from "../../../config/sources_seed.json";
+import { inferSourceTier, type WireSourceTier } from "../ingest/sourceTiers";
 
 interface SeedSource {
   name: string;
   feedUrl: string;
   category: string;
+  tier?: WireSourceTier;
   /**
    * A feed that used to be in the catalogue and should now be switched off.
    *
@@ -22,6 +24,7 @@ export async function seedSources() {
   let retired = 0;
 
   for (const src of sourcesData as SeedSource[]) {
+    const tier = inferSourceTier(src);
     const exists = await prisma.source.findUnique({
       where: { feedUrl: src.feedUrl },
     });
@@ -32,8 +35,8 @@ export async function seedSources() {
       await prisma.source.update({
         where: { id: exists.id },
         data: src.retired
-          ? { name: src.name, category: src.category, enabled: false }
-          : { name: src.name, category: src.category },
+          ? { name: src.name, category: src.category, tier, enabled: false }
+          : { name: src.name, category: src.category, tier },
       });
       if (src.retired && exists.enabled) retired++;
       else skipped++;
@@ -51,6 +54,7 @@ export async function seedSources() {
         name: src.name,
         feedUrl: src.feedUrl,
         category: src.category,
+        tier,
         enabled: true,
       },
     });

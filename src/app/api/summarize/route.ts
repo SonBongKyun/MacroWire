@@ -1,68 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { safePublicFetch } from "@/lib/security/outbound-url";
+import { enrichArticleById } from "@/lib/enrichment/enrichArticle";
 
-// Client-side extractive summarization endpoint
-// No external AI API needed — uses simple extraction from RSS summary + title
-
-export async function POST(req: NextRequest) {
+/**
+ * Backward-compatible extract-key-facts endpoint.
+ *
+ * This is intentionally not labelled an AI summary: it returns only facts
+ * extracted from RSS excerpts, public page metadata and related coverage.
+ */
+export async function POST(request: NextRequest) {
   try {
-    const { url } = await req.json();
-
-    if (!url) {
+    const { url } = await request.json();
+    if (typeof url !== "string" || !url) {
       return NextResponse.json({ error: "Missing URL" }, { status: 400 });
     }
 
-    const article = await prisma.article.findUnique({
-      where: { url },
-      select: { title: true, summary: true, url: true },
-    });
+    const article = await prisma.article.findUnique({ where: { url }, select: { id: true } });
     if (!article) return NextResponse.json({ error: "Unknown article" }, { status: 404 });
-    const { title, summary } = article;
 
-    // Attempt to fetch article page for more context (with timeout)
-    let pageText = "";
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
-      const res = await safePublicFetch(article.url, {
-        signal: controller.signal,
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; MacroWire/1.0)" },
-      });
-      clearTimeout(timeout);
-      if (res.ok) {
-        const html = await res.text();
-        // Extract text from meta description and og:description
-        const metaDesc = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i)?.[1] || "";
-        const ogDesc = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["']/i)?.[1] || "";
-        pageText = ogDesc || metaDesc;
-      }
-    } catch {}
+    const enrichment = await enrichArticleById(article.id);
+    if (!enrichment) return NextResponse.json({ error: "Unknown article" }, { status: 404 });
 
-    // Build a structured summary from available data
-    const sources: string[] = [];
-    if (summary) sources.push(summary);
-    if (pageText && pageText !== summary) sources.push(pageText);
-
-    const bestText = sources[0] || "";
-
-    // Extract key sentences (simple extractive)
-    const sentences = bestText
-      .replace(/\s+/g, " ")
-      .split(/[.!?。]\s*/)
-      .filter((s) => s.trim().length > 10)
-      .slice(0, 3);
-
-    const result = {
-      title,
-      keyPoints: sentences.length > 0 ? sentences : ["요약을 생성할 수 없습니다. 원문을 확인해주세요."],
-      source: pageText ? "meta" : summary ? "rss" : "none",
-      generatedAt: new Date().toISOString(),
-    };
-
-    return NextResponse.json(result);
-  } catch (err) {
-    console.error("Summarize error:", err);
-    return NextResponse.json({ error: "Summarization failed" }, { status: 500 });
+    return NextResponse.json({
+      keyPoints: enrichment.keyFacts.map((fact) => fact.text),
+      source: enrichment.contentSources.map((source) => source.kind),
+      generatedAt: enrichment.enrichedAt,
+      mode: "extract-key-facts",
+    }, {
+      headers: { Deprecation: "true", Link: `</api/articles/${article.id}/enrich>; rel=successor-version` },
+    });
+  } catch (error) {
+    console.error("[api/summarize] error:", error);
+    return NextResponse.json({ error: "Key-fact extraction failed" }, { status: 500 });
   }
 }

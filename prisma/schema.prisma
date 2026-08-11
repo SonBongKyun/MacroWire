@@ -147,31 +147,69 @@ model DailyRecap {
 // Existing models (unchanged shape, just declared after the new ones)
 // =========================================================
 
+enum SourceTier {
+  T0
+  T1
+  T2
+  T3
+}
+
 model Source {
-  id        String    @id @default(cuid())
-  name      String
-  feedUrl   String    @unique
-  enabled   Boolean   @default(true)
-  category  String
-  createdAt DateTime  @default(now())
-  articles  Article[]
+  id                  String     @id @default(cuid())
+  name                String
+  feedUrl             String     @unique
+  enabled             Boolean    @default(true)
+  category            String
+  tier                SourceTier @default(T2)
+  lastFetchAt         DateTime?
+  lastSuccessAt       DateTime?
+  lastFailureAt       DateTime?
+  lastLatencyMs       Int?
+  consecutiveFailures Int        @default(0)
+  nextFetchAt         DateTime?
+  createdAt           DateTime   @default(now())
+  articles            Article[]
+
+  @@index([enabled, tier, nextFetchAt])
 }
 
 model Article {
-  id          String   @id
-  sourceId    String
-  sourceName  String
-  title       String
-  url         String   @unique
-  publishedAt DateTime
-  summary     String?
-  tags        String   @default("[]") // JSON array stored as string
-  isRead      Boolean  @default(false)
-  isSaved     Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  source      Source   @relation(fields: [sourceId], references: [id])
+  id                String             @id
+  sourceId          String
+  sourceName        String
+  title             String
+  url               String             @unique
+  publishedAt       DateTime
+  summary           String? // legacy alias retained while clients migrate to feedExcerpt
+  feedExcerpt       String?
+  metaDescription   String?
+  tags              String             @default("[]") // JSON array stored as string
+  importanceTier    String             @default("general")
+  importanceScore   Int                @default(0)
+  importanceReasons String             @default("[]")
+  isRead            Boolean            @default(false)
+  isSaved           Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  source            Source             @relation(fields: [sourceId], references: [id])
+  enrichment        ArticleEnrichment?
 
   @@index([publishedAt])
   @@index([sourceId])
   @@index([url])
+  @@index([importanceTier, publishedAt])
+}
+
+model ArticleEnrichment {
+  articleId      String   @id
+  keyFacts       Json
+  keyNumbers     Json
+  whyItMatters   String?
+  entities       Json
+  contentSources Json
+  analysisKind   String?
+  enrichedAt     DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  article        Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([enrichedAt])
 }

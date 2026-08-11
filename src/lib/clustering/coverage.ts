@@ -24,10 +24,65 @@ export interface Coverage {
   names: string[];
 }
 
+export interface RelatedCoverageArticle {
+  id: string;
+  sourceName: string;
+  title: string;
+  url: string;
+  publishedAt: string;
+  summary: string | null;
+  tags: string[];
+}
+
 /** Stories drift apart after this long; beyond it they are separate events. */
 const WINDOW_MS = 6 * 60 * 60 * 1000;
 /** Fewer shared words than this and the overlap is coincidence. */
 const MIN_SHARED_KEYWORDS = 2;
+
+function matchesEvent(anchor: Article, candidate: Article): boolean {
+  const anchorTime = new Date(anchor.publishedAt).getTime();
+  const candidateTime = new Date(candidate.publishedAt).getTime();
+  if (Math.abs(anchorTime - candidateTime) > WINDOW_MS) return false;
+  if (!anchor.tags.some((tag) => candidate.tags.includes(tag))) return false;
+
+  const anchorWords = extractKeywords(anchor.title);
+  const candidateWords = extractKeywords(candidate.title);
+  const shared = [...anchorWords].filter((word) => candidateWords.has(word));
+  return shared.length >= MIN_SHARED_KEYWORDS && shared.some(isStrongKeyword);
+}
+
+/**
+ * O(n) event lookup for one selected article. The list-wide coverage map stays
+ * virtualized and in-memory; detail enrichment only scans a bounded recent
+ * window and returns at most one filing per additional outlet.
+ */
+export function findRelatedCoverage(
+  anchor: Article,
+  candidates: Article[],
+  limit = 8,
+): RelatedCoverageArticle[] {
+  const seenOutlets = new Set([anchor.sourceName]);
+  const related: RelatedCoverageArticle[] = [];
+
+  for (const candidate of candidates) {
+    if (candidate.id === anchor.id || seenOutlets.has(candidate.sourceName)) continue;
+    if (!matchesEvent(anchor, candidate)) continue;
+
+    seenOutlets.add(candidate.sourceName);
+    related.push({
+      id: candidate.id,
+      sourceName: candidate.sourceName,
+      title: candidate.title,
+      url: candidate.url,
+      publishedAt: candidate.publishedAt,
+      summary: candidate.summary,
+      tags: candidate.tags,
+    });
+    if (related.length >= limit) break;
+  }
+
+  return related;
+}
 
 /**
  * Map every article to the breadth of coverage around it.

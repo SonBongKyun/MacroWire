@@ -1,141 +1,211 @@
 # MacroWire
 
-개인용 매크로 뉴스 와이어 웹앱. 공개 RSS 피드를 GitHub Actions로 수집해 Neon에 저장하고, 터미널형 UI에서 빠르게 탐색할 수 있습니다.
+개인용 실시간 거시경제·시장 뉴스 터미널. 공개 RSS/Atom 피드를 지속적으로 확인하고, 하나의 기사를 사건 단위의 사실·수치·관련 보도·출처 정보로 보강합니다.
 
-## 기술 스택
+MacroWire는 기사 전문 보관소가 아닙니다. 목록에서는 중요한 변화를 빠르게 찾고, 상세 화면에서는 공개 데이터 조각만으로 사건의 핵심을 판단한 뒤 필요한 경우 원문을 엽니다.
 
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **Database**: Neon PostgreSQL (Prisma ORM)
-- **RSS Parser**: rss-parser
+## MacroWire v2 architecture
 
-## 실행 방법
+```text
+Render Background Worker (primary)
+  → tier scheduler (T0 / T1 / T2 / T3)
+  → RSS / official public feeds
+  → normalize + canonical URL
+  → tag + explainable importance
+  → URL deduplicate
+  → Neon PostgreSQL
+  → /api/articles/head arrival check
+  → MacroWire client
 
-### 1. 의존성 설치
-
-```bash
-npm install
+GitHub Actions T0/T1 ingest (fallback only)
+  → same normalization and deduplication path
+  → Neon PostgreSQL
 ```
 
-### 2. 환경 변수와 데이터베이스
+웹 프로세스와 worker는 독립적으로 실행됩니다. worker가 source cadence, overlap 방지, retry/backoff, source failure 격리와 상태 기록을 소유합니다. `.github/workflows/breaking-ingest.yml`은 worker 장애나 배포 공백을 보완하는 best-effort safety net이며 지연 보장은 하지 않습니다.
+
+### Source tiers
+
+| Tier | 역할 | 기본 주기 | 예시 |
+|---|---|---:|---|
+| T0 | 공식 발표 | 45초 | Federal Reserve, ECB |
+| T1 | 속보 wire | 25초 | 연합뉴스 속보, CNBC Breaking, Bloomberg Markets |
+| T2 | 시장 보도 | 2분 | MarketWatch, FT, Nikkei, SCMP, CoinDesk |
+| T3 | 배경/분석 | 10분 | Hacker News, Reddit, 분석 피드 |
+
+`WIRE_T0_INTERVAL_MS`부터 `WIRE_T3_INTERVAL_MS`까지 환경 변수로 cadence를 조정할 수 있습니다. 실패한 source는 해당 tier 주기의 지수 backoff를 적용하며 최대 30분으로 제한됩니다. 한 feed의 오류는 다른 feed 실행을 중단하지 않습니다.
+
+### Source health
+
+`Source`에는 다음 runtime 상태가 저장됩니다.
+
+- `lastFetchAt`
+- `lastSuccessAt`
+- `lastFailureAt`
+- `lastLatencyMs`
+- `consecutiveFailures`
+- `nextFetchAt`
+
+`POST /api/live/pulse`는 v2부터 read-only health endpoint입니다. 브라우저가 ingestion을 유도하지 않기 때문에 여러 탭, Vercel serverless instance, worker 사이의 ingest 경쟁이 없습니다. 새 기사 도착 확인은 가벼운 `GET /api/articles/head`가 담당하고 기존의 수동 반영, desktop notification, sound UX는 유지합니다.
+
+## Article enrichment
+
+### Raw source data
+
+- title, URL, source, published time
+- `feedExcerpt`: RSS가 공개한 발췌
+- `metaDescription`: 사용자가 선택한 기사에서만 읽는 공개 page metadata
+- tags
+
+기존 `summary` 컬럼은 호환성을 위해 유지하고 migration 시 `feedExcerpt`로 안전하게 backfill합니다. 새 ingest는 두 필드에 같은 RSS 발췌를 기록합니다.
+
+### Derived data
+
+`ArticleEnrichment`는 raw data와 분리해 다음을 캐시합니다.
+
+- `keyFacts`: RSS, 공식 발표, metadata, 관련 coverage에서 그대로 추출한 문장
+- `keyNumbers`: 명시적인 단위와 주변 문맥이 함께 있는 숫자만 추출
+- `whyItMatters`: 기존 signal classifier를 이용한 규칙 기반 분석
+- entities
+- content sources / provenance
+- enrichment timestamp
+
+상세 흐름:
+
+```text
+Article selected
+  → cached enrichment 확인 (12시간)
+  → 공개 URL 안전성 + DNS 검사
+  → 최대 512KB HTML에서 meta/og description만 추출
+  → 최근 6시간 coverage window에서 독립 매체 확인
+  → 사실 / 수치 / 규칙 분석 분리
+  → ArticleEnrichment 저장
+  → event-centric detail 표시
+```
+
+모든 article row에서 page fetch나 AI 호출을 실행하지 않습니다. enrichment는 선택된 기사에만 lazy-load되며, coverage query는 최대 250개의 최근 후보로 제한됩니다.
+
+### Provenance and AI policy
+
+우선순위는 `official source → RSS → public metadata → multi-source coverage → rules → optional AI`입니다. Fast Wire와 Article Detail은 `ANTHROPIC_API_KEY` 없이 동작합니다.
+
+상세 화면은 사실과 분석을 분리합니다.
+
+- `WHAT HAPPENED`: 실제 확보한 텍스트와 source label
+- `KEY NUMBERS`: 실제 문자열, 문맥, source label
+- `WHY IT MATTERS`: `Analysis · rules`로 명시
+- `RELATED COVERAGE`: 독립 매체별 headline, time, URL
+- `PROVENANCE`: 사용한 RSS/official/metadata/coverage/rules 표시
+
+정보가 없으면 섹션을 숨깁니다. 빈 데이터를 채우기 위한 문장이나 수치를 생성하지 않습니다.
+
+## Local development
+
+### Requirements
+
+- Node.js 24
+- Neon/PostgreSQL-compatible database
+- `DATABASE_URL`: pooled application connection
+- `DIRECT_URL`: direct migration connection
+
+### Install and migrate
 
 ```bash
-npx prisma db push
+npm ci
+npx prisma migrate deploy
 npx prisma generate
 ```
 
-### 3. 개발 서버 실행
+운영 데이터가 있는 환경에서 `prisma migrate reset`을 실행하지 마세요. v2 migration은 기존 row를 삭제하지 않고 nullable/default column, enum, enrichment table을 추가한 뒤 `summary → feedExcerpt`만 backfill합니다.
+
+### Run web and worker
+
+두 터미널에서 실행합니다.
 
 ```bash
 npm run dev
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000) 접속
+```bash
+npm run worker:wire
+```
 
-### 4. 첫 인제스트 실행
+웹 앱은 [http://localhost:3000](http://localhost:3000), 실제 desk는 `/app`에서 엽니다.
 
-- `DATABASE_URL`과 `DIRECT_URL`을 설정한 뒤 `npx tsx scripts/ingest-once.ts` 실행
-- 배포 환경에서는 GitHub Actions의 `full-ingest`와 `breaking-ingest`가 Neon에 직접 기록
+### Validation
 
-## 주요 기능
+```bash
+npm run typecheck
+npm test
+npm run lint
+npm run build
+```
 
-| 기능 | 설명 |
-|------|------|
-| RSS 인제스트 | 30개 이상 공개 RSS 피드를 정기 수집하고 고신호 속보를 우선 처리 |
-| 태깅 | 규칙 기반 자동 태깅 (rates, inflation, fed, fx, oil, geopolitics, equities, credit, crypto, ai) |
-| 필터 | 소스, 태그, 검색, 기간(24h/7d/30d) 필터링 |
-| 읽음/저장 | 기사 읽음 상태 및 저장 토글 |
-| 자동 정리 | 30일 초과 기사 자동 삭제 (저장된 기사 제외) |
-| 3패널 UI | 좌측(소스/태그), 중앙(기사 목록), 우측(기사 상세) |
-| 시세 | Yahoo Finance 기반 단일 시세 계층 — 모든 화면이 같은 일간 등락률과 실제 일중 시세를 사용 |
-| 경제 캘린더 | 공표 규칙에서 매달 자동 산출 (하드코딩 일정 없음) |
-| 모바일 | 하단 탭바 + 리스트→상세 전환, 44px 터치 타깃, 홈 화면 설치(PWA) |
+## Deployment
 
-## 모바일
+### Neon
 
-- **터치**: 768px 이하에서 모든 컨트롤이 최소 44px 타깃을 갖고, 본문 텍스트는 11px 아래로
-  내려가지 않습니다. 기사 태그처럼 작게 보여야 하는 칩은 겉보기 크기를 유지한 채
-  가상 요소로 히트 영역만 넓힙니다.
-- **배터리·데이터**: 모든 폴링은 `useVisibleInterval`을 거칩니다. 탭이 가려지면 뉴스(30초)·
-  시세(5분)·시계(1초) 타이머가 전부 멈추고, 다시 보는 순간 한 번 즉시 갱신합니다.
-  주머니 속에서 라디오를 깨우지 않습니다.
-- **설치**: `start_url`이 `/app`이라 홈 화면에서 열면 랜딩이 아니라 데스크로 바로 들어갑니다.
-  아이콘은 192/512 PNG와 maskable 변형을 포함합니다(`npm run icons`로 SVG에서 재생성).
-- **초기 로딩**: 대시보드와 와이어만 처음에 로드하고, 나머지 탭·오버레이는 열 때
-  내려받습니다. 에디토리얼 세리프(Crimson Pro)는 랜딩·리캡 라우트에서만 로드합니다.
+1. production backup/PITR 상태를 확인합니다.
+2. `DIRECT_URL`로 `npx prisma migrate deploy`를 실행합니다.
+3. destructive reset 없이 `20260811090000_fast_wire_article_enrichment` migration이 적용됐는지 확인합니다.
 
-## 데이터 원칙
+### Render Background Worker
 
-화면에 보이는 숫자는 실제 값이거나, 실제가 아닐 때 그렇다고 표시합니다.
+repository root의 `render.yaml`을 Blueprint로 연결합니다.
 
-- **시세는 한 곳에서만 계산합니다.** `src/lib/market/quote.ts`가 유일한 시세 계층이고
-  `/api/market`과 `/api/portfolio`가 이를 공유합니다. 일간 등락률은 항상
-  Yahoo `meta.previousClose`(직전 정규장 종가)를 기준으로 계산합니다. 조회 구간에 따라
-  달라지는 `chartPreviousClose`를 쓰면 5일 변동률이 일간 변동률로 표시됩니다.
-- **차트는 합성하지 않습니다.** 스파크라인은 실제 일중 종가 시계열입니다. 데이터가
-  부족하면 선을 그리지 않고 "일중 시세 없음"을 표시합니다.
-- **정적 수치는 기준일을 밝힙니다.** `config/macro_indicators.json`의 각 항목은 `asOf`와
-  `staleAfterDays`를 가지며, 기간이 지나거나 `asOf`가 `null`이면 대시보드가 흐리게
-  표시하고 "확인 필요"를 붙입니다.
-- **캘린더는 규칙으로 생성합니다.** `config/econ_calendar.json`의 `recurring` 규칙을
-  `src/lib/calendar/econ.ts`가 매달 전개하므로 일정이 과거로 굳지 않습니다.
-  규칙 기반 항목은 "추정"으로 표시하고, 확정된 중앙은행 일정은 `anchors`에 추가하면
-  같은 날짜의 추정 항목을 대체합니다. 발표 시각은 기관 현지 시간대로 저장해
-  미국 지표가 EST/EDT를 자동으로 따라갑니다.
+- type: `worker`
+- build: `npm ci`
+- pre-deploy: `npx prisma migrate deploy`
+- start: `npm run worker:wire`
+- required secrets: `DATABASE_URL`, `DIRECT_URL`
+- shutdown delay: 30초
 
-## API 엔드포인트
+Render는 worker 종료 시 `SIGTERM`을 보내므로 entrypoint가 새 tick을 중단하고 진행 중 fetch를 drain한 뒤 Prisma connection을 닫습니다. Worker가 정상화된 뒤 T0/T1 로그에서 주기, latency, failures, next poll 상태를 확인하세요.
+
+### Vercel
+
+Vercel은 Next.js web/API만 실행합니다. worker loop를 Vercel function 안에서 시작하지 않습니다. schema migration 이후 web을 배포하고 다음을 확인합니다.
+
+- `GET /api/articles`가 새 raw/importance fields를 반환
+- `POST /api/articles/:id/enrich`가 cache/provenance를 반환
+- `POST /api/live/pulse`가 `role: health-only`를 반환
+- `GET /api/articles/head` arrival count가 기존처럼 동작
+
+### GitHub Actions fallback
+
+`breaking-ingest-fallback` workflow에는 `DATABASE_URL`과 `DIRECT_URL` secret이 필요합니다. T0/T1 source만 bounded run으로 확인하며 worker를 대체하는 latency guarantee로 간주하지 않습니다.
+
+## API
 
 | Method | Endpoint | 설명 |
-|--------|----------|------|
-| GET | `/api/sources` | 소스 목록 |
-| PATCH | `/api/sources/:id` | 소스 활성화/비활성화 |
-| GET | `/api/articles` | 기사 조회 (필터: sourceId, tag, q, read, saved, range, limit, cursor) |
-| POST | `/api/articles/:id/read` | 읽음 토글 |
-| POST | `/api/articles/:id/save` | 저장 토글 |
-| POST | `/api/ingest` | 수동 인제스트 실행 |
+|---|---|---|
+| GET | `/api/sources` | source, tier, health 상태 |
+| GET | `/api/articles` | virtualized list용 기사 조회 |
+| GET | `/api/articles/head` | 새 기사/속보 도착 수 확인 |
+| POST | `/api/articles/:id/enrich` | 선택 기사 metadata + 사건 enrichment |
+| POST | `/api/articles/:id/read` | 읽음 전환 |
+| POST | `/api/articles/:id/save` | 저장 전환 |
+| POST | `/api/live/pulse` | read-only worker health |
+| POST | `/api/summarize` | 구버전 호환용 extract-key-facts wrapper |
+| POST | `/api/ingest` | bounded manual/full fallback ingest |
 
-## 프로젝트 구조
+## Data and copyright rules
 
-```
-src/
-├── app/
-│   ├── api/
-│   │   ├── ingest/route.ts
-│   │   ├── articles/route.ts
-│   │   ├── articles/[id]/read/route.ts
-│   │   ├── articles/[id]/save/route.ts
-│   │   ├── sources/route.ts
-│   │   └── sources/[id]/route.ts
-│   ├── page.tsx
-│   ├── layout.tsx
-│   └── globals.css
-├── components/
-│   ├── TopBar.tsx
-│   ├── SourcePanel.tsx
-│   ├── ArticleList.tsx
-│   └── ArticleDetail.tsx
-├── lib/
-│   ├── db/prisma.ts
-│   ├── db/seed.ts
-│   ├── ingest/ingest.ts
-│   ├── cleanup/cleaner.ts
-│   ├── calendar/econ.ts      # 경제 캘린더 규칙 전개
-│   ├── market/quote.ts       # 시세 단일 계층 (등락률·스파크라인)
-│   └── tagging/tagger.ts
-└── types/index.ts
-config/
-├── tag_rules.json
-├── sources_seed.json
-├── econ_calendar.json        # 반복 규칙 + 확정 일정(anchors)
-└── macro_indicators.json     # 정책금리·물가 등 참고 수치 (asOf 필수)
-prisma/
-└── schema.prisma
-```
+- 기사 전문을 저장하거나 화면에 재현하지 않습니다.
+- paywall, login, robots 정책을 우회하지 않습니다.
+- metadata fetch는 DB에 이미 저장된 HTTP(S) URL만 대상으로 하고 private/loopback DNS를 차단합니다.
+- HTML은 metadata 추출 중 메모리에만 최대 512KB까지 읽으며 DB에는 description만 저장합니다.
+- 화면의 사실과 수치는 확보된 source text에서만 추출합니다.
+- 규칙 기반 해석은 source fact가 아닌 `Analysis`로 표시합니다.
+- 원문은 항상 source가 표시된 `OPEN ORIGINAL` CTA로 엽니다.
 
-## 법적 제약
+## Existing product behavior retained
 
-- 본문 스크래핑 금지
-- 유료 콘텐츠 우회 접근 금지
-- 저장 데이터: title, url, publishedAt, source, summary(피드 제공 시), tags
-- 본문은 항상 "Open original"로 외부 링크 이동
+- article list virtualization
+- source/tag/search/range filters
+- per-user read/save state
+- research notes and highlights
+- related coverage and signal scoring
+- user-controlled arrival loading (목록 강제 이동 없음)
+- desktop notifications and sound
+- mobile list/detail navigation

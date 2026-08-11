@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
-/** How often the open app asks the server to refresh the breaking queue. */
+/** How often the open app checks the long-running worker's T0/T1 health. */
 const PULSE_INTERVAL_MS = 60_000;
 /** How often it asks whether anything landed. Cheap enough to run this often. */
 const CHECK_INTERVAL_MS = 8_000;
@@ -19,6 +19,8 @@ export interface LiveWireState {
   checkedAt: number | null;
   /** False once a check fails, so the UI can stop claiming to be live. */
   connected: boolean;
+  /** Health reported by the primary T0/T1 worker. */
+  workerStatus: "healthy" | "degraded" | "stale" | "unconfigured" | "unknown";
 }
 
 interface Options {
@@ -31,14 +33,9 @@ interface Options {
 /**
  * Keeps the wire live for as long as the app is open.
  *
- * Two loops, because they cost very different amounts. The pulse asks the
- * server to go and fetch the breaking feeds — real work, once a minute. The
- * check asks whether anything landed — two counts, every eight seconds. Neither
- * runs while the tab is hidden.
- *
- * The scheduled job cannot do this on its own: GitHub throttles cron on public
- * repositories so hard that a five-minute schedule was landing 45–80 minutes
- * apart. This is what makes "leave it open and watch" actually work.
+ * Two cheap read loops: one checks worker health once a minute, while the other
+ * asks whether anything landed every eight seconds. Ingestion belongs to the
+ * worker, so multiple tabs and serverless instances cannot race feed writes.
  */
 export function useLiveWire({ onArrival, paused = false }: Options): LiveWireState & {
   /** Move the watermark to now; the reader has caught up. */
@@ -50,6 +47,7 @@ export function useLiveWire({ onArrival, paused = false }: Options): LiveWireSta
     latestAt: null,
     checkedAt: null,
     connected: true,
+    workerStatus: "unknown",
   });
 
   // The watermark the reader has already seen. Set on the first check so an
@@ -86,6 +84,7 @@ export function useLiveWire({ onArrival, paused = false }: Options): LiveWireSta
           onArrivalRef.current(data.newCount, data.breakingCount);
         }
         return {
+          ...s,
           pending: data.newCount,
           pendingBreaking: data.breakingCount,
           latestAt: data.latest,
@@ -101,12 +100,17 @@ export function useLiveWire({ onArrival, paused = false }: Options): LiveWireSta
   const pulse = useCallback(async () => {
     if (paused) return;
     try {
-      await fetch("/api/live/pulse", { method: "POST" });
+      const response = await fetch("/api/live/pulse", { method: "POST" });
+      if (!response.ok) throw new Error(String(response.status));
+      const data: { status?: LiveWireState["workerStatus"] } = await response.json();
+      setState((current) => ({
+        ...current,
+        workerStatus: data.status ?? "unknown",
+      }));
     } catch {
-      /* the scheduled job is still the floor */
+      setState((current) => ({ ...current, workerStatus: "unknown" }));
     }
-    // Look right after asking, so a pulse that found something shows up now
-    // rather than on the next eight-second tick.
+    // Keep arrival state current after the health check.
     await check();
   }, [paused, check]);
 

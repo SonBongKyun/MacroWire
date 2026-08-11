@@ -48,6 +48,8 @@ export async function GET(request: NextRequest) {
           OR: [
             { title: { contains: token } },
             { summary: { contains: token } },
+            { feedExcerpt: { contains: token } },
+            { metaDescription: { contains: token } },
             { sourceName: { contains: token } },
             { tags: { contains: token } },
           ],
@@ -56,6 +58,8 @@ export async function GET(request: NextRequest) {
         where.OR = [
           { title: { contains: q } },
           { summary: { contains: q } },
+          { feedExcerpt: { contains: q } },
+          { metaDescription: { contains: q } },
           { sourceName: { contains: q } },
           { tags: { contains: q } },
         ];
@@ -91,6 +95,7 @@ export async function GET(request: NextRequest) {
 
     const articles = await prisma.article.findMany({
       where,
+      include: { source: { select: { tier: true } } },
       orderBy: { publishedAt: "desc" },
       take: limit + 1, // fetch one extra to determine if there's a next page
       ...(cursor
@@ -121,11 +126,15 @@ export async function GET(request: NextRequest) {
     const savedIds = new Set(savedStates.map((state) => state.articleId));
 
     return NextResponse.json({
-      data: data.map((a) => ({
-        ...a,
-        tags: JSON.parse(a.tags),
-        isRead: readIds.has(a.id),
-        isSaved: savedIds.has(a.id),
+      data: data.map(({ source, ...article }) => ({
+        ...article,
+        sourceTier: source.tier,
+        summary: article.feedExcerpt ?? article.summary,
+        feedExcerpt: article.feedExcerpt ?? article.summary,
+        tags: JSON.parse(article.tags),
+        importanceReasons: JSON.parse(article.importanceReasons),
+        isRead: readIds.has(article.id),
+        isSaved: savedIds.has(article.id),
       })),
       nextCursor,
       hasMore,
