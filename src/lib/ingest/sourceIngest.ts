@@ -2,6 +2,7 @@ import Parser from "rss-parser";
 import { prisma } from "../db/prisma";
 import { applyTags } from "../tagging/tagger";
 import { classifyNewsImportance } from "../news/importance";
+import { deliverDiscordAlerts } from "../alerts/discord";
 import { withFeedRetry } from "./feedRetry";
 import { articleIdFromUrl, canonicalizeArticleUrl } from "./url";
 import {
@@ -40,8 +41,13 @@ export interface FeedItem {
 export interface NewWireArticle {
   id: string;
   title: string;
+  url: string;
   sourceName: string;
+  sourceTier: WireSourceTier;
   publishedAt: string;
+  importanceTier: "critical" | "major" | "general";
+  importanceScore: number;
+  importanceReasons: string[];
 }
 
 export interface SourceIngestResult {
@@ -182,8 +188,13 @@ export async function persistFeedItems(
     newArticles.push({
       id,
       title,
+      url,
       sourceName: source.name,
+      sourceTier: source.tier,
       publishedAt: publishedAt.toISOString(),
+      importanceTier: importance.tier,
+      importanceScore: importance.score,
+      importanceReasons: importance.reasons,
     });
   }
 
@@ -249,6 +260,10 @@ export async function pollSourceAndRecordHealth(source: WireSource): Promise<Sou
     // Prisma reconnects its pool after transient disconnects. Health recording
     // is useful, but never allowed to kill the source loop.
     console.error(`[wire] health update failed for ${source.name}:`, error);
+  }
+
+  if (result.newArticles.length > 0) {
+    await deliverDiscordAlerts(result.newArticles);
   }
 
   return result;

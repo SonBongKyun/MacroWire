@@ -29,6 +29,10 @@ test("canonicalizes tracking variants to one article and prevents duplicate inge
   assert.equal(result.skipped, 1);
   assert.equal(created.length, 1);
   assert.equal(created[0].feedExcerpt, null);
+  assert.equal(result.newArticles[0].url, "https://example.com/story?id=7");
+  assert.equal(result.newArticles[0].sourceTier, "T2");
+  assert.equal(typeof result.newArticles[0].importanceScore, "number");
+  assert.ok(Array.isArray(result.newArticles[0].importanceReasons));
 });
 
 test("keeps same-event headlines from different outlets for corroboration", async () => {

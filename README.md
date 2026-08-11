@@ -14,6 +14,7 @@ Render Background Worker (primary)
   → tag + explainable importance
   → URL deduplicate
   → Neon PostgreSQL
+  → Discord webhook (new T0/T1 signal only)
   → /api/articles/head arrival check
   → MacroWire client
 
@@ -23,6 +24,22 @@ GitHub Actions T0/T1 ingest (fallback only)
 ```
 
 웹 프로세스와 worker는 독립적으로 실행됩니다. worker가 source cadence, overlap 방지, retry/backoff, source failure 격리와 상태 기록을 소유합니다. `.github/workflows/breaking-ingest.yml`은 worker 장애나 배포 공백을 보완하는 best-effort safety net이며 지연 보장은 하지 않습니다.
+
+### Discord real-time alerts
+
+`DISCORD_WEBHOOK_URL`이 설정되면 worker는 DB에 실제로 새로 생성된 기사만 Discord로 전송합니다. 기본 정책은 T0/T1, 중요도 38점 이상, 발행 30분 이내이며 한 번에 최대 10건입니다. URL 정규화와 DB unique constraint를 통과한 기사만 대상이므로 worker와 GitHub fallback이 겹쳐도 같은 기사가 두 경로에서 동시에 알림으로 만들어지지 않습니다.
+
+Discord 응답이 `429` 또는 `5xx`이면 최대 3회 backoff 재시도합니다. webhook 오류는 해당 feed 수집과 DB 저장을 되돌리거나 worker를 중단하지 않습니다. webhook URL은 비밀값이므로 repository나 클라이언트 저장소에 넣지 말고 Render 및 GitHub Actions secret으로만 설정합니다.
+
+환경 변수:
+
+- `DISCORD_WEBHOOK_URL`: Discord incoming webhook URL
+- `DISCORD_ALERTS_ENABLED`: `false`이면 URL이 있어도 비활성화
+- `DISCORD_ALERT_SOURCE_TIERS`: 기본 `T0,T1`
+- `DISCORD_ALERT_MIN_SCORE`: 기본 `38`
+- `DISCORD_ALERT_MAX_AGE_MINUTES`: 기본 `30`
+- `DISCORD_ALERT_MAX_ARTICLES`: 기본 `10`, Discord embed 제한에 맞춰 최대 10
+- `DISCORD_WEBHOOK_USERNAME`: 기본 `MacroWire`
 
 ### Source tiers
 
@@ -157,7 +174,7 @@ repository root의 `render.yaml`을 Blueprint로 연결합니다.
 - build: `npm ci`
 - pre-deploy: `npx prisma migrate deploy`
 - start: `npm run worker:wire`
-- required secrets: `DATABASE_URL`, `DIRECT_URL`
+- required secrets: `DATABASE_URL`, `DIRECT_URL`, `DISCORD_WEBHOOK_URL`
 - shutdown delay: 30초
 
 Render는 worker 종료 시 `SIGTERM`을 보내므로 entrypoint가 새 tick을 중단하고 진행 중 fetch를 drain한 뒤 Prisma connection을 닫습니다. Worker가 정상화된 뒤 T0/T1 로그에서 주기, latency, failures, next poll 상태를 확인하세요.
@@ -173,7 +190,7 @@ Vercel은 Next.js web/API만 실행합니다. worker loop를 Vercel function 안
 
 ### GitHub Actions fallback
 
-`breaking-ingest-fallback` workflow에는 `DATABASE_URL`과 `DIRECT_URL` secret이 필요합니다. T0/T1 source만 bounded run으로 확인하며 worker를 대체하는 latency guarantee로 간주하지 않습니다.
+`breaking-ingest-fallback` workflow에는 `DATABASE_URL`, `DIRECT_URL`, `DISCORD_WEBHOOK_URL` secret이 필요합니다. T0/T1 source만 bounded run으로 확인하며 worker를 대체하는 latency guarantee로 간주하지 않습니다.
 
 ## API
 

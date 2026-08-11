@@ -13,6 +13,16 @@ services:
         sync: false
       - key: DIRECT_URL
         sync: false
+      - key: DISCORD_WEBHOOK_URL
+        sync: false
+      - key: DISCORD_ALERT_SOURCE_TIERS
+        value: "T0,T1"
+      - key: DISCORD_ALERT_MIN_SCORE
+        value: "38"
+      - key: DISCORD_ALERT_MAX_AGE_MINUTES
+        value: "30"
+      - key: DISCORD_ALERT_MAX_ARTICLES
+        value: "10"
       - key: WIRE_WORKER_CONCURRENCY
         value: "4"
       - key: WIRE_LOOP_INTERVAL_MS

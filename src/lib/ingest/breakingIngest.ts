@@ -2,6 +2,7 @@ import { prisma } from "../db/prisma";
 import { seedSources } from "../db/seed";
 import { runSourceIngest, type NewWireArticle, type WireSource } from "./sourceIngest";
 import { FALLBACK_TIERS } from "./sourceTiers";
+import { deliverDiscordAlerts } from "../alerts/discord";
 
 export type NewBreakingArticle = NewWireArticle;
 
@@ -35,10 +36,11 @@ export async function runBreakingIngest(): Promise<BreakingIngestResult> {
   const results = await Promise.all(
     sources.map((source) => runSourceIngest(source as WireSource)),
   );
-  const newArticles = results
+  const allNewArticles = results
     .flatMap((result) => result.newArticles)
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
-    .slice(0, 10);
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  await deliverDiscordAlerts(allNewArticles);
+  const newArticles = allNewArticles.slice(0, 10);
 
   return {
     added: results.reduce((sum, result) => sum + result.added, 0),

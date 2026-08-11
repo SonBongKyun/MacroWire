@@ -1,6 +1,7 @@
 import { prisma } from "../db/prisma";
 import { cleanupOldArticles } from "../cleanup/cleaner";
 import { runSourceIngest, type WireSource } from "./sourceIngest";
+import { deliverDiscordAlerts } from "../alerts/discord";
 
 export interface SourceParser {
   canHandle: (feedUrl: string) => boolean;
@@ -29,6 +30,7 @@ export async function runIngest(): Promise<IngestResult> {
   const results = await Promise.all(
     sources.map((source) => runSourceIngest(source as WireSource)),
   );
+  await deliverDiscordAlerts(results.flatMap((result) => result.newArticles));
 
   try {
     await cleanupOldArticles();
