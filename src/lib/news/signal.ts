@@ -20,11 +20,14 @@ const TAG_SIGNALS: Record<
   물가: { weight: 22, reason: "물가", evidence: true },
   환율: { weight: 22, reason: "외환시장", evidence: true },
   수출입: { weight: 18, reason: "무역", evidence: true },
-  재정: { weight: 18, reason: "재정정책", evidence: true },
+  // Broad tags help rank an article after concrete evidence is found, but do
+  // not promote political rhetoric or incidental property stories by
+  // themselves. Specific fiscal and housing phrases are handled below.
+  재정: { weight: 18, reason: "재정정책", evidence: false },
   에너지: { weight: 17, reason: "원자재", evidence: true },
   원자재: { weight: 16, reason: "원자재", evidence: true },
   가계부채: { weight: 20, reason: "금융안정", evidence: true },
-  부동산: { weight: 14, reason: "부동산", evidence: true },
+  부동산: { weight: 10, reason: "부동산", evidence: false },
   경기: { weight: 8, reason: "경기", evidence: false },
   // Equity moves are colour, not a macro cause on their own — weighted low and
   // deliberately not counted as evidence, so "증시 급락" alone stays general
@@ -57,6 +60,11 @@ const TEXT_SIGNALS: Array<{ pattern: RegExp; weight: number; reason: string }> =
     reason: "경기지표",
   },
   {
+    pattern: /(주택가격|집값|아파트값|주택시장|부동산시장|주택담보대출|모기지\s*금리|주택착공|주택판매|home prices?|housing market|mortgage rates?|housing starts?|home sales?)/i,
+    weight: 28,
+    reason: "주택시장",
+  },
+  {
     pattern: /(관세|무역수지|수출|수입|재정적자|국가채무|추경|예산안|tariff|trade (deficit|friction|war)|fiscal|government debt)/i,
     weight: 29,
     reason: "정책·무역",
@@ -77,9 +85,14 @@ const TEXT_SIGNALS: Array<{ pattern: RegExp; weight: number; reason: string }> =
     reason: "반도체",
   },
   {
-    pattern: /(제재|휴전|전쟁|분쟁|미사일|핵협상|공급망|sanction|ceasefire|geopolit|supply chain)/i,
-    weight: 26,
-    reason: "지정학",
+    pattern: /((제재|휴전|전쟁|분쟁|미사일|핵협상|sanction|ceasefire|war|conflict|missile).*(증시|주가|환율|유가|원유|에너지|공급망|수출|관세|해운|호르무즈|홍해|stocks?|market|currency|oil|energy|supply chain|export|tariff|shipping)|(증시|주가|환율|유가|원유|에너지|공급망|수출|관세|해운|호르무즈|홍해|stocks?|market|currency|oil|energy|supply chain|export|tariff|shipping).*(제재|휴전|전쟁|분쟁|미사일|핵협상|sanction|ceasefire|war|conflict|missile))/i,
+    weight: 30,
+    reason: "지정학·시장",
+  },
+  {
+    pattern: /(전쟁\s*(선포|발발)|침공|대규모\s*(공습|공격)|핵실험|invasion|declares? war|war breaks? out|major attack|nuclear test)/i,
+    weight: 34,
+    reason: "지정학 급변",
   },
   {
     pattern: /((인공지능|artificial intelligence|\bAI\b).*(증시|주가|투자|시장|반도체|수출|규제|stocks?|market|chips?|export|regulation)|(stocks?|market|chips?|export|regulation).*(인공지능|artificial intelligence|\bAI\b))/i,
@@ -105,6 +118,10 @@ const NOISE_SIGNALS: Array<{ pattern: RegExp; penalty: number }> = [
   {
     pattern: /(입건|구속영장|흉기|실종|교통사고|화재\s*발생|부고|별세|장례식|자수|피의자|압수수색|마약|살인|경찰\s*(수사|출동))/i,
     penalty: 46,
+  },
+  {
+    pattern: /(국민의힘|국힘|더불어민주당|민주당|여당|야당|대변인|원내대표).*(비판|촉구|사과|재검토|철회|규탄|논평|입장)|(republicans?|democrats?|opposition|ruling party).*(critic|urge|demand|call for|slam|apolog)/i,
+    penalty: 22,
   },
 ];
 

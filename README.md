@@ -4,6 +4,14 @@
 
 MacroWire는 기사 전문 보관소가 아닙니다. 목록에서는 중요한 변화를 빠르게 찾고, 상세 화면에서는 공개 데이터 조각만으로 사건의 핵심을 판단한 뒤 필요한 경우 원문을 엽니다.
 
+## Deployment topology
+
+- **Vercel**: `main` 브랜치의 production web app과 Next.js API
+- **Render**: tiered RSS polling과 Discord 전송을 담당하는 선택적 background worker만 실행
+- **Neon**: 두 실행 환경이 공유하는 production PostgreSQL
+
+`render.yaml`은 web service를 정의하지 않습니다. 공개 MacroWire 앱은 Vercel의 `macro-wire` 프로젝트에 연결되어 있습니다.
+
 ## MacroWire v2 architecture
 
 ```text
@@ -27,7 +35,7 @@ GitHub Actions T0/T1 ingest (fallback only)
 
 ### Discord real-time alerts
 
-`DISCORD_WEBHOOK_URL`이 설정되면 worker는 DB에 실제로 새로 생성된 기사만 Discord로 전송합니다. 기본 정책은 T0/T1, 중요도 38점 이상, 발행 30분 이내이며 한 번에 최대 10건입니다. URL 정규화와 DB unique constraint를 통과한 기사만 대상이므로 worker와 GitHub fallback이 겹쳐도 같은 기사가 두 경로에서 동시에 알림으로 만들어지지 않습니다.
+`DISCORD_WEBHOOK_URL`이 설정되면 worker는 DB에 실제로 새로 생성된 기사만 Discord로 전송합니다. 기본 정책은 T0/T1, 중요도 55점 이상, 발행 30분 이내이며 한 번에 최대 5건입니다. URL 정규화와 DB unique constraint를 통과한 기사만 대상이므로 worker와 GitHub fallback이 겹쳐도 같은 기사가 두 경로에서 동시에 알림으로 만들어지지 않습니다.
 
 Discord 응답이 `429` 또는 `5xx`이면 최대 3회 backoff 재시도합니다. webhook 오류는 해당 feed 수집과 DB 저장을 되돌리거나 worker를 중단하지 않습니다. webhook URL은 비밀값이므로 repository나 클라이언트 저장소에 넣지 말고 Render 및 GitHub Actions secret으로만 설정합니다.
 
@@ -36,9 +44,9 @@ Discord 응답이 `429` 또는 `5xx`이면 최대 3회 backoff 재시도합니�
 - `DISCORD_WEBHOOK_URL`: Discord incoming webhook URL
 - `DISCORD_ALERTS_ENABLED`: `false`이면 URL이 있어도 비활성화
 - `DISCORD_ALERT_SOURCE_TIERS`: 기본 `T0,T1`
-- `DISCORD_ALERT_MIN_SCORE`: 기본 `38`
+- `DISCORD_ALERT_MIN_SCORE`: 기본 `55`, 시장 영향이 뚜렷한 기사만 전송
 - `DISCORD_ALERT_MAX_AGE_MINUTES`: 기본 `30`
-- `DISCORD_ALERT_MAX_ARTICLES`: 기본 `10`, Discord embed 제한에 맞춰 최대 10
+- `DISCORD_ALERT_MAX_ARTICLES`: 기본 `5`, 한 번의 속보 폭주를 다섯 건으로 제한
 - `DISCORD_WEBHOOK_USERNAME`: 기본 `MacroWire`
 
 ### Source tiers
@@ -106,11 +114,14 @@ Article selected
 
 우선순위는 `official source → RSS → public metadata → multi-source coverage → rules → optional AI`입니다. Fast Wire와 Article Detail은 `ANTHROPIC_API_KEY` 없이 동작합니다.
 
+기사 상세의 `AI ORIGINAL SUMMARY`는 사용자가 선택한 기사에서 버튼을 눌렀을 때만 실행됩니다. SSRF 검사를 통과한 공개 원문 본문을 메모리에서 최대 14,000자까지만 읽고, 원문 전체는 저장하지 않습니다. 본문 접근이 막히거나 부족하면 우회하지 않고 RSS/metadata로만 요약하며 화면에 근거 범위를 표시합니다. 파생 요약은 tier·locale·prompt version별로 7일간 `Insight` 캐시에 저장되고, 캐시 적중은 일일 AI quota를 차감하지 않습니다.
+
 상세 화면은 사실과 분석을 분리합니다.
 
 - `WHAT HAPPENED`: 실제 확보한 텍스트와 source label
 - `KEY NUMBERS`: 실제 문자열, 문맥, source label
 - `WHY IT MATTERS`: `Analysis · rules`로 명시
+- `AI ORIGINAL SUMMARY`: AI 생성 표시, 원문/RSS 근거 범위, 신뢰도, 캐시 여부
 - `RELATED COVERAGE`: 독립 매체별 headline, time, URL
 - `PROVENANCE`: 사용한 RSS/official/metadata/coverage/rules 표시
 

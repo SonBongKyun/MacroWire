@@ -91,6 +91,28 @@ test("does not trust broad AI or geopolitics tags without textual evidence", () 
   assert.equal(crime.tier, "general");
 });
 
+test("requires market impact or a major escalation for geopolitical alerts", () => {
+  const militaryHardware = classifyArticleSignal(article({
+    sourceName: "연합뉴스 속보",
+    title: "레이저무기·초음속미사일 무장, 상륙전력 과시",
+    tags: ["속보", "지정학"],
+  }));
+  const marketImpact = classifyArticleSignal(article({
+    sourceName: "Bloomberg Markets",
+    title: "Iran conflict sends oil higher and pressures global stock markets",
+    tags: ["속보", "지정학", "에너지"],
+  }));
+  const majorEscalation = classifyArticleSignal(article({
+    sourceName: "연합뉴스 속보",
+    title: "인접국 침공으로 전쟁 발발",
+    tags: ["속보", "지정학"],
+  }));
+
+  assert.equal(militaryHardware.tier, "general");
+  assert.notEqual(marketImpact.tier, "general");
+  assert.notEqual(majorEscalation.tier, "general");
+});
+
 test("keeps AI and semiconductor stories when the title contains market evidence", () => {
   const signal = classifyArticleSignal(article({
     title: "AI hardware stocks plunge on semiconductor export restrictions",

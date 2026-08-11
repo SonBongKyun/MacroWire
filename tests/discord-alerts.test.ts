@@ -30,7 +30,8 @@ test("loads a Discord-only webhook config without exposing unrelated hosts", () 
   const config = loadDiscordAlertConfig({ DISCORD_WEBHOOK_URL: webhookUrl });
   assert.ok(config);
   assert.deepEqual([...config.sourceTiers], ["T0", "T1"]);
-  assert.equal(config.minScore, 38);
+  assert.equal(config.minScore, 55);
+  assert.equal(config.maxArticles, 5);
   assert.throws(
     () => loadDiscordAlertConfig({ DISCORD_WEBHOOK_URL: "https://hooks.slack.com/services/test" }),
     /Discord incoming webhook URL/,
@@ -50,6 +51,7 @@ test("selects only fresh high-signal configured tiers and caps bursts", () => {
     article({ id: "article-3", title: "ECB statement", importanceScore: 60 }),
     article({ id: "old", publishedAt: "2026-08-11T10:00:00.000Z" }),
     article({ id: "low", importanceScore: 20 }),
+    article({ id: "borderline", importanceScore: 54 }),
     article({ id: "background", sourceTier: "T3" }),
   ], config, now);
 

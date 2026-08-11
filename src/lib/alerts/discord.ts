@@ -3,9 +3,9 @@ import type { ImportanceTier } from "../news/importance";
 import type { WireSourceTier } from "../ingest/sourceTiers";
 
 const DEFAULT_TIERS: readonly WireSourceTier[] = ["T0", "T1"];
-const DEFAULT_MIN_SCORE = 38;
+const DEFAULT_MIN_SCORE = 55;
 const DEFAULT_MAX_AGE_MINUTES = 30;
-const DEFAULT_MAX_ARTICLES = 10;
+const DEFAULT_MAX_ARTICLES = 5;
 const DEFAULT_TIMEOUT_MS = 8_000;
 const MAX_ATTEMPTS = 3;
 

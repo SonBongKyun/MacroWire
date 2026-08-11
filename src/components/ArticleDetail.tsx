@@ -16,6 +16,7 @@ import type { Article, ArticleEnrichmentResult } from "@/types";
 import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleNotes } from "@/hooks/useArticleNotes";
 import { classifyArticleSignal } from "@/lib/news/signal";
+import { ArticleAiSummary } from "./ArticleAiSummary";
 
 interface ArticleDetailProps {
   article: Article | null;
@@ -398,6 +399,8 @@ export function ArticleDetail({
             이 기사에는 확인 가능한 발췌나 공개 metadata가 없습니다. 없는 사실은 보충하지 않았습니다.
           </div>
         )}
+
+        <ArticleAiSummary articleId={article.id} />
 
         <EventSections
           article={article}
