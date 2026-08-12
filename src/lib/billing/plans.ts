@@ -91,7 +91,7 @@ export const PLANS: Record<PlanKey, Plan> = {
       { ko: "PRO 전체 기능", en: "Everything in PRO" },
       { ko: "분 단위 속보 모니터링", en: "Minute-level breaking monitor" },
       { ko: "다국가 매크로 통합 (KR·US·CN·EU)", en: "Multi-region macro fusion" },
-      { ko: "Claude Opus 인사이트", en: "Claude Opus insights" },
+      { ko: "고급 모델 인사이트", en: "Advanced-model insights" },
       { ko: "주간 리서치 리포트 (PDF)", en: "Weekly research PDF" },
       { ko: "API 액세스", en: "API access" },
       { ko: "우선 지원", en: "Priority support" },

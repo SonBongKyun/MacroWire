@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { dailyRecap } from "@/lib/ai/claude";
+import { dailyRecap } from "@/lib/ai/openRouterInsights";
 import { authorizeCron } from "@/lib/security/cron";
 
 export const dynamic = "force-dynamic";

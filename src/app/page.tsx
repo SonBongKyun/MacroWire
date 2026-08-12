@@ -249,7 +249,7 @@ function FilingsGrid() {
       label: "SIGNAL FIRST",
       title: "분류는 즉시, 해설은 AI로",
       kicker: "무엇이 중요한지는 규칙으로, 왜 중요한지는 모델로.",
-      body: "클러스터링(TF-IDF · Jaccard)과 감성 라벨링은 서버에서 규칙 기반으로 즉시 처리합니다. \"왜 중요한가\"를 정리하는 인사이트와 일일 리캡은 Claude가 담당하며, 이때 기사 제목과 요약이 Anthropic API로 전송됩니다.",
+      body: "클러스터링(TF-IDF · Jaccard)과 감성 라벨링은 서버에서 규칙 기반으로 즉시 처리합니다. \"왜 중요한가\"를 정리하는 선택적 인사이트와 일일 리캡은 OpenRouter를 통해 설정된 모델이 담당합니다.",
     },
     {
       no: "03",

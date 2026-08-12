@@ -11,6 +11,8 @@ import {
 } from "@/lib/ai/sourceSummary";
 import type { Locale } from "@/lib/ai/prompts";
 import { verifyOwnerSecret } from "@/lib/security/api-auth";
+import { isAiConfigured } from "@/lib/ai/client";
+import { aiErrorResponse } from "@/lib/ai/http";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -81,7 +83,7 @@ export async function GET(
   if (!article) return NextResponse.json({ error: "Unknown article" }, { status: 404 });
 
   const summary = await getCachedSourceArticleSummary(article, access);
-  const aiConfigured = Boolean(process.env.ANTHROPIC_API_KEY);
+  const aiConfigured = isAiConfigured();
   const ownerAuthorized = !isClerkServerEnabled() && verifyOwnerSecret(request.headers) === "authorized";
   const canGenerate = aiConfigured && (isClerkServerEnabled() || ownerAuthorized);
   return NextResponse.json({
@@ -105,7 +107,7 @@ export async function POST(
   try {
     const cached = await getCachedSourceArticleSummary(article, access);
     if (cached) return NextResponse.json({ summary: cached });
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!isAiConfigured()) {
       return NextResponse.json({ error: "AI_NOT_CONFIGURED" }, { status: 503 });
     }
 
@@ -124,10 +126,6 @@ export async function POST(
     if (code === "SOURCE_TEXT_UNAVAILABLE") {
       return NextResponse.json({ error: code }, { status: 422 });
     }
-    if (code === "AI_NOT_CONFIGURED") {
-      return NextResponse.json({ error: code }, { status: 503 });
-    }
-    console.error("[api/articles/summary] error:", error);
-    return NextResponse.json({ error: "AI_REQUEST_FAILED" }, { status: 502 });
+    return aiErrorResponse("api/articles/summary", error);
   }
 }

@@ -30,8 +30,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const recap = await getRecap();
   const title = recap ? `${recap.headline} — MacroWire` : "Today in Macro — MacroWire";
   const description = recap
-    ? `${recap.summary}. The top 3 macro stories that matter today, distilled by Claude.`
-    : "Top 3 macro stories every trading day, distilled by Claude.";
+    ? `${recap.summary}. The top 3 macro stories that matter today, distilled by MacroWire.`
+    : "Top 3 macro stories every trading day, distilled by MacroWire.";
   return {
     title,
     description,
@@ -76,7 +76,7 @@ export default async function MacroLandingEn() {
         </div>
 
         <h1 style={{ fontFamily: "var(--font-display-condensed)", fontSize: 56, lineHeight: 1.08, letterSpacing: "0.02em", margin: "0 0 20px" }}>
-          {recap?.headline ?? "Today's macro, distilled by Claude"}
+          {recap?.headline ?? "Today's macro, distilled by MacroWire"}
         </h1>
 
         {recap?.summary && (
@@ -115,7 +115,7 @@ export default async function MacroLandingEn() {
             The desk every macro trader needs.
           </h2>
           <p style={{ fontSize: 14, color: "#A9A79E", marginBottom: 20 }}>
-            A continuously collected global macro wire. Claude tells you why each story matters.
+            A continuously collected global macro wire that shows why each story matters.
           </p>
           <Link href="/sign-up" style={{ display: "inline-block", padding: "10px 18px", background: "#72AEF8", color: "#0B0E11", fontWeight: 700, fontSize: 12, letterSpacing: "0.10em", textDecoration: "none" }}>
             START FREE

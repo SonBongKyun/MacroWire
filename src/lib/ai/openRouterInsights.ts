@@ -1,14 +1,15 @@
 /**
- * Claude-powered insight engine. Single entry point for all LLM calls;
+ * Provider-neutral insight engine backed by OpenRouter. Single entry point for
+ * all LLM calls;
  * results are cached in the Insight table to keep API spend bounded.
  *
- * Three audiences:
+ * Four audiences:
  *  - articleInsight: per-article "why does this matter" panel
  *  - clusterInsight: synthesis across related articles
  *  - dailyRecap:    top 3 stories of the day with trade implications
  *  - personalBriefing: filtered through user's watchlist + portfolio
  */
-import { anthropic, modelForTier } from "./client";
+import { modelCacheIdentity, requestModelText } from "./client";
 import { cacheKey, getCachedInsight, setCachedInsight } from "./cache";
 import {
   systemPrompt,
@@ -42,23 +43,18 @@ function defaultTTL(kind: InsightKind): number {
   }
 }
 
-async function callClaude<T>(opts: {
+async function callInsightModel<T>(opts: {
   tier: Tier;
   locale: Locale;
   prompt: string;
   maxTokens?: number;
 }): Promise<T> {
-  const model = modelForTier(opts.tier);
-  const msg = await anthropic.messages.create({
-    model,
-    max_tokens: opts.maxTokens ?? 1024,
+  const text = await requestModelText({
+    tier: opts.tier,
+    maxTokens: opts.maxTokens ?? 1024,
     system: systemPrompt(opts.locale, opts.tier),
-    messages: [{ role: "user", content: opts.prompt }],
+    prompt: opts.prompt,
   });
-  const text = msg.content
-    .map((c) => (c.type === "text" ? c.text : ""))
-    .join("")
-    .trim();
   const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
   try {
     return JSON.parse(cleaned) as T;
@@ -80,11 +76,17 @@ export interface ArticleInsight {
 }
 
 export async function articleInsight(article: ArticleLike, opts: BaseOpts): Promise<ArticleInsight> {
-  const key = cacheKey({ kind: "ARTICLE", articleId: article.id, tier: opts.tier, locale: opts.locale });
+  const key = cacheKey({
+    kind: "ARTICLE",
+    articleId: article.id,
+    tier: opts.tier,
+    locale: opts.locale,
+    model: modelCacheIdentity(opts.tier),
+  });
   const cached = await getCachedInsight(key);
   if (cached) return cached.payload as unknown as ArticleInsight;
   const prompt = articleInsightPrompt[opts.locale](article);
-  const result = await callClaude<ArticleInsight>({
+  const result = await callInsightModel<ArticleInsight>({
     tier: opts.tier,
     locale: opts.locale,
     prompt,
@@ -108,11 +110,17 @@ export interface ClusterInsight {
 
 export async function clusterInsight(articles: ArticleLike[], opts: BaseOpts): Promise<ClusterInsight> {
   const ids = articles.map((a) => a.id).sort().join(",");
-  const key = cacheKey({ kind: "CLUSTER", ids, tier: opts.tier, locale: opts.locale });
+  const key = cacheKey({
+    kind: "CLUSTER",
+    ids,
+    tier: opts.tier,
+    locale: opts.locale,
+    model: modelCacheIdentity(opts.tier),
+  });
   const cached = await getCachedInsight(key);
   if (cached) return cached.payload as unknown as ClusterInsight;
   const prompt = clusterInsightPrompt[opts.locale](articles);
-  const result = await callClaude<ClusterInsight>({
+  const result = await callInsightModel<ClusterInsight>({
     tier: opts.tier,
     locale: opts.locale,
     prompt,
@@ -141,11 +149,17 @@ export interface DailyRecapPayload {
 
 export async function dailyRecap(articles: ArticleLike[], opts: BaseOpts): Promise<DailyRecapPayload> {
   const ids = articles.map((a) => a.id).sort().join(",");
-  const key = cacheKey({ kind: "DAILY_RECAP", ids, tier: opts.tier, locale: opts.locale });
+  const key = cacheKey({
+    kind: "DAILY_RECAP",
+    ids,
+    tier: opts.tier,
+    locale: opts.locale,
+    model: modelCacheIdentity(opts.tier),
+  });
   const cached = await getCachedInsight(key);
   if (cached) return cached.payload as unknown as DailyRecapPayload;
   const prompt = dailyRecapPrompt[opts.locale](articles);
-  const result = await callClaude<DailyRecapPayload>({
+  const result = await callInsightModel<DailyRecapPayload>({
     tier: opts.tier,
     locale: opts.locale,
     prompt,
@@ -181,11 +195,12 @@ export async function personalBriefing(
     interestsHash,
     tier: opts.tier,
     locale: opts.locale,
+    model: modelCacheIdentity(opts.tier),
   });
   const cached = await getCachedInsight(key);
   if (cached) return cached.payload as unknown as PersonalBriefingPayload;
   const prompt = personalBriefingPrompt[opts.locale](articles, watchlist, portfolio);
-  const result = await callClaude<PersonalBriefingPayload>({
+  const result = await callInsightModel<PersonalBriefingPayload>({
     tier: opts.tier,
     locale: opts.locale,
     prompt,

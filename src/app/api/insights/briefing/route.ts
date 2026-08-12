@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { personalBriefing } from "@/lib/ai/claude";
+import { personalBriefing } from "@/lib/ai/openRouterInsights";
 import { requireTier, enforceInsightQuota, logInsightUsage } from "@/lib/billing/gate";
 import type { Locale } from "@/lib/ai/prompts";
+import { aiErrorResponse } from "@/lib/ai/http";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -78,7 +79,6 @@ export async function POST(req: NextRequest) {
     await logInsightUsage(user.id, "PERSONAL_BRIEFING");
     return NextResponse.json({ briefing: { ...briefing, items }, locale, tier: user.tier });
   } catch (err) {
-    console.error("[api/insights/briefing]", err);
-    return NextResponse.json({ error: "AI request failed" }, { status: 500 });
+    return aiErrorResponse("api/insights/briefing", err);
   }
 }

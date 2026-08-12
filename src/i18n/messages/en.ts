@@ -25,7 +25,7 @@ export const en: Messages = {
     },
     why: {
       title: "Why MacroWire",
-      a: { t: "Claude AI insights", d: "Not just a feed — Claude tells you why each story matters, and which assets / sectors are exposed." },
+      a: { t: "AI insights", d: "Not just a feed — see why each story matters and which assets or sectors are exposed." },
       b: { t: "Rolling breaking pipeline", d: "30+ RSS sources monitored continuously, with high-signal breaking feeds prioritized." },
       c: { t: "Personalized briefing", d: "Every 12 hours, a briefing tailored to your watchlist and portfolio." },
     },

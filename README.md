@@ -112,9 +112,9 @@ Article selected
 
 ### Provenance and AI policy
 
-우선순위는 `official source → RSS → public metadata → multi-source coverage → rules → optional AI`입니다. Fast Wire와 Article Detail은 `ANTHROPIC_API_KEY` 없이 동작합니다.
+우선순위는 `official source → RSS → public metadata → multi-source coverage → rules → optional AI`입니다. Fast Wire와 Article Detail은 `OPENROUTER_API_KEY` 없이 동작합니다.
 
-기사 상세의 `AI ORIGINAL SUMMARY`는 사용자가 선택한 기사에서 버튼을 눌렀을 때만 실행됩니다. SSRF 검사를 통과한 공개 원문 본문을 메모리에서 최대 14,000자까지만 읽고, 원문 전체는 저장하지 않습니다. 본문 접근이 막히거나 부족하면 우회하지 않고 RSS/metadata로만 요약하며 화면에 근거 범위를 표시합니다. 파생 요약은 tier·locale·prompt version별로 7일간 `Insight` 캐시에 저장되고, 캐시 적중은 일일 AI quota를 차감하지 않습니다.
+기사 상세의 `AI ORIGINAL SUMMARY`는 사용자가 선택한 기사에서 버튼을 눌렀을 때만 실행됩니다. SSRF 검사를 통과한 공개 원문 본문을 메모리에서 최대 14,000자까지만 읽고, 원문 전체는 저장하지 않습니다. 본문 접근이 막히거나 부족하면 우회하지 않고 RSS/metadata로만 요약하며 화면에 근거 범위를 표시합니다. 파생 요약은 provider model·tier·locale·prompt version별로 7일간 `Insight` 캐시에 저장되고, 캐시 적중은 일일 AI quota를 차감하지 않습니다. `OPENROUTER_MODEL_*`에는 OpenRouter의 `provider/model` slug를 설정합니다.
 
 상세 화면은 사실과 분석을 분리합니다.
 

@@ -27,13 +27,18 @@ function errorMessage(status: number, code?: string): string {
     return "소유자 인증이 설정된 환경에서만 AI 요약을 생성할 수 있습니다.";
   }
   if (status === 401) return "로그인 후 AI 요약을 사용할 수 있습니다.";
-  if (status === 429 || code === "QUOTA_EXCEEDED") return "오늘의 무료 AI 요약 한도를 사용했습니다.";
+  if (code === "QUOTA_EXCEEDED") return "오늘의 무료 AI 요약 한도를 사용했습니다.";
+  if (status === 429 || code === "AI_RATE_LIMITED") return "AI 제공자가 혼잡합니다. 잠시 후 다시 시도해 주세요.";
   if (status === 422 || code === "SOURCE_TEXT_UNAVAILABLE") {
     return "요약할 공개 원문이나 RSS 발췌를 확보하지 못했습니다.";
   }
-  if (status === 503 || code === "AI_NOT_CONFIGURED") {
-    return "ANTHROPIC_API_KEY가 설정되면 AI 원문 요약을 사용할 수 있습니다.";
+  if (code === "AI_NOT_CONFIGURED") {
+    return "OPENROUTER_API_KEY가 설정되면 AI 원문 요약을 사용할 수 있습니다.";
   }
+  if (code === "AI_AUTH_FAILED") return "OpenRouter API 키 인증을 확인해 주세요.";
+  if (code === "AI_CREDITS_EXHAUSTED") return "OpenRouter 크레딧을 확인해 주세요.";
+  if (code === "AI_PROVIDER_UNAVAILABLE") return "AI 제공자를 일시적으로 사용할 수 없습니다.";
+  if (status === 504 || code === "AI_TIMEOUT") return "AI 응답 시간이 초과됐습니다. 잠시 후 다시 시도해 주세요.";
   return "AI 요약에 실패했습니다. 잠시 후 다시 시도해 주세요.";
 }
 
