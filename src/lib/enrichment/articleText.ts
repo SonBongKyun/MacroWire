@@ -14,6 +14,16 @@ export interface ArticleTextResult {
 }
 
 const BOILERPLATE_PATTERN = /(?:cookie|privacy policy|terms of use|sign in|log in|subscribe|newsletter|advertisement|all rights reserved|쿠키|개인정보|이용약관|로그인|구독|광고)/i;
+const RESTRICTED_PUBLISHER_HOSTS = ["ft.com", "wsj.com", "bloomberg.com"];
+
+export function isRestrictedPublisherUrl(rawUrl: string): boolean {
+  try {
+    const hostname = new URL(rawUrl).hostname.toLowerCase().replace(/^www\./, "");
+    return RESTRICTED_PUBLISHER_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`));
+  } catch {
+    return false;
+  }
+}
 
 export function classifyArticleTextResponse(
   status: number,
@@ -117,6 +127,12 @@ export async function fetchPublicArticleText(
   url: string,
   timeoutMs = 8_000,
 ): Promise<ArticleTextResult> {
+  // These publishers commonly expose a JSON-LD articleBody inside a paywall
+  // shell. Treat it as blocked and fall back to RSS/public metadata instead of
+  // mistaking HTTP 200 for permission to use the full body.
+  if (isRestrictedPublisherUrl(url)) {
+    return { status: "blocked", text: null, description: null };
+  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 

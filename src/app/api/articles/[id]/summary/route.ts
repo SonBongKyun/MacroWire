@@ -10,6 +10,7 @@ import {
   type SummaryArticle,
 } from "@/lib/ai/sourceSummary";
 import type { Locale } from "@/lib/ai/prompts";
+import { verifyOwnerSecret } from "@/lib/security/api-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -22,9 +23,22 @@ interface AiAccess {
   userId: string | null;
 }
 
-async function resolveAccess(requestedLocale: unknown): Promise<AiAccess | NextResponse> {
+async function resolveAccess(
+  requestedLocale: unknown,
+  request?: NextRequest,
+  requireWriteAccess = false,
+): Promise<AiAccess | NextResponse> {
   const locale: Locale = requestedLocale === "en" ? "en" : "ko";
   if (!isClerkServerEnabled()) {
+    if (requireWriteAccess) {
+      const ownerStatus = verifyOwnerSecret(request!.headers);
+      if (ownerStatus === "unconfigured") {
+        return NextResponse.json({ error: "OWNER_AUTH_NOT_CONFIGURED" }, { status: 503 });
+      }
+      if (ownerStatus !== "authorized") {
+        return NextResponse.json({ error: "OWNER_AUTH_REQUIRED" }, { status: 401 });
+      }
+    }
     return { tier: "FREE", locale, plan: planFromTier("FREE"), userId: null };
   }
 
@@ -67,10 +81,13 @@ export async function GET(
   if (!article) return NextResponse.json({ error: "Unknown article" }, { status: 404 });
 
   const summary = await getCachedSourceArticleSummary(article, access);
+  const aiConfigured = Boolean(process.env.ANTHROPIC_API_KEY);
+  const ownerAuthorized = !isClerkServerEnabled() && verifyOwnerSecret(request.headers) === "authorized";
+  const canGenerate = aiConfigured && (isClerkServerEnabled() || ownerAuthorized);
   return NextResponse.json({
     summary,
-    canGenerate: Boolean(process.env.ANTHROPIC_API_KEY),
-    reason: process.env.ANTHROPIC_API_KEY ? null : "AI_NOT_CONFIGURED",
+    canGenerate,
+    reason: !aiConfigured ? "AI_NOT_CONFIGURED" : canGenerate ? null : "OWNER_AUTH_REQUIRED",
   });
 }
 
@@ -79,7 +96,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> },
 ) {
   const body = await request.json().catch(() => ({})) as { locale?: Locale };
-  const access = await resolveAccess(body.locale);
+  const access = await resolveAccess(body.locale, request, true);
   if (access instanceof NextResponse) return access;
   const { id } = await context.params;
   const article = await findArticle(id);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { WireWorker } from "../src/lib/ingest/wireWorker";
+import { WireWorker, createSourceCatalogueLoader } from "../src/lib/ingest/wireWorker";
 import type { SourceIngestResult, WireSource } from "../src/lib/ingest/sourceIngest";
 
 const source = (id: string, nextFetchAt: Date | null = null): WireSource => ({
@@ -23,6 +23,43 @@ const success = (item: WireSource): SourceIngestResult => ({
 });
 
 const quietLogger = { info() {}, warn() {}, error() {} };
+
+test("seeds the source catalogue once and serves it from memory until refresh", async () => {
+  let seeded = 0;
+  let loaded = 0;
+  let clock = 0;
+  const loader = createSourceCatalogueLoader({
+    seed: async () => { seeded++; },
+    load: async () => { loaded++; return [source("cached")]; },
+    refreshMs: 1_000,
+    now: () => clock,
+  });
+
+  await Promise.all([loader(), loader()]);
+  await loader();
+  assert.equal(seeded, 1);
+  assert.equal(loaded, 1);
+
+  clock = 1_001;
+  await loader();
+  assert.equal(seeded, 1);
+  assert.equal(loaded, 2);
+});
+
+test("starts T0 and T1 before a slow T2/T3 backlog", async () => {
+  const calls: string[] = [];
+  const tiers = { official: "T0", breaking: "T1", background: "T3", market: "T2" } as const;
+  const sources = Object.entries(tiers).map(([id, tier]) => ({ ...source(id), tier }));
+  const worker = new WireWorker({
+    loadSources: async () => [sources[2], sources[3], sources[1], sources[0]],
+    pollSource: async (item) => { calls.push(item.id); return success(item); },
+    concurrency: 1,
+    logger: quietLogger,
+  });
+
+  await worker.runOnce();
+  assert.deepEqual(calls, ["official", "breaking", "market", "background"]);
+});
 
 test("polls only due sources", async () => {
   const calls: string[] = [];

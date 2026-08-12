@@ -48,6 +48,8 @@ export interface NewWireArticle {
   importanceTier: "critical" | "major" | "general";
   importanceScore: number;
   importanceReasons: string[];
+  summary: string | null;
+  tags: string[];
 }
 
 export interface SourceIngestResult {
@@ -149,7 +151,8 @@ export async function persistFeedItems(
     const feedExcerpt = item.summary?.replace(/\s+/g, " ").trim().slice(0, 1_500) || null;
     const title = item.title.trim() || "Untitled";
     const baseTags = applyTags(title, feedExcerpt);
-    const tags = source.tier === "T1" && !baseTags.includes("속보")
+    const isBreakingSource = source.category === "속보" || /속보|breaking/i.test(source.name);
+    const tags = isBreakingSource && !baseTags.includes("속보")
       ? ["속보", ...baseTags]
       : baseTags;
     const importance = classifyNewsImportance({
@@ -195,6 +198,8 @@ export async function persistFeedItems(
       importanceTier: importance.tier,
       importanceScore: importance.score,
       importanceReasons: importance.reasons,
+      summary: feedExcerpt,
+      tags,
     });
   }
 

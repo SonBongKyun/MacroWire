@@ -26,6 +26,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ALL_TAGS } from "@/lib/tagging/tagger";
 import { useLiveWire } from "@/hooks/useLiveWire";
 import { LiveWireBar } from "@/components/LiveWireBar";
+import { MyDesk } from "@/components/MyDesk";
+import { usePersonalRelevance } from "@/hooks/usePersonalRelevance";
 
 // Everything below is reachable only after a tap — a secondary tab, an
 // overlay, or split view. Loading it all up front made the first paint on a
@@ -168,10 +170,12 @@ function HomeInner() {
   // Platform tab — read from localStorage AFTER mount to avoid SSR/CSR
   // hydration mismatch (server has no localStorage and would render the
   // default tab while the client hydrates with a different tab).
-  const [activeMainTab, setActiveMainTab] = useState<MainTab>("dashboard");
+  const [activeMainTab, setActiveMainTab] = useState<MainTab>("desk");
   useEffect(() => {
     const saved = localStorage.getItem("macro-wire-tab") as MainTab | null;
-    if (saved) setActiveMainTab(saved);
+    if (saved && ["desk", "dashboard", "news", "markets", "analytics", "ai", "research", "portfolio"].includes(saved)) {
+      setActiveMainTab(saved);
+    }
   }, []);
 
   // Filters
@@ -198,6 +202,11 @@ function HomeInner() {
   const multiView = useMultiView();
   const dashboardLayout = useDashboardLayout();
   const readingGoals = useReadingGoals();
+  const {
+    scores: personalScores,
+    dismissedArticleIds,
+    recordInteraction,
+  } = usePersonalRelevance(articles);
 
   // UI state
   const [addSourceOpen, setAddSourceOpen] = useState(false);
@@ -390,8 +399,9 @@ function HomeInner() {
       const json = await res.json();
       setArticles((prev) => prev.map((a) => (a.id === article.id ? { ...a, isRead: json.isRead } : a)));
       if (selectedArticle?.id === article.id) setSelectedArticle((prev) => prev ? { ...prev, isRead: json.isRead } : null);
+      if (json.isRead) recordInteraction(article, "read");
     } catch (err) { console.error("Toggle read failed:", err); }
-  }, [selectedArticle]);
+  }, [recordInteraction, selectedArticle]);
 
   const toggleSave = useCallback(async (article: Article) => {
     try {
@@ -399,11 +409,13 @@ function HomeInner() {
       const json = await res.json();
       setArticles((prev) => prev.map((a) => (a.id === article.id ? { ...a, isSaved: json.isSaved } : a)));
       if (selectedArticle?.id === article.id) setSelectedArticle((prev) => prev ? { ...prev, isSaved: json.isSaved } : null);
+      if (json.isSaved) recordInteraction(article, "saved");
       showToast(json.isSaved ? "저장됨" : "저장 해제");
     } catch (err) { console.error("Toggle save failed:", err); }
-  }, [selectedArticle, showToast]);
+  }, [recordInteraction, selectedArticle, showToast]);
 
   const selectArticle = useCallback((article: Article) => {
+    recordInteraction(article, "opened");
     setSelectedArticle(article);
     setNewArticleCount(0);
     setNewArticleIds((prev) => prev.filter((id) => id !== article.id));
@@ -412,7 +424,13 @@ function HomeInner() {
       readingGoals.incrementRead();
     }
     if (activeMainTab !== "news") setActiveMainTab("news");
-  }, [toggleRead, activeMainTab, readingGoals]);
+  }, [toggleRead, activeMainTab, readingGoals, recordInteraction]);
+
+  const dismissArticle = useCallback((article: Article) => {
+    recordInteraction(article, "dismissed");
+    if (selectedArticle?.id === article.id) setSelectedArticle(null);
+    showToast("개인 와이어에서 숨겼습니다");
+  }, [recordInteraction, selectedArticle, showToast]);
 
   const markAllRead = useCallback(async () => {
     const unreadIds = articles.filter((a) => !a.isRead).map((a) => a.id);
@@ -532,7 +550,7 @@ function HomeInner() {
   };
 
   const filteredArticles = useMemo(() => {
-    let list = articles;
+    let list = articles.filter((article) => !dismissedArticleIds.has(article.id));
     if (regionFilter !== "전체") {
       const rTags = REGION_TAGS[regionFilter] || [];
       list = list.filter((a) => a.tags.some((t) => rTags.includes(t)));
@@ -549,11 +567,11 @@ function HomeInner() {
     if (readFilter === "unread") list = list.filter((a) => !a.isRead);
     else if (readFilter === "read") list = list.filter((a) => a.isRead);
     return list;
-  }, [articles, regionFilter, multiView, readFilter]);
+  }, [articles, dismissedArticleIds, regionFilter, multiView, readFilter]);
 
   // Keyboard shortcuts
   useEffect(() => {
-    const TAB_ORDER: MainTab[] = ["dashboard", "news", "markets", "analytics", "ai", "research", "portfolio"];
+    const TAB_ORDER: MainTab[] = ["desk", "news", "markets", "dashboard", "analytics", "ai", "research", "portfolio"];
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); setCommandPaletteOpen(true); return; }
       // Ctrl+Shift+S: toggle split view
@@ -595,9 +613,9 @@ function HomeInner() {
         case "j": if (activeMainTab === "news") { e.preventDefault(); const idx = filteredArticles.findIndex((a) => a.id === selectedArticle?.id); const next = idx < 0 ? 0 : Math.min(idx + 1, filteredArticles.length - 1); if (filteredArticles[next]) selectArticle(filteredArticles[next]); } break;
         case "k": if (activeMainTab === "news") { e.preventDefault(); const idx = filteredArticles.findIndex((a) => a.id === selectedArticle?.id); const prev = Math.max(idx - 1, 0); if (filteredArticles[prev]) selectArticle(filteredArticles[prev]); } break;
         case "s": if (selectedArticle) { e.preventDefault(); toggleSave(selectedArticle); } break;
-        case "o": if (selectedArticle) { e.preventDefault(); window.open(selectedArticle.url, "_blank"); } break;
+        case "o": if (selectedArticle) { e.preventDefault(); recordInteraction(selectedArticle, "original-opened"); window.open(selectedArticle.url, "_blank"); } break;
         case "n": e.preventDefault(); setActiveMainTab("news"); break;
-        case "h": e.preventDefault(); setActiveMainTab("dashboard"); break;
+        case "h": e.preventDefault(); setActiveMainTab("desk"); break;
         case "1": e.preventDefault(); setRange("24h"); break;
         case "2": e.preventDefault(); setRange("7d"); break;
         case "3": e.preventDefault(); setRange("30d"); break;
@@ -610,7 +628,7 @@ function HomeInner() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [ingesting, refreshNews, toggleDarkMode, markAllRead, exportSaved, selectedArticle, filteredArticles, selectArticle, toggleSave, activeMainTab, splitView]);
+  }, [ingesting, refreshNews, toggleDarkMode, markAllRead, exportSaved, selectedArticle, filteredArticles, selectArticle, toggleSave, activeMainTab, splitView, recordInteraction]);
 
   return (
     <div className="macro-app flex flex-col h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -670,6 +688,16 @@ function HomeInner() {
       {/* Tab Content */}
       <ErrorBoundary key={activeMainTab}>
       <div className="tab-content-enter flex-1 overflow-hidden">
+        {activeMainTab === "desk" && (
+          <MyDesk
+            articles={filteredArticles}
+            sources={sources}
+            personalScores={personalScores}
+            onSelectArticle={selectArticle}
+            onOpenWire={() => setActiveMainTab("news")}
+          />
+        )}
+
         {activeMainTab === "dashboard" && (
           <DashboardTab
             articles={articles}
@@ -710,6 +738,7 @@ function HomeInner() {
             viewMode={viewMode}
             timelineMode={timelineMode}
             newArticleIds={newArticleIds}
+            personalScores={personalScores}
             onSelectArticle={selectArticle}
             onCloseArticle={() => setSelectedArticle(null)}
             onSelectSource={(id) => setSelectedSourceId((prev) => (prev === id ? null : id))}
@@ -729,6 +758,9 @@ function HomeInner() {
             collectionNames={collectionStore.names}
             onCollectionChange={assignArticle}
             onCreateCollection={createCollection}
+            onOpenOriginal={(article) => recordInteraction(article, "original-opened")}
+            onCreateNote={(article) => recordInteraction(article, "note-created")}
+            onDismissArticle={dismissArticle}
           />
         )}
 
@@ -758,6 +790,9 @@ function HomeInner() {
                 newArticleIds={newArticleIds}
                 viewMode="list"
                 onViewModeChange={setViewMode}
+                personalScores={personalScores}
+                onOpenOriginal={(article) => recordInteraction(article, "original-opened")}
+                onDismissArticle={dismissArticle}
               />
             </div>
 
@@ -775,6 +810,9 @@ function HomeInner() {
                   onCreateCollection={createCollection}
                   articles={filteredArticles}
                   onSelectArticle={selectArticle}
+                  personalRelevance={personalScores.get(selectedArticle.id)}
+                  onOpenOriginal={(article) => recordInteraction(article, "original-opened")}
+                  onCreateNote={(article) => recordInteraction(article, "note-created")}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full" style={{ color: "var(--muted)" }}>

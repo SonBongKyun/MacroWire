@@ -3,12 +3,11 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { ArrowUp, LoaderCircle } from "lucide-react";
 import type { Article } from "@/types";
-import { TAG_COLORS } from "@/lib/constants/colors";
-import { useArticleScoring } from "@/hooks/useArticleScoring";
 import { PeekPopover } from "@/components/PeekPopover";
 import { EmptyState } from "@/components/EmptyState";
 import { classifyArticleSignal } from "@/lib/news/signal";
 import { computeCoverage } from "@/lib/clustering/coverage";
+import type { PersonalRelevanceResult } from "@/lib/personalization/relevance";
 
 type ReadFilter = "all" | "unread" | "read";
 type ViewMode = "list" | "card";
@@ -36,9 +35,12 @@ interface ArticleListProps {
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
   density?: "compact" | "comfortable";
+  personalScores?: Map<string, PersonalRelevanceResult>;
+  onOpenOriginal?: (article: Article) => void;
+  onDismissArticle?: (article: Article) => void;
 }
 
-const ROW_HEIGHT_COMPACT = 76;
+const ROW_HEIGHT_COMPACT = 72;
 const ROW_HEIGHT_COMFORTABLE = 104;
 const BUFFER_COUNT = 10;
 
@@ -107,8 +109,10 @@ export function ArticleList({
   viewMode = "list",
   onViewModeChange,
   density = "comfortable",
+  personalScores = new Map(),
+  onOpenOriginal,
+  onDismissArticle,
 }: ArticleListProps) {
-  const { getScore } = useArticleScoring(articles);
   const listRef = useRef<HTMLDivElement>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollTop, setScrollTop] = useState(0);
@@ -182,14 +186,15 @@ export function ArticleList({
     if (!ctxMenu.article) return [];
     const a = ctxMenu.article;
     return [
-      { label: "원문 열기", action: () => { window.open(a.url, "_blank"); closeContextMenu(); } },
+      { label: "원문 열기", action: () => { onOpenOriginal?.(a); window.open(a.url, "_blank"); closeContextMenu(); } },
       { label: "URL 복사", action: () => { navigator.clipboard.writeText(a.url); closeContextMenu(); } },
       { label: "제목 + URL 복사", action: () => { navigator.clipboard.writeText(`${a.title}\n${a.url}`); closeContextMenu(); } },
       { type: "divider" as const },
+      ...(onDismissArticle ? [{ label: "관심 없음", action: () => { onDismissArticle(a); closeContextMenu(); } }] : []),
       { label: a.isSaved ? "저장 해제" : "저장", action: () => { onToggleSave(a); closeContextMenu(); } },
       { label: a.isRead ? "읽지 않음" : "읽음 표시", action: () => { onToggleRead?.(a); closeContextMenu(); } },
     ];
-  }, [ctxMenu.article, onToggleSave, onToggleRead, closeContextMenu]);
+  }, [ctxMenu.article, onToggleSave, onToggleRead, onOpenOriginal, onDismissArticle, closeContextMenu]);
 
   // Apply read filter client-side
   const filteredArticles =
@@ -341,7 +346,7 @@ export function ArticleList({
                 const isUnread = !article.isRead;
                 const articleSignal = classifyArticleSignal(article);
                 const isBreaking = articleSignal.isBreaking;
-                const impactScore = getScore(article.id)?.impactScore ?? 0;
+                const personalRelevance = personalScores.get(article.id);
                 return (
                   <div
                     key={article.id}
@@ -364,9 +369,8 @@ export function ArticleList({
                     onMouseLeave={handleRowMouseLeave}
                   >
                     <div className="article-row-body">
-                      {/* Metadata first, headline second — the arrangement a
-                          wire reader scans fastest: who filed it and when, then
-                          what it says. */}
+                      <p className="article-row-title">{article.title}</p>
+
                       <div className="article-row-meta">
                         {isUnread && <span className="article-unread-marker" aria-hidden="true" />}
                         <span
@@ -375,13 +379,12 @@ export function ArticleList({
                         >
                           {article.sourceName}
                         </span>
-                        {isBreaking && <span className="article-breaking-badge">속보</span>}
-                        {articleSignal.tier === "critical" && (
-                          <span
-                            className="article-signal-badge"
-                            title={`거시경제 신호 ${articleSignal.score}점 · ${articleSignal.reasons.join(", ")}`}
-                          >
-                            S{articleSignal.score}
+                        <span className="article-row-meta-separator" aria-hidden="true">·</span>
+                        <span className="article-row-time">{timeAgo(article.publishedAt)}</span>
+                        {isBreaking && <span className="article-breaking-badge">BREAKING</span>}
+                        {!isBreaking && articleSignal.tier === "critical" && (
+                          <span className="article-signal-badge" title={articleSignal.reasons.join(" · ")}>
+                            MARKET SIGNAL
                           </span>
                         )}
                         {(() => {
@@ -392,39 +395,16 @@ export function ArticleList({
                               className="article-row-coverage"
                               title={`같은 사안 보도: ${cov.names.join(", ")}`}
                             >
-                              {cov.outlets}개 매체
+                              {cov.outlets} sources
                             </span>
                           );
                         })()}
-                        <span className="article-row-metaspacer" />
-                        {impactScore > 0 && (
-                          <span className="article-row-impact" title={`영향도 ${impactScore}`}>
-                            {impactScore}
+                        {personalRelevance?.isHigh && (
+                          <span className="article-for-you-badge" title={personalRelevance.reasons.join(" · ")}>
+                            FOR YOU · {personalRelevance.reasons.slice(0, 2).join(" · ")}
                           </span>
                         )}
-                        <span className="article-row-time">{timeAgo(article.publishedAt)} 전</span>
                       </div>
-
-                      <p className="article-row-title">{article.title}</p>
-
-                      {density === "comfortable" && article.tags.length > 0 && (
-                        <div className="article-row-tags">
-                          {article.tags.slice(0, 3).map((tag) => {
-                            if (tag === "속보") return null;
-                            const color = TAG_COLORS[tag] || "#64748b";
-                            return (
-                              <button
-                                key={tag}
-                                onClick={(e) => { e.stopPropagation(); onTagClick?.(tag); }}
-                                className="article-row-tag"
-                                style={{ "--tag-color": color } as React.CSSProperties}
-                              >
-                                {tag}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
                     </div>
                   </div>
                 );

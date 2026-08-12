@@ -4816,3 +4816,540 @@
     font-size: 17px !important;
   }
 }
+
+/* ===========================================================================
+   Personal desk + headline-first wire
+   =========================================================================== */
+
+.macro-app .my-desk {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 30px clamp(18px, 3vw, 48px) 56px;
+  background: #0b0f12;
+}
+
+.macro-app .my-desk > * {
+  width: min(1320px, 100%);
+  margin-inline: auto;
+}
+
+.macro-app .my-desk-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 12px 0 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.macro-app .my-desk-kicker {
+  color: var(--accent);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+}
+
+.macro-app .my-desk-header h1 {
+  margin: 8px 0 7px;
+  color: var(--foreground-bright);
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 4vw, 54px);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.macro-app .my-desk-header p {
+  margin: 0;
+  color: var(--foreground-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.macro-app .my-desk-status {
+  display: grid;
+  gap: 5px;
+  min-width: 130px;
+  padding-bottom: 3px;
+  text-align: right;
+}
+
+.macro-app .my-desk-status span {
+  color: #9bc9aa;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.macro-app .my-desk-status i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #78b98d;
+}
+
+.macro-app .my-desk-status b {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.macro-app .my-desk-lead,
+.macro-app .my-desk-wire,
+.macro-app .my-desk-card {
+  border: 1px solid var(--border);
+  background: #101519;
+}
+
+.macro-app .my-desk-lead {
+  margin-top: 22px;
+}
+
+.macro-app .my-desk-section-head {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.macro-app .my-desk-section-head > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+}
+
+.macro-app .my-desk-section-head h2 {
+  margin: 0;
+  color: var(--foreground-secondary);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.macro-app .my-desk-section-head > div > span {
+  color: var(--accent);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+}
+
+.macro-app .my-desk-section-head > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.macro-app .my-desk-section-head > button:hover { color: var(--accent-light); }
+
+.macro-app .my-desk-lead-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.macro-app .my-desk-lead-grid > button {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 11px;
+  padding: 18px 17px 19px;
+  border: 0;
+  border-right: 1px solid var(--border-subtle);
+  background: transparent;
+  text-align: left;
+}
+
+.macro-app .my-desk-lead-grid > button:last-child { border-right: 0; }
+.macro-app .my-desk-lead-grid > button:hover { background: var(--surface-active); }
+
+.macro-app .my-desk-rank {
+  color: var(--border-strong);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.macro-app .my-desk-lead-grid h3 {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--foreground-bright);
+  font-size: 16px;
+  font-weight: 640;
+  line-height: 1.48;
+  letter-spacing: -0.01em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.macro-app .my-desk-lead-grid p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.macro-app .my-desk-lead-grid small {
+  display: block;
+  margin-top: 7px;
+  color: var(--accent-light);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.macro-app .my-desk-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.macro-app .my-signal-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 8px 14px 14px;
+}
+
+.macro-app .my-signal-list > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 9px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.macro-app .my-signal-list span { color: var(--foreground); font-size: 12px; }
+.macro-app .my-signal-list b { color: var(--accent); font-family: var(--font-mono); font-size: 10px; }
+
+.macro-app .my-calendar-list { padding: 8px 14px 14px; }
+.macro-app .my-calendar-list > div {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 30px;
+  gap: 10px;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.macro-app .my-calendar-list time { color: var(--accent-light); font-family: var(--font-mono); font-size: 10px; }
+.macro-app .my-calendar-list span { color: var(--foreground-secondary); font-size: 11.5px; }
+.macro-app .my-calendar-list b { color: var(--muted); font-family: var(--font-mono); font-size: 9px; text-align: right; }
+
+.macro-app .my-desk-wire { margin-top: 16px; }
+.macro-app .my-desk-wire .my-desk-section-head > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.macro-app .my-wire-list { display: grid; }
+.macro-app .my-wire-list > button {
+  display: grid;
+  grid-template-columns: 138px minmax(0, 1fr) 66px;
+  gap: 14px;
+  align-items: center;
+  min-height: 45px;
+  padding: 8px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: transparent;
+  text-align: left;
+}
+.macro-app .my-wire-list > button:last-child { border-bottom: 0; }
+.macro-app .my-wire-list > button:hover { background: var(--surface-active); }
+.macro-app .my-wire-source { overflow: hidden; color: var(--muted); font-size: 10.5px; text-overflow: ellipsis; white-space: nowrap; }
+.macro-app .my-wire-list strong { overflow: hidden; color: var(--foreground); font-size: 13px; font-weight: 570; text-overflow: ellipsis; white-space: nowrap; }
+.macro-app .my-wire-meta { color: var(--accent-light); font-family: var(--font-mono); font-size: 9px; text-align: right; }
+.macro-app .my-desk-empty { margin: 0; padding: 18px; color: var(--muted); font-size: 11px; }
+
+/* The unselected wire is a full reading surface. Selection creates a measured
+   split with a 440px headline column instead of crushing it into a sidebar. */
+.macro-app .news-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.macro-app .news-workspace:not(.has-selection) .news-empty-pane { display: none; }
+.macro-app .news-workspace.has-selection { grid-template-columns: 440px minmax(0, 1fr) !important; }
+.macro-app .news-list-pane { border-left: 0; }
+
+.macro-app .news-workspace:not(.has-selection) .article-row-body {
+  width: min(1080px, 100%);
+}
+
+.macro-app .today-signals {
+  flex: 0 0 auto;
+  padding: 14px 16px 15px;
+  border-bottom: 1px solid var(--border);
+  background: #0e1317;
+}
+
+.macro-app .news-workspace.has-selection .today-signals { display: none; }
+
+.macro-app .today-signals-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.macro-app .today-signals-head > div { display: flex; align-items: baseline; gap: 8px; }
+.macro-app .today-signals-head span { color: var(--accent); font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.12em; }
+.macro-app .today-signals-head h2 { margin: 0; color: var(--foreground-secondary); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.13em; }
+.macro-app .today-signals-head small { color: var(--muted); font-family: var(--font-mono); font-size: 8px; }
+
+.macro-app .today-signals-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--border-subtle);
+}
+
+.macro-app .today-signals-list > button {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  padding: 11px 12px;
+  border: 0;
+  border-right: 1px solid var(--border-subtle);
+  background: transparent;
+  text-align: left;
+}
+
+.macro-app .today-signals-list > button:last-child { border-right: 0; }
+.macro-app .today-signals-list > button:hover { background: var(--surface-active); }
+.macro-app .today-signals-list > button > span { color: var(--border-strong); font-family: var(--font-mono); font-size: 10px; }
+.macro-app .today-signals-list strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--foreground-bright);
+  font-size: 12px;
+  font-weight: 620;
+  line-height: 1.42;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.macro-app .today-signals-list small { display: block; overflow: hidden; margin-top: 6px; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Headline first. Metadata is one quiet line below it; no raw ranking numbers. */
+.macro-app .article-row-body {
+  justify-content: center;
+  gap: 7px;
+  padding: 13px 20px;
+}
+
+.macro-app .article-row-title {
+  order: 1;
+  font-size: 16.5px;
+  font-weight: 580;
+  line-height: 1.5;
+  letter-spacing: -0.008em;
+}
+
+.macro-app .article-row.is-unread .article-row-title { font-weight: 650; }
+
+.macro-app .article-row-meta {
+  order: 2;
+  gap: 6px;
+  min-height: 17px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.macro-app .article-row-source {
+  max-width: 180px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 10.5px;
+  font-weight: 620;
+}
+
+.macro-app .article-row-time,
+.macro-app .article-row-meta-separator {
+  color: var(--muted);
+  font-family: var(--font-interface);
+  font-size: 10.5px;
+}
+
+.macro-app .article-row-meta-separator { flex: 0 0 auto; }
+.macro-app .article-row-metaspacer,
+.macro-app .article-row-impact,
+.macro-app .article-row-tags { display: none !important; }
+
+.macro-app .article-breaking-badge,
+.macro-app .article-signal-badge,
+.macro-app .article-for-you-badge,
+.macro-app .article-row-coverage {
+  display: inline-flex;
+  height: 17px;
+  align-items: center;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 2px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 8.5px;
+  font-weight: 750;
+  line-height: 17px;
+  white-space: nowrap;
+}
+
+.macro-app .article-breaking-badge { color: #ff979a; background: rgba(207, 65, 70, 0.15); }
+.macro-app .article-signal-badge { color: #b7c9d9; background: rgba(143, 166, 187, 0.1); }
+.macro-app .article-for-you-badge { color: var(--accent-light); background: var(--accent-surface); }
+.macro-app .article-row-coverage { color: var(--foreground-secondary); background: rgba(155, 169, 181, 0.08); }
+.macro-app .article-for-you-badge { max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+
+.macro-app .article-row.article-row-compact .article-row-body { gap: 6px; padding: 9px 18px; }
+.macro-app .article-row.article-row-compact .article-row-title { font-size: 14.5px; line-height: 1.45; }
+
+/* Reader typography follows the content hierarchy rather than metadata density. */
+.macro-app .news-detail-pane .event-detail-header { padding: 22px 24px 19px !important; }
+.macro-app .news-detail-pane .event-detail-header h2 {
+  font-size: clamp(22px, 2vw, 26px) !important;
+  font-weight: 760 !important;
+  line-height: 1.42 !important;
+}
+.macro-app .event-kicker { font-size: 10px; }
+.macro-app .event-byline { font-size: 10.5px; }
+.macro-app .event-entity { font-size: 10px; }
+.macro-app .event-detail-scroll { padding: 0 24px 28px; }
+.macro-app .event-section { padding: 20px 0; }
+.macro-app .event-section-heading h3 { font-size: 10.5px; }
+.macro-app .event-section-index { font-size: 9.5px; }
+.macro-app .event-facts p,
+.macro-app .raw-excerpt p,
+.macro-app .event-analysis { font-size: 14.5px; line-height: 1.72; }
+.macro-app .event-facts li span:last-child { font-size: 10px; }
+.macro-app .event-numbers dt { font-size: 12px; }
+.macro-app .event-numbers dd { font-size: 16px; }
+.macro-app .event-numbers > div > span { font-size: 10px; }
+.macro-app .analysis-disclosure,
+.macro-app .coverage-confirmed { font-size: 9.5px; }
+.macro-app .ai-summary-lead { font-size: 15.5px; line-height: 1.72; }
+.macro-app .ai-summary-result li p { font-size: 13.5px; line-height: 1.65; }
+.macro-app .ai-summary-result li > span,
+.macro-app .ai-summary-provenance,
+.macro-app .ai-summary-caution,
+.macro-app .coverage-row span,
+.macro-app .coverage-row-actions button,
+.macro-app .coverage-row-actions a { font-size: 10px; }
+.macro-app .coverage-row p { font-size: 12.5px; line-height: 1.55; }
+.macro-app .enrichment-status { font-size: 10.5px; }
+
+.macro-app .personal-context { background: rgba(114, 174, 248, 0.035); }
+.macro-app .personal-context-label {
+  margin-left: auto;
+  color: var(--accent-light);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+.macro-app .personal-context-reasons { display: flex; flex-wrap: wrap; gap: 7px; }
+.macro-app .personal-context-reasons span {
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  color: var(--foreground-bright);
+  font-size: 11px;
+}
+.macro-app .personal-context > p { margin: 12px 0 0; color: var(--muted); font-size: 10.5px; }
+.macro-app .personal-context > p strong { color: var(--accent-light); font-weight: 650; }
+
+.macro-app .provenance-section { padding: 0; }
+.macro-app .provenance-section summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--foreground-secondary);
+  cursor: pointer;
+  list-style: none;
+}
+.macro-app .provenance-section summary::-webkit-details-marker { display: none; }
+.macro-app .provenance-section summary > span:first-child { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 650; }
+.macro-app .provenance-section summary > span:last-child { color: var(--muted); transition: transform 150ms ease; }
+.macro-app .provenance-section[open] summary > span:last-child { transform: rotate(180deg); }
+.macro-app .provenance-body { padding: 0 0 18px; }
+.macro-app .provenance-section dl > div { grid-template-columns: 88px minmax(0, 1fr); font-size: 10.5px; }
+
+@media (max-width: 1180px) {
+  .macro-app .wire-tab > span:not(.wire-count) { display: none; }
+  .macro-app .news-workspace.has-selection { grid-template-columns: 410px minmax(0, 1fr) !important; }
+  .macro-app .today-signals-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .macro-app .today-signals-list > button:nth-child(2) { border-right: 0; }
+  .macro-app .today-signals-list > button:nth-child(-n + 2) { border-bottom: 1px solid var(--border-subtle); }
+}
+
+@media (max-width: 900px) {
+  .macro-app .news-workspace,
+  .macro-app .news-workspace.has-selection {
+    display: block !important;
+  }
+  .macro-app .news-workspace.has-selection .news-list-pane { display: none; }
+  .macro-app .news-workspace:not(.has-selection) .news-detail-pane { display: none; }
+  .macro-app .news-detail-pane { width: 100%; height: 100%; border-left: 0; }
+  .macro-app .my-desk-lead-grid { grid-template-columns: 1fr; }
+  .macro-app .my-desk-lead-grid > button { border-right: 0; border-bottom: 1px solid var(--border-subtle); }
+  .macro-app .my-desk-lead-grid > button:last-child { border-bottom: 0; }
+}
+
+@media (max-width: 768px) {
+  .macro-app .my-desk { padding: 18px 12px calc(92px + env(safe-area-inset-bottom)); }
+  .macro-app .my-desk-header { align-items: flex-start; padding-top: 8px; }
+  .macro-app .my-desk-header h1 { font-size: 36px; }
+  .macro-app .my-desk-header p { max-width: 300px; font-size: 12px; }
+  .macro-app .my-desk-status { display: none; }
+  .macro-app .my-desk-columns { grid-template-columns: 1fr; }
+  .macro-app .my-wire-list > button { grid-template-columns: 82px minmax(0, 1fr); gap: 10px; }
+  .macro-app .my-wire-meta { display: none; }
+  .macro-app .article-row { padding-inline: 0 !important; }
+  .macro-app .article-row-body { padding: 12px 14px; }
+  .macro-app .article-row-title { font-size: 15.5px; }
+  .macro-app .article-row-meta { display: flex !important; }
+  .macro-app .article-signal-badge { display: none; }
+  .macro-app .article-row-coverage { max-width: 82px; overflow: hidden; text-overflow: ellipsis; }
+  .macro-app .today-signals { padding-inline: 12px; }
+  .macro-app .today-signals-list {
+    display: flex;
+    overflow-x: auto;
+    border: 0;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+  .macro-app .today-signals-list > button {
+    min-width: min(280px, calc(100vw - 48px));
+    border: 1px solid var(--border-subtle) !important;
+  }
+  .macro-app .news-detail-pane .event-detail-header { padding: 18px 15px 16px !important; }
+  .macro-app .news-detail-pane .event-detail-header h2 { font-size: 22px !important; }
+  .macro-app .event-detail-scroll { padding-inline: 15px; }
+  .macro-app .event-facts p,
+  .macro-app .raw-excerpt p,
+  .macro-app .event-analysis { font-size: 14px; }
+}
+
+@media (max-width: 390px) {
+  .macro-app .my-desk-header h1 { font-size: 32px; }
+  .macro-app .my-signal-list { grid-template-columns: 1fr; }
+  .macro-app .my-calendar-list > div { grid-template-columns: 43px minmax(0, 1fr) 26px; gap: 7px; }
+  .macro-app .article-row-source { max-width: 118px; }
+  .macro-app .article-for-you-badge { margin-left: auto; }
+  .macro-app .article-row-coverage { display: none; }
+  .macro-app .article-row-title { font-size: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .macro-app .provenance-section summary > span:last-child { transition: none; }
+}

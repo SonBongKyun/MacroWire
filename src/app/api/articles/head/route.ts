@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { isBreakingArticle } from "@/lib/news/signal";
 
 export const dynamic = "force-dynamic";
 
@@ -33,12 +34,25 @@ export async function GET(req: NextRequest) {
 
     // Ingest stamps createdAt, so this counts what arrived rather than what was
     // published — a story filed late still registers as new to this reader.
-    const [newCount, breakingCount] = await Promise.all([
-      prisma.article.count({ where: { createdAt: { gt: since } } }),
-      prisma.article.count({
-        where: { createdAt: { gt: since }, source: { category: "속보" } },
-      }),
-    ]);
+    const landed = await prisma.article.findMany({
+      where: { createdAt: { gt: since } },
+      select: {
+        title: true,
+        summary: true,
+        tags: true,
+        sourceName: true,
+        importanceScore: true,
+        importanceTier: true,
+        source: { select: { tier: true } },
+      },
+    });
+    const newCount = landed.length;
+    const breakingCount = landed.filter((article) => isBreakingArticle({
+      ...article,
+      tags: JSON.parse(article.tags) as string[],
+      sourceTier: article.source.tier,
+      importanceTier: article.importanceTier as "critical" | "major" | "general",
+    })).length;
 
     return NextResponse.json({ latest, newCount, breakingCount });
   } catch (err) {

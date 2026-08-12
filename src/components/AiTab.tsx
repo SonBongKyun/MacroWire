@@ -7,6 +7,7 @@ import { generateSmartSummary, type SmartSummary } from "@/lib/ai/summarizer";
 import { generateInsights, type MarketInsight } from "@/lib/ai/insights";
 import { getRecommendations, type Recommendation } from "@/lib/ai/recommendations";
 import { analyzeSentiment, type SentimentResult } from "@/lib/sentiment/sentiment";
+import { isBreakingArticle } from "@/lib/news/signal";
 
 interface AiTabProps {
   articles: Article[];
@@ -105,10 +106,7 @@ export function AiTab({ articles, sources, onSelectArticle, onTabChange, portfol
       else neu++;
     }
 
-    const breakingCount = todayArticles.filter((a) => {
-      const s = summaries.get(a.id);
-      return s?.impactLevel === "high";
-    }).length;
+    const breakingCount = todayArticles.filter(isBreakingArticle).length;
 
     // Top tags by frequency
     const tagCount: Record<string, number> = {};

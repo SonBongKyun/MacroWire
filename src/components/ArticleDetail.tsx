@@ -10,12 +10,14 @@ import {
   Radar,
   RefreshCw,
   ShieldCheck,
+  Target,
   Trash2,
 } from "lucide-react";
 import type { Article, ArticleEnrichmentResult } from "@/types";
 import { TAG_COLORS } from "@/lib/constants/colors";
 import { useArticleNotes } from "@/hooks/useArticleNotes";
 import { classifyArticleSignal } from "@/lib/news/signal";
+import type { PersonalRelevanceResult } from "@/lib/personalization/relevance";
 import { ArticleAiSummary } from "./ArticleAiSummary";
 
 interface ArticleDetailProps {
@@ -29,6 +31,9 @@ interface ArticleDetailProps {
   onCreateCollection?: (name: string) => void;
   articles?: Article[];
   onSelectArticle?: (article: Article) => void;
+  personalRelevance?: PersonalRelevanceResult;
+  onOpenOriginal?: (article: Article) => void;
+  onCreateNote?: (article: Article) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -172,30 +177,36 @@ function EventSections({
       )}
 
       {enrichment && (
-        <section className="event-section provenance-section" aria-labelledby="provenance-heading">
-          <div className="event-section-heading">
-            <ShieldCheck size={13} aria-hidden="true" />
-            <h3 id="provenance-heading">PROVENANCE</h3>
-          </div>
-          <dl>
-            <div>
-              <dt>Source</dt>
-              <dd>{article.sourceName}{article.sourceTier === "T0" ? " official release" : " RSS feed"}</dd>
-            </div>
-            <div>
-              <dt>Data used</dt>
-              <dd>
-                {[...new Set(enrichment.contentSources.map((source) => evidenceLabel(source.kind)))].join(" + ") || "확인 가능한 공개 데이터 없음"}
-              </dd>
-            </div>
-            {enrichment.analysisKind && (
+        <details className="event-section provenance-section">
+          <summary>
+            <span><ShieldCheck size={13} aria-hidden="true" /> Sources &amp; provenance</span>
+            <span aria-hidden="true">⌄</span>
+          </summary>
+          <div className="provenance-body" id="provenance-heading">
+            <dl>
               <div>
-                <dt>Analysis</dt>
-                <dd>위 출처에서 확인된 신호를 규칙 기반으로 해석</dd>
+                <dt>Source</dt>
+                <dd>{article.sourceName}{article.sourceTier === "T0" ? " official release" : " RSS feed"}</dd>
               </div>
-            )}
-          </dl>
-        </section>
+              <div>
+                <dt>Data used</dt>
+                <dd>
+                  {[...new Set(enrichment.contentSources.map((source) => evidenceLabel(source.kind)))].join(" + ") || "확인 가능한 공개 데이터 없음"}
+                </dd>
+              </div>
+              <div>
+                <dt>Coverage</dt>
+                <dd>{enrichment.coverage.count > 1 ? `${enrichment.coverage.count}개 독립 매체` : "단일 출처"}</dd>
+              </div>
+              {enrichment.analysisKind && (
+                <div>
+                  <dt>Analysis</dt>
+                  <dd>위 출처에서 확인된 신호를 규칙 기반으로 해석</dd>
+                </div>
+              )}
+            </dl>
+          </div>
+        </details>
       )}
     </div>
   );
@@ -212,6 +223,9 @@ export function ArticleDetail({
   onCreateCollection,
   articles = [],
   onSelectArticle,
+  personalRelevance,
+  onOpenOriginal,
+  onCreateNote,
 }: ArticleDetailProps) {
   const [toast, setToast] = useState<string | null>(null);
   const [newCollectionInput, setNewCollectionInput] = useState("");
@@ -353,11 +367,15 @@ export function ArticleDetail({
           <i aria-hidden="true" />
           <span>{timeAgo(article.publishedAt)}</span>
           <i aria-hidden="true" />
-          <span className={`importance-label is-${importance.tier}`} title={importance.reasons.join(" · ")}>
-            <Radar size={11} /> {importance.tier.toUpperCase()} {importance.score}
-          </span>
-          <i aria-hidden="true" />
-          <span>{coverageCount > 1 ? `${coverageCount} SOURCES` : "1 SOURCE"}</span>
+          {importance.tier !== "general" && (
+            <>
+              <span className={`importance-label is-${importance.tier}`} title={importance.reasons.join(" · ")}>
+                <Radar size={11} /> {importance.tier === "critical" ? "MARKET CRITICAL" : "MARKET SIGNAL"}
+              </span>
+              <i aria-hidden="true" />
+            </>
+          )}
+          {coverageCount > 1 && <span>{coverageCount} SOURCES</span>}
         </div>
         <h2>{article.title}</h2>
         <div className="event-byline">
@@ -398,6 +416,22 @@ export function ArticleDetail({
           <div className="enrichment-status is-minimal">
             이 기사에는 확인 가능한 발췌나 공개 metadata가 없습니다. 없는 사실은 보충하지 않았습니다.
           </div>
+        )}
+
+        {personalRelevance?.isHigh && (
+          <section className="event-section personal-context" aria-labelledby="personal-context-heading">
+            <div className="event-section-heading">
+              <Target size={13} aria-hidden="true" />
+              <h3 id="personal-context-heading">WHY YOU&apos;RE SEEING THIS</h3>
+              <span className="personal-context-label">FOR YOU</span>
+            </div>
+            <div className="personal-context-reasons">
+              {personalRelevance.reasons.map((reason) => <span key={reason}>{reason}</span>)}
+            </div>
+            {personalRelevance.assets.length > 0 && (
+              <p>Related <strong>{personalRelevance.assets.join(" · ")}</strong></p>
+            )}
+          </section>
         )}
 
         <ArticleAiSummary articleId={article.id} />
@@ -441,7 +475,10 @@ export function ArticleDetail({
               <textarea
                 rows={3}
                 value={noteText}
-                onChange={(event) => articleNotes.saveNote(article.id, event.target.value)}
+                onChange={(event) => {
+                  if (!noteText.trim() && event.target.value.trim()) onCreateNote?.(article);
+                  articleNotes.saveNote(article.id, event.target.value);
+                }}
                 placeholder="이 사건에 대한 메모"
               />
               {highlights.map((highlight) => (
@@ -458,6 +495,7 @@ export function ArticleDetail({
                   onChange={(event) => setHighlightInput(event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && highlightInput.trim()) {
+                      if (!hasNote) onCreateNote?.(article);
                       articleNotes.addHighlight(article.id, highlightInput.trim());
                       setHighlightInput("");
                     }
@@ -497,17 +535,17 @@ export function ArticleDetail({
       )}
 
       <footer className="event-detail-actions">
-        <a href={article.url} target="_blank" rel="noopener noreferrer" className="event-original-cta">
+        <a href={article.url} target="_blank" rel="noopener noreferrer" className="event-original-cta" onClick={() => onOpenOriginal?.(article)}>
           <span>OPEN ORIGINAL</span>
           <small>{article.sourceName}</small>
           <ExternalLink size={14} />
         </a>
-        <button onClick={handleReadAndNext} title="읽음 처리 후 다음 기사"><CheckCheck size={15} /></button>
-        <button onClick={() => setFullscreen(true)} title="전체 화면"><FileText size={15} /></button>
-        <button onClick={copyUrl} title="URL 복사">URL</button>
-        <button onClick={shareArticle} title="공유">공유</button>
-        <button onClick={() => onToggleRead(article)} className={article.isRead ? "is-active" : ""} title="읽음 전환">✓</button>
-        <button onClick={() => onToggleSave(article)} className={article.isSaved ? "is-active" : ""} title="저장 전환">★</button>
+        <button onClick={handleReadAndNext} title="읽음 처리 후 다음 기사" aria-label="읽음 처리 후 다음 기사"><CheckCheck size={15} /></button>
+        <button onClick={() => setFullscreen(true)} title="전체 화면" aria-label="전체 화면 열기"><FileText size={15} /></button>
+        <button onClick={copyUrl} title="URL 복사" aria-label="기사 URL 복사">URL</button>
+        <button onClick={shareArticle} title="공유" aria-label="기사 공유 텍스트 복사">공유</button>
+        <button onClick={() => onToggleRead(article)} className={article.isRead ? "is-active" : ""} title="읽음 전환" aria-label="기사 읽음 전환">✓</button>
+        <button onClick={() => onToggleSave(article)} className={article.isSaved ? "is-active" : ""} title="저장 전환" aria-label="기사 저장 전환">★</button>
       </footer>
 
       {toast && <div className="event-detail-toast">{toast}</div>}
@@ -519,7 +557,7 @@ export function ArticleDetail({
             <div className="event-kicker"><span>{article.sourceName}</span><i /><span>{formatDate(article.publishedAt)}</span></div>
             <h1>{article.title}</h1>
             <EventSections article={article} enrichment={enrichment} articles={articles} onSelectArticle={onSelectArticle} />
-            <a href={article.url} target="_blank" rel="noopener noreferrer" className="event-original-cta">
+            <a href={article.url} target="_blank" rel="noopener noreferrer" className="event-original-cta" onClick={() => onOpenOriginal?.(article)}>
               <span>OPEN ORIGINAL</span><small>{article.sourceName}</small><ExternalLink size={14} />
             </a>
           </div>

@@ -17,6 +17,7 @@ import {
   Menu,
   Newspaper,
   PanelLeftClose,
+  Radar,
   Radio,
   RefreshCw,
   ScanText,
@@ -27,7 +28,7 @@ import {
 import { Logo } from "@/components/Logo";
 import { useVisibleInterval } from "@/hooks/useVisibleInterval";
 
-export type MainTab = "dashboard" | "news" | "markets" | "analytics" | "ai" | "research" | "portfolio";
+export type MainTab = "desk" | "dashboard" | "news" | "markets" | "analytics" | "ai" | "research" | "portfolio";
 
 interface PlatformNavProps {
   activeTab: MainTab;
@@ -65,9 +66,10 @@ interface PlatformNavProps {
 const SEARCH_HISTORY_KEY = "macro-wire-search-history";
 
 const tabs = [
-  { key: "dashboard" as const, label: "데스크", shortLabel: "데스크", icon: LayoutDashboard },
+  { key: "desk" as const, label: "MY DESK", shortLabel: "데스크", icon: Radar },
   { key: "news" as const, label: "와이어", shortLabel: "와이어", icon: Newspaper },
   { key: "markets" as const, label: "마켓", shortLabel: "마켓", icon: ChartNoAxesCombined },
+  { key: "dashboard" as const, label: "대시보드", shortLabel: "대시보드", icon: LayoutDashboard },
   { key: "analytics" as const, label: "분석", shortLabel: "분석", icon: Activity },
   { key: "ai" as const, label: "브리핑", shortLabel: "브리핑", icon: ScanText },
   { key: "research" as const, label: "리서치", shortLabel: "리서치", icon: FlaskConical },
@@ -75,10 +77,10 @@ const tabs = [
 ];
 
 const mobilePrimaryTabs = tabs.filter((tab) =>
-  ["dashboard", "news", "markets", "ai"].includes(tab.key)
+  ["desk", "news", "markets", "ai"].includes(tab.key)
 );
 const mobileMoreTabs = tabs.filter((tab) =>
-  ["analytics", "research", "portfolio"].includes(tab.key)
+  ["dashboard", "analytics", "research", "portfolio"].includes(tab.key)
 );
 
 function formatCountdown(value: number) {

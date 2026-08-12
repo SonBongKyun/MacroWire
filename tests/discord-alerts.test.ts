@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildDiscordWebhookPayload,
+  createDiscordEventMemory,
   deliverDiscordAlerts,
   loadDiscordAlertConfig,
   selectDiscordAlertArticles,
@@ -22,6 +23,8 @@ function article(overrides: Partial<DiscordAlertArticle> = {}): DiscordAlertArti
     importanceTier: "critical",
     importanceScore: 84,
     importanceReasons: ["공식 발표", "금리 정책", "30분 이내"],
+    summary: "The Federal Reserve announced a policy decision.",
+    tags: ["속보", "연준", "금리"],
     ...overrides,
   };
 }
@@ -70,6 +73,19 @@ test("builds mention-safe Discord embeds with source and importance context", ()
   assert.match(payload.embeds[0].fields[2].value, /공식 발표/);
 });
 
+test("collapses the same event reported by several outlets inside one alert burst", () => {
+  const config = loadDiscordAlertConfig({ DISCORD_WEBHOOK_URL: webhookUrl });
+  assert.ok(config);
+  const { selected, suppressed } = selectDiscordAlertArticles([
+    article({ id: "fed-a", sourceName: "Bloomberg Markets", sourceTier: "T1", title: "Federal Reserve cuts interest rates by 25 basis points" }),
+    article({ id: "fed-b", sourceName: "CNBC Breaking", sourceTier: "T1", title: "Fed cuts interest rate by a quarter point" }),
+    article({ id: "oil", sourceName: "CNBC Breaking", sourceTier: "T1", title: "WTI oil rises as OPEC supply tightens", tags: ["속보", "에너지"] }),
+  ], config, now);
+
+  assert.deepEqual(selected.map((item) => item.id), ["fed-a", "oil"]);
+  assert.equal(suppressed, 1);
+});
+
 test("retries Discord rate limits and succeeds without delaying tests", async () => {
   const responses = [
     new Response(JSON.stringify({ retry_after: 0.01 }), {
@@ -91,6 +107,7 @@ test("retries Discord rate limits and succeeds without delaying tests", async ()
       warn: (message) => logs.push(String(message)),
       error: (message) => logs.push(String(message)),
     },
+    eventMemory: createDiscordEventMemory(),
   });
 
   assert.equal(result.delivered, 1);
@@ -106,9 +123,42 @@ test("keeps ingestion callers alive when Discord rejects a request", async () =>
     fetchImpl: async () => new Response(null, { status: 401 }),
     sleep: async () => {},
     logger: { info() {}, warn() {}, error() {} },
+    eventMemory: createDiscordEventMemory(),
   });
 
   assert.equal(result.delivered, 0);
   assert.equal(result.attempts, 1);
   assert.match(result.error ?? "", /401/);
+});
+
+test("suppresses the same event across sequential worker deliveries", async () => {
+  const eventMemory = createDiscordEventMemory();
+  let deliveries = 0;
+  const options = {
+    env: { DISCORD_WEBHOOK_URL: webhookUrl },
+    now: () => now,
+    fetchImpl: async () => {
+      deliveries += 1;
+      return new Response(null, { status: 204 });
+    },
+    logger: { info() {}, warn() {}, error() {} },
+    eventMemory,
+  };
+
+  const first = await deliverDiscordAlerts([
+    article({ id: "fed-a", sourceName: "Bloomberg Markets", sourceTier: "T1" }),
+  ], options);
+  const second = await deliverDiscordAlerts([
+    article({
+      id: "fed-b",
+      sourceName: "CNBC Breaking",
+      sourceTier: "T1",
+      title: "Federal Reserve cuts interest rates by 25 basis points",
+    }),
+  ], options);
+
+  assert.equal(first.delivered, 1);
+  assert.equal(second.delivered, 0);
+  assert.equal(second.suppressed, 1);
+  assert.equal(deliveries, 1);
 });

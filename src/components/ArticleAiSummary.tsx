@@ -23,6 +23,9 @@ interface SummaryResponse {
 }
 
 function errorMessage(status: number, code?: string): string {
+  if (code === "OWNER_AUTH_REQUIRED" || code === "OWNER_AUTH_NOT_CONFIGURED") {
+    return "소유자 인증이 설정된 환경에서만 AI 요약을 생성할 수 있습니다.";
+  }
   if (status === 401) return "로그인 후 AI 요약을 사용할 수 있습니다.";
   if (status === 429 || code === "QUOTA_EXCEEDED") return "오늘의 무료 AI 요약 한도를 사용했습니다.";
   if (status === 422 || code === "SOURCE_TEXT_UNAVAILABLE") {
@@ -54,7 +57,9 @@ export function ArticleAiSummary({ articleId }: { articleId: string }) {
         if (!response.ok) throw Object.assign(new Error(data.error ?? "REQUEST_FAILED"), { status: response.status });
         setResult(data.summary);
         setCanGenerate(data.canGenerate !== false);
-        if (data.reason === "AI_NOT_CONFIGURED") setError(errorMessage(503, data.reason));
+        if (data.reason === "AI_NOT_CONFIGURED" || data.reason === "OWNER_AUTH_REQUIRED") {
+          setError(errorMessage(data.reason === "AI_NOT_CONFIGURED" ? 503 : 401, data.reason));
+        }
       })
       .catch((requestError: Error & { status?: number }) => {
         if (requestError.name !== "AbortError") {

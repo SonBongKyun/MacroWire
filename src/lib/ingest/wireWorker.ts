@@ -1,4 +1,5 @@
 import type { SourceIngestResult, WireSource } from "./sourceIngest";
+import type { WireSourceTier } from "./sourceTiers";
 
 export interface WireWorkerDependencies {
   loadSources: () => Promise<WireSource[]>;
@@ -11,6 +12,49 @@ export interface WireWorkerDependencies {
 
 function isDue(source: WireSource, now: Date): boolean {
   return !source.nextFetchAt || source.nextFetchAt.getTime() <= now.getTime();
+}
+
+const TIER_PRIORITY: Record<WireSourceTier, number> = { T0: 0, T1: 1, T2: 2, T3: 3 };
+
+export function createSourceCatalogueLoader(options: {
+  seed: () => Promise<unknown>;
+  load: () => Promise<WireSource[]>;
+  refreshMs?: number;
+  now?: () => number;
+}): () => Promise<WireSource[]> {
+  const refreshMs = Math.max(1_000, options.refreshMs ?? 60_000);
+  const now = options.now ?? Date.now;
+  let seedTask: Promise<unknown> | null = null;
+  let refreshTask: Promise<WireSource[]> | null = null;
+  let cache: WireSource[] | null = null;
+  let loadedAt = Number.NEGATIVE_INFINITY;
+
+  const ensureSeeded = async () => {
+    if (!seedTask) {
+      seedTask = options.seed().catch((error) => {
+        seedTask = null;
+        throw error;
+      });
+    }
+    await seedTask;
+  };
+
+  return async () => {
+    await ensureSeeded();
+    if (cache && now() - loadedAt < refreshMs) return cache;
+    if (!refreshTask) {
+      refreshTask = options.load()
+        .then((sources) => {
+          cache = sources;
+          loadedAt = now();
+          return sources;
+        })
+        .finally(() => {
+          refreshTask = null;
+        });
+    }
+    return refreshTask;
+  };
 }
 
 export class WireWorker {
@@ -54,7 +98,10 @@ export class WireWorker {
 
     const due = sources
       .filter((source) => isDue(source, this.now()) && !this.active.has(source.id))
-      .sort((a, b) => (a.nextFetchAt?.getTime() ?? 0) - (b.nextFetchAt?.getTime() ?? 0));
+      .sort((a, b) =>
+        TIER_PRIORITY[a.tier] - TIER_PRIORITY[b.tier] ||
+        (a.nextFetchAt?.getTime() ?? 0) - (b.nextFetchAt?.getTime() ?? 0)
+      );
 
     if (due.length === 0) return;
 

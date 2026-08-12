@@ -9,7 +9,8 @@ export interface ArticleSignal {
   isBreaking: boolean;
 }
 
-type SignalArticle = Pick<Article, "title" | "summary" | "tags" | "sourceName">;
+type SignalArticle = Pick<Article, "title" | "summary" | "tags" | "sourceName"> &
+  Partial<Pick<Article, "sourceTier" | "importanceScore" | "importanceTier">>;
 
 const TAG_SIGNALS: Record<
   string,
@@ -130,10 +131,18 @@ function normalizeTag(tag: string): string {
 }
 
 export function isBreakingArticle(article: SignalArticle): boolean {
-  return (
+  const hasExplicitMarker = (
     article.tags.some((tag) => normalizeTag(tag) === "속보") ||
-    article.sourceName.includes("속보")
+    /속보|breaking/i.test(article.sourceName)
   );
+  const storedImportance = article.importanceScore;
+
+  // During ingest there is no stored importance yet, so the explicit marker is
+  // carried into the importance pass. Once stored, weak stories from a fast
+  // source stop presenting as BREAKING solely because of the feed they used.
+  if (typeof storedImportance !== "number") return hasExplicitMarker;
+  if (article.sourceTier === "T0" && storedImportance >= 70) return true;
+  return hasExplicitMarker && storedImportance >= 38;
 }
 
 export function classifyArticleSignal(article: SignalArticle): ArticleSignal {

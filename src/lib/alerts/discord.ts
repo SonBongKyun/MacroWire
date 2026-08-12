@@ -1,6 +1,8 @@
 import { parseWebhookUrl } from "../security/outbound-url";
 import type { ImportanceTier } from "../news/importance";
 import type { WireSourceTier } from "../ingest/sourceTiers";
+import { isBreakingArticle } from "../news/signal";
+import { extractKeywords, isStrongKeyword } from "../clustering/cluster";
 
 const DEFAULT_TIERS: readonly WireSourceTier[] = ["T0", "T1"];
 const DEFAULT_MIN_SCORE = 55;
@@ -19,6 +21,8 @@ export interface DiscordAlertArticle {
   importanceTier: ImportanceTier;
   importanceScore: number;
   importanceReasons: string[];
+  summary: string | null;
+  tags: string[];
 }
 
 export interface DiscordAlertConfig {
@@ -40,12 +44,17 @@ export interface DiscordDeliveryResult {
   error?: string;
 }
 
+export interface DiscordEventMemory {
+  recent: Array<{ article: DiscordAlertArticle; reservedAt: number }>;
+}
+
 interface DeliveryOptions {
   env?: Record<string, string | undefined>;
   now?: () => Date;
   fetchImpl?: typeof fetch;
   sleep?: (delayMs: number) => Promise<void>;
   logger?: Pick<Console, "info" | "warn" | "error">;
+  eventMemory?: DiscordEventMemory;
 }
 
 interface DiscordWebhookPayload {
@@ -115,6 +124,49 @@ function importanceRank(tier: ImportanceTier): number {
   return 0;
 }
 
+const EVENT_WINDOW_MS = 30 * 60_000;
+const defaultEventMemory: DiscordEventMemory = { recent: [] };
+
+export function createDiscordEventMemory(): DiscordEventMemory {
+  return { recent: [] };
+}
+
+function sameAlertEvent(left: DiscordAlertArticle, right: DiscordAlertArticle): boolean {
+  const leftTime = new Date(left.publishedAt).getTime();
+  const rightTime = new Date(right.publishedAt).getTime();
+  if (!Number.isFinite(leftTime) || !Number.isFinite(rightTime) || Math.abs(leftTime - rightTime) > EVENT_WINDOW_MS) {
+    return false;
+  }
+  const leftTags = new Set(left.tags.filter((tag) => tag !== "속보"));
+  const sharedTags = right.tags.filter((tag) => tag !== "속보" && leftTags.has(tag));
+  const leftWords = extractKeywords(left.title);
+  const sharedWords = [...extractKeywords(right.title)].filter((word) => leftWords.has(word) && isStrongKeyword(word));
+  return sharedWords.length >= 3 || (sharedTags.length > 0 && sharedWords.length >= 1);
+}
+
+function reserveDiscordEvents(
+  articles: DiscordAlertArticle[],
+  memory: DiscordEventMemory,
+  now: Date,
+): { reserved: DiscordAlertArticle[]; suppressed: number } {
+  const cutoff = now.getTime() - EVENT_WINDOW_MS;
+  memory.recent = memory.recent.filter((entry) => entry.reservedAt >= cutoff);
+  const reserved: DiscordAlertArticle[] = [];
+
+  for (const article of articles) {
+    if (memory.recent.some((entry) => sameAlertEvent(entry.article, article))) continue;
+    memory.recent.push({ article, reservedAt: now.getTime() });
+    reserved.push(article);
+  }
+
+  return { reserved, suppressed: articles.length - reserved.length };
+}
+
+function releaseDiscordEvents(memory: DiscordEventMemory, articles: DiscordAlertArticle[]): void {
+  const ids = new Set(articles.map((article) => article.id));
+  memory.recent = memory.recent.filter((entry) => !ids.has(entry.article.id));
+}
+
 export function selectDiscordAlertArticles(
   articles: DiscordAlertArticle[],
   config: DiscordAlertConfig,
@@ -128,6 +180,7 @@ export function selectDiscordAlertArticles(
     if (
       unique.has(article.id) ||
       !config.sourceTiers.has(article.sourceTier) ||
+      !isBreakingArticle(article) ||
       article.importanceScore < config.minScore ||
       !Number.isFinite(publishedAt) ||
       publishedAt < cutoff
@@ -143,9 +196,15 @@ export function selectDiscordAlertArticles(
     b.publishedAt.localeCompare(a.publishedAt),
   );
 
+  const collapsed: DiscordAlertArticle[] = [];
+  for (const article of eligible) {
+    if (collapsed.some((existing) => sameAlertEvent(existing, article))) continue;
+    collapsed.push(article);
+  }
+
   return {
-    selected: eligible.slice(0, config.maxArticles),
-    suppressed: Math.max(0, eligible.length - config.maxArticles),
+    selected: collapsed.slice(0, config.maxArticles),
+    suppressed: Math.max(0, eligible.length - Math.min(collapsed.length, config.maxArticles)),
   };
 }
 
@@ -260,11 +319,16 @@ export async function deliverDiscordAlerts(
     };
   }
 
-  const { selected, suppressed } = selectDiscordAlertArticles(
+  const now = options.now?.() ?? new Date();
+  const selection = selectDiscordAlertArticles(
     articles,
     config,
-    options.now?.() ?? new Date(),
+    now,
   );
+  const eventMemory = options.eventMemory ?? defaultEventMemory;
+  const reservation = reserveDiscordEvents(selection.selected, eventMemory, now);
+  const selected = reservation.reserved;
+  const suppressed = selection.suppressed + reservation.suppressed;
   if (selected.length === 0) {
     return {
       configured: true,
@@ -308,6 +372,7 @@ export async function deliverDiscordAlerts(
     } catch (error) {
       if (attempt === MAX_ATTEMPTS || (response && !shouldRetry(response.status))) {
         const message = error instanceof Error ? error.message : "Discord webhook request failed";
+        releaseDiscordEvents(eventMemory, selected);
         logger.error(`[discord] delivery failed after ${attempts} attempt(s): ${message}`);
         return {
           configured: true,
@@ -325,6 +390,7 @@ export async function deliverDiscordAlerts(
     await sleep(await retryDelayMs(response, attempt));
   }
 
+  releaseDiscordEvents(eventMemory, selected);
   return {
     configured: true,
     considered: articles.length,

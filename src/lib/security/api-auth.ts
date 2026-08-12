@@ -1,6 +1,24 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { isClerkServerEnabled } from "@/lib/auth/config";
+import { timingSafeEqual } from "node:crypto";
+
+export type OwnerSecretStatus = "authorized" | "unconfigured" | "invalid";
+
+export function verifyOwnerSecret(
+  headers: Headers,
+  env: Record<string, string | undefined> = process.env,
+): OwnerSecretStatus {
+  const expected = env.MACROWIRE_OWNER_SECRET?.trim();
+  if (!expected) return "unconfigured";
+  const bearer = headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+  const supplied = headers.get("x-macrowire-owner-secret")?.trim() || bearer;
+  if (!supplied) return "invalid";
+  const expectedBytes = Buffer.from(expected);
+  const suppliedBytes = Buffer.from(supplied);
+  if (expectedBytes.length !== suppliedBytes.length) return "invalid";
+  return timingSafeEqual(expectedBytes, suppliedBytes) ? "authorized" : "invalid";
+}
 
 function configuredAdminIds(): Set<string> {
   return new Set(

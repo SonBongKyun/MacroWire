@@ -1,0 +1,30 @@
+{
+  "profileId": "local-owner",
+  "topicWeights": {
+    "rates": 10,
+    "fed": 10,
+    "treasury": 10,
+    "inflation": 9,
+    "fx": 9,
+    "semiconductors": 9,
+    "korea": 8,
+    "oil": 8,
+    "boj": 8,
+    "ai-capex": 7,
+    "credit": 6,
+    "crypto": 4
+  },
+  "followedAssets": [
+    "SOXL",
+    "SOX",
+    "NVDA",
+    "USD/KRW",
+    "US10Y",
+    "US2Y",
+    "WTI",
+    "BTC",
+    "DXY",
+    "KOSPI"
+  ],
+  "highRelevanceThreshold": 58
+}

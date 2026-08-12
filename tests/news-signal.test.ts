@@ -3,6 +3,7 @@ import test from "node:test";
 import type { Article } from "../src/types";
 import {
   classifyArticleSignal,
+  isBreakingArticle,
   isMacroSignal,
 } from "../src/lib/news/signal";
 
@@ -73,6 +74,31 @@ test("keeps macro breaking news while filtering entertainment breaking news", ()
   assert.equal(macro.isBreaking, true);
   assert.equal(macro.tier, "critical");
   assert.equal(entertainment.tier, "general");
+});
+
+test("uses one strict breaking rule for stored wire articles", () => {
+  assert.equal(isBreakingArticle(article({
+    sourceName: "Bloomberg Markets",
+    sourceTier: "T1",
+    title: "Company reports quarterly earnings",
+    importanceScore: 64,
+    importanceTier: "major",
+  })), false);
+  assert.equal(isBreakingArticle(article({
+    sourceName: "Federal Reserve",
+    sourceTier: "T0",
+    title: "Federal Reserve issues policy decision",
+    importanceScore: 74,
+    importanceTier: "critical",
+  })), true);
+  assert.equal(isBreakingArticle(article({
+    sourceName: "CNBC Breaking",
+    sourceTier: "T1",
+    title: "Breaking CPI release",
+    tags: ["속보", "물가"],
+    importanceScore: 45,
+    importanceTier: "major",
+  })), true);
 });
 
 test("does not trust broad AI or geopolitics tags without textual evidence", () => {

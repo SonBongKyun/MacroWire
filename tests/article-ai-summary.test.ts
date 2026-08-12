@@ -3,7 +3,9 @@ import test from "node:test";
 import {
   classifyArticleTextResponse,
   extractPublicArticleText,
+  isRestrictedPublisherUrl,
 } from "../src/lib/enrichment/articleText";
+import { verifyOwnerSecret } from "../src/lib/security/api-auth";
 import {
   fallbackSummaryEvidence,
   validateSourceSummaryOutput,
@@ -50,6 +52,25 @@ test("classifies blocked and oversized source pages without bypassing them", () 
   assert.equal(classifyArticleTextResponse(200, "application/pdf", 5_000), "unavailable");
   assert.equal(classifyArticleTextResponse(200, "text/html", 2_000_000), "unavailable");
   assert.equal(classifyArticleTextResponse(200, "text/html", 50_000), "read");
+});
+
+test("blocks full-text extraction for known paywalled publishers", () => {
+  assert.equal(isRestrictedPublisherUrl("https://www.ft.com/content/story"), true);
+  assert.equal(isRestrictedPublisherUrl("https://markets.wsj.com/story"), true);
+  assert.equal(isRestrictedPublisherUrl("https://www.bloomberg.com/news/articles/story"), true);
+  assert.equal(isRestrictedPublisherUrl("https://www.federalreserve.gov/newsevents/pressreleases.htm"), false);
+});
+
+test("AI generation fails closed without Clerk unless the owner secret is configured and supplied", () => {
+  assert.equal(verifyOwnerSecret(new Headers(), {}), "unconfigured");
+  assert.equal(
+    verifyOwnerSecret(new Headers({ "x-macrowire-owner-secret": "wrong" }), { MACROWIRE_OWNER_SECRET: "correct" }),
+    "invalid",
+  );
+  assert.equal(
+    verifyOwnerSecret(new Headers({ authorization: "Bearer correct" }), { MACROWIRE_OWNER_SECRET: "correct" }),
+    "authorized",
+  );
 });
 
 test("labels fallback evidence rather than claiming it is the original body", () => {

@@ -47,3 +47,24 @@ test("keeps same-event headlines from different outlets for corroboration", asyn
   assert.equal(writes.length, 2);
   assert.notEqual(writes[0].url, writes[1].url);
 });
+
+test("does not label every T1 feed item as breaking", async () => {
+  const writes: ArticleInsert[] = [];
+  await persistFeedItems({
+    id: "bloomberg",
+    name: "Bloomberg Markets",
+    feedUrl: "https://example.com/rss",
+    category: "markets",
+    tier: "T1",
+  }, [{
+    title: "Company reports quarterly earnings",
+    url: "https://example.com/earnings",
+    publishedAt: new Date("2026-08-11T00:00:00Z"),
+  }], async (article) => {
+    writes.push(article);
+    return "created";
+  }, new Date("2026-08-11T00:10:00Z"));
+
+  assert.equal(writes.length, 1);
+  assert.equal(writes[0].tags.includes("속보"), false);
+});

@@ -9,12 +9,14 @@ import { EmptyState } from "@/components/EmptyState";
 import { SpikeAlert } from "@/components/SpikeAlert";
 import { NewsTimeline } from "@/components/NewsTimeline";
 import { useArticleScoring } from "@/hooks/useArticleScoring";
+import { computeCoverage } from "@/lib/clustering/coverage";
+import type { PersonalRelevanceResult } from "@/lib/personalization/relevance";
 import {
   classifyArticleSignal,
   type ArticleSignal,
 } from "@/lib/news/signal";
 
-type SortMode = "newest" | "impact" | "oldest" | "source";
+type SortMode = "relevance" | "newest" | "impact" | "oldest" | "source";
 type FocusMode = "signal" | "all" | "breaking";
 export type DensityMode = "compact" | "comfortable";
 
@@ -34,6 +36,7 @@ interface NewsTabProps {
   viewMode: "list" | "card";
   timelineMode: boolean;
   newArticleIds: string[];
+  personalScores: Map<string, PersonalRelevanceResult>;
   // Handlers
   onSelectArticle: (article: Article) => void;
   onCloseArticle: () => void;
@@ -55,6 +58,9 @@ interface NewsTabProps {
   collectionNames: string[];
   onCollectionChange: (articleId: string, name: string) => void;
   onCreateCollection: (name: string) => void;
+  onOpenOriginal?: (article: Article) => void;
+  onCreateNote?: (article: Article) => void;
+  onDismissArticle?: (article: Article) => void;
 }
 
 const RANGES: Array<{ value: "24h" | "7d" | "30d"; label: string }> = [
@@ -119,6 +125,7 @@ export function NewsTab({
   viewMode,
   timelineMode,
   newArticleIds,
+  personalScores,
   onSelectArticle,
   onCloseArticle,
   onSelectSource,
@@ -138,8 +145,11 @@ export function NewsTab({
   collectionNames,
   onCollectionChange,
   onCreateCollection,
+  onOpenOriginal,
+  onCreateNote,
+  onDismissArticle,
 }: NewsTabProps) {
-  const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [sortMode, setSortMode] = useState<SortMode>("relevance");
   const [density, setDensity] = useState<DensityMode>("comfortable");
   const [focusMode, setFocusMode] = useState<FocusMode>("signal");
   const [regionFading, setRegionFading] = useState(false);
@@ -208,6 +218,12 @@ export function NewsTab({
   const sortedArticles = useMemo(() => {
     const list = [...focusedArticles];
     switch (sortMode) {
+      case "relevance":
+        return list.sort((a, b) =>
+          (personalScores.get(b.id)?.score ?? 0) - (personalScores.get(a.id)?.score ?? 0) ||
+          (b.importanceScore ?? 0) - (a.importanceScore ?? 0) ||
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        );
       case "newest":
         return list.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
       case "impact":
@@ -223,7 +239,15 @@ export function NewsTab({
       default:
         return list;
     }
-  }, [focusedArticles, sortMode, getScore]);
+  }, [focusedArticles, sortMode, getScore, personalScores]);
+
+  const coverage = useMemo(() => computeCoverage(sortedArticles), [sortedArticles]);
+  const todaysSignals = useMemo(
+    () => sortedArticles
+      .filter((article) => (personalScores.get(article.id)?.isHigh || (article.importanceScore ?? 0) >= 55))
+      .slice(0, 4),
+    [personalScores, sortedArticles],
+  );
 
   useEffect(() => {
     if (
@@ -409,6 +433,7 @@ export function NewsTab({
                 minWidth: 70,
               }}
             >
+              <option value="relevance">나에게 중요</option>
               <option value="newest">최신순</option>
               <option value="impact">중요도순</option>
               <option value="oldest">오래된순</option>
@@ -471,6 +496,32 @@ export function NewsTab({
       >
         {/* Left column: article list */}
         <div className={`news-list-pane overflow-hidden transition-opacity duration-200 ${regionFading ? "opacity-0" : "opacity-100"}`}>
+          {todaysSignals.length > 0 && (
+            <section className="today-signals" aria-labelledby="today-signals-title">
+              <div className="today-signals-head">
+                <div><span>DESK</span><h2 id="today-signals-title">TODAY&apos;S SIGNALS</h2></div>
+                <small>{todaysSignals.length} selected</small>
+              </div>
+              <div className="today-signals-list">
+                {todaysSignals.map((article, index) => {
+                  const relevance = personalScores.get(article.id);
+                  const corroboration = coverage.get(article.id);
+                  return (
+                    <button type="button" key={article.id} onClick={() => onSelectArticle(article)}>
+                      <span>{index + 1}</span>
+                      <div>
+                        <strong>{article.title}</strong>
+                        <small>
+                          {relevance?.isHigh ? relevance.reasons.join(" · ") : article.sourceName}
+                          {corroboration ? ` · ${corroboration.outlets} sources` : ""}
+                        </small>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
           <SpikeAlert articles={sortedArticles} onTagClick={onTagClick} />
 
           {sortedArticles.length === 0 && !loading ? (
@@ -521,6 +572,9 @@ export function NewsTab({
               viewMode="list"
               onViewModeChange={onViewModeChange}
               density={density}
+              personalScores={personalScores}
+              onOpenOriginal={onOpenOriginal}
+              onDismissArticle={onDismissArticle}
             />
           )}
         </div>
@@ -548,6 +602,9 @@ export function NewsTab({
               onCreateCollection={onCreateCollection}
               articles={sortedArticles}
               onSelectArticle={onSelectArticle}
+              personalRelevance={personalScores.get(selectedArticle.id)}
+              onOpenOriginal={onOpenOriginal}
+              onCreateNote={onCreateNote}
             />
           </div>
         ) : (
