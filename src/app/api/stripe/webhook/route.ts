@@ -4,20 +4,11 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/billing/stripe";
 import { prisma } from "@/lib/db/prisma";
 import { tierFromPriceId } from "@/lib/billing/plans";
-import type { SubStatus } from "@prisma/client";
+import type { SubStatus, Tier } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-/**
- * Stripe webhook for subscription lifecycle.
- *
- * Configure in Stripe dashboard: Developers → Webhooks → Add endpoint
- * Endpoint URL: https://<domain>/api/stripe/webhook
- * Events: checkout.session.completed, customer.subscription.created,
- *         customer.subscription.updated, customer.subscription.deleted,
- *         invoice.payment_failed
- */
 export async function POST(req: NextRequest) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) {
@@ -42,26 +33,24 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.subscription && session.customer) {
-          const subId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
-          const fullSub = await stripe.subscriptions.retrieve(subId);
-          await upsertSubscription(fullSub);
+          const subId = typeof session.subscription === "string"
+            ? session.subscription
+            : session.subscription.id;
+          await upsertSubscription(await stripe.subscriptions.retrieve(subId));
         }
         break;
       }
       case "customer.subscription.created":
       case "customer.subscription.updated":
-      case "customer.subscription.deleted": {
+      case "customer.subscription.deleted":
         await upsertSubscription(event.data.object as Stripe.Subscription);
         break;
-      }
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const subscription = invoice.parent?.subscription_details?.subscription;
-        const subscriptionId =
-          typeof subscription === "string" ? subscription : subscription?.id;
+        const subscriptionId = typeof subscription === "string" ? subscription : subscription?.id;
         if (subscriptionId) {
-          const sub = await stripe.subscriptions.retrieve(subscriptionId);
-          await upsertSubscription(sub);
+          await upsertSubscription(await stripe.subscriptions.retrieve(subscriptionId));
         }
         break;
       }
@@ -88,20 +77,22 @@ function mapStatus(s: Stripe.Subscription.Status): SubStatus {
     case "incomplete_expired":
     case "unpaid":
     case "paused":
-      return "INCOMPLETE";
     default:
       return "INCOMPLETE";
   }
+}
+
+function isEntitledStatus(status: SubStatus): boolean {
+  return status === "ACTIVE" || status === "TRIALING";
 }
 
 async function upsertSubscription(sub: Stripe.Subscription) {
   const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const item = sub.items.data[0];
   const priceId = item?.price?.id ?? "";
-  const userId = (sub.metadata?.userId as string | undefined) ?? null;
+  const metadataUserId = (sub.metadata?.userId as string | undefined) ?? null;
 
-  // Resolve our local userId — metadata first, then by customer id, then by Clerk metadata fallback.
-  let resolvedUserId = userId;
+  let resolvedUserId = metadataUserId;
   if (!resolvedUserId) {
     const byCustomer = await prisma.subscription.findUnique({
       where: { stripeCustomerId: customerId },
@@ -123,39 +114,76 @@ async function upsertSubscription(sub: Stripe.Subscription) {
     return;
   }
 
-  const tier = tierFromPriceId(priceId);
   const status = mapStatus(sub.status);
+  const entitled = isEntitledStatus(status);
+  const paidTier = tierFromPriceId(priceId);
+  if (entitled && !paidTier) {
+    // A paid subscription whose price is not configured must fail loudly.
+    // Treating it as FREE would hide a production billing configuration error.
+    throw new Error(`UNKNOWN_STRIPE_PRICE:${priceId || "missing"}`);
+  }
+  const userTier: Tier = entitled ? paidTier! : "FREE";
 
-  // `current_period_*` lives at the subscription item level in newer API versions.
-  const periodStart = (item?.current_period_start ?? sub.start_date ?? Math.floor(Date.now() / 1000)) * 1000;
-  const periodEnd = (item?.current_period_end ?? Math.floor(Date.now() / 1000) + 86400 * 30) * 1000;
+  const periodStart = (
+    item?.current_period_start ?? sub.start_date ?? Math.floor(Date.now() / 1000)
+  ) * 1000;
+  const periodEnd = (
+    item?.current_period_end ?? Math.floor(Date.now() / 1000) + 86400 * 30
+  ) * 1000;
+
+  const existing = await prisma.subscription.findUnique({
+    where: { userId: resolvedUserId },
+  });
+
+  // Ignore a late terminal event from an older subscription after a replacement
+  // subscription has already become active. Stripe can deliver lifecycle events
+  // out of order, and the old cancellation must not downgrade the new plan.
+  if (
+    existing
+    && existing.stripeSubscriptionId !== sub.id
+    && isEntitledStatus(existing.status)
+    && !entitled
+  ) {
+    console.warn(
+      "[stripe-webhook] ignoring stale terminal event",
+      sub.id,
+      "current=",
+      existing.stripeSubscriptionId,
+    );
+    return;
+  }
+
+  const subscriptionWrite = existing
+    ? prisma.subscription.update({
+        where: { userId: resolvedUserId },
+        data: {
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: sub.id,
+          stripePriceId: priceId,
+          status,
+          currentPeriodStart: new Date(periodStart),
+          currentPeriodEnd: new Date(periodEnd),
+          cancelAtPeriodEnd: !!sub.cancel_at_period_end,
+        },
+      })
+    : prisma.subscription.create({
+        data: {
+          userId: resolvedUserId,
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: sub.id,
+          stripePriceId: priceId,
+          status,
+          currentPeriodStart: new Date(periodStart),
+          currentPeriodEnd: new Date(periodEnd),
+          cancelAtPeriodEnd: !!sub.cancel_at_period_end,
+        },
+      });
 
   await prisma.$transaction([
-    prisma.subscription.upsert({
-      where: { stripeSubscriptionId: sub.id },
-      update: {
-        stripeCustomerId: customerId,
-        stripePriceId: priceId,
-        status,
-        currentPeriodStart: new Date(periodStart),
-        currentPeriodEnd: new Date(periodEnd),
-        cancelAtPeriodEnd: !!sub.cancel_at_period_end,
-      },
-      create: {
-        userId: resolvedUserId,
-        stripeCustomerId: customerId,
-        stripeSubscriptionId: sub.id,
-        stripePriceId: priceId,
-        status,
-        currentPeriodStart: new Date(periodStart),
-        currentPeriodEnd: new Date(periodEnd),
-        cancelAtPeriodEnd: !!sub.cancel_at_period_end,
-      },
-    }),
-    // Reflect tier on the user. Downgrade only when the subscription is gone.
+    subscriptionWrite,
     prisma.user.update({
       where: { id: resolvedUserId },
-      data: { tier: status === "ACTIVE" || status === "TRIALING" ? tier : "FREE" },
+      data: { tier: userTier },
     }),
   ]);
 }

@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { personalBriefing } from "@/lib/ai/openRouterInsights";
-import { requireTier, enforceInsightQuota, logInsightUsage } from "@/lib/billing/gate";
+import {
+  quotaExceededResponse,
+  releaseInsightReservation,
+  requireTier,
+  reserveInsightQuota,
+} from "@/lib/billing/gate";
 import type { Locale } from "@/lib/ai/prompts";
 import { aiErrorResponse } from "@/lib/ai/http";
+import {
+  parsePortfolioStore,
+  parseWatchlistStore,
+} from "@/lib/personalization/deskPreferences";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -18,24 +27,17 @@ export async function POST(req: NextRequest) {
   if (gate instanceof NextResponse) return gate;
   const { user, plan } = gate;
 
-  const quotaErr = await enforceInsightQuota(user, plan, "PERSONAL_BRIEFING");
-  if (quotaErr) return quotaErr;
-
   const body = (await req.json().catch(() => ({}))) as { locale?: Locale };
   const locale: Locale = body.locale === "en" ? "en" : user.locale === "en" ? "en" : "ko";
 
-  // Extract user interests.
-  const watchlist = (user.watchlist as { items?: { keyword: string }[] } | null)?.items?.map(
-    (i) => i.keyword
-  ) ?? [];
-  const portfolio = (user.portfolio as { assets?: { symbol?: string; name?: string }[] } | null)
-    ?.assets?.map((a) => a.symbol ?? a.name ?? "")
-    .filter(Boolean) ?? [];
+  const watchlist = parseWatchlistStore(user.watchlist).items.map((item) => item.keyword);
+  const portfolio = parsePortfolioStore(user.portfolio, { defaultWhenMissing: false })
+    .assets.map((asset) => asset.symbol);
 
   if (watchlist.length === 0 && portfolio.length === 0) {
     return NextResponse.json(
       { error: "EMPTY_INTERESTS", message: "Add to watchlist or portfolio to enable briefings." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -45,6 +47,12 @@ export async function POST(req: NextRequest) {
     orderBy: { publishedAt: "desc" },
     take: MAX_ARTICLES,
   });
+  if (articles.length === 0) {
+    return NextResponse.json({ error: "NO_RECENT_ARTICLES" }, { status: 404 });
+  }
+
+  const reservation = await reserveInsightQuota(user, plan, "PERSONAL_BRIEFING");
+  if (!reservation.ok) return quotaExceededResponse(reservation);
 
   try {
     const briefing = await personalBriefing(
@@ -58,7 +66,7 @@ export async function POST(req: NextRequest) {
       })),
       watchlist,
       portfolio,
-      { tier: user.tier, locale }
+      { tier: user.tier, locale },
     );
 
     const items = briefing.items
@@ -76,9 +84,9 @@ export async function POST(req: NextRequest) {
       })
       .filter(Boolean);
 
-    await logInsightUsage(user.id, "PERSONAL_BRIEFING");
     return NextResponse.json({ briefing: { ...briefing, items }, locale, tier: user.tier });
   } catch (err) {
+    await releaseInsightReservation(reservation.reservationId);
     return aiErrorResponse("api/insights/briefing", err);
   }
 }

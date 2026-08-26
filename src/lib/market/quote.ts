@@ -1,15 +1,7 @@
 /**
  * Single source of truth for market quotes.
- *
- * Both /api/market (ticker + dashboard strip) and /api/portfolio (watchlist
- * rows) used to call Yahoo separately and derive the daily change themselves.
- * They disagreed: /api/portfolio asked for a 5-day range and read
- * `meta.chartPreviousClose`, which for a 5d window is the close *before the
- * window* — a 5-day change presented as a daily one. KOSPI showed -1.23% in
- * the ticker and -21.18% in the dashboard on the same screen.
- *
- * The fix is to always anchor the change on `meta.previousClose` (the prior
- * regular session close) and to share one fetch path.
+ * Both /api/market and /api/portfolio use this path so daily-change math,
+ * outbound limits, and failure behavior stay identical.
  */
 
 export interface Quote {
@@ -19,9 +11,7 @@ export interface Quote {
   previousClose: number;
   change: number;
   changePct: number;
-  /** Real intraday closes for the current session — never synthesised. */
   sparkline: number[];
-  /** Last regular-market tick, ISO. Null when Yahoo omits it. */
   asOf: string | null;
   currency: string | null;
 }
@@ -50,7 +40,29 @@ export const SYMBOL_LABELS: Record<string, string> = {
   "JPYKRW=X": "JPY/KRW",
 };
 
+export const MAX_QUOTE_SYMBOLS = 24;
+const MAX_SYMBOL_LENGTH = 32;
+const QUOTE_REQUEST_TIMEOUT_MS = 8_000;
+const QUOTE_FETCH_CONCURRENCY = 6;
 const MAX_SPARKLINE_POINTS = 48;
+const VALID_SYMBOL = /^[A-Za-z0-9^=._-]+$/;
+
+export function isValidQuoteSymbol(symbol: string): boolean {
+  const value = symbol.trim();
+  return value.length > 0 && value.length <= MAX_SYMBOL_LENGTH && VALID_SYMBOL.test(value);
+}
+
+export function normalizeQuoteSymbols(symbols: string[]): string[] {
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+  for (const raw of symbols) {
+    const symbol = raw.trim();
+    if (!symbol || seen.has(symbol)) continue;
+    seen.add(symbol);
+    normalized.push(symbol);
+  }
+  return normalized;
+}
 
 interface YahooMeta {
   regularMarketPrice?: number;
@@ -69,18 +81,25 @@ interface YahooResult {
 async function requestChart(
   symbol: string,
   range: string,
-  interval: string
+  interval: string,
 ): Promise<YahooResult | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), QUOTE_REQUEST_TIMEOUT_MS);
   try {
     const url =
       `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
       `?range=${range}&interval=${interval}`;
-    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
     if (!res.ok) return null;
     const json = await res.json();
     return json?.chart?.result?.[0] ?? null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -92,11 +111,9 @@ function extractCloses(result: YahooResult | null): number[] {
     .map((v) => Number(v.toFixed(4)));
 }
 
-/**
- * One quote, with the daily change anchored on the prior session close and a
- * sparkline built from real intraday prints.
- */
 export async function fetchQuote(symbol: string): Promise<Quote | null> {
+  if (!isValidQuoteSymbol(symbol)) return null;
+
   const intraday = await requestChart(symbol, "1d", "5m");
   if (!intraday?.meta) return null;
 
@@ -104,17 +121,12 @@ export async function fetchQuote(symbol: string): Promise<Quote | null> {
   const price = meta.regularMarketPrice ?? 0;
   if (!price) return null;
 
-  // previousClose is the prior *session* close regardless of the chart range;
-  // chartPreviousClose moves with the range and is only a safe fallback here
-  // because this request is always a 1-day window.
   const previousClose = meta.previousClose ?? meta.chartPreviousClose ?? price;
   const change = price - previousClose;
   const changePct = previousClose ? (change / previousClose) * 100 : 0;
 
   let sparkline = extractCloses(intraday);
   if (sparkline.length < 2) {
-    // Thin session (holiday, pre-open, illiquid symbol) — widen the window so
-    // the card still draws a real line instead of a flat stub.
     sparkline = extractCloses(await requestChart(symbol, "5d", "1h"));
   }
 
@@ -133,16 +145,33 @@ export async function fetchQuote(symbol: string): Promise<Quote | null> {
   };
 }
 
-/** Fetch many symbols in parallel, preserving the caller's display order. */
+/**
+ * Fetch many symbols with bounded concurrency. A public portfolio request can
+ * no longer turn into an unbounded Promise.all burst against Yahoo/Vercel.
+ */
 export async function fetchQuotes(symbols: string[]): Promise<Quote[]> {
-  const settled = await Promise.allSettled(symbols.map(fetchQuote));
+  const unique = normalizeQuoteSymbols(symbols).filter(isValidQuoteSymbol);
+  if (unique.length === 0) return [];
+
   const bySymbol = new Map<string, Quote>();
-  for (const entry of settled) {
-    if (entry.status === "fulfilled" && entry.value) {
-      bySymbol.set(entry.value.symbol, entry.value);
-    }
-  }
-  return symbols
+  let cursor = 0;
+  const workers = Array.from(
+    { length: Math.min(QUOTE_FETCH_CONCURRENCY, unique.length) },
+    async () => {
+      while (cursor < unique.length) {
+        const symbol = unique[cursor++];
+        try {
+          const quote = await fetchQuote(symbol);
+          if (quote) bySymbol.set(symbol, quote);
+        } catch {
+          // One provider/symbol failure must not fail the batch.
+        }
+      }
+    },
+  );
+
+  await Promise.all(workers);
+  return unique
     .map((symbol) => bySymbol.get(symbol))
     .filter((quote): quote is Quote => Boolean(quote));
 }

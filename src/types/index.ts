@@ -89,6 +89,14 @@ export interface ArticlesResponse {
   data: Article[];
   nextCursor: string | null;
   hasMore: boolean;
+  access?: {
+    tier: "FREE" | "PRO" | "ELITE";
+    requestedRange: "24h" | "7d" | "30d";
+    effectiveRange: "24h" | "7d" | "30d";
+    rangeRestricted: boolean;
+    sourceScope: "core" | "all";
+    managedSubscriptions: boolean;
+  };
 }
 
 export interface IngestResult {

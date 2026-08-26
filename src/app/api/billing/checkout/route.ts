@@ -9,8 +9,10 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /**
- * Start a Stripe Checkout session for the selected plan.
- * POST { plan: "pro" | "elite", interval?: "month" | "year" }
+ * Start a Stripe Checkout session for a user without an active subscription.
+ * Existing subscribers are routed to Customer Portal instead of creating a
+ * second Stripe subscription that would conflict with our one-user/one-row
+ * subscription model.
  */
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -26,19 +28,27 @@ export async function POST(req: NextRequest) {
   if (!priceId) {
     return NextResponse.json(
       { error: `Stripe price id for ${planKey} is not configured` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   const user = await getOrCreateUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Reuse customer if we already have one.
-  let customerId: string | undefined;
   const sub = await prisma.subscription.findUnique({ where: { userId: user.id } });
-  if (sub?.stripeCustomerId) {
-    customerId = sub.stripeCustomerId;
-  } else {
+
+  // Changing an existing subscription belongs in Stripe's authenticated portal.
+  // This avoids accidentally creating two recurring subscriptions for one user.
+  if (sub?.stripeCustomerId && sub.status !== "CANCELED") {
+    const portal = await stripe.billingPortal.sessions.create({
+      customer: sub.stripeCustomerId,
+      return_url: `${siteUrl()}/account`,
+    });
+    return NextResponse.json({ url: portal.url, existingSubscription: true });
+  }
+
+  let customerId = sub?.stripeCustomerId;
+  if (!customerId) {
     const customer = await stripe.customers.create({
       email: user.email,
       name: user.name ?? undefined,

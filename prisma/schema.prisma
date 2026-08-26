@@ -64,7 +64,7 @@ model Subscription {
 }
 
 // =========================================================
-// AI insights (was on pensive-visvesvaraya branch, now in main on Postgres)
+// AI insights
 // =========================================================
 
 enum InsightKind {
@@ -78,7 +78,7 @@ enum InsightKind {
 model Insight {
   id        String      @id @default(cuid())
   kind      InsightKind
-  cacheKey  String      @unique // hash of inputs (articleIds, userTier, locale)
+  cacheKey  String      @unique
   locale    String      @default("ko")
   payload   Json
   expiresAt DateTime
@@ -101,8 +101,7 @@ model InsightUsage {
 }
 
 // =========================================================
-// Per-user article state — moves off global isRead/isSaved on Article
-// (existing fields kept for back-compat; new tables are authoritative)
+// Per-user article state
 // =========================================================
 
 model ReadState {
@@ -110,9 +109,11 @@ model ReadState {
   articleId String
   readAt    DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@id([userId, articleId])
   @@index([userId, readAt])
+  @@index([articleId])
 }
 
 model SavedArticle {
@@ -121,9 +122,11 @@ model SavedArticle {
   savedAt   DateTime @default(now())
   note      String?
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@id([userId, articleId])
   @@index([userId, savedAt])
+  @@index([articleId])
 }
 
 // =========================================================
@@ -144,7 +147,7 @@ model DailyRecap {
 }
 
 // =========================================================
-// Existing models (unchanged shape, just declared after the new ones)
+// Wire source and article models
 // =========================================================
 
 enum SourceTier {
@@ -192,6 +195,8 @@ model Article {
   createdAt         DateTime           @default(now())
   source            Source             @relation(fields: [sourceId], references: [id])
   enrichment        ArticleEnrichment?
+  readStates        ReadState[]
+  savedArticles     SavedArticle[]
 
   @@index([publishedAt])
   @@index([sourceId])
