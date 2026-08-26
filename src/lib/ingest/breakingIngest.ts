@@ -3,6 +3,7 @@ import { seedSources } from "../db/seed";
 import { runSourceIngest, type NewWireArticle, type WireSource } from "./sourceIngest";
 import { FALLBACK_TIERS } from "./sourceTiers";
 import { deliverDiscordAlerts } from "../alerts/discord";
+import { linkNewArticlesToEvents } from "../events/eventGraph";
 
 export type NewBreakingArticle = NewWireArticle;
 
@@ -14,13 +15,6 @@ export interface BreakingIngestResult {
   newArticles: NewBreakingArticle[];
 }
 
-/**
- * Best-effort T0/T1 fallback used by GitHub Actions.
- *
- * The long-running worker is the primary ingest path. This bounded run shares
- * the same normalization and URL dedup logic so a delayed fallback cannot
- * create a competing data model or duplicate rows.
- */
 export async function runBreakingIngest(): Promise<BreakingIngestResult> {
   let sources = await prisma.source.findMany({
     where: { enabled: true, tier: { in: [...FALLBACK_TIERS] } },
@@ -40,6 +34,7 @@ export async function runBreakingIngest(): Promise<BreakingIngestResult> {
     .flatMap((result) => result.newArticles)
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
   await deliverDiscordAlerts(allNewArticles);
+  await linkNewArticlesToEvents(allNewArticles);
   const newArticles = allNewArticles.slice(0, 10);
 
   return {
