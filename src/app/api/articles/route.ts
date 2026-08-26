@@ -50,7 +50,6 @@ export async function GET(request: NextRequest) {
     };
     const andFilters: Prisma.ArticleWhereInput[] = [];
 
-    // Subscription entitlements are enforced here, not only in the UI.
     if (access.plan.limits.sources === "core") {
       andFilters.push({ source: { is: { tier: { not: "T3" } } } });
     }
@@ -58,7 +57,6 @@ export async function GET(request: NextRequest) {
     if (sourceId) where.sourceId = sourceId;
 
     if (tag) {
-      // tags are still stored as a JSON-string array for back compatibility.
       where.tags = { contains: `"${tag}"` };
     }
 
@@ -101,7 +99,23 @@ export async function GET(request: NextRequest) {
 
     const articles = await prisma.article.findMany({
       where,
-      include: { source: { select: { tier: true } } },
+      include: {
+        source: { select: { tier: true } },
+        eventLinks: {
+          take: 1,
+          select: {
+            event: {
+              select: {
+                id: true,
+                coverageCount: true,
+                importanceScore: true,
+                primarySourceName: true,
+                officialSourceName: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
       take: limit + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
@@ -129,16 +143,24 @@ export async function GET(request: NextRequest) {
     const savedIds = new Set(savedStates.map((state) => state.articleId));
 
     return NextResponse.json({
-      data: data.map(({ source, ...article }) => ({
-        ...article,
-        sourceTier: source.tier,
-        summary: article.feedExcerpt ?? article.summary,
-        feedExcerpt: article.feedExcerpt ?? article.summary,
-        tags: parseStringArray(article.tags),
-        importanceReasons: parseStringArray(article.importanceReasons),
-        isRead: readIds.has(article.id),
-        isSaved: savedIds.has(article.id),
-      })),
+      data: data.map(({ source, eventLinks, ...article }) => {
+        const event = eventLinks[0]?.event ?? null;
+        return {
+          ...article,
+          sourceTier: source.tier,
+          summary: article.feedExcerpt ?? article.summary,
+          feedExcerpt: article.feedExcerpt ?? article.summary,
+          tags: parseStringArray(article.tags),
+          importanceReasons: parseStringArray(article.importanceReasons),
+          isRead: readIds.has(article.id),
+          isSaved: savedIds.has(article.id),
+          eventId: event?.id ?? null,
+          eventCoverage: event?.coverageCount ?? 1,
+          eventImportanceScore: event?.importanceScore ?? article.importanceScore,
+          eventPrimarySource: event?.primarySourceName ?? null,
+          eventOfficialSource: event?.officialSourceName ?? null,
+        };
+      }),
       nextCursor,
       hasMore,
       access: {
