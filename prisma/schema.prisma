@@ -230,39 +230,38 @@ model ArticleEnrichment {
 // =========================================================
 
 model Event {
-  id                String         @id @default(cuid())
-  eventKey          String         @unique
-  title             String
-  firstSeenAt       DateTime
-  lastSeenAt        DateTime
-  latestPublishedAt DateTime
-  importanceTier    String         @default("general")
-  importanceScore   Int            @default(0)
-  coverageCount     Int            @default(1)
-  primarySourceName String?
+  id                 String         @id @default(cuid())
+  eventKey           String         @unique
+  title              String
+  firstSeenAt        DateTime
+  lastSeenAt         DateTime
+  latestPublishedAt  DateTime
+  importanceTier     String         @default("general")
+  importanceScore    Int            @default(0)
+  coverageCount      Int            @default(1)
+  primarySourceName  String?
   officialSourceName String?
-  tags              String         @default("[]")
-  regions           String         @default("[]")
-  marketChannels    String         @default("[]")
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  articles          EventArticle[]
+  tags               String         @default("[]")
+  regions            String         @default("[]")
+  marketChannels     String         @default("[]")
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  articles           EventArticle[]
 
   @@index([latestPublishedAt])
   @@index([importanceScore, latestPublishedAt])
 }
 
 model EventArticle {
-  eventId         String
-  articleId       String
-  sourceName      String
-  publishedAt     DateTime
+  eventId          String
+  articleId        String   @unique
+  sourceName       String
+  publishedAt      DateTime
   similarityScore Float?
-  isPrimary       Boolean @default(false)
-  event           Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  article         Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  isPrimary        Boolean  @default(false)
+  event            Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  article          Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@id([eventId, articleId])
-  @@index([articleId])
   @@index([publishedAt])
 }
