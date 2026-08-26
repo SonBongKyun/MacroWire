@@ -1,22 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { isBreakingArticle } from "@/lib/news/signal";
+import { resolveViewerAccess } from "@/lib/billing/access";
+import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 /**
  * "Has anything landed since X?" — the cheapest question the wire can ask.
- *
- * Checking for breaking news used to mean refetching the whole 50-article list
- * every 30 seconds, which is far too expensive to run at the cadence a ticker
- * needs. This returns two numbers, so the client can ask every few seconds and
- * only pull the list when the answer changes.
+ * Counts use the same source entitlement as /api/articles so a FREE reader is
+ * never told about arrivals that cannot appear after loading the list.
  */
 export async function GET(req: NextRequest) {
   const sinceParam = req.nextUrl.searchParams.get("since");
 
   try {
+    const access = await resolveViewerAccess();
+    const sourceScope: Prisma.ArticleWhereInput = access.plan.limits.sources === "core"
+      ? { source: { is: { tier: { not: "T3" } } } }
+      : {};
+
     const newest = await prisma.article.findFirst({
+      where: sourceScope,
       orderBy: { createdAt: "desc" },
       select: { createdAt: true },
     });
@@ -32,10 +37,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid 'since'" }, { status: 400 });
     }
 
-    // Ingest stamps createdAt, so this counts what arrived rather than what was
-    // published — a story filed late still registers as new to this reader.
     const landed = await prisma.article.findMany({
-      where: { createdAt: { gt: since } },
+      where: {
+        ...sourceScope,
+        createdAt: { gt: since },
+      },
       select: {
         title: true,
         summary: true,
@@ -47,12 +53,19 @@ export async function GET(req: NextRequest) {
       },
     });
     const newCount = landed.length;
-    const breakingCount = landed.filter((article) => isBreakingArticle({
-      ...article,
-      tags: JSON.parse(article.tags) as string[],
-      sourceTier: article.source.tier,
-      importanceTier: article.importanceTier as "critical" | "major" | "general",
-    })).length;
+    const breakingCount = landed.filter((article) => {
+      let tags: string[] = [];
+      try {
+        const parsed = JSON.parse(article.tags);
+        if (Array.isArray(parsed)) tags = parsed.filter((item): item is string => typeof item === "string");
+      } catch {}
+      return isBreakingArticle({
+        ...article,
+        tags,
+        sourceTier: article.source.tier,
+        importanceTier: article.importanceTier as "critical" | "major" | "general",
+      });
+    }).length;
 
     return NextResponse.json({ latest, newCount, breakingCount });
   } catch (err) {
