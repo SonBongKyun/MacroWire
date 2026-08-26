@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { Prisma, type Tier, type User, type InsightKind } from "@prisma/client";
+import { type Tier, type User, type InsightKind } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { planFromTier, type Plan } from "@/lib/billing/plans";
 
@@ -41,24 +41,21 @@ function startOfUtcDay(now = new Date()): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
-function isRetryableTransactionError(error: unknown): boolean {
-  return Boolean(
-    error
-      && typeof error === "object"
-      && "code" in error
-      && (error as { code?: string }).code === "P2034",
-  );
-}
-
 export type QuotaReservation =
   | { ok: true; reservationId: string | null; used: number; limit: number }
   | { ok: false; used: number; limit: number };
 
 /**
- * Atomically reserve one AI usage slot. The old count-then-insert flow allowed
- * simultaneous FREE requests to observe the same count and both pass. A
- * serializable transaction makes the limit exact; P2034 conflicts are retried.
- * Unlimited plans return a null reservation without touching the database.
+ * Atomically reserve one AI usage slot.
+ *
+ * Requests for the same user are serialized with a PostgreSQL transaction-level
+ * advisory lock before counting and inserting usage. This keeps the quota exact
+ * without forcing unrelated users through a global lock and avoids SERIALIZABLE
+ * write-conflict failures during bursts of concurrent requests.
+ *
+ * hashtextextended() returns a stable 64-bit lock key for the user id. A rare
+ * hash collision can only serialize two unrelated users briefly; it cannot let
+ * either user exceed their quota.
  */
 export async function reserveInsightQuota(
   user: User,
@@ -70,33 +67,30 @@ export async function reserveInsightQuota(
   if (limit <= 0) return { ok: false, used: 0, limit };
 
   const since = startOfUtcDay();
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      return await prisma.$transaction(async (tx) => {
-        const used = await tx.insightUsage.count({
-          where: { userId: user.id, createdAt: { gte: since } },
-        });
-        if (used >= limit) return { ok: false, used, limit } as const;
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw<Array<{ locked: number }>>`
+      SELECT 1::int AS locked
+      FROM (
+        SELECT pg_advisory_xact_lock(hashtextextended(${user.id}, 0))
+      ) AS advisory_lock
+    `;
 
-        const reservation = await tx.insightUsage.create({
-          data: { userId: user.id, kind },
-          select: { id: true },
-        });
-        return {
-          ok: true,
-          reservationId: reservation.id,
-          used: used + 1,
-          limit,
-        } as const;
-      }, {
-        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-      });
-    } catch (error) {
-      if (attempt < 2 && isRetryableTransactionError(error)) continue;
-      throw error;
-    }
-  }
-  throw new Error("QUOTA_RESERVATION_FAILED");
+    const used = await tx.insightUsage.count({
+      where: { userId: user.id, createdAt: { gte: since } },
+    });
+    if (used >= limit) return { ok: false, used, limit } as const;
+
+    const reservation = await tx.insightUsage.create({
+      data: { userId: user.id, kind },
+      select: { id: true },
+    });
+    return {
+      ok: true,
+      reservationId: reservation.id,
+      used: used + 1,
+      limit,
+    } as const;
+  });
 }
 
 export function quotaExceededResponse(reservation: Extract<QuotaReservation, { ok: false }>) {
