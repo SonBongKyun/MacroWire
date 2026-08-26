@@ -83,10 +83,10 @@ test("labels fallback evidence rather than claiming it is the original body", ()
   assert.equal(fallbackSummaryEvidence({ ...article, feedExcerpt: "Too short.", metaDescription: null }, null), null);
 });
 
-test("validates and bounds structured AI summary output", () => {
+test("validates and bounds concise structured AI summary output", () => {
   assert.deepEqual(validateSourceSummaryOutput({
     summary: "정책금리가 25bp 인하됐고 당국은 향후 결정을 데이터에 연동했다.",
-    keyPoints: ["- 물가 둔화가 결정 배경이다.", "2. 두 위원은 동결을 선호했다."],
+    keyPoints: ["- 물가 둔화가 결정 배경이다.", "2. 두 위원은 동결을 선호했다.", "세 번째 포인트는 버려진다."],
     confidence: "HIGH",
   }), {
     summary: "정책금리가 25bp 인하됐고 당국은 향후 결정을 데이터에 연동했다.",
@@ -96,4 +96,5 @@ test("validates and bounds structured AI summary output", () => {
   assert.throws(() => validateSourceSummaryOutput({ summary: "짧은 요약", keyPoints: [], confidence: "HIGH" }), /AI_BAD_SCHEMA/);
   assert.equal(validateSourceSummaryOutput({ summary: "확인된 사실은 하나다.", keyPoints: ["확인된 사실"], confidence: "LOW" }).keyPoints.length, 1);
   assert.throws(() => validateSourceSummaryOutput({ summary: "요약", keyPoints: ["a", "b"], confidence: "CERTAIN" }), /AI_BAD_SCHEMA/);
+  assert.throws(() => validateSourceSummaryOutput({ summary: "가".repeat(421), keyPoints: ["핵심"], confidence: "MEDIUM" }), /AI_BAD_SCHEMA/);
 });
