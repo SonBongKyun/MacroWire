@@ -68,8 +68,11 @@ export async function reserveInsightQuota(
 
   const since = startOfUtcDay();
   return prisma.$transaction(async (tx) => {
-    await tx.$queryRaw<Array<{ locked: null }>>`
-      SELECT pg_advisory_xact_lock(hashtextextended(${user.id}, 0)) AS locked
+    await tx.$queryRaw<Array<{ locked: number }>>`
+      SELECT 1::int AS locked
+      FROM (
+        SELECT pg_advisory_xact_lock(hashtextextended(${user.id}, 0))
+      ) AS advisory_lock
     `;
 
     const used = await tx.insightUsage.count({
