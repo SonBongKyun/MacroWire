@@ -2,6 +2,7 @@ import { prisma } from "../db/prisma";
 import { cleanupOldArticles } from "../cleanup/cleaner";
 import { runSourceIngest, type WireSource } from "./sourceIngest";
 import { deliverDiscordAlerts } from "../alerts/discord";
+import { backfillRecentEvents, linkNewArticlesToEvents } from "../events/eventGraph";
 
 export interface SourceParser {
   canHandle: (feedUrl: string) => boolean;
@@ -10,9 +11,6 @@ export interface SourceParser {
   }>;
 }
 
-// Kept for API compatibility. Current production sources use RSS/Atom and the
-// shared source ingest path; source-specific parsers can be reintroduced here
-// without creating another persistence pipeline.
 export function registerParser(parser: SourceParser) {
   void parser;
 }
@@ -30,7 +28,14 @@ export async function runIngest(): Promise<IngestResult> {
   const results = await Promise.all(
     sources.map((source) => runSourceIngest(source as WireSource)),
   );
-  await deliverDiscordAlerts(results.flatMap((result) => result.newArticles));
+  const newArticles = results.flatMap((result) => result.newArticles);
+  await deliverDiscordAlerts(newArticles);
+  await linkNewArticlesToEvents(newArticles);
+  try {
+    await backfillRecentEvents(30, 48);
+  } catch (error) {
+    console.error("[event] fallback backfill error:", error);
+  }
 
   try {
     await cleanupOldArticles();
