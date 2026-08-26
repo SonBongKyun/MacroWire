@@ -3,6 +3,7 @@ import { seedSources } from "../src/lib/db/seed";
 import { pollSourceAndRecordHealth, type WireSource } from "../src/lib/ingest/sourceIngest";
 import { WireWorker, createSourceCatalogueLoader } from "../src/lib/ingest/wireWorker";
 import { nextPollAt } from "../src/lib/ingest/sourceTiers";
+import { backfillRecentEvents, linkNewArticlesToEvents } from "../src/lib/events/eventGraph";
 
 function positiveInteger(value: string | undefined, fallback: number): number {
   const parsed = Number(value);
@@ -10,21 +11,38 @@ function positiveInteger(value: string | undefined, fallback: number): number {
 }
 
 const loadSources = createSourceCatalogueLoader({
-  // Reconcile tiers and explicit retire flags once when the worker starts.
-  // seedSources never re-enables a source disabled by the owner.
   seed: seedSources,
   load: async () => prisma.source.findMany({ where: { enabled: true } }) as Promise<WireSource[]>,
   refreshMs: positiveInteger(process.env.WIRE_SOURCE_REFRESH_MS, 60_000),
 });
 
+let backfillCounter = 0;
 async function pollSource(source: WireSource) {
   const result = await pollSourceAndRecordHealth(source);
   const failures = result.failed ? (source.consecutiveFailures ?? 0) + 1 : 0;
-  // Keep the in-memory schedule current between catalogue refreshes. Health
-  // remains durable in Postgres, but the one-second loop no longer rereads the
-  // whole Source table merely to learn this timestamp.
   source.consecutiveFailures = failures;
-  source.nextFetchAt = nextPollAt(source.tier, new Date(), failures);
+  source.feedEtag = result.etag ?? source.feedEtag ?? null;
+  source.feedLastModified = result.lastModified ?? source.feedLastModified ?? null;
+  source.lastRetryAfterMs = result.retryAfterMs ?? null;
+  const scheduled = nextPollAt(source.tier, new Date(), failures);
+  source.nextFetchAt = result.retryAfterMs && result.retryAfterMs > 0
+    ? new Date(Math.max(scheduled.getTime(), Date.now() + result.retryAfterMs))
+    : scheduled;
+
+  if (result.newArticles.length > 0) {
+    await linkNewArticlesToEvents(result.newArticles);
+    // Backfill is intentionally bounded and infrequent so a new product layer
+    // cannot steal capacity from the primary wire loop.
+    backfillCounter += result.newArticles.length;
+    if (backfillCounter >= 20) {
+      backfillCounter = 0;
+      try {
+        await backfillRecentEvents(20, 48);
+      } catch (error) {
+        console.error("[event] bounded backfill failed", error);
+      }
+    }
+  }
   return result;
 }
 
