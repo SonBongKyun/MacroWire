@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Tier } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { isClerkServerEnabled } from "@/lib/auth/config";
-import { requireTier, enforceInsightQuota, logInsightUsage } from "@/lib/billing/gate";
+import {
+  quotaExceededResponse,
+  releaseInsightReservation,
+  requireTier,
+  reserveInsightQuota,
+} from "@/lib/billing/gate";
 import { planFromTier, type Plan } from "@/lib/billing/plans";
 import {
   generateSourceArticleSummary,
@@ -41,6 +46,8 @@ async function resolveAccess(
         return NextResponse.json({ error: "OWNER_AUTH_REQUIRED" }, { status: 401 });
       }
     }
+    // Keep the self-hosted owner path inexpensive by default. Data access is
+    // full elsewhere; the optional AI model can still be overridden by env.
     return { tier: "FREE", locale, plan: planFromTier("FREE"), userId: null };
   }
 
@@ -101,9 +108,11 @@ export async function POST(
   const access = await resolveAccess(body.locale, request, true);
   if (access instanceof NextResponse) return access;
   const { id } = await context.params;
+  if (!id || id.length > 128) return NextResponse.json({ error: "Invalid article" }, { status: 400 });
   const article = await findArticle(id);
   if (!article) return NextResponse.json({ error: "Unknown article" }, { status: 404 });
 
+  let reservationId: string | null = null;
   try {
     const cached = await getCachedSourceArticleSummary(article, access);
     if (cached) return NextResponse.json({ summary: cached });
@@ -114,14 +123,21 @@ export async function POST(
     if (access.userId) {
       const user = await prisma.user.findUnique({ where: { id: access.userId } });
       if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
-      const quotaError = await enforceInsightQuota(user, access.plan, "ARTICLE");
-      if (quotaError) return quotaError;
+      const reservation = await reserveInsightQuota(user, access.plan, "ARTICLE");
+      if (!reservation.ok) return quotaExceededResponse(reservation);
+      reservationId = reservation.reservationId;
     }
 
     const summary = await generateSourceArticleSummary(article, access);
-    if (access.userId && !summary.cached) await logInsightUsage(access.userId, "ARTICLE");
+    // Another concurrent request may have filled the cache after our initial
+    // check. A cache hit should not consume an AI usage slot.
+    if (summary.cached && reservationId) {
+      await releaseInsightReservation(reservationId);
+      reservationId = null;
+    }
     return NextResponse.json({ summary });
   } catch (error) {
+    await releaseInsightReservation(reservationId);
     const code = error instanceof Error ? error.message : "AI_REQUEST_FAILED";
     if (code === "SOURCE_TEXT_UNAVAILABLE") {
       return NextResponse.json({ error: code }, { status: 422 });
