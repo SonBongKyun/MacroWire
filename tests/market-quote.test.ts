@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test, { afterEach } from "node:test";
-import { fetchQuote, fetchQuotes } from "../src/lib/market/quote";
+import {
+  fetchQuote,
+  fetchQuotes,
+  isValidQuoteSymbol,
+  MAX_QUOTE_SYMBOLS,
+  normalizeQuoteSymbols,
+} from "../src/lib/market/quote";
 
 type ChartStub = {
   previousClose?: number;
@@ -45,9 +51,6 @@ afterEach(() => {
 });
 
 test("anchors the daily change on previousClose, not the range-relative chartPreviousClose", async () => {
-  // Shape taken from a real ^KS11 response: over a 5d window Yahoo reports a
-  // chartPreviousClose from five sessions back, which used to be presented as
-  // a daily change (-21%) next to the ticker's correct -1.2%.
   stubYahoo(() => ({
     regularMarketPrice: 5593.56,
     previousClose: 5663.24,
@@ -93,7 +96,6 @@ test("widens the window when the 1d session has too few prints to draw", async (
   const quote = await fetchQuote("THIN");
   assert.ok(quote);
   assert.deepEqual(quote.sparkline, [47, 48, 49, 50]);
-  // The widened window must not leak into the change — it stays a daily move.
   assert.equal(quote.previousClose, 49);
 });
 
@@ -125,4 +127,32 @@ test("exposes the quote timestamp so surfaces can label their as-of time", async
   assert.equal(quote.asOf, new Date(1785402340 * 1000).toISOString());
   assert.equal(quote.currency, "KRW");
   assert.equal(quote.changePct, 0);
+});
+
+test("accepts Yahoo-style symbols and rejects URL/control syntax", () => {
+  for (const symbol of ["005930.KS", "BTC-USD", "^GSPC", "USDKRW=X", "DX-Y.NYB"]) {
+    assert.equal(isValidQuoteSymbol(symbol), true, symbol);
+  }
+  for (const symbol of ["", "../AAPL", "AAPL?x=1", "AAPL/TEST", "AAPL%20", "A".repeat(33)]) {
+    assert.equal(isValidQuoteSymbol(symbol), false, symbol);
+  }
+});
+
+test("normalizes duplicate portfolio symbols without changing first-seen order", () => {
+  assert.deepEqual(
+    normalizeQuoteSymbols([" BTC-USD ", "^GSPC", "BTC-USD", "", "^GSPC", "GC=F"]),
+    ["BTC-USD", "^GSPC", "GC=F"],
+  );
+  assert.equal(MAX_QUOTE_SYMBOLS, 24);
+});
+
+test("invalid symbols never reach the outbound provider", async () => {
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    throw new Error("should not be called");
+  }) as typeof fetch;
+
+  assert.equal(await fetchQuote("../internal"), null);
+  assert.equal(calls, 0);
 });
