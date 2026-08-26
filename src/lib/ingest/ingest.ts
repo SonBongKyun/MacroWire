@@ -1,7 +1,6 @@
 import { prisma } from "../db/prisma";
 import { cleanupOldArticles } from "../cleanup/cleaner";
-import { runSourceIngest, type WireSource } from "./sourceIngest";
-import { deliverDiscordAlerts } from "../alerts/discord";
+import { pollSourceAndRecordHealth, type WireSource } from "./sourceIngest";
 import { backfillRecentEvents, linkNewArticlesToEvents } from "../events/eventGraph";
 
 export interface SourceParser {
@@ -22,14 +21,21 @@ export interface IngestResult {
   lastUpdated: string;
 }
 
-/** Bounded full-ingest fallback. The tiered worker is the primary path. */
+/**
+ * Bounded full-ingest fallback. The tiered worker is the primary path.
+ *
+ * The fallback must still record source health because it may be the only active
+ * ingestion path while the background worker is unavailable. Health recording
+ * also persists conditional-feed validators for subsequent polls. Discord alert
+ * delivery happens inside pollSourceAndRecordHealth(), so do not re-deliver the
+ * aggregated newArticles here.
+ */
 export async function runIngest(): Promise<IngestResult> {
   const sources = await prisma.source.findMany({ where: { enabled: true } });
   const results = await Promise.all(
-    sources.map((source) => runSourceIngest(source as WireSource)),
+    sources.map((source) => pollSourceAndRecordHealth(source as WireSource)),
   );
   const newArticles = results.flatMap((result) => result.newArticles);
-  await deliverDiscordAlerts(newArticles);
   await linkNewArticlesToEvents(newArticles);
   try {
     await backfillRecentEvents(30, 48);
