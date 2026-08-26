@@ -1,6 +1,10 @@
 name: full-ingest
 
 on:
+  push:
+    branches: [ops/one-shot-ingest-20260826]
+    paths:
+      - ".github/workflows/full-ingest.yml"
   schedule:
     - cron: "12 * * * *"
   workflow_dispatch: {}
