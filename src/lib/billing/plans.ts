@@ -13,11 +13,11 @@ export interface Plan {
   name: string;
   priceKRW: number;
   priceUSD: number;
-  priceIdEnv?: string; // env var holding the Stripe price id
+  priceIdEnv?: string;
   highlight?: boolean;
   bullets: { ko: string; en: string }[];
   limits: {
-    aiInsightsPerDay: number; // 0 = unavailable, -1 = unlimited
+    aiInsightsPerDay: number;
     historyDays: number;
     watchlistSize: number;
     portfolioSize: number;
@@ -75,7 +75,7 @@ export const PLANS: Record<PlanKey, Plan> = {
       aiInsightsPerDay: -1,
       historyDays: 30,
       watchlistSize: 100,
-      portfolioSize: 100,
+      portfolioSize: 24,
       sources: "all",
       dailyRecap: true,
       personalBriefing: true,
@@ -100,7 +100,7 @@ export const PLANS: Record<PlanKey, Plan> = {
       aiInsightsPerDay: -1,
       historyDays: 30,
       watchlistSize: 1000,
-      portfolioSize: 1000,
+      portfolioSize: 48,
       sources: "all",
       dailyRecap: true,
       personalBriefing: true,
@@ -116,9 +116,14 @@ export function planFromTier(tier: Tier): Plan {
   return PLANS.free;
 }
 
-export function tierFromPriceId(priceId: string | null | undefined): Tier {
-  if (!priceId) return "FREE";
+/**
+ * Stripe price IDs are configuration, not user input. Unknown IDs must not be
+ * silently interpreted as FREE because that can hide a misconfigured paid
+ * product and incorrectly downgrade an active subscriber.
+ */
+export function tierFromPriceId(priceId: string | null | undefined): Tier | null {
+  if (!priceId) return null;
   if (priceId === process.env.STRIPE_PRICE_PRO) return "PRO";
   if (priceId === process.env.STRIPE_PRICE_ELITE) return "ELITE";
-  return "FREE";
+  return null;
 }
