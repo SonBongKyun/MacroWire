@@ -20,12 +20,12 @@ test("FREE quota admits exactly three concurrent reservations", async () => {
   const user = await createQuotaUser("concurrent");
   try {
     const results = await Promise.all(
-      Array.from({ length: 8 }, () => reserveInsightQuota(user, PLANS.free, "ARTICLE")),
+      Array.from({ length: 16 }, () => reserveInsightQuota(user, PLANS.free, "ARTICLE")),
     );
     const accepted = results.filter((result) => result.ok);
     const rejected = results.filter((result) => !result.ok);
     assert.equal(accepted.length, 3);
-    assert.equal(rejected.length, 5);
+    assert.equal(rejected.length, 13);
 
     const persisted = await prisma.insightUsage.count({ where: { userId: user.id } });
     assert.equal(persisted, 3);
