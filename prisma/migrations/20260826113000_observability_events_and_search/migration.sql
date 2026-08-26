@@ -45,7 +45,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS "Event_eventKey_key" ON "Event"("eventKey");
 CREATE INDEX IF NOT EXISTS "Event_latestPublishedAt_idx" ON "Event"("latestPublishedAt" DESC);
 CREATE INDEX IF NOT EXISTS "Event_importanceScore_latestPublishedAt_idx"
   ON "Event"("importanceScore" DESC, "latestPublishedAt" DESC);
-CREATE INDEX IF NOT EXISTS "EventArticle_articleId_idx" ON "EventArticle"("articleId");
+CREATE UNIQUE INDEX IF NOT EXISTS "EventArticle_articleId_key" ON "EventArticle"("articleId");
 CREATE INDEX IF NOT EXISTS "EventArticle_publishedAt_idx" ON "EventArticle"("publishedAt" DESC);
 
 DO $$ BEGIN
