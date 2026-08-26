@@ -8,10 +8,24 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: macrowire
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U user -d macrowire"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
     env:
-      DATABASE_URL: postgresql://user:password@localhost:5432/macrowire
-      DIRECT_URL: postgresql://user:password@localhost:5432/macrowire
+      DATABASE_URL: postgresql://user:password@localhost:5432/macrowire?schema=public
+      DIRECT_URL: postgresql://user:password@localhost:5432/macrowire?schema=public
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,6 +33,11 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+      - name: Verify clean-database migrations
+        run: |
+          npx prisma migrate deploy
+          npx prisma validate
+          npx prisma migrate status
       - run: npm run test
       - run: npm run typecheck
       - run: npm run lint
