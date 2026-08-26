@@ -1,0 +1,35 @@
+name: refresh-lock-override
+
+on:
+  push:
+    branches: [upgrade/production-v2-20260826]
+    paths:
+      - ".github/workflows/refresh-lock-override.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: upgrade/production-v2-20260826
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm install --package-lock-only --ignore-scripts
+      - name: Commit lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "chore(deps): refresh lockfile for deepmerge override"
+          git fetch origin upgrade/production-v2-20260826
+          git rebase origin/upgrade/production-v2-20260826
+          git push origin HEAD:upgrade/production-v2-20260826
