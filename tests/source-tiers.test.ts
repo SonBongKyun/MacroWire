@@ -19,7 +19,10 @@ test("uses faster cadence for breaking sources than market and background feeds"
   const schedules = getTierSchedules({});
   assert.ok(schedules.T1.intervalMs < schedules.T2.intervalMs);
   assert.ok(schedules.T2.intervalMs < schedules.T3.intervalMs);
-  assert.equal(nextPollAt("T1", new Date(0), 0, schedules).getTime(), schedules.T1.intervalMs);
+  assert.equal(
+    nextPollAt("T1", new Date(0), 0, schedules, () => 0.5).getTime(),
+    schedules.T1.intervalMs,
+  );
 });
 
 test("backs off repeated failures without exceeding the cap", () => {
