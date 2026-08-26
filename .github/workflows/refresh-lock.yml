@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-      - run: npm install --package-lock-only
+      - run: npm install --package-lock-only --ignore-scripts
       - name: Commit lockfile
         run: |
           git config user.name "github-actions[bot]"
