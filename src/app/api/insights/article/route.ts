@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { articleInsight } from "@/lib/ai/openRouterInsights";
-import { requireTier, enforceInsightQuota, logInsightUsage } from "@/lib/billing/gate";
+import {
+  quotaExceededResponse,
+  releaseInsightReservation,
+  requireTier,
+  reserveInsightQuota,
+} from "@/lib/billing/gate";
 import type { Locale } from "@/lib/ai/prompts";
 import { aiErrorResponse } from "@/lib/ai/http";
 
@@ -15,16 +20,18 @@ export async function POST(req: NextRequest) {
   if (gate instanceof NextResponse) return gate;
   const { user, plan } = gate;
 
-  const quotaErr = await enforceInsightQuota(user, plan, "ARTICLE");
-  if (quotaErr) return quotaErr;
-
   const body = (await req.json().catch(() => ({}))) as { articleId?: string; locale?: Locale };
-  if (!body.articleId) return NextResponse.json({ error: "articleId required" }, { status: 400 });
+  const articleId = body.articleId?.trim();
+  if (!articleId || articleId.length > 128) {
+    return NextResponse.json({ error: "articleId required" }, { status: 400 });
+  }
 
-  const article = await prisma.article.findUnique({ where: { id: body.articleId } });
+  const article = await prisma.article.findUnique({ where: { id: articleId } });
   if (!article) return NextResponse.json({ error: "Article not found" }, { status: 404 });
 
   const locale: Locale = body.locale === "en" ? "en" : (user.locale === "en" ? "en" : "ko");
+  const reservation = await reserveInsightQuota(user, plan, "ARTICLE");
+  if (!reservation.ok) return quotaExceededResponse(reservation);
 
   try {
     const insight = await articleInsight(
@@ -36,11 +43,11 @@ export async function POST(req: NextRequest) {
         publishedAt: article.publishedAt,
         url: article.url,
       },
-      { tier: user.tier, locale }
+      { tier: user.tier, locale },
     );
-    await logInsightUsage(user.id, "ARTICLE");
     return NextResponse.json({ insight, locale, tier: user.tier });
   } catch (err) {
+    await releaseInsightReservation(reservation.reservationId);
     return aiErrorResponse("api/insights/article", err);
   }
 }
