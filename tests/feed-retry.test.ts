@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { withFeedRetry } from "../src/lib/ingest/feedRetry";
+import { FeedHttpError, parseRetryAfterMs, withFeedRetry } from "../src/lib/ingest/feedRetry";
 
 const instantRetry = { attempts: 3, baseDelayMs: 0, jitterMs: 0 };
 
@@ -34,4 +34,18 @@ test("feed retry retries HTTP 429 but not HTTP 403", async () => {
     }, instantRetry),
   );
   assert.equal(forbiddenAttempts, 1);
+});
+
+test("Retry-After supports seconds and HTTP dates with a safety cap", () => {
+  const now = Date.UTC(2026, 7, 26, 3, 0, 0);
+  assert.equal(parseRetryAfterMs("12", now), 12_000);
+  assert.equal(parseRetryAfterMs(new Date(now + 45_000).toUTCString(), now), 45_000);
+  assert.equal(parseRetryAfterMs("99999", now), 30 * 60_000);
+  assert.equal(parseRetryAfterMs("garbage", now), null);
+});
+
+test("FeedHttpError exposes HTTP status and server retry hint", () => {
+  const error = new FeedHttpError("rate limited", 429, 10_000);
+  assert.equal(error.status, 429);
+  assert.equal(error.retryAfterMs, 10_000);
 });

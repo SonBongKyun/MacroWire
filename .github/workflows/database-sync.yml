@@ -1,18 +1,14 @@
-name: database-sync
+name: database-migration-audit
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "prisma/schema.prisma"
   workflow_dispatch: {}
 
 concurrency:
-  group: database-sync
+  group: database-migration-audit
   cancel-in-progress: false
 
 jobs:
-  sync:
+  audit:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -25,5 +21,7 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
-      - name: Apply additive Prisma schema changes
-        run: npx prisma db push --skip-generate
+      - name: Validate Prisma schema
+        run: npx prisma validate
+      - name: Audit production migration status (read-only)
+        run: npx prisma migrate status

@@ -3,7 +3,8 @@ import { prisma } from "../db/prisma";
 import { applyTags } from "../tagging/tagger";
 import { classifyNewsImportance } from "../news/importance";
 import { deliverDiscordAlerts } from "../alerts/discord";
-import { withFeedRetry } from "./feedRetry";
+import { safePublicFetch } from "../security/outbound-url";
+import { FeedHttpError, parseRetryAfterMs, withFeedRetry } from "./feedRetry";
 import { articleIdFromUrl, canonicalizeArticleUrl } from "./url";
 import {
   getTierSchedules,
@@ -18,8 +19,9 @@ const FEED_HEADERS = {
   Accept: "application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.7",
   "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
   "Accept-Encoding": "identity",
-  "Cache-Control": "no-cache",
 };
+
+const parser = new Parser();
 
 export interface WireSource {
   id: string;
@@ -29,6 +31,9 @@ export interface WireSource {
   tier: WireSourceTier;
   consecutiveFailures?: number;
   nextFetchAt?: Date | null;
+  feedEtag?: string | null;
+  feedLastModified?: string | null;
+  lastRetryAfterMs?: number | null;
 }
 
 export interface FeedItem {
@@ -36,6 +41,15 @@ export interface FeedItem {
   url: string;
   summary?: string | null;
   publishedAt?: Date;
+}
+
+export interface FeedFetchResult {
+  items: FeedItem[];
+  status: number;
+  etag: string | null;
+  lastModified: string | null;
+  notModified: boolean;
+  retryAfterMs: number | null;
 }
 
 export interface NewWireArticle {
@@ -61,19 +75,21 @@ export interface SourceIngestResult {
   latencyMs: number;
   error?: string;
   newArticles: NewWireArticle[];
+  httpStatus?: number;
+  etag?: string | null;
+  lastModified?: string | null;
+  notModified?: boolean;
+  retryAfterMs?: number | null;
 }
 
-function parserFor(timeoutMs: number) {
-  return new Parser({ timeout: timeoutMs, headers: FEED_HEADERS });
+function conditionalHeaders(source: WireSource): Record<string, string> {
+  const headers: Record<string, string> = { ...FEED_HEADERS };
+  if (source.feedEtag) headers["If-None-Match"] = source.feedEtag;
+  if (source.feedLastModified) headers["If-Modified-Since"] = source.feedLastModified;
+  return headers;
 }
 
-export async function fetchSourceFeed(source: WireSource): Promise<FeedItem[]> {
-  const schedule = getTierSchedules()[source.tier];
-  const feed = await withFeedRetry(
-    () => parserFor(schedule.timeoutMs).parseURL(source.feedUrl),
-    { attempts: schedule.retryAttempts, baseDelayMs: 700, jitterMs: 350 },
-  );
-
+function mapFeedItems(feed: Awaited<ReturnType<Parser["parseString"]>>): FeedItem[] {
   return feed.items.map((item) => ({
     title: item.title?.trim() || "Untitled",
     url: item.link || "",
@@ -84,6 +100,54 @@ export async function fetchSourceFeed(source: WireSource): Promise<FeedItem[]> {
         ? new Date(item.isoDate)
         : new Date(),
   }));
+}
+
+export async function fetchSourceFeedDetailed(source: WireSource): Promise<FeedFetchResult> {
+  const schedule = getTierSchedules()[source.tier];
+  return withFeedRetry(async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), schedule.timeoutMs);
+    try {
+      const response = await safePublicFetch(source.feedUrl, {
+        headers: conditionalHeaders(source),
+        signal: controller.signal,
+        cache: "no-store",
+      });
+      const retryAfterMs = parseRetryAfterMs(response.headers.get("retry-after"));
+      const etag = response.headers.get("etag") ?? source.feedEtag ?? null;
+      const lastModified = response.headers.get("last-modified") ?? source.feedLastModified ?? null;
+
+      if (response.status === 304) {
+        return { items: [], status: 304, etag, lastModified, notModified: true, retryAfterMs };
+      }
+      if (!response.ok) {
+        throw new FeedHttpError(
+          `Feed request failed with Status code ${response.status}`,
+          response.status,
+          retryAfterMs,
+        );
+      }
+
+      const xml = await response.text();
+      if (xml.length > 5_000_000) throw new Error("Feed body exceeds 5 MB");
+      const feed = await parser.parseString(xml);
+      return {
+        items: mapFeedItems(feed),
+        status: response.status,
+        etag,
+        lastModified,
+        notModified: false,
+        retryAfterMs,
+      };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }, { attempts: schedule.retryAttempts, baseDelayMs: 700, jitterMs: 350 });
+}
+
+/** Backwards-compatible helper retained for scripts/tests that only need items. */
+export async function fetchSourceFeed(source: WireSource): Promise<FeedItem[]> {
+  return (await fetchSourceFeedDetailed(source)).items;
 }
 
 export interface ArticleInsert {
@@ -210,23 +274,41 @@ export async function runSourceIngest(
   source: WireSource,
   options: {
     fetchItems?: (source: WireSource) => Promise<FeedItem[]>;
+    fetchFeed?: (source: WireSource) => Promise<FeedFetchResult>;
     createArticle?: CreateArticle;
     now?: () => Date;
   } = {},
 ): Promise<SourceIngestResult> {
   const startedAt = Date.now();
-  const fetchItems = options.fetchItems ?? fetchSourceFeed;
   const now = options.now ?? (() => new Date());
 
   try {
-    const items = await fetchItems(source);
-    const persisted = await persistFeedItems(source, items, options.createArticle, now());
+    const fetched = options.fetchFeed
+      ? await options.fetchFeed(source)
+      : options.fetchItems
+        ? {
+            items: await options.fetchItems(source),
+            status: 200,
+            etag: source.feedEtag ?? null,
+            lastModified: source.feedLastModified ?? null,
+            notModified: false,
+            retryAfterMs: null,
+          }
+        : await fetchSourceFeedDetailed(source);
+    const persisted = fetched.notModified
+      ? { added: 0, skipped: 0, newArticles: [] as NewWireArticle[] }
+      : await persistFeedItems(source, fetched.items, options.createArticle, now());
     return {
       sourceId: source.id,
       sourceName: source.name,
       ...persisted,
       failed: false,
       latencyMs: Date.now() - startedAt,
+      httpStatus: fetched.status,
+      etag: fetched.etag,
+      lastModified: fetched.lastModified,
+      notModified: fetched.notModified,
+      retryAfterMs: fetched.retryAfterMs,
     };
   } catch (error) {
     return {
@@ -238,6 +320,8 @@ export async function runSourceIngest(
       latencyMs: Date.now() - startedAt,
       error: error instanceof Error ? error.message : String(error),
       newArticles: [],
+      httpStatus: error instanceof FeedHttpError ? error.status : undefined,
+      retryAfterMs: error instanceof FeedHttpError ? error.retryAfterMs : undefined,
     };
   }
 }
@@ -247,6 +331,11 @@ export async function pollSourceAndRecordHealth(source: WireSource): Promise<Sou
   const result = await runSourceIngest(source);
   const completedAt = new Date();
   const failures = result.failed ? (source.consecutiveFailures ?? 0) + 1 : 0;
+  const retryDelay = result.retryAfterMs ?? 0;
+  const scheduledNext = nextPollAt(source.tier, completedAt, failures);
+  const nextFetchAt = retryDelay > 0
+    ? new Date(Math.max(scheduledNext.getTime(), completedAt.getTime() + retryDelay))
+    : scheduledNext;
 
   try {
     await prisma.source.update({
@@ -258,12 +347,15 @@ export async function pollSourceAndRecordHealth(source: WireSource): Promise<Sou
         lastFailureAt: result.failed ? completedAt : undefined,
         lastLatencyMs: result.latencyMs,
         consecutiveFailures: failures,
-        nextFetchAt: nextPollAt(source.tier, completedAt, failures),
+        nextFetchAt,
+        feedEtag: result.etag === undefined ? undefined : result.etag,
+        feedLastModified: result.lastModified === undefined ? undefined : result.lastModified,
+        lastHttpStatus: result.httpStatus ?? undefined,
+        lastNotModifiedAt: result.notModified ? completedAt : undefined,
+        lastRetryAfterMs: result.retryAfterMs ?? null,
       },
     });
   } catch (error) {
-    // Prisma reconnects its pool after transient disconnects. Health recording
-    // is useful, but never allowed to kill the source loop.
     console.error(`[wire] health update failed for ${source.name}:`, error);
   }
 

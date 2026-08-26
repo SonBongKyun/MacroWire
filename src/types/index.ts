@@ -11,6 +11,11 @@ export interface Source {
   lastLatencyMs?: number | null;
   consecutiveFailures?: number;
   nextFetchAt?: string | null;
+  feedEtag?: string | null;
+  feedLastModified?: string | null;
+  lastHttpStatus?: number | null;
+  lastNotModifiedAt?: string | null;
+  lastRetryAfterMs?: number | null;
   createdAt: string;
   _count?: { articles: number };
 }
@@ -33,6 +38,11 @@ export interface Article {
   isRead: boolean;
   isSaved: boolean;
   createdAt: string;
+  eventId?: string | null;
+  eventCoverage?: number;
+  eventImportanceScore?: number;
+  eventPrimarySource?: string | null;
+  eventOfficialSource?: string | null;
 }
 
 export interface ContentSource {
@@ -97,6 +107,23 @@ export interface ArticlesResponse {
     sourceScope: "core" | "all";
     managedSubscriptions: boolean;
   };
+}
+
+export interface WireEvent {
+  id: string;
+  eventKey: string;
+  title: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  latestPublishedAt: string;
+  importanceTier: "critical" | "major" | "general";
+  importanceScore: number;
+  coverageCount: number;
+  primarySourceName: string | null;
+  officialSourceName: string | null;
+  tags: string[];
+  regions: string[];
+  marketChannels: string[];
 }
 
 export interface IngestResult {
