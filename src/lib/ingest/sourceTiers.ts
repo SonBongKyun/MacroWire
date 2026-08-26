@@ -20,8 +20,6 @@ export function isFallbackTier(tier: WireSourceTier): boolean {
 }
 
 const DEFAULT_SCHEDULES: Record<WireSourceTier, TierSchedule> = {
-  // Official releases change less often than breaking wires, but they remain
-  // close enough to release time for a personal macro desk.
   T0: { intervalMs: 45_000, timeoutMs: 12_000, retryAttempts: 3 },
   T1: { intervalMs: 25_000, timeoutMs: 10_000, retryAttempts: 3 },
   T2: { intervalMs: 120_000, timeoutMs: 15_000, retryAttempts: 2 },
@@ -62,16 +60,11 @@ export function inferSourceTier(source: SourceDescriptor): WireSourceTier {
   const name = source.name.toLowerCase();
   const category = source.category.toLowerCase();
 
-  if (
-    /(federal reserve|\becb\b|bank of korea|한국은행|\bbls\b|\bbea\b)/i.test(name)
-  ) {
+  if (/(federal reserve|\becb\b|bank of korea|한국은행|\bbls\b|\bbea\b)/i.test(name)) {
     return "T0";
   }
 
-  if (
-    category === "속보" ||
-    /(breaking|bloomberg markets|연합뉴스 속보)/i.test(name)
-  ) {
+  if (category === "속보" || /(breaking|bloomberg markets|연합뉴스 속보)/i.test(name)) {
     return "T1";
   }
 
@@ -92,14 +85,25 @@ export function failureBackoffMs(
   return Math.min(interval * 2 ** exponent, 30 * 60_000);
 }
 
+export function pollJitterMs(intervalMs: number, random = Math.random): number {
+  // Spread sources across the interval so dozens of feeds do not hit one host
+  // or one database connection at the same instant. Keep it small enough that
+  // the advertised tier cadence still remains meaningful.
+  const span = Math.max(250, Math.round(intervalMs * 0.08));
+  return Math.round((random() * 2 - 1) * span);
+}
+
 export function nextPollAt(
   tier: WireSourceTier,
   completedAt: Date,
   consecutiveFailures = 0,
   schedules = getTierSchedules(),
+  random = Math.random,
 ): Date {
-  const delay = consecutiveFailures > 0
+  const baseDelay = consecutiveFailures > 0
     ? failureBackoffMs(tier, consecutiveFailures, schedules)
     : schedules[tier].intervalMs;
+  const jitter = consecutiveFailures > 0 ? 0 : pollJitterMs(baseDelay, random);
+  const delay = Math.max(1_000, baseDelay + jitter);
   return new Date(completedAt.getTime() + delay);
 }
