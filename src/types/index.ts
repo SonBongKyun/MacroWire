@@ -111,6 +111,9 @@ export interface ArticlesResponse {
 
 export type MarketImpactDirection = "up" | "down" | "mixed" | "watch";
 export type MarketImpactChannel = "rates" | "fx" | "equities" | "energy" | "crypto" | "macro";
+export type EventConfidence = "high" | "medium" | "low";
+export type EventLifecycle = "flash" | "developing" | "confirmed" | "cooling";
+export type EventUpdateKind = "initial" | "new_fact" | "confirmation" | "follow_up";
 
 export interface WireEventMarketImpact {
   channel: MarketImpactChannel;
@@ -118,6 +121,25 @@ export interface WireEventMarketImpact {
   direction: MarketImpactDirection;
   score: number;
   rationale: string;
+  confidence: EventConfidence;
+}
+
+export interface WireEventLatestUpdate {
+  kind: EventUpdateKind;
+  sourceName: string;
+  sourceTier: "T0" | "T1" | "T2" | "T3" | null;
+  publishedAt: string;
+  headline: string;
+  newFacts: string[];
+  newAnchors: string[];
+  summary: string;
+}
+
+export interface WireEventSourceTierCounts {
+  T0: number;
+  T1: number;
+  T2: number;
+  T3: number;
 }
 
 export interface WireEventArticle {
@@ -151,10 +173,20 @@ export interface WireEvent {
   marketChannels: string[];
   deskScore: number;
   deskTier: "critical" | "major" | "general";
+  pulseScore: number;
+  lifecycle: EventLifecycle;
   importanceReasons: string[];
+  pulseReasons: string[];
   shortExplanation: string;
+  whyNow: string;
   marketImpacts: WireEventMarketImpact[];
-  confidence: "high" | "medium" | "low";
+  confidence: EventConfidence;
+  confirmationScore: number;
+  sourceQualityScore: number;
+  sourceTierCounts: WireEventSourceTierCounts;
+  updatesLast15m: number;
+  updatesLast60m: number;
+  latestUpdate: WireEventLatestUpdate | null;
   distinctSources: number;
   evidenceCount: number;
   articles: WireEventArticle[];
