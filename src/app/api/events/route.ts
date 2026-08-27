@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
     const limit = boundedLimit(searchParams.get("limit"));
     const region = cleanFilter(searchParams.get("region"));
     const channel = cleanFilter(searchParams.get("channel"));
+    const lifecycle = cleanFilter(searchParams.get("lifecycle"));
     const minScoreRaw = Number.parseInt(searchParams.get("minScore") ?? "0", 10);
     const minScore = Number.isFinite(minScoreRaw) ? Math.min(Math.max(minScoreRaw, 0), 100) : 0;
 
@@ -50,37 +51,51 @@ export async function GET(req: NextRequest) {
         : {}),
     };
 
-    // Pull a wider candidate set and rank after calculating event-level source
-    // diversity, freshness and transmission breadth. Stored article importance
-    // remains non-compounding and explainable.
-    const events = await prisma.event.findMany({
-      where,
-      orderBy: [{ importanceScore: "desc" }, { latestPublishedAt: "desc" }],
-      take: Math.min(100, Math.max(limit * 4, 40)),
-      include: {
-        articles: {
-          orderBy: [{ isPrimary: "desc" }, { publishedAt: "desc" }],
-          take: 12,
-          include: {
-            article: {
-              select: {
-                id: true,
-                title: true,
-                url: true,
-                sourceName: true,
-                publishedAt: true,
-                summary: true,
-                feedExcerpt: true,
-                tags: true,
-                importanceScore: true,
-                importanceTier: true,
-                source: { select: { tier: true } },
-              },
+    const candidateTake = Math.min(70, Math.max(limit * 5, 40));
+    const include = {
+      articles: {
+        orderBy: [{ isPrimary: "desc" as const }, { publishedAt: "desc" as const }],
+        take: 16,
+        include: {
+          article: {
+            select: {
+              id: true,
+              title: true,
+              url: true,
+              sourceName: true,
+              publishedAt: true,
+              summary: true,
+              feedExcerpt: true,
+              tags: true,
+              importanceScore: true,
+              importanceTier: true,
+              source: { select: { tier: true } },
             },
           },
         },
       },
-    });
+    };
+
+    // A live desk needs two candidate lanes. Structural importance catches the
+    // major story that still matters; recency catches a fresh event before its
+    // coverage count has had time to build. Derived Pulse then ranks the union.
+    const [priorityEvents, recentEvents] = await Promise.all([
+      prisma.event.findMany({
+        where,
+        orderBy: [{ importanceScore: "desc" }, { latestPublishedAt: "desc" }],
+        take: candidateTake,
+        include,
+      }),
+      prisma.event.findMany({
+        where,
+        orderBy: [{ latestPublishedAt: "desc" }, { importanceScore: "desc" }],
+        take: candidateTake,
+        include,
+      }),
+    ]);
+    const events = [...new Map(
+      [...priorityEvents, ...recentEvents].map((event) => [event.id, event]),
+    ).values()];
 
     const data = events.map(({ articles, ...event }) => {
       const rawEvidence = articles.map(({ article, similarityScore, isPrimary }) => ({
@@ -128,12 +143,16 @@ export async function GET(req: NextRequest) {
         tags,
         regions,
         marketChannels,
+        firstSeenAt,
         latestPublishedAt,
         coverageCount: distinctSources,
         importanceScore,
         primarySourceName,
         officialSourceName,
       }, evidence);
+      const sortedEvidence = [...evidence].sort(
+        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+      );
 
       return {
         ...event,
@@ -149,7 +168,7 @@ export async function GET(req: NextRequest) {
         regions,
         marketChannels,
         ...intelligence,
-        articles: evidence.map((article) => ({
+        articles: sortedEvidence.map((article) => ({
           id: article.id,
           title: article.title,
           url: article.url,
@@ -174,9 +193,11 @@ export async function GET(req: NextRequest) {
       }))
       .filter((event) => !region || event.regions.some((item) => item.toLowerCase() === region))
       .filter((event) => !channel || event.marketChannels.some((item) => item.toLowerCase() === channel))
+      .filter((event) => !lifecycle || event.lifecycle === lifecycle)
       .filter((event) => event.deskScore >= minScore)
-      .sort((a, b) => b.deskScore - a.deskScore
-        || b.distinctSources - a.distinctSources
+      .sort((a, b) => b.pulseScore - a.pulseScore
+        || b.deskScore - a.deskScore
+        || b.confirmationScore - a.confirmationScore
         || new Date(b.latestPublishedAt).getTime() - new Date(a.latestPublishedAt).getTime())
       .slice(0, limit);
 
@@ -190,7 +211,7 @@ export async function GET(req: NextRequest) {
         rangeRestricted: rangeAccess.restricted,
       },
     }, {
-      headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=30" },
+      headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=20" },
     });
   } catch (error) {
     console.error("[api/events]", error);
