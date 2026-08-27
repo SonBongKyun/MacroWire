@@ -1,8 +1,12 @@
 import { extractKeywords, isStrongKeyword, keywordOverlap } from "@/lib/clustering/cluster";
+import { canonicalSourceName } from "@/lib/events/sourceIdentity";
 
 export type EventImportanceTier = "critical" | "major" | "general";
 export type MarketImpactDirection = "up" | "down" | "mixed" | "watch";
 export type MarketImpactChannel = "rates" | "fx" | "equities" | "energy" | "crypto" | "macro";
+export type EventConfidence = "high" | "medium" | "low";
+export type EventLifecycle = "flash" | "developing" | "confirmed" | "cooling";
+export type EventUpdateKind = "initial" | "new_fact" | "confirmation" | "follow_up";
 
 export interface EventArticleSignal {
   id?: string;
@@ -21,6 +25,7 @@ export interface EventSignal {
   tags: string[];
   regions?: string[];
   marketChannels?: string[];
+  firstSeenAt?: string | Date;
   latestPublishedAt: string | Date;
   coverageCount: number;
   importanceScore: number;
@@ -34,15 +39,44 @@ export interface MarketImpact {
   direction: MarketImpactDirection;
   score: number;
   rationale: string;
+  confidence: EventConfidence;
+}
+
+export interface EventLatestUpdate {
+  kind: EventUpdateKind;
+  sourceName: string;
+  sourceTier: "T0" | "T1" | "T2" | "T3" | null;
+  publishedAt: string;
+  headline: string;
+  newFacts: string[];
+  newAnchors: string[];
+  summary: string;
+}
+
+export interface EventSourceTierCounts {
+  T0: number;
+  T1: number;
+  T2: number;
+  T3: number;
 }
 
 export interface EventIntelligence {
   deskScore: number;
   deskTier: EventImportanceTier;
+  pulseScore: number;
+  lifecycle: EventLifecycle;
   importanceReasons: string[];
+  pulseReasons: string[];
   shortExplanation: string;
+  whyNow: string;
   marketImpacts: MarketImpact[];
-  confidence: "high" | "medium" | "low";
+  confidence: EventConfidence;
+  confirmationScore: number;
+  sourceQualityScore: number;
+  sourceTierCounts: EventSourceTierCounts;
+  updatesLast15m: number;
+  updatesLast60m: number;
+  latestUpdate: EventLatestUpdate | null;
   distinctSources: number;
   evidenceCount: number;
 }
@@ -73,6 +107,30 @@ const ANCHOR_PATTERNS: Array<[string, RegExp]> = [
   ["bitcoin", /\b(bitcoin|btc)\b|비트코인/i],
 ];
 
+const ANCHOR_LABELS: Record<string, string> = {
+  fed: "연준",
+  bok: "한국은행",
+  ecb: "ECB",
+  boj: "BOJ",
+  pboc: "PBOC",
+  cpi: "CPI",
+  pce: "PCE",
+  payrolls: "고용보고서",
+  gdp: "GDP",
+  nvidia: "Nvidia",
+  samsung: "Samsung",
+  skhynix: "SK hynix",
+  iran: "이란",
+  israel: "이스라엘",
+  hormuz: "호르무즈",
+  opec: "OPEC",
+  trump: "Trump",
+  china: "중국",
+  korea: "한국",
+  japan: "일본",
+  bitcoin: "Bitcoin",
+};
+
 const CHANNEL_LABELS: Record<MarketImpactChannel, string> = {
   rates: "RATES",
   fx: "FX",
@@ -81,6 +139,29 @@ const CHANNEL_LABELS: Record<MarketImpactChannel, string> = {
   crypto: "CRYPTO",
   macro: "MACRO",
 };
+
+const SOURCE_TIER_WEIGHT: Record<NonNullable<EventArticleSignal["sourceTier"]>, number> = {
+  T0: 100,
+  T1: 84,
+  T2: 62,
+  T3: 38,
+};
+
+const FACT_PATTERNS = [
+  /\b\d+(?:\.\d+)?\s?(?:%|(?:bp|bps|basis points?)\b)/gi,
+  /[$€£₩]\s?\d[\d,.]*(?:\s?(?:trillion|billion|million|tn|bn|mn))?/gi,
+  /\b\d[\d,.]*(?:\.\d+)?\s?(?:trillion|billion|million|tn|bn|mn)\b/gi,
+  /\b\d[\d,.]*(?:\.\d+)?\s?(?:조|억|만)?원\b/g,
+];
+
+function clampScore(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function safeTime(value: string | Date): number {
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
 
 export function normalizeEventHeadline(title: string): string {
   return title
@@ -229,8 +310,9 @@ function pushImpact(
       channel,
       label: CHANNEL_LABELS[channel],
       direction,
-      score: Math.max(0, Math.min(100, score)),
+      score: clampScore(score),
       rationale,
+      confidence: "low",
     };
     if (existing) impacts.splice(impacts.indexOf(existing), 1, next);
     else impacts.push(next);
@@ -315,10 +397,15 @@ export function inferMarketImpacts(
   return impacts.sort((a, b) => b.score - a.score).slice(0, 4);
 }
 
+/**
+ * Desk score is deliberately structural. Freshness and update velocity belong
+ * to Pulse score, otherwise an old but still important event silently loses
+ * its identity as time passes.
+ */
 export function scoreEventPriority(
   event: Pick<EventSignal, "coverageCount" | "importanceScore" | "officialSourceName" | "latestPublishedAt" | "marketChannels">,
   distinctSources = event.coverageCount,
-  now = Date.now(),
+  _now = Date.now(),
 ): { score: number; tier: EventImportanceTier; reasons: string[] } {
   let score = Math.max(0, Math.min(100, event.importanceScore));
   const reasons: string[] = [];
@@ -347,17 +434,7 @@ export function scoreEventPriority(
     reasons.push("복수 시장 전이");
   }
 
-  const latest = new Date(event.latestPublishedAt).getTime();
-  const age = Number.isFinite(latest) ? Math.max(0, now - latest) : Number.POSITIVE_INFINITY;
-  if (age <= 15 * 60_000) {
-    score += 6;
-    reasons.push("15분 이내 업데이트");
-  } else if (age <= 60 * 60_000) {
-    score += 3;
-    reasons.push("1시간 이내 업데이트");
-  }
-
-  score = Math.max(0, Math.min(100, score));
+  score = clampScore(score);
   const tier: EventImportanceTier = score >= 78 ? "critical" : score >= 48 ? "major" : "general";
   return { score, tier, reasons: reasons.slice(0, 4) };
 }
@@ -369,7 +446,7 @@ export function dedupeEventArticles<T extends EventArticleSignal>(articles: T[])
 
   for (const article of articles) {
     const normalized = normalizeEventHeadline(article.title);
-    const sourceTitle = `${article.sourceName.toLowerCase()}::${normalized}`;
+    const sourceTitle = `${canonicalSourceName(article.sourceName).toLowerCase()}::${normalized}`;
     if (seenSourceTitle.has(sourceTitle)) continue;
     // Exact syndicated headlines from multiple mirrors add little evidence.
     if (normalized.length > 20 && seenHeadline.has(normalized) && article.sourceTier === "T3") continue;
@@ -380,12 +457,260 @@ export function dedupeEventArticles<T extends EventArticleSignal>(articles: T[])
   return result;
 }
 
-export function buildEventIntelligence(event: EventSignal, rawArticles: EventArticleSignal[]): EventIntelligence {
+function canonicalFact(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/,/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/(\d+)\.0+(?=\D|$)/g, "$1")
+    .trim();
+}
+
+export function extractExplicitFacts(text: string): string[] {
+  const seen = new Set<string>();
+  const facts: string[] = [];
+  for (const pattern of FACT_PATTERNS) {
+    for (const match of text.match(pattern) ?? []) {
+      const clean = match.replace(/\s+/g, " ").trim();
+      const canonical = canonicalFact(clean);
+      if (!canonical || seen.has(canonical)) continue;
+      seen.add(canonical);
+      facts.push(clean);
+    }
+  }
+  return facts.slice(0, 8);
+}
+
+function uniqueSourceArticles(articles: EventArticleSignal[]): EventArticleSignal[] {
+  const bySource = new Map<string, EventArticleSignal>();
+  for (const article of articles) {
+    const key = canonicalSourceName(article.sourceName).toLowerCase();
+    if (!key) continue;
+    const current = bySource.get(key);
+    if (!current) {
+      bySource.set(key, article);
+      continue;
+    }
+    const currentWeight = current.sourceTier ? SOURCE_TIER_WEIGHT[current.sourceTier] : 50;
+    const nextWeight = article.sourceTier ? SOURCE_TIER_WEIGHT[article.sourceTier] : 50;
+    if (nextWeight > currentWeight || (nextWeight === currentWeight && safeTime(article.publishedAt) > safeTime(current.publishedAt))) {
+      bySource.set(key, article);
+    }
+  }
+  return [...bySource.values()];
+}
+
+export function deriveSourceTierCounts(articles: EventArticleSignal[]): EventSourceTierCounts {
+  const counts: EventSourceTierCounts = { T0: 0, T1: 0, T2: 0, T3: 0 };
+  for (const article of uniqueSourceArticles(articles)) {
+    if (article.sourceTier) counts[article.sourceTier] += 1;
+  }
+  return counts;
+}
+
+export function scoreSourceQuality(articles: EventArticleSignal[]): number {
+  const sources = uniqueSourceArticles(articles);
+  if (sources.length === 0) return 0;
+  const average = sources.reduce((sum, article) => (
+    sum + (article.sourceTier ? SOURCE_TIER_WEIGHT[article.sourceTier] : 50)
+  ), 0) / sources.length;
+  const diversityBonus = Math.min(12, Math.max(0, sources.length - 1) * 4);
+  return clampScore(average + diversityBonus);
+}
+
+export function scoreEventConfirmation(
+  event: Pick<EventSignal, "officialSourceName">,
+  articles: EventArticleSignal[],
+): number {
+  const sources = uniqueSourceArticles(articles);
+  const counts = deriveSourceTierCounts(articles);
+  const sourceCount = sources.length;
+  let score = sourceCount <= 1 ? 20 : sourceCount === 2 ? 48 : sourceCount === 3 ? 65 : 80;
+
+  if (event.officialSourceName || counts.T0 > 0) score = Math.max(score, 72);
+  if ((event.officialSourceName || counts.T0 > 0) && sourceCount >= 2) score += 8;
+  if (counts.T0 + counts.T1 >= 2) score += 5;
+  return clampScore(score);
+}
+
+function articleEvidenceText(article: EventArticleSignal): string {
+  return `${article.title} ${article.feedExcerpt ?? article.summary ?? ""}`.replace(/\s+/g, " ").trim();
+}
+
+export function deriveLatestUpdate(articles: EventArticleSignal[]): EventLatestUpdate | null {
+  const sorted = [...articles].sort((a, b) => safeTime(b.publishedAt) - safeTime(a.publishedAt));
+  const latest = sorted[0];
+  if (!latest) return null;
+  const previous = sorted.slice(1);
+  const latestFacts = extractExplicitFacts(articleEvidenceText(latest));
+  const previousFacts = new Set(
+    previous.flatMap((article) => extractExplicitFacts(articleEvidenceText(article))).map(canonicalFact),
+  );
+  const newFacts = previous.length > 0
+    ? latestFacts.filter((fact) => !previousFacts.has(canonicalFact(fact))).slice(0, 4)
+    : [];
+
+  const latestAnchors = extractEventAnchors(latest.title, latest.tags);
+  const previousAnchors = new Set<string>();
+  for (const article of previous) {
+    for (const anchor of extractEventAnchors(article.title, article.tags)) previousAnchors.add(anchor);
+  }
+  const newAnchors = previous.length > 0
+    ? [...latestAnchors]
+      .filter((anchor) => !previousAnchors.has(anchor))
+      .map((anchor) => ANCHOR_LABELS[anchor] ?? anchor)
+      .slice(0, 3)
+    : [];
+
+  const previousSources = new Set(previous.map((article) => canonicalSourceName(article.sourceName).toLowerCase()));
+  const latestSource = canonicalSourceName(latest.sourceName);
+  const isNewSource = previous.length > 0 && !previousSources.has(latestSource.toLowerCase());
+  const kind: EventUpdateKind = previous.length === 0
+    ? "initial"
+    : newFacts.length > 0 || newAnchors.length > 0
+      ? "new_fact"
+      : isNewSource
+        ? "confirmation"
+        : "follow_up";
+
+  let summary: string;
+  if (kind === "initial") {
+    summary = `${latestSource}에서 처음 포착된 이벤트입니다.`;
+  } else if (kind === "new_fact") {
+    const details = [...newFacts, ...newAnchors.map((anchor) => `새 핵심축 ${anchor}`)].slice(0, 4);
+    summary = details.length > 0
+      ? `${latestSource} 최신 업데이트에서 ${details.join(", ")} 항목이 새로 포착됐습니다.`
+      : `${latestSource}에서 새로운 핵심 정보가 추가됐습니다.`;
+  } else if (kind === "confirmation") {
+    summary = `${latestSource}가 새 독립 소스로 합류해 같은 사건을 추가 확인했습니다.`;
+  } else {
+    summary = `${latestSource}에서 후속 보도가 추가됐습니다. 핵심 수치의 새 변화는 아직 포착되지 않았습니다.`;
+  }
+
+  const publishedTime = safeTime(latest.publishedAt);
+  return {
+    kind,
+    sourceName: latestSource,
+    sourceTier: latest.sourceTier ?? null,
+    publishedAt: new Date(publishedTime || Date.now()).toISOString(),
+    headline: latest.title,
+    newFacts,
+    newAnchors,
+    summary,
+  };
+}
+
+function freshnessScore(latestPublishedAt: string | Date, now: number): number {
+  const age = Math.max(0, now - safeTime(latestPublishedAt));
+  if (age <= 5 * 60_000) return 100;
+  if (age <= 15 * 60_000) return 90;
+  if (age <= 60 * 60_000) return 70;
+  if (age <= 3 * 60 * 60_000) return 45;
+  if (age <= 6 * 60 * 60_000) return 25;
+  if (age <= 12 * 60 * 60_000) return 10;
+  return 0;
+}
+
+function updateVelocity(articles: EventArticleSignal[], now: number): {
+  updatesLast15m: number;
+  updatesLast60m: number;
+  score: number;
+} {
+  const updatesLast15m = articles.filter((article) => Math.max(0, now - safeTime(article.publishedAt)) <= 15 * 60_000).length;
+  const updatesLast60m = articles.filter((article) => Math.max(0, now - safeTime(article.publishedAt)) <= 60 * 60_000).length;
+  const distinctSources = uniqueSourceArticles(articles).length;
+  const score = clampScore(
+    updatesLast15m * 24
+    + Math.max(0, updatesLast60m - updatesLast15m) * 8
+    + Math.min(distinctSources, 5) * 6,
+  );
+  return { updatesLast15m, updatesLast60m, score };
+}
+
+function lifecycleForEvent(
+  event: EventSignal,
+  articles: EventArticleSignal[],
+  confirmationScore: number,
+  now: number,
+): EventLifecycle {
+  const latest = safeTime(event.latestPublishedAt);
+  const articleTimes = articles.map((article) => safeTime(article.publishedAt)).filter((time) => time > 0);
+  const articleFirst = articleTimes.length > 0 ? Math.min(...articleTimes) : latest;
+  const first = event.firstSeenAt ? safeTime(event.firstSeenAt) : articleFirst;
+  const latestAge = Math.max(0, now - latest);
+  const eventAge = Math.max(0, now - first);
+  const distinctSources = uniqueSourceArticles(articles).length;
+
+  if (latestAge > 3 * 60 * 60_000) return "cooling";
+  if (eventAge <= 12 * 60_000 && distinctSources <= 1 && confirmationScore < 70) return "flash";
+  if (confirmationScore >= 75) return "confirmed";
+  return "developing";
+}
+
+function confidenceFromScore(score: number): EventConfidence {
+  if (score >= 75) return "high";
+  if (score >= 45) return "medium";
+  return "low";
+}
+
+function impactConfidence(impact: MarketImpact, confirmationScore: number): EventConfidence {
+  const directionalBonus = impact.direction === "watch" ? 0 : 6;
+  const score = confirmationScore * 0.65 + impact.score * 0.35 + directionalBonus;
+  return confidenceFromScore(score);
+}
+
+export function buildEventIntelligence(
+  event: EventSignal,
+  rawArticles: EventArticleSignal[],
+  now = Date.now(),
+): EventIntelligence {
   const articles = dedupeEventArticles(rawArticles);
-  const distinctSources = new Set(articles.map((article) => article.sourceName)).size || event.coverageCount || 1;
-  const priority = scoreEventPriority(event, distinctSources);
-  const marketImpacts = inferMarketImpacts(event, articles);
-  const primary = articles.find((article) => article.sourceName === event.primarySourceName) ?? articles[0];
+  const distinctSources = new Set(articles.map((article) => canonicalSourceName(article.sourceName).toLowerCase())).size
+    || event.coverageCount
+    || 1;
+  const priority = scoreEventPriority(event, distinctSources, now);
+  const confirmationScore = scoreEventConfirmation(event, articles);
+  const sourceQualityScore = scoreSourceQuality(articles);
+  const sourceTierCounts = deriveSourceTierCounts(articles);
+  const latestUpdate = deriveLatestUpdate(articles);
+  const velocity = updateVelocity(articles, now);
+  const lifecycle = lifecycleForEvent(event, articles, confirmationScore, now);
+  const freshScore = freshnessScore(event.latestPublishedAt, now);
+  const noveltyScore = latestUpdate?.kind === "new_fact"
+    ? 100
+    : latestUpdate?.kind === "confirmation"
+      ? 80
+      : latestUpdate?.kind === "initial"
+        ? 65
+        : 45;
+  let pulseScore = clampScore(
+    priority.score * 0.55
+    + freshScore * 0.20
+    + velocity.score * 0.15
+    + noveltyScore * 0.10,
+  );
+  if (lifecycle === "cooling") pulseScore = clampScore(pulseScore - 8);
+
+  const pulseReasons: string[] = [];
+  if (latestUpdate?.kind === "new_fact") {
+    pulseReasons.push(latestUpdate.newFacts.length > 0
+      ? `새 수치 ${latestUpdate.newFacts.length}개`
+      : "새 핵심 정보");
+  }
+  if (velocity.updatesLast15m >= 2) pulseReasons.push(`15분 ${velocity.updatesLast15m}개 업데이트`);
+  else if (velocity.updatesLast60m >= 2) pulseReasons.push(`1시간 ${velocity.updatesLast60m}개 업데이트`);
+  else if (velocity.updatesLast60m === 0 && lifecycle !== "flash") pulseReasons.push("1시간 신규 업데이트 없음");
+  if (confirmationScore >= 75) pulseReasons.push("교차 확인 강함");
+  if (lifecycle === "cooling") pulseReasons.push("최근 업데이트 둔화");
+
+  const marketImpacts = inferMarketImpacts(event, articles).map((impact) => ({
+    ...impact,
+    confidence: impactConfidence(impact, confirmationScore),
+  }));
+  const primaryCanonical = event.primarySourceName ? canonicalSourceName(event.primarySourceName) : null;
+  const primary = articles.find((article) => (
+    primaryCanonical && canonicalSourceName(article.sourceName) === primaryCanonical
+  )) ?? articles[0];
   const firstSentence = firstUsefulSentence(primary);
 
   const coveragePhrase = distinctSources >= 2
@@ -397,19 +722,23 @@ export function buildEventIntelligence(event: EventSignal, rawArticles: EventArt
     .join(" ")
     .slice(0, 420);
 
-  const confidence: EventIntelligence["confidence"] = event.officialSourceName || distinctSources >= 4
-    ? "high"
-    : distinctSources >= 2
-      ? "medium"
-      : "low";
-
   return {
     deskScore: priority.score,
     deskTier: priority.tier,
+    pulseScore,
+    lifecycle,
     importanceReasons: priority.reasons,
+    pulseReasons: pulseReasons.slice(0, 4),
     shortExplanation,
+    whyNow: latestUpdate?.summary ?? "새 업데이트를 기다리고 있습니다.",
     marketImpacts,
-    confidence,
+    confidence: confidenceFromScore(confirmationScore),
+    confirmationScore,
+    sourceQualityScore,
+    sourceTierCounts,
+    updatesLast15m: velocity.updatesLast15m,
+    updatesLast60m: velocity.updatesLast60m,
+    latestUpdate,
     distinctSources,
     evidenceCount: articles.length,
   };

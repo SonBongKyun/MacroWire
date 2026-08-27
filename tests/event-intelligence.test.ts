@@ -67,24 +67,28 @@ test("Warsh is not misread as war in equity transmission", () => {
   assert.equal(equities?.direction, "watch");
 });
 
-test("event desk score rewards independent sources, official confirmation and breadth", () => {
+test("event desk score is structural while pulse rewards fresh confirmed breadth", () => {
+  const now = new Date("2026-08-28T00:00:00Z");
   const intelligence = buildEventIntelligence({
     title: "Bank of Korea raises policy rate",
     tags: ["금리", "한국은행"],
     regions: ["KR"],
     marketChannels: ["rates", "fx", "equities"],
-    latestPublishedAt: new Date(),
+    firstSeenAt: new Date(now.getTime() - 20 * 60_000),
+    latestPublishedAt: now,
     coverageCount: 3,
     importanceScore: 65,
     primarySourceName: "Bank of Korea",
     officialSourceName: "Bank of Korea",
   }, [
-    { title: "Bank of Korea raises policy rate", sourceName: "Bank of Korea", sourceTier: "T0", publishedAt: new Date(), importanceScore: 65, tags: ["금리", "한국은행"] },
-    { title: "BOK hikes rate as inflation pressure persists", sourceName: "Reuters", sourceTier: "T1", publishedAt: new Date(), importanceScore: 60, tags: ["금리", "한국은행"] },
-    { title: "한국은행, 기준금리 인상", sourceName: "연합뉴스", sourceTier: "T1", publishedAt: new Date(), importanceScore: 61, tags: ["금리", "한국은행"] },
-  ]);
+    { title: "Bank of Korea raises policy rate", sourceName: "Bank of Korea", sourceTier: "T0", publishedAt: new Date(now.getTime() - 20 * 60_000), importanceScore: 65, tags: ["금리", "한국은행"] },
+    { title: "BOK hikes rate as inflation pressure persists", sourceName: "Reuters", sourceTier: "T1", publishedAt: new Date(now.getTime() - 5 * 60_000), importanceScore: 60, tags: ["금리", "한국은행"] },
+    { title: "한국은행, 기준금리 인상", sourceName: "연합뉴스", sourceTier: "T1", publishedAt: now, importanceScore: 61, tags: ["금리", "한국은행"] },
+  ], now.getTime());
 
-  assert.ok(intelligence.deskScore >= 90);
+  assert.ok(intelligence.deskScore >= 85);
+  assert.ok(intelligence.pulseScore >= 80);
+  assert.equal(intelligence.lifecycle, "confirmed");
   assert.equal(intelligence.confidence, "high");
   assert.equal(intelligence.distinctSources, 3);
   assert.ok(intelligence.importanceReasons.includes("공식 소스 확인"));

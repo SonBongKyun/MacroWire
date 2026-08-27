@@ -12,6 +12,8 @@ import {
   filterEventEvidence,
 } from "@/lib/events/eventIntelligence";
 import { isMarketRelevantEvent } from "@/lib/events/marketRelevance";
+import { canonicalSourceName } from "@/lib/events/sourceIdentity";
+import { applyTags } from "@/lib/tagging/tagger";
 
 function parseStringArray(raw: string): string[] {
   try {
@@ -40,6 +42,7 @@ export async function GET(req: NextRequest) {
     const limit = boundedLimit(searchParams.get("limit"));
     const region = cleanFilter(searchParams.get("region"));
     const channel = cleanFilter(searchParams.get("channel"));
+    const lifecycle = cleanFilter(searchParams.get("lifecycle"));
     const minScoreRaw = Number.parseInt(searchParams.get("minScore") ?? "0", 10);
     const minScore = Number.isFinite(minScoreRaw) ? Math.min(Math.max(minScoreRaw, 0), 100) : 0;
 
@@ -50,54 +53,79 @@ export async function GET(req: NextRequest) {
         : {}),
     };
 
-    // Pull a wider candidate set and rank after calculating event-level source
-    // diversity, freshness and transmission breadth. Stored article importance
-    // remains non-compounding and explainable.
-    const events = await prisma.event.findMany({
-      where,
-      orderBy: [{ importanceScore: "desc" }, { latestPublishedAt: "desc" }],
-      take: Math.min(100, Math.max(limit * 4, 40)),
-      include: {
-        articles: {
-          orderBy: [{ isPrimary: "desc" }, { publishedAt: "desc" }],
-          take: 12,
-          include: {
-            article: {
-              select: {
-                id: true,
-                title: true,
-                url: true,
-                sourceName: true,
-                publishedAt: true,
-                summary: true,
-                feedExcerpt: true,
-                tags: true,
-                importanceScore: true,
-                importanceTier: true,
-                source: { select: { tier: true } },
-              },
+    const candidateTake = Math.min(70, Math.max(limit * 5, 40));
+    const include = {
+      articles: {
+        orderBy: [{ isPrimary: "desc" as const }, { publishedAt: "desc" as const }],
+        take: 16,
+        include: {
+          article: {
+            select: {
+              id: true,
+              title: true,
+              url: true,
+              sourceName: true,
+              publishedAt: true,
+              summary: true,
+              feedExcerpt: true,
+              tags: true,
+              importanceScore: true,
+              importanceTier: true,
+              source: { select: { tier: true } },
             },
           },
         },
       },
-    });
+    };
+
+    // A live desk needs two candidate lanes. Structural importance catches the
+    // major story that still matters; recency catches a fresh event before its
+    // coverage count has had time to build. Derived Pulse then ranks the union.
+    const [priorityEvents, recentEvents] = await Promise.all([
+      prisma.event.findMany({
+        where,
+        orderBy: [{ importanceScore: "desc" }, { latestPublishedAt: "desc" }],
+        take: candidateTake,
+        include,
+      }),
+      prisma.event.findMany({
+        where,
+        orderBy: [{ latestPublishedAt: "desc" }, { importanceScore: "desc" }],
+        take: candidateTake,
+        include,
+      }),
+    ]);
+    const events = [...new Map(
+      [...priorityEvents, ...recentEvents].map((event) => [event.id, event]),
+    ).values()];
 
     const data = events.map(({ articles, ...event }) => {
-      const rawEvidence = articles.map(({ article, similarityScore, isPrimary }) => ({
-        id: article.id,
-        title: article.title,
-        url: article.url,
-        sourceName: article.sourceName,
-        sourceTier: article.source.tier,
-        publishedAt: article.publishedAt,
-        importanceScore: article.importanceScore,
-        importanceTier: article.importanceTier,
-        tags: parseStringArray(article.tags),
-        summary: article.summary,
-        feedExcerpt: article.feedExcerpt,
-        similarityScore,
-        isPrimary,
-      }));
+      const rawEvidence = articles.map(({ article, similarityScore, isPrimary }) => {
+        // Historical rows can carry tags created before stricter token-boundary
+        // rules shipped. Re-tag from visible evidence at read time so old
+        // `chair -> AI`, `Warsh -> war` pollution cannot leak into the desk.
+        const cleanTags = applyTags(
+          article.title,
+          article.feedExcerpt ?? article.summary ?? undefined,
+        );
+        return {
+          id: article.id,
+          title: article.title,
+          url: article.url,
+          // Feed names are not independent publishers. Collapse newsroom feed
+          // variants before confirmation/source-quality calculations.
+          sourceName: canonicalSourceName(article.sourceName),
+          sourceTier: article.source.tier,
+          publishedAt: article.publishedAt,
+          importanceScore: article.importanceScore,
+          importanceTier: article.importanceTier,
+          tags: cleanTags,
+          summary: article.summary,
+          feedExcerpt: article.feedExcerpt,
+          similarityScore,
+          isPrimary,
+        };
+      });
 
       // Existing production rows may have been linked by Event V1. Revalidate
       // every historical link against the primary article's clean tags before
@@ -118,22 +146,28 @@ export async function GET(req: NextRequest) {
       const firstSeenAt = publishedTimes.length > 0 ? new Date(Math.min(...publishedTimes)) : event.firstSeenAt;
       const latestPublishedAt = publishedTimes.length > 0 ? new Date(Math.max(...publishedTimes)) : event.latestPublishedAt;
       const importanceScore = Math.max(0, ...evidence.map((article) => article.importanceScore ?? 0));
-      const officialSourceName = event.officialSourceName && evidence.some(
-        (article) => article.sourceTier === "T0" && article.sourceName === event.officialSourceName,
-      ) ? event.officialSourceName : null;
-      const primarySourceName = effectivePrimary?.sourceName ?? event.primarySourceName;
+      const storedOfficialSource = event.officialSourceName ? canonicalSourceName(event.officialSourceName) : null;
+      const officialSourceName = storedOfficialSource && evidence.some(
+        (article) => article.sourceTier === "T0" && article.sourceName === storedOfficialSource,
+      ) ? storedOfficialSource : null;
+      const primarySourceName = effectivePrimary?.sourceName
+        ?? (event.primarySourceName ? canonicalSourceName(event.primarySourceName) : null);
 
       const intelligence = buildEventIntelligence({
         title: event.title,
         tags,
         regions,
         marketChannels,
+        firstSeenAt,
         latestPublishedAt,
         coverageCount: distinctSources,
         importanceScore,
         primarySourceName,
         officialSourceName,
       }, evidence);
+      const sortedEvidence = [...evidence].sort(
+        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+      );
 
       return {
         ...event,
@@ -142,14 +176,14 @@ export async function GET(req: NextRequest) {
         latestPublishedAt,
         importanceTier: effectivePrimary?.importanceTier ?? event.importanceTier,
         importanceScore,
-        coverageCount: distinctSources,
+        coverageCount: intelligence.distinctSources,
         primarySourceName,
         officialSourceName,
         tags,
         regions,
         marketChannels,
         ...intelligence,
-        articles: evidence.map((article) => ({
+        articles: sortedEvidence.map((article) => ({
           id: article.id,
           title: article.title,
           url: article.url,
@@ -174,9 +208,11 @@ export async function GET(req: NextRequest) {
       }))
       .filter((event) => !region || event.regions.some((item) => item.toLowerCase() === region))
       .filter((event) => !channel || event.marketChannels.some((item) => item.toLowerCase() === channel))
+      .filter((event) => !lifecycle || event.lifecycle === lifecycle)
       .filter((event) => event.deskScore >= minScore)
-      .sort((a, b) => b.deskScore - a.deskScore
-        || b.distinctSources - a.distinctSources
+      .sort((a, b) => b.pulseScore - a.pulseScore
+        || b.deskScore - a.deskScore
+        || b.confirmationScore - a.confirmationScore
         || new Date(b.latestPublishedAt).getTime() - new Date(a.latestPublishedAt).getTime())
       .slice(0, limit);
 
@@ -190,7 +226,7 @@ export async function GET(req: NextRequest) {
         rangeRestricted: rangeAccess.restricted,
       },
     }, {
-      headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=30" },
+      headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=20" },
     });
   } catch (error) {
     console.error("[api/events]", error);
