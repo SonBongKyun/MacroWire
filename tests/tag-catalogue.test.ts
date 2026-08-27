@@ -10,9 +10,12 @@ test("the UI tag list is the rules file, not a copy of it", () => {
   assert.ok(ALL_TAGS.length >= 19);
 });
 
-test("every tag in the catalogue is reachable from its own keywords", () => {
+test("every tag in the catalogue is reachable from representative market context", () => {
   for (const rule of tagRules.rules) {
-    const probe = rule.keywords[0];
+    // 경기 is intentionally context-sensitive because the bare Korean word
+    // also means a sports match. Probe it with explicit business-cycle text
+    // instead of reintroducing the false-positive behavior this test protects.
+    const probe = rule.tag === "경기" ? "경제 경기 회복 전망" : rule.keywords[0];
     const tags = applyTags(probe);
     assert.ok(
       tags.includes(rule.tag),
