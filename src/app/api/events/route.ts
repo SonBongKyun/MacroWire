@@ -12,6 +12,7 @@ import {
   filterEventEvidence,
 } from "@/lib/events/eventIntelligence";
 import { isMarketRelevantEvent } from "@/lib/events/marketRelevance";
+import { canonicalSourceName } from "@/lib/events/sourceIdentity";
 import { applyTags } from "@/lib/tagging/tagger";
 
 function parseStringArray(raw: string): string[] {
@@ -111,7 +112,9 @@ export async function GET(req: NextRequest) {
           id: article.id,
           title: article.title,
           url: article.url,
-          sourceName: article.sourceName,
+          // Feed names are not independent publishers. Collapse newsroom feed
+          // variants before confirmation/source-quality calculations.
+          sourceName: canonicalSourceName(article.sourceName),
           sourceTier: article.source.tier,
           publishedAt: article.publishedAt,
           importanceScore: article.importanceScore,
@@ -143,10 +146,12 @@ export async function GET(req: NextRequest) {
       const firstSeenAt = publishedTimes.length > 0 ? new Date(Math.min(...publishedTimes)) : event.firstSeenAt;
       const latestPublishedAt = publishedTimes.length > 0 ? new Date(Math.max(...publishedTimes)) : event.latestPublishedAt;
       const importanceScore = Math.max(0, ...evidence.map((article) => article.importanceScore ?? 0));
-      const officialSourceName = event.officialSourceName && evidence.some(
-        (article) => article.sourceTier === "T0" && article.sourceName === event.officialSourceName,
-      ) ? event.officialSourceName : null;
-      const primarySourceName = effectivePrimary?.sourceName ?? event.primarySourceName;
+      const storedOfficialSource = event.officialSourceName ? canonicalSourceName(event.officialSourceName) : null;
+      const officialSourceName = storedOfficialSource && evidence.some(
+        (article) => article.sourceTier === "T0" && article.sourceName === storedOfficialSource,
+      ) ? storedOfficialSource : null;
+      const primarySourceName = effectivePrimary?.sourceName
+        ?? (event.primarySourceName ? canonicalSourceName(event.primarySourceName) : null);
 
       const intelligence = buildEventIntelligence({
         title: event.title,
@@ -171,7 +176,7 @@ export async function GET(req: NextRequest) {
         latestPublishedAt,
         importanceTier: effectivePrimary?.importanceTier ?? event.importanceTier,
         importanceScore,
-        coverageCount: distinctSources,
+        coverageCount: intelligence.distinctSources,
         primarySourceName,
         officialSourceName,
         tags,
