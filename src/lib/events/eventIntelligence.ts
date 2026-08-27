@@ -1,4 +1,5 @@
 import { extractKeywords, isStrongKeyword, keywordOverlap } from "@/lib/clustering/cluster";
+import { canonicalSourceName } from "@/lib/events/sourceIdentity";
 
 export type EventImportanceTier = "critical" | "major" | "general";
 export type MarketImpactDirection = "up" | "down" | "mixed" | "watch";
@@ -147,7 +148,7 @@ const SOURCE_TIER_WEIGHT: Record<NonNullable<EventArticleSignal["sourceTier"]>, 
 };
 
 const FACT_PATTERNS = [
-  /\b\d+(?:\.\d+)?\s?(?:%|bp|bps|basis points?)\b/gi,
+  /\b\d+(?:\.\d+)?\s?(?:%|(?:bp|bps|basis points?)\b)/gi,
   /[$€£₩]\s?\d[\d,.]*(?:\s?(?:trillion|billion|million|tn|bn|mn))?/gi,
   /\b\d[\d,.]*(?:\.\d+)?\s?(?:trillion|billion|million|tn|bn|mn)\b/gi,
   /\b\d[\d,.]*(?:\.\d+)?\s?(?:조|억|만)?원\b/g,
@@ -445,7 +446,7 @@ export function dedupeEventArticles<T extends EventArticleSignal>(articles: T[])
 
   for (const article of articles) {
     const normalized = normalizeEventHeadline(article.title);
-    const sourceTitle = `${article.sourceName.toLowerCase()}::${normalized}`;
+    const sourceTitle = `${canonicalSourceName(article.sourceName).toLowerCase()}::${normalized}`;
     if (seenSourceTitle.has(sourceTitle)) continue;
     // Exact syndicated headlines from multiple mirrors add little evidence.
     if (normalized.length > 20 && seenHeadline.has(normalized) && article.sourceTier === "T3") continue;
@@ -483,7 +484,7 @@ export function extractExplicitFacts(text: string): string[] {
 function uniqueSourceArticles(articles: EventArticleSignal[]): EventArticleSignal[] {
   const bySource = new Map<string, EventArticleSignal>();
   for (const article of articles) {
-    const key = article.sourceName.trim().toLowerCase();
+    const key = canonicalSourceName(article.sourceName).toLowerCase();
     if (!key) continue;
     const current = bySource.get(key);
     if (!current) {
@@ -492,7 +493,7 @@ function uniqueSourceArticles(articles: EventArticleSignal[]): EventArticleSigna
     }
     const currentWeight = current.sourceTier ? SOURCE_TIER_WEIGHT[current.sourceTier] : 50;
     const nextWeight = article.sourceTier ? SOURCE_TIER_WEIGHT[article.sourceTier] : 50;
-    if (nextWeight > currentWeight || safeTime(article.publishedAt) > safeTime(current.publishedAt)) {
+    if (nextWeight > currentWeight || (nextWeight === currentWeight && safeTime(article.publishedAt) > safeTime(current.publishedAt))) {
       bySource.set(key, article);
     }
   }
@@ -545,20 +546,25 @@ export function deriveLatestUpdate(articles: EventArticleSignal[]): EventLatestU
   const previousFacts = new Set(
     previous.flatMap((article) => extractExplicitFacts(articleEvidenceText(article))).map(canonicalFact),
   );
-  const newFacts = latestFacts.filter((fact) => !previousFacts.has(canonicalFact(fact))).slice(0, 4);
+  const newFacts = previous.length > 0
+    ? latestFacts.filter((fact) => !previousFacts.has(canonicalFact(fact))).slice(0, 4)
+    : [];
 
   const latestAnchors = extractEventAnchors(latest.title, latest.tags);
   const previousAnchors = new Set<string>();
   for (const article of previous) {
     for (const anchor of extractEventAnchors(article.title, article.tags)) previousAnchors.add(anchor);
   }
-  const newAnchors = [...latestAnchors]
-    .filter((anchor) => !previousAnchors.has(anchor))
-    .map((anchor) => ANCHOR_LABELS[anchor] ?? anchor)
-    .slice(0, 3);
+  const newAnchors = previous.length > 0
+    ? [...latestAnchors]
+      .filter((anchor) => !previousAnchors.has(anchor))
+      .map((anchor) => ANCHOR_LABELS[anchor] ?? anchor)
+      .slice(0, 3)
+    : [];
 
-  const previousSources = new Set(previous.map((article) => article.sourceName.trim().toLowerCase()));
-  const isNewSource = previous.length > 0 && !previousSources.has(latest.sourceName.trim().toLowerCase());
+  const previousSources = new Set(previous.map((article) => canonicalSourceName(article.sourceName).toLowerCase()));
+  const latestSource = canonicalSourceName(latest.sourceName);
+  const isNewSource = previous.length > 0 && !previousSources.has(latestSource.toLowerCase());
   const kind: EventUpdateKind = previous.length === 0
     ? "initial"
     : newFacts.length > 0 || newAnchors.length > 0
@@ -569,23 +575,24 @@ export function deriveLatestUpdate(articles: EventArticleSignal[]): EventLatestU
 
   let summary: string;
   if (kind === "initial") {
-    summary = `${latest.sourceName}에서 처음 포착된 이벤트입니다.`;
+    summary = `${latestSource}에서 처음 포착된 이벤트입니다.`;
   } else if (kind === "new_fact") {
     const details = [...newFacts, ...newAnchors.map((anchor) => `새 핵심축 ${anchor}`)].slice(0, 4);
     summary = details.length > 0
-      ? `${latest.sourceName} 최신 업데이트에서 ${details.join(", ")}가 새로 포착됐습니다.`
-      : `${latest.sourceName}에서 새로운 핵심 정보가 추가됐습니다.`;
+      ? `${latestSource} 최신 업데이트에서 ${details.join(", ")} 항목이 새로 포착됐습니다.`
+      : `${latestSource}에서 새로운 핵심 정보가 추가됐습니다.`;
   } else if (kind === "confirmation") {
-    summary = `${latest.sourceName}가 새 독립 소스로 합류해 같은 사건을 추가 확인했습니다.`;
+    summary = `${latestSource}가 새 독립 소스로 합류해 같은 사건을 추가 확인했습니다.`;
   } else {
-    summary = `${latest.sourceName}에서 후속 보도가 추가됐습니다. 핵심 수치의 새 변화는 아직 포착되지 않았습니다.`;
+    summary = `${latestSource}에서 후속 보도가 추가됐습니다. 핵심 수치의 새 변화는 아직 포착되지 않았습니다.`;
   }
 
+  const publishedTime = safeTime(latest.publishedAt);
   return {
     kind,
-    sourceName: latest.sourceName,
+    sourceName: latestSource,
     sourceTier: latest.sourceTier ?? null,
-    publishedAt: new Date(safeTime(latest.publishedAt)).toISOString(),
+    publishedAt: new Date(publishedTime || Date.now()).toISOString(),
     headline: latest.title,
     newFacts,
     newAnchors,
@@ -627,9 +634,8 @@ function lifecycleForEvent(
   now: number,
 ): EventLifecycle {
   const latest = safeTime(event.latestPublishedAt);
-  const articleFirst = articles.length > 0
-    ? Math.min(...articles.map((article) => safeTime(article.publishedAt)).filter((time) => time > 0))
-    : latest;
+  const articleTimes = articles.map((article) => safeTime(article.publishedAt)).filter((time) => time > 0);
+  const articleFirst = articleTimes.length > 0 ? Math.min(...articleTimes) : latest;
   const first = event.firstSeenAt ? safeTime(event.firstSeenAt) : articleFirst;
   const latestAge = Math.max(0, now - latest);
   const eventAge = Math.max(0, now - first);
@@ -659,7 +665,9 @@ export function buildEventIntelligence(
   now = Date.now(),
 ): EventIntelligence {
   const articles = dedupeEventArticles(rawArticles);
-  const distinctSources = new Set(articles.map((article) => article.sourceName)).size || event.coverageCount || 1;
+  const distinctSources = new Set(articles.map((article) => canonicalSourceName(article.sourceName).toLowerCase())).size
+    || event.coverageCount
+    || 1;
   const priority = scoreEventPriority(event, distinctSources, now);
   const confirmationScore = scoreEventConfirmation(event, articles);
   const sourceQualityScore = scoreSourceQuality(articles);
@@ -691,6 +699,7 @@ export function buildEventIntelligence(
   }
   if (velocity.updatesLast15m >= 2) pulseReasons.push(`15분 ${velocity.updatesLast15m}개 업데이트`);
   else if (velocity.updatesLast60m >= 2) pulseReasons.push(`1시간 ${velocity.updatesLast60m}개 업데이트`);
+  else if (velocity.updatesLast60m === 0 && lifecycle !== "flash") pulseReasons.push("1시간 신규 업데이트 없음");
   if (confirmationScore >= 75) pulseReasons.push("교차 확인 강함");
   if (lifecycle === "cooling") pulseReasons.push("최근 업데이트 둔화");
 
@@ -698,7 +707,10 @@ export function buildEventIntelligence(
     ...impact,
     confidence: impactConfidence(impact, confirmationScore),
   }));
-  const primary = articles.find((article) => article.sourceName === event.primarySourceName) ?? articles[0];
+  const primaryCanonical = event.primarySourceName ? canonicalSourceName(event.primarySourceName) : null;
+  const primary = articles.find((article) => (
+    primaryCanonical && canonicalSourceName(article.sourceName) === primaryCanonical
+  )) ?? articles[0];
   const firstSentence = firstUsefulSentence(primary);
 
   const coveragePhrase = distinctSources >= 2
