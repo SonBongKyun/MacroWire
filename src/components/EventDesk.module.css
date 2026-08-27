@@ -10,7 +10,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .sectionHead h2 {
@@ -71,6 +71,40 @@
   color: var(--bulletin-amber);
 }
 
+.modeBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  border-top: 1px solid #1b1e23;
+  padding-top: 9px;
+}
+
+.modeBar button {
+  border: 1px solid #25282e;
+  background: #0d0f12;
+  color: #6f7278;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+
+.modeBar button b {
+  margin-left: 3px;
+  color: #a5a7ac;
+  font-weight: 800;
+}
+
+.modeBar button:hover,
+.modeBar .activeMode {
+  border-color: #4a4030;
+  color: var(--bulletin-amber);
+  background: #13110d;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -102,12 +136,12 @@
 .eventTopline {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   min-width: 0;
   margin-bottom: 10px;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 9px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 .rank {
@@ -115,13 +149,45 @@
   font-weight: 700;
 }
 
+.lifecycle {
+  border: 1px solid #30333a;
+  padding: 2px 4px;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+}
+
+.lifecycle.flash {
+  border-color: #765b2b;
+  color: #ffbf45;
+}
+
+.lifecycle.developing {
+  border-color: #405569;
+  color: #8fbce0;
+}
+
+.lifecycle.confirmed {
+  border-color: #39523f;
+  color: #93c49c;
+}
+
+.lifecycle.cooling {
+  border-color: #30333a;
+  color: #777a80;
+}
+
+.pulse {
+  color: #e3b55a;
+  font-weight: 850;
+}
+
 .score {
-  color: var(--bulletin-amber);
+  color: #a9aaae;
   font-weight: 800;
 }
 
 .confidence {
-  color: #9a9ba0;
+  color: #777a80;
 }
 
 .age {
@@ -138,11 +204,66 @@
   letter-spacing: -0.02em;
 }
 
+.changeBox {
+  margin-top: 11px;
+  border: 1px solid #282b31;
+  border-left-color: #6c562d;
+  background: #101216;
+  padding: 9px 10px;
+}
+
+.changeHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+}
+
+.changeHead strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--bulletin-amber);
+  letter-spacing: 0.09em;
+}
+
+.changeHead > span {
+  color: #777a80;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.changeBox p {
+  margin: 7px 0 0;
+  color: #c0bfb9;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.newFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.newFacts span {
+  border: 1px solid #393229;
+  background: #15120e;
+  padding: 3px 5px;
+  color: #d6ba82;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 750;
+}
+
 .explanation {
   margin: 10px 0 0;
-  color: #a6a5a0;
-  font-size: 12px;
-  line-height: 1.62;
+  color: #94948f;
+  font-size: 11px;
+  line-height: 1.58;
 }
 
 .metaRow {
@@ -174,7 +295,7 @@
 .impactChip {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   border: 1px solid #292c31;
   padding: 5px 7px;
   background: #111419;
@@ -184,6 +305,7 @@
 
 .impactChip > span { color: #8f9298; font-weight: 800; }
 .impactChip > b { display: inline-flex; align-items: center; gap: 2px; font-weight: 700; }
+.impactChip > small { color: #5f6268; font-size: 8px; font-weight: 800; }
 .impactChip.up > b { color: #8ebf9a; }
 .impactChip.down > b { color: #d58f8f; }
 .impactChip.mixed > b { color: #c9b47d; }
@@ -201,6 +323,11 @@
   padding-left: 6px;
   color: #73757b;
   font-size: 9px;
+}
+
+.reasonRow .pulseReason {
+  border-left-color: #745a2d;
+  color: #bba36f;
 }
 
 .actions {
@@ -224,6 +351,56 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.situationGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid #26292f;
+  background: #26292f;
+}
+
+.situationGrid > div {
+  display: grid;
+  gap: 3px;
+  background: #101216;
+  padding: 7px 8px;
+}
+
+.situationGrid span,
+.sourceMix span {
+  color: #62656b;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.situationGrid b {
+  color: #d0cec7;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+}
+
+.sourceMix {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 14px;
+  color: #73757b;
+  font-size: 9px;
+}
+
+.sourceMix b {
+  color: #9fa1a6;
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.sourceMix em {
+  margin-left: auto;
+  color: #60636a;
+  font-style: normal;
+}
+
 .transmission,
 .evidenceList {
   display: grid;
@@ -242,8 +419,9 @@
 
 .transmission p {
   display: grid;
-  grid-template-columns: 74px 1fr;
+  grid-template-columns: 74px 1fr auto;
   gap: 8px;
+  align-items: start;
   margin: 0;
   font-size: 10px;
 }
@@ -254,6 +432,13 @@
 }
 
 .transmission p span { color: #92949a; line-height: 1.5; }
+.transmission p em {
+  color: #65686e;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 800;
+}
 
 .evidenceItem {
   padding: 9px 0;
@@ -314,13 +499,22 @@
   .headActions { justify-content: flex-start; }
 }
 
+@media (max-width: 640px) {
+  .situationGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 560px) {
   .shell { padding-top: 16px; }
   .eventCard { padding: 14px 13px; }
   .title { font-size: 15px; }
   .explanation { font-size: 11px; }
-  .eventTopline { gap: 6px; }
+  .eventTopline { gap: 5px; flex-wrap: wrap; }
   .confidence { display: none; }
+  .age { margin-left: auto; }
   .impactChip { flex: 1 1 44%; justify-content: space-between; }
+  .impactChip > small { display: none; }
   .transmission p { grid-template-columns: 62px 1fr; }
+  .transmission p em { display: none; }
+  .sourceMix { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .sourceMix em { margin-left: 0; }
 }
