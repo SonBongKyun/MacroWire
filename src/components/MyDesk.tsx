@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, CalendarClock, Radio, Target } from "lucide-react";
+import { CalendarClock, Radio, Target } from "lucide-react";
 import type { Article, Source } from "@/types";
 import type { PersonalRelevanceResult } from "@/lib/personalization/relevance";
-import { computeCoverage } from "@/lib/clustering/coverage";
 import { getEconEvents } from "@/lib/calendar/econ";
+import { EventDesk } from "@/components/EventDesk";
 
 interface MyDeskProps {
   articles: Article[];
@@ -58,12 +58,10 @@ export function MyDesk({ articles, sources, personalScores, onSelectArticle, onO
     };
   }, []);
 
-  const coverage = useMemo(() => computeCoverage(articles), [articles]);
   const ranked = useMemo(
     () => [...articles].sort((a, b) => compareRank(a, b, personalScores)),
     [articles, personalScores],
   );
-  const whatChanged = ranked.slice(0, 3);
   const wire = useMemo(() => [...articles]
     .sort((a, b) => {
       const aHigh = personalScores.get(a.id)?.isHigh ? 1 : 0;
@@ -97,7 +95,7 @@ export function MyDesk({ articles, sources, personalScores, onSelectArticle, onO
         <div>
           <span className="my-desk-kicker">PERSONAL MARKET INTELLIGENCE</span>
           <h1>MY DESK</h1>
-          <p>오늘의 시장 변화, 내 관심 신호, 다음 일정을 한 화면에 정리했습니다.</p>
+          <p>뉴스를 반복해서 읽지 않고, 사건과 시장 전이 경로를 먼저 봅니다.</p>
         </div>
         <div className="my-desk-status">
           <span><i /> LIVE WIRE</span>
@@ -105,33 +103,11 @@ export function MyDesk({ articles, sources, personalScores, onSelectArticle, onO
         </div>
       </header>
 
-      <section className="my-desk-lead" aria-labelledby="what-changed-title">
-        <div className="my-desk-section-head">
-          <div><span>01</span><h2 id="what-changed-title">WHAT CHANGED</h2></div>
-          <button type="button" onClick={onOpenWire}>전체 와이어 <ArrowRight size={14} /></button>
-        </div>
-        <div className="my-desk-lead-grid">
-          {whatChanged.map((article, index) => {
-            const relevance = personalScores.get(article.id);
-            const corroboration = coverage.get(article.id);
-            return (
-              <button type="button" key={article.id} onClick={() => onSelectArticle(article)}>
-                <span className="my-desk-rank">0{index + 1}</span>
-                <div>
-                  <h3>{article.title}</h3>
-                  <p>
-                    {article.sourceName}
-                    {now ? ` · ${formatTimeAgo(article.publishedAt, now)}` : ""}
-                    {corroboration ? ` · ${corroboration.outlets} sources` : ""}
-                  </p>
-                  {relevance?.isHigh && <small>FOR YOU · {relevance.reasons.join(" · ")}</small>}
-                </div>
-              </button>
-            );
-          })}
-          {whatChanged.length === 0 && <p className="my-desk-empty">수신된 기사를 기다리고 있습니다.</p>}
-        </div>
-      </section>
+      <EventDesk
+        articles={articles}
+        onSelectArticle={onSelectArticle}
+        onOpenWire={onOpenWire}
+      />
 
       <div className="my-desk-columns">
         <section className="my-desk-card" aria-labelledby="my-signals-title">
@@ -165,8 +141,8 @@ export function MyDesk({ articles, sources, personalScores, onSelectArticle, onO
 
       <section className="my-desk-wire" aria-labelledby="my-wire-title">
         <div className="my-desk-section-head">
-          <div><Radio size={14} /><h2 id="my-wire-title">WIRE</h2></div>
-          <span>FOR YOU 우선 · 이후 최신순</span>
+          <div><Radio size={14} /><h2 id="my-wire-title">RAW WIRE</h2></div>
+          <span>이벤트 아래에서 원문 헤드라인을 최신순으로 확인</span>
         </div>
         <div className="my-wire-list">
           {wire.map((article) => {
