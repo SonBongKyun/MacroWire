@@ -12,6 +12,7 @@ import {
   filterEventEvidence,
 } from "@/lib/events/eventIntelligence";
 import { isMarketRelevantEvent } from "@/lib/events/marketRelevance";
+import { applyTags } from "@/lib/tagging/tagger";
 
 function parseStringArray(raw: string): string[] {
   try {
@@ -98,21 +99,30 @@ export async function GET(req: NextRequest) {
     ).values()];
 
     const data = events.map(({ articles, ...event }) => {
-      const rawEvidence = articles.map(({ article, similarityScore, isPrimary }) => ({
-        id: article.id,
-        title: article.title,
-        url: article.url,
-        sourceName: article.sourceName,
-        sourceTier: article.source.tier,
-        publishedAt: article.publishedAt,
-        importanceScore: article.importanceScore,
-        importanceTier: article.importanceTier,
-        tags: parseStringArray(article.tags),
-        summary: article.summary,
-        feedExcerpt: article.feedExcerpt,
-        similarityScore,
-        isPrimary,
-      }));
+      const rawEvidence = articles.map(({ article, similarityScore, isPrimary }) => {
+        // Historical rows can carry tags created before stricter token-boundary
+        // rules shipped. Re-tag from visible evidence at read time so old
+        // `chair -> AI`, `Warsh -> war` pollution cannot leak into the desk.
+        const cleanTags = applyTags(
+          article.title,
+          article.feedExcerpt ?? article.summary ?? undefined,
+        );
+        return {
+          id: article.id,
+          title: article.title,
+          url: article.url,
+          sourceName: article.sourceName,
+          sourceTier: article.source.tier,
+          publishedAt: article.publishedAt,
+          importanceScore: article.importanceScore,
+          importanceTier: article.importanceTier,
+          tags: cleanTags,
+          summary: article.summary,
+          feedExcerpt: article.feedExcerpt,
+          similarityScore,
+          isPrimary,
+        };
+      });
 
       // Existing production rows may have been linked by Event V1. Revalidate
       // every historical link against the primary article's clean tags before
