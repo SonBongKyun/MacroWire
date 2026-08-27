@@ -1,9 +1,13 @@
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db/prisma";
-import { extractKeywords, isStrongKeyword, keywordOverlap } from "@/lib/clustering/cluster";
 import type { NewWireArticle } from "@/lib/ingest/sourceIngest";
+import {
+  EVENT_MATCH_THRESHOLD,
+  eventSimilarityV2,
+} from "@/lib/events/eventIntelligence";
 
-const EVENT_WINDOW_MS = 6 * 60 * 60_000;
+const DEFAULT_EVENT_WINDOW_MS = 8 * 60 * 60_000;
+const EXTENDED_EVENT_WINDOW_MS = 18 * 60 * 60_000;
 
 function parseStringArray(raw: string | null | undefined): string[] {
   if (!raw) return [];
@@ -19,19 +23,23 @@ function unique(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))];
 }
 
+/** Backwards-compatible export used by tests and older callers. */
 export function eventSimilarity(
   a: { title: string; tags: string[] },
   b: { title: string; tags: string[] },
 ): number {
-  if (!a.tags.some((tag) => b.tags.includes(tag))) return 0;
-  const aKeywords = extractKeywords(a.title);
-  const bKeywords = extractKeywords(b.title);
-  const overlap = keywordOverlap(aKeywords, bKeywords);
-  if (overlap < 2) return 0;
-  const shared = [...aKeywords].filter((word) => bKeywords.has(word));
-  if (!shared.some(isStrongKeyword)) return 0;
-  const union = new Set([...aKeywords, ...bKeywords]).size || 1;
-  return overlap / union;
+  return eventSimilarityV2(a, b);
+}
+
+function eventWindowMs(article: Pick<NewWireArticle, "title" | "tags">): number {
+  const text = `${article.title} ${article.tags.join(" ")}`.toLowerCase();
+  // Geopolitical, commodity-supply and central-bank stories often develop in
+  // waves over a full session. The stricter V2 entity matching lets us keep a
+  // longer window without fusing generic market headlines.
+  if (/hormuz|iran|israel|war|sanction|opec|oil|energy|central bank|fed|fomc|ecb|boj|bok|호르무즈|이란|이스라엘|전쟁|제재|유가|에너지|연준|한국은행|금통위/.test(text)) {
+    return EXTENDED_EVENT_WINDOW_MS;
+  }
+  return DEFAULT_EVENT_WINDOW_MS;
 }
 
 function eventKey(articleId: string): string {
@@ -67,22 +75,23 @@ export async function linkArticleToEvent(article: NewWireArticle): Promise<strin
   if (alreadyLinked) return alreadyLinked.eventId;
 
   const publishedAt = new Date(article.publishedAt);
-  const lower = new Date(publishedAt.getTime() - EVENT_WINDOW_MS);
-  const upper = new Date(publishedAt.getTime() + EVENT_WINDOW_MS);
+  const windowMs = eventWindowMs(article);
+  const lower = new Date(publishedAt.getTime() - windowMs);
+  const upper = new Date(publishedAt.getTime() + windowMs);
   const candidates = await prisma.event.findMany({
     where: { latestPublishedAt: { gte: lower, lte: upper } },
     orderBy: [{ latestPublishedAt: "desc" }, { importanceScore: "desc" }],
-    take: 80,
+    take: 120,
   });
 
   let best: (typeof candidates)[number] | null = null;
   let bestScore = 0;
   for (const candidate of candidates) {
-    const score = eventSimilarity(
+    const score = eventSimilarityV2(
       { title: article.title, tags: article.tags },
       { title: candidate.title, tags: parseStringArray(candidate.tags) },
     );
-    if (score > bestScore) {
+    if (score >= EVENT_MATCH_THRESHOLD && score > bestScore) {
       best = candidate;
       bestScore = score;
     }
@@ -155,6 +164,9 @@ export async function linkArticleToEvent(article: NewWireArticle): Promise<strin
         lastSeenAt: publishedAt > best.lastSeenAt ? publishedAt : best.lastSeenAt,
         latestPublishedAt: publishedAt > best.latestPublishedAt ? publishedAt : best.latestPublishedAt,
         importanceTier: becomesPrimary ? article.importanceTier : best.importanceTier,
+        // Keep the stored score as the strongest source-level signal. Event-level
+        // coverage/freshness bonuses are calculated at read time so they never
+        // compound every time another article is attached.
         importanceScore: Math.max(best.importanceScore, article.importanceScore),
         coverageCount: sourceNames.size,
         primarySourceName: becomesPrimary ? article.sourceName : best.primarySourceName,

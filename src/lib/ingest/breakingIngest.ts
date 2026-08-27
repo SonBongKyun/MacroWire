@@ -1,8 +1,7 @@
 import { prisma } from "../db/prisma";
 import { seedSources } from "../db/seed";
-import { runSourceIngest, type NewWireArticle, type WireSource } from "./sourceIngest";
+import { pollSourceAndRecordHealth, type NewWireArticle, type WireSource } from "./sourceIngest";
 import { FALLBACK_TIERS } from "./sourceTiers";
-import { deliverDiscordAlerts } from "../alerts/discord";
 import { linkNewArticlesToEvents } from "../events/eventGraph";
 
 export type NewBreakingArticle = NewWireArticle;
@@ -27,13 +26,16 @@ export async function runBreakingIngest(): Promise<BreakingIngestResult> {
     });
   }
 
+  // The fallback uses the same health-recording wrapper as the long-running
+  // worker. This keeps /api/health honest when GitHub Actions is temporarily
+  // carrying the wire. pollSourceAndRecordHealth also owns per-source Discord
+  // delivery, so there is deliberately no second aggregate alert call here.
   const results = await Promise.all(
-    sources.map((source) => runSourceIngest(source as WireSource)),
+    sources.map((source) => pollSourceAndRecordHealth(source as WireSource)),
   );
   const allNewArticles = results
     .flatMap((result) => result.newArticles)
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
-  await deliverDiscordAlerts(allNewArticles);
   await linkNewArticlesToEvents(allNewArticles);
   const newArticles = allNewArticles.slice(0, 10);
 

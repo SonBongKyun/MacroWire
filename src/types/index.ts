@@ -109,6 +109,31 @@ export interface ArticlesResponse {
   };
 }
 
+export type MarketImpactDirection = "up" | "down" | "mixed" | "watch";
+export type MarketImpactChannel = "rates" | "fx" | "equities" | "energy" | "crypto" | "macro";
+
+export interface WireEventMarketImpact {
+  channel: MarketImpactChannel;
+  label: string;
+  direction: MarketImpactDirection;
+  score: number;
+  rationale: string;
+}
+
+export interface WireEventArticle {
+  id: string;
+  title: string;
+  url: string;
+  sourceName: string;
+  publishedAt: string;
+  importanceScore: number;
+  importanceTier: string;
+  sourceTier: "T0" | "T1" | "T2" | "T3";
+  similarityScore: number | null;
+  isPrimary: boolean;
+  excerpt: string | null;
+}
+
 export interface WireEvent {
   id: string;
   eventKey: string;
@@ -124,6 +149,26 @@ export interface WireEvent {
   tags: string[];
   regions: string[];
   marketChannels: string[];
+  deskScore: number;
+  deskTier: "critical" | "major" | "general";
+  importanceReasons: string[];
+  shortExplanation: string;
+  marketImpacts: WireEventMarketImpact[];
+  confidence: "high" | "medium" | "low";
+  distinctSources: number;
+  evidenceCount: number;
+  articles: WireEventArticle[];
+}
+
+export interface EventsResponse {
+  data: WireEvent[];
+  generatedAt?: string;
+  access?: {
+    tier: "FREE" | "PRO" | "ELITE";
+    requestedRange: "24h" | "7d" | "30d";
+    effectiveRange: "24h" | "7d" | "30d";
+    rangeRestricted: boolean;
+  };
 }
 
 export interface IngestResult {
