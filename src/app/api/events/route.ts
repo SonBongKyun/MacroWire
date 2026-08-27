@@ -11,6 +11,7 @@ import {
   eventSimilarityV2,
   filterEventEvidence,
 } from "@/lib/events/eventIntelligence";
+import { isMarketRelevantEvent } from "@/lib/events/marketRelevance";
 
 function parseStringArray(raw: string): string[] {
   try {
@@ -166,6 +167,11 @@ export async function GET(req: NextRequest) {
         })),
       };
     })
+      .filter((event) => isMarketRelevantEvent({
+        title: event.title,
+        tags: event.tags,
+        marketChannels: event.marketChannels,
+      }))
       .filter((event) => !region || event.regions.some((item) => item.toLowerCase() === region))
       .filter((event) => !channel || event.marketChannels.some((item) => item.toLowerCase() === channel))
       .filter((event) => event.deskScore >= minScore)
