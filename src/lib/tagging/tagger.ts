@@ -24,6 +24,13 @@ function keywordMatches(text: string, keyword: string): boolean {
   const normalized = keyword.trim().toLowerCase();
   if (!normalized) return false;
 
+  // "경기" is both the business cycle and a sports match. Require nearby
+  // economic context for the bare word; explicit terms such as 경기침체 and
+  // 경기회복 are separate keywords and continue to match normally.
+  if (normalized === "경기") {
+    return /(?:경제|성장|침체|회복|둔화|부진|호황|불황|소비|고용|실업|gdp|pmi).{0,14}경기|경기.{0,14}(?:경제|성장|침체|회복|둔화|부진|호황|불황|소비|고용|실업|gdp|pmi)/i.test(text);
+  }
+
   // Short Latin finance tokens such as AI, EU, CPI, Fed and war must be
   // matched as words. Plain substring matching turns "chair" into AI and
   // "Warsh" into war, which cascades into bad importance and event signals.
