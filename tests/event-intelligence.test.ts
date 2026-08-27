@@ -5,6 +5,7 @@ import {
   buildEventIntelligence,
   dedupeEventArticles,
   eventSimilarityV2,
+  filterEventEvidence,
   inferMarketImpacts,
   normalizeEventHeadline,
 } from "../src/lib/events/eventIntelligence";
@@ -34,6 +35,17 @@ test("event V2 rejects different named entities sharing a generic market tag", (
   );
 });
 
+test("legacy V1 links are filtered against the V2 primary story", () => {
+  const evidence = filterEventEvidence(
+    { title: "Nvidia fuels AI optimism after earnings", tags: ["반도체", "AI"] },
+    [
+      { id: "1", title: "Nvidia fuels AI optimism after earnings", sourceName: "Bloomberg", sourceTier: "T1", publishedAt: new Date(), tags: ["반도체", "AI"], isPrimary: true },
+      { id: "2", title: "The Kansas City Fed President on the First Jackson Hole of the Warsh Era", sourceName: "Bloomberg", sourceTier: "T1", publishedAt: new Date(), tags: ["금리", "연준"], isPrimary: false },
+    ],
+  );
+  assert.deepEqual(evidence.map((article) => article.id), ["1"]);
+});
+
 test("Hormuz supply disruption maps to upward energy pressure", () => {
   const impacts = inferMarketImpacts({
     title: "Hormuz shipping disruption raises oil supply fears",
@@ -43,6 +55,16 @@ test("Hormuz supply disruption maps to upward energy pressure", () => {
   const energy = impacts.find((impact) => impact.channel === "energy");
   assert.equal(energy?.direction, "up");
   assert.ok((energy?.score ?? 0) >= 80);
+});
+
+test("Warsh is not misread as war in equity transmission", () => {
+  const impacts = inferMarketImpacts({
+    title: "Warsh opens first Jackson Hole symposium as Fed chair",
+    tags: ["연준", "금리", "증시"],
+    marketChannels: ["rates", "equities"],
+  });
+  const equities = impacts.find((impact) => impact.channel === "equities");
+  assert.equal(equities?.direction, "watch");
 });
 
 test("event desk score rewards independent sources, official confirmation and breadth", () => {
