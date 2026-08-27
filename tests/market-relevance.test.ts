@@ -45,6 +45,14 @@ test("weather and sports stay off the macro event desk", () => {
   }), false);
 });
 
+test("metaphorical commodity language stays off the desk", () => {
+  assert.equal(isMarketRelevantEvent({
+    title: "엘니뇨에 세비체 사라진다…금값 된 해산물",
+    tags: ["원자재"],
+    marketChannels: [],
+  }), false);
+});
+
 test("real macro, policy and commodity events remain eligible", () => {
   assert.equal(isMarketRelevantEvent({
     title: "Bank of Korea raises policy rate",
@@ -53,6 +61,11 @@ test("real macro, policy and commodity events remain eligible", () => {
   }), true);
   assert.equal(isMarketRelevantEvent({
     title: "Copper jumps on supply concerns",
+    tags: ["원자재"],
+    marketChannels: [],
+  }), true);
+  assert.equal(isMarketRelevantEvent({
+    title: "금값 급등, 온스당 사상 최고치",
     tags: ["원자재"],
     marketChannels: [],
   }), true);
